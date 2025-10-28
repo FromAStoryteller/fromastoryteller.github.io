@@ -91,10 +91,26 @@ p.lede{
   .nav a:focus
   .nav a:any-link {
     colour: var(--ink)
+    -webkit-text-fill-colour: var(--ink);
     text-decoration: none
     outline: 0;
   }
-  
+
+a {colour: inherit; }
+    a:link,
+    a:visited,
+    a:hover,
+    a:active,
+    a:focus,
+    a:any-link {
+      colour: inherit;
+      text-decoration: none;
+    }
+
+@media (forced-colours: active) {
+  .nav a { forced-colour-adjust: none; }
+}
+    
 .footer{
   margin-top: 1.75rem;
   font-size:0.95rem;
