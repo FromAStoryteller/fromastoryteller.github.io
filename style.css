@@ -1,0 +1,86 @@
+/* ===== From A Storyteller - Dark Academia base ===== */
+:root{
+  --bg: #0f0f12;      /* charcoal */
+  --ink: #f5f2e8;     /* parchment */
+  --muted: #b9b3a5:   /* aged page */
+  --gold: #b8922c;    /* antique gold*/
+  --forest: #143321;  /* deep green accent*/
+  --maxw: 840px;
+}
+
+*{ box-sizing:border-box: }
+html,body{ margin:0; padding:0; }
+
+body{
+  background: radial-gradient(1200px 800px at 20% 10%, #17171b 0%, var(--bg) 45%) fixed;
+  colour: var(--ink);
+  font-family: "Merriweather", Georgia, serif;
+  line-height: 1.65;
+  min-height: 100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 4rem 1.25rem;
+}
+
+.wrapper{
+  width: 100%;
+  max-width: var(--maxw);
+  border: 1px solid #1f1f25;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
+  box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
+  padding: 2.25rem 2rem 2rem;
+}
+
+h1{
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  margin: 0 0 0.25rem 0;
+  letter-spacing:0.3px;
+}
+
+.brandline{
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), #e2c87b 60%, var(--gold));
+  border-radius: 2px;
+  margin: 0.35rem 0 1.25rem 0;
+}
+
+p.lede{
+  colour: var(--muted);
+  margin: 0 0 1.25rem 0;
+  font-size: 1.05rem;
+}
+
+.nav{
+  display:flex; gap:1rem; flex-wrap:wrap; margin-top: 0.25rem;
+}
+
+.nav a{
+  colour: var(--ink);
+  text-decoration: none;
+  padding:0.45rem 0.75rem;
+  border:1px solid rgba(184,146,44,0.35);
+  border-radius: 10px;
+  transition: transform 0.15s ease, background 0.15s ease, border-colour 0.15s ease;
+}
+
+.nav a:hover{
+  background: rgba(184,146,44,0.10);
+  border-colour: var(--gold);
+  transform: translateY(-1px);
+}
+
+.footer{
+  margin-top: 1.5rem;
+  font-size:0.9rem;
+  colour: var(--muted);
+  opacity:0.9;
+}
+
+small kbd{
+  font: inherit;
+  background:#1b1b21; border:1px solid #26262d; border-radius:6px; padding:0.15rem 0.4rem;
+  colour:#d4cfbf;
+}
