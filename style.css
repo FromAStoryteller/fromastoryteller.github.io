@@ -68,13 +68,13 @@ p.lede{
   padding:0.55rem 0.95rem;
   border:1px solid rgba(184,146,44,0.55);
   border-radius: 10px;
-  background: rgba(184,146,44,0.10);
+  background: rgba(184,146,44,0.12);
   transition: transform 0.15s ease, background 0.15s ease, border-colour 0.15s ease, box-shadow 0.15s ease;
 }
 
 .nav a:hover{
   colour: var(--ink);
-  background: rgba(184,146,44,0.25);
+  background: rgba(184,146,44,0.28);
   border-colour: var(--gold);
   box-shadow: 0 0 10px rgba(184,146,44,0.45), 0 0 12px rgba(216,202,255,0.25);
   transform: translateY(-2px);
@@ -83,8 +83,8 @@ p.lede{
 .nav a:visited{
   colour: #d8caff;
   border-colour: var(--gold);
-  background: rgba(184,146,44,0.18);
-  box-shadow: 0 0 8px rgba(184,146,44,0.35)
+  background: rgba(184,146,44,0.28);
+  box-shadow: 0 0 10px rgba(184,146,44,0.55)
 }
 
 .nav a,
