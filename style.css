@@ -12,7 +12,7 @@
 html,body{ margin:0; padding:0; }
 
 body{
-  background: radial-gradient(1200px 800px at 20% 10%, #17171b 0%, var(--bg) 45%) fixed;
+  background: radial-gradient(1000px 700px at 20% 10%, #202024 0%, var(--bg) 60%) fixed;
   colour: var(--ink);
   font-family: "Merriweather", Georgia, serif;
   line-height: 1.65;
@@ -26,11 +26,12 @@ body{
 .wrapper{
   width: 100%;
   max-width: var(--maxw);
-  border: 1px solid #1f1f25;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
-  box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
-  padding: 2.25rem 2rem 2rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  background: rgba(40, 40, 44, 0.75);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 12px 45px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 2.5rem 2.25rem;
 }
 
 h1{
@@ -60,23 +61,25 @@ p.lede{
 .nav a{
   colour: var(--ink);
   text-decoration: none;
-  padding:0.45rem 0.75rem;
-  border:1px solid rgba(184,146,44,0.35);
+  padding:0.55rem 0.95rem;
+  border:1px solid rgba(184,146,44,0.55);
   border-radius: 10px;
-  transition: transform 0.15s ease, background 0.15s ease, border-colour 0.15s ease;
+  background: rgba(184,146,44,0.10);
+  transition: transform 0.15s ease, background 0.15s ease, border-colour 0.15s ease, box-shadow 0.15s ease;
 }
 
 .nav a:hover{
-  background: rgba(184,146,44,0.10);
+  background: rgba(184,146,44,0.22);
   border-colour: var(--gold);
-  transform: translateY(-1px);
+  box-shadow: 0 0 10px rgba(184,146,44,0.3);
+  transform: translateY(-2px);
 }
 
 .footer{
-  margin-top: 1.5rem;
-  font-size:0.9rem;
-  colour: var(--muted);
-  opacity:0.9;
+  margin-top: 1.75rem;
+  font-size:0.95rem;
+  colour: var(--ink);
+  opacity:0.85;
 }
 
 small kbd{
