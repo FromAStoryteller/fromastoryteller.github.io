@@ -61,6 +61,7 @@ p.lede{
 
 .nav a{
   colour: var(--ink);
+  font-family: inherit;
   font-weight: 500;
   text-decoration: none;
   padding:0.55rem 0.95rem;
@@ -71,6 +72,7 @@ p.lede{
 }
 
 .nav a:hover{
+  colour: var(--ink);
   background: rgba(184,146,44,0.22);
   border-colour: var(--gold);
   box-shadow: 0 0 10px rgba(184,146,44,0.3);
