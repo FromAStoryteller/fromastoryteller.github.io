@@ -84,11 +84,15 @@ p.lede{
 }
 
 .nav a,
+  .nav a:link,
   .nav a:visited,
+  .nav a:hover,
   .nav a:active,
-  .nav a:focus {
+  .nav a:focus
+  .nav a:any-link {
     colour: var(--ink)
     text-decoration: none
+    outline: 0;
   }
   
 .footer{
