@@ -96,6 +96,10 @@ p.lede{
     outline: 0;
   }
 
+.nav a .label {
+  colour: var(--ink);
+}
+  
 a {colour: inherit; }
     a:link,
     a:visited,
