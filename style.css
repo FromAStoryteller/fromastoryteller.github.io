@@ -82,6 +82,14 @@ p.lede{
 .nav a:visited{
   colour: var(--ink);
 }
+
+.nav a,
+  .nav a:visited,
+  .nav a:active,
+  .nav a:focus {
+    colour: var(--ink)
+    text-decoration: none
+  }
   
 .footer{
   margin-top: 1.75rem;
