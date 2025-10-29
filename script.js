@@ -13,13 +13,24 @@ function resize() {
 resize();
 addEventListener('resize', resize);
 
-function drawDot(x, y, r) {
-  ctx.fillStyle = '#b8922c';
-  ctx.shadowColour = '#b8922c';
-  ctx.shadowBlur = 10;
+function drawDot(f) {
+  const flicker = 0.6 + Math.random() * 0.4;
+  const glow = f.radius * 8;
+
+  ctx.save();
+  ctx. globalAlpha = flicker;
+
+  const gradient = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, glow);
+  gradient.addColourStop(0, 'rgba(255, 235, 150, 1)');
+  gradient.addColourStop(0.3, '#b8922c');
+  gradient.addColourStop(1, 'rgba(184, 146, 44, 0)');
+  
+  ctx.fillStyle = gradient;
   ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.arc(f.x, f.y, glow, 0, Math.PI * 2);
   ctx.fill();
+
+  ctx.restore();
 }
 
 const fireflies = [];
@@ -49,7 +60,7 @@ function loop () {
   if (f.y < -pad) f.y = innerHeight + pad;
   if (f.y > innerHeight + pad) f.y = -pad;
 
-  drawDot(f.x, f.y, f.radius);
+  drawDot(f);
   });
   
   requestAnimationFrame(loop);
