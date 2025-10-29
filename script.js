@@ -15,37 +15,43 @@ addEventListener('resize', resize);
 
 function drawDot(x, y, r) {
   ctx.fillStyle = '#b8922c';
+  ctx.shadowColour = '#b8922c';
+  ctx.shadowBlur = 10;
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
 }
 
-function renderOnce() {
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
-  drawDot(innerWidth / 2, innerHeight / 2, 3);
-}
+const fireflies = [];
+const fireflyCount = 20;
 
-let x = innerWidth / 2;
-let y = innerHeight / 2;
-let angle = 0;
-const speed = 0.7;
+for (let i = 0; i < fireflyCount; i++) {
+  fireflies.push({
+    x: Math.random() * innerWidth,
+    y: Math.random() * innerHeight,
+    angle: Math.random() * Math.PI * 2,
+    speed: 0.4 + Math.random() * 0.6,
+    radius: 2 + Math.random() * 2
+  });
+}
 
 function loop () {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 
-  angle += (Math.random() - 0.5) * 0.06;
-
-  x += Math.cos(angle) * speed;
-  y += Math.sin(angle) * speed;
+  fireflies.forEach(f => {
+    f.angle += (Math.random() - 0.5) * 0.1;
+    f.x += Math.cos(f.angle) * f.speed;
+    f.y += Math.sin(f.angle) * f.speed;
 
   const pad = 40;
-  if (x < -pad) x = innerWidth + pad;
-  if (x > innerWidth + pad) x = -pad;
-  if (y < -pad) y = innerHeight + pad;
-  if (y > innerHeight + pad) y = -pad;
+  if (f.x < -pad) f.x = innerWidth + pad;
+  if (f.x > innerWidth + pad) f.x = -pad;
+  if (f.y < -pad) f.y = innerHeight + pad;
+  if (f.y > innerHeight + pad) f.y = -pad;
 
-  drawDot(x, y, 3);
-
+  drawDot(f.x, f.y, f.radius);
+  });
+  
   requestAnimationFrame(loop);
 }
 
