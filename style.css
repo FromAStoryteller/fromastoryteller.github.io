@@ -131,3 +131,15 @@ small kbd{
   background:#b8922c; border:1px solid #26262d; border-radius:6px; padding:0.15rem 0.4rem;
   colour:#d4cfbf;
 }
+
+#fireflies{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+  .wrapper{ position: relative; z-index: 1; }
+  
