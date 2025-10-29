@@ -25,4 +25,29 @@ function renderOnce() {
   drawDot(innerWidth / 2, innerHeight / 2, 3);
 }
 
-renderOnce();
+let x = innerWidth / 2;
+let y = innerHeight / 2;
+let angle = 0;
+const speed = 0.7;
+
+function loop () {
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+  angle += (math.random() - 0.5) * 0.06;
+
+  x += Math.cos(angle) * speed;
+  y += Math.sin(angle) * speed;
+
+  const pad = 40;
+  if (x < -pad) x = innerWidth + pad;
+  if (x > innerWidth + pad) x = -pad;
+  if (y < -pad) y = innerHeight + pad;
+  if (y > innerHeight + pad) y = -pad;
+
+  drawDot(x, y, 3);
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+
