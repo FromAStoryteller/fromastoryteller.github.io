@@ -1,7 +1,7 @@
 const canvas = document.getElementById('fireflies');
 const ctx = canvas.getContext('2d', { alpha: true });
 
-function resive() {
+function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.floor(innerWidth * dpr);
   canvas.height = Math.floor(innerHeight * dpr);
@@ -33,7 +33,7 @@ const speed = 0.7;
 function loop () {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 
-  angle += (math.random() - 0.5) * 0.06;
+  angle += (Math.random() - 0.5) * 0.06;
 
   x += Math.cos(angle) * speed;
   y += Math.sin(angle) * speed;
