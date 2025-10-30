@@ -18,12 +18,12 @@ function drawDot(f) {
   const glow = f.radius * 8;
 
   ctx.save();
-  ctx. globalAlpha = flicker;
+  ctx.globalAlpha = flicker;
 
   const gradient = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, glow);
-  gradient.addColourStop(0, 'rgba(255, 235, 150, 1)');
-  gradient.addColourStop(0.3, '#b8922c');
-  gradient.addColourStop(1, 'rgba(184, 146, 44, 0)');
+  gradient.addColorStop(0, 'rgba(255, 235, 150, 1)');
+  gradient.addColorStop(0.3, '#b8922c');
+  gradient.addColorStop(1, 'rgba(184, 146, 44, 0)');
   
   ctx.fillStyle = gradient;
   ctx.beginPath();
