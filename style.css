@@ -13,7 +13,7 @@ html,body{ margin:0; padding:0; }
 
 body{
   background: radial-gradient(1000px 700px at 20% 10%, #202024 0%, var(--bg) 60%) fixed;
-  colour: var(--ink);
+  color: var(--ink);
   font-family: "Merriweather", Georgia, serif;
   line-height: 1.65;
   min-height: 100svh;
@@ -50,7 +50,7 @@ h1{
 }
 
 p.lede{
-  colour: var(--ink);
+  color: var(--ink);
   opacity: 0.95;
   margin: 0 0 1.25rem 0;
   font-size: 1.05rem;
@@ -61,7 +61,7 @@ p.lede{
 }
 
 .nav a{
-  colour: var(--ink);
+  color: var(--ink);
   font-family: inherit;
   font-weight: 500;
   text-decoration: none;
@@ -69,20 +69,20 @@ p.lede{
   border:1px solid rgba(184,146,44,0.55);
   border-radius: 10px;
   background: rgba(184,146,44,0.12);
-  transition: transform 0.15s ease, background 0.15s ease, border-colour 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .nav a:hover{
-  colour: var(--ink);
+  color: var(--ink);
   background: rgba(184,146,44,0.28);
-  border-colour: var(--gold);
+  border-color: var(--gold);
   box-shadow: 0 0 10px rgba(184,146,44,0.45), 0 0 12px rgba(216,202,255,0.25);
   transform: translateY(-2px);
 }
 
 .nav a:visited{
-  colour: #d8caff;
-  border-colour: var(--gold);
+  color: #d8caff;
+  border-color: var(--gold);
   background: rgba(184,146,44,0.28);
   box-shadow: 0 0 10px rgba(184,146,44,0.55)
 }
@@ -94,42 +94,42 @@ p.lede{
   .nav a:active,
   .nav a:focus
   .nav a:any-link {
-    colour: var(--ink)
-    -webkit-text-fill-colour: var(--ink);
+    color: var(--ink)
+    -webkit-text-fill-color: var(--ink);
     text-decoration: none
     outline: 0;
   }
 
 .nav a .label {
-  colour: var(--ink);
+  color: var(--ink);
 }
   
-a {colour: inherit; }
+a {color: inherit; }
     a:link,
     a:visited,
     a:hover,
     a:active,
     a:focus,
     a:any-link {
-      colour: inherit;
+      color: inherit;
       text-decoration: none;
     }
 
-@media (forced-colours: active) {
-  .nav a { forced-colour-adjust: none; }
+@media (forced-colors: active) {
+  .nav a { forced-color-adjust: none; }
 }
     
 .footer{
   margin-top: 1.75rem;
   font-size:0.95rem;
-  colour: var(--ink);
+  color: var(--ink);
   opacity:0.95;
 }
 
 small kbd{
   font: inherit;
   background:#b8922c; border:1px solid #26262d; border-radius:6px; padding:0.15rem 0.4rem;
-  colour:#d4cfbf;
+  color:#d4cfbf;
 }
 
 #fireflies{
