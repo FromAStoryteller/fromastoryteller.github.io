@@ -34,6 +34,7 @@ img {
 }
 
 .meme img {
+  text-align: center;
   max-width: 100%;
   height: auto;
   max-height: 700px;
