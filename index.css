@@ -15,6 +15,11 @@ body {
   background: black;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .banner {
   color: white;
   text-align: center;
