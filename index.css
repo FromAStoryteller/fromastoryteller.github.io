@@ -35,5 +35,6 @@ img {
 
 .meme img {
   max-width: 100%;
+  height: auto;
   max-height: 800px;
 }
