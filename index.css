@@ -21,6 +21,11 @@ img {
   display: block;
 }
 
+i {
+  font-size: 32px;
+  color: #d4af37; /* Gold */
+}
+
 .banner {
   color: white;
   text-align: center;
