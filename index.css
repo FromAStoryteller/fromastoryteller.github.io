@@ -34,10 +34,44 @@ i {
   padding: 10px;
 }
 
-.to-do-list {
-  display: flex;
-  justify-content: space-around;
+/* BODY */
+
+/* TO DO LIST */
+.to-do-container {
+  width: 80%;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.5);
   color: white;
+}
+
+.to-do-container h1 {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.to-do-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: white;
+}
+
+.to-do.list li {
+  color: white;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.to-do-list:hover {
+  color: #d4af37; /* Gold */
 }
 
 .meme {
