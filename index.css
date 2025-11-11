@@ -37,6 +37,7 @@ i {
 .to-do-list {
   display: flex;
   justify-content: space-around;
+  color: white;
 }
 
 .meme {
