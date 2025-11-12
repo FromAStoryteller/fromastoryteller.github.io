@@ -20,19 +20,22 @@
   </head>
 
   <!-- HEADER -->
-  <header>
-    <div class="header-container">
-      <button id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
-      <h1>From A Storyteller</h1> <!-- NEED TO CREATE A LOGO TO GO WITH THIS -->
-      <input type="text" placeholder="Search" class="search-box">
-      <div class="social-links">
-        <a href="https://github.com/FromAStoryteller/" target="_blank"><i class="fa-brands fa-github"></i></a>
-        <a href="https://www.facebook.com/fromastoryteller/" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-        <a href="https://www.instagram.com/fromastoryteller/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-        <a href="https://www.youtube.com/@fromastoryteller/" target="_blank"><i class="fa-brands fa-youtube"></i></a>
-        <a href="https://www.tiktok.com/@fromastoryteller/" target="_blank"><i class="fa-brands fa-tiktok"></i></a>
-      </div>
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="menu-toggle" aria-label="Open Menu"><i class="fa-solid fa-bars"></i></button>
+      <a href="/index.html" class="logo">From A Storyteller</a>
     </div>
+
+    <form class="site-search" action="/search.html" role="search">
+      <input type="search" name="q" placeholder="Search" aria-label="Search">
+    </form>
+    
+    <nav class="socials" aria-label="Social Links">
+      <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>
+      <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+    </nav>
   </header>
 
 </html>
