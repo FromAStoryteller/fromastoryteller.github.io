@@ -28,39 +28,82 @@ i {
 }
 
 /* HEADER */
-header {
-  background-color: black;
-  color: white;
-  padding: 1rem 2rem;
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: black;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px 24px;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.brand {
   display: flex;
-  justify-content: space-between;
-  align items: center;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-header h1 {
-  font-family: "Gabriela", serif;
-  font-size: 1.5rem;
-  color: white;
-  text-decoration: none;
-}
-
-.search-box {
-  flex: 1;
-  max-width: 400px;
-  margin: 0 2rem;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 8px;
-}
-
-social-links a {
-  color: white;
-  text-decoration: none;
-  margin-left: 1rem;
-}
-
-.social-links a:hover {
+.menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 36px;
+  border-radius: 10px;
+  background: black;
   color: #d4af37; /* Gold */
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+.menu-toggle:hover {
+  filter: brightness(1.1);
+}
+
+.logo {
+  font-family: "Gabriela", serif;
+  font-weight: 700;
+  text-decoration: none;
+  color: #d4af37; /* Gold */
+  font-size: 1.4rem;
+}
+
+.site-search {
+  display: flex;
+  justify-content: center;
+}
+
+.site-search input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.socials {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.socials a {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  text-decoration: none;
+  color: white;
+  background: black;
+  font-size: 1.05rem;
+}
+
+.social a:hover {
+  background: #d4af37; /* Gold */
 }
 /* END OF HEADER */
 
