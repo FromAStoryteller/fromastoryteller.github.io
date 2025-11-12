@@ -1,5 +1,6 @@
 /* Main CSS File */
 
+
 /* FONT */
 .gabriela-regular {
   font-family: "Gabriela", serif;
@@ -27,6 +28,7 @@ i {
   color: #d4af37; /* Gold */
 }
 
+
 /* HEADER */
 .site-header {
   position: sticky;
@@ -37,26 +39,27 @@ i {
 }
 
 .header-inner {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   padding: 12px 24px;
   max-width: 1100px;
+  height: 64px;
   margin-inline: auto;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .menu-toggle {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   background: black;
   color: #d4af37; /* Gold */
@@ -87,7 +90,8 @@ i {
 
 .socials {
   display: flex;
-  gap: 0.65rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .socials a {
@@ -98,21 +102,17 @@ i {
   border-radius: 50%;
   text-decoration: none;
   color: white;
-  background: black;
+  background: none;
   font-size: 1.05rem;
+  transition: all 0.3s ease;
 }
 
 .social a:hover {
-  background: #d4af37; /* Gold */
+  color: #d4af37; /* Gold */
+  background: none;
 }
 /* END OF HEADER */
 
-/* TESTING WITHOUT THIS - DELETE IF NOT NEEDED .banner {
-  color: white;
-  text-align: center;
-  background: black;
-  padding: 10px;
-} */
 
 /* BODY */
 
