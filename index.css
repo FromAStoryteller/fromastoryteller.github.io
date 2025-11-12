@@ -82,7 +82,7 @@ i {
 }
 
 .site-search input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .socials {
