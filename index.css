@@ -27,12 +27,49 @@ i {
   color: #d4af37; /* Gold */
 }
 
-.banner {
+/* HEADER */
+header {
+  background-color: black;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align items: center;
+}
+
+header h1 {
+  font-family: "Gabriela", serif;
+  font-size: 1.5rem;
+  color: white;
+  text-decoration: none;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 2rem;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 8px;
+}
+
+social-links a {
+  color: white;
+  text-decoration: none;
+  margin-left: 1rem;
+}
+
+.social-links a:hover {
+  color: #d4af37; /* Gold */
+}
+/* END OF HEADER */
+
+/* TESTING WITHOUT THIS - DELETE IF NOT NEEDED .banner {
   color: white;
   text-align: center;
   background: black;
   padding: 10px;
-}
+} */
 
 /* BODY */
 
