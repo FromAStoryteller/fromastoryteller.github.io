@@ -85,11 +85,33 @@ img {
   flex: 1 1 auto;
   justify-content: center;
   min-width: 0;
+  align-items: center;
+}
+
+.site-search input {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #ccc;
   border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+}
+
+.site-search input:focus {
+  border-color: #888;
 }
 
 .site-search input::placeholder {
   color: rgba(0, 0, 0, 0.6);
+}
+
+.site search .fa-magnifying-glass {
+  postion: absolute;
+  right: 12px;
+  font-size: 16px;
+  color: #000;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
     /* RIGHT */
