@@ -144,7 +144,7 @@ img {
   gap: 10px;
 }
 
-.socials a {
+.socials i {
   display: grid;
   place-items: center;
   width: 36px;
