@@ -207,11 +207,22 @@ body {
   color: #d4af37; /* Gold */
 }
 
-.strike {
-  text-decoration: line-through;
-  text-decoration-color: #142A22; /* Green */
-  text-decoration-thickness: 2px;
-  text-shadow: 0 0 4px rgba(20, 42, 34, 0.6);
+.done {
+  list-style: none;
+  position: relative;
+  padding-left: 28px;
+  color: white;
+}
+
+.done::before {
+  content: "\f00c";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #d4af37; /* Gold */
+  font-size: 1.1rem;
 }
 
 .meme {
