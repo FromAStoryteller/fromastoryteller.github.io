@@ -144,7 +144,7 @@ img {
   gap: 10px;
 }
 
-.socials i {
+.socials a {
   display: grid;
   place-items: center;
   width: 36px;
@@ -157,7 +157,7 @@ img {
   transition: color 400ms ease-in-out;
 }
 
-.social i:hover {
+.socials a:hover {
   color: #d4af37; /* Gold */
   background: none;
 }
