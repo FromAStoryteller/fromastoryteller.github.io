@@ -157,7 +157,7 @@ img {
   transition: color 400ms ease-in-out;
 }
 
-.social a:hover {
+.social i:hover {
   color: #d4af37; /* Gold */
   background: none;
 }
