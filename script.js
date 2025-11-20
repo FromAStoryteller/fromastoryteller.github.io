@@ -6,8 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadComponent(path, placeholderId) {
   fetch(path)
-    .then(response => response.text())
+    .then(res => res.text())
     .then(html => {
-      document.getElementById(placeholderId).innerHTML = html;
-    });
+      const container = document.getElementById(placeholderId);
+      if (container) container.innerHTML = html;
+    })
+    .catch(err => console.error("Error loading", path, err));
 }
