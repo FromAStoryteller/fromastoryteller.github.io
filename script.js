@@ -1,6 +1,13 @@
-// Load header
-fetch('/header.html')
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById('header-placeholder').innerHTML = data;
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  loadComponent("components/header.html", "header-placeholder");
+  loadComponent("components/sidebar.html", "sidebar-placeholder");
+  loadComponent("components/footer.html", "footer-placeholder");
+});
+
+function loadComponent(path, placeholderId) {
+  fetch(path)
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById(placeholderId).innerHTML = html;
+    });
+}
