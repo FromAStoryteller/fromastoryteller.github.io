@@ -3,9 +3,9 @@
 // Load components, then wire up the sidebar toggle
 document.addEventListener("DOMContentLoaded", () => {
   Promise.all([
-    loadComponent("components/header.html", "header-placeholder"),
-    loadComponent("components/sidebar.html", "sidebar-placeholder"),
-    loadComponent("components/footer.html", "footer-placeholder")
+    loadComponent("/components/header.html", "header-placeholder"),
+    loadComponent("/components/sidebar.html", "sidebar-placeholder"),
+    loadComponent("/components/footer.html", "footer-placeholder")
   ])
   .then(() => {
     initSidebarToggle();
