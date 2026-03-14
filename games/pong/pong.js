@@ -4,18 +4,26 @@ let aiPaddle
 let ball
 let gameOver = false
 
+let playerScore = 0
+let aiScore = 0
+let highScore = 0
+
+const WIN_SCORE = 5
+
 function initGame() {
     playerPaddle = new Paddle(true, "blue")
     aiPaddle = new Paddle(false, "red")
     ball = new Ball("green")
+    playerScore = 0
+    aiScore = 0
     gameOver = false
 }
 
 class Paddle {
     constructor(isLeft, col) {
-        this.y = height / 2
         this.w = 20
         this.h = 100
+        this.y = height / 2 - this.h / 2
         this.yChange = 0
         this.isLeft = isLeft
         this.col = col
@@ -39,13 +47,17 @@ class Paddle {
 
     aiMove() {
         let moveSpeed = 0
-        const distanceToBall = ball.y - (this.y + this.h / 2)
-
+        const paddleCenter = this.y + this.h / 2
+        const distanceToBall = ball.y - paddleCenter
+        
+        // Only react when ball is moving toward the AI
         if (ball.xspeed > 0) {
-            // Move only if the ball is coming towards the AI paddle
-            if (abs(distanceToBall) > this.h / 4) {
-                // Move only if the ball is a certain distance away
-                moveSpeed = constrain(distanceToBall * 0.1, -10, 10)
+            // Only start tracking when the ball is on the AI half
+            if (ball.x > width / 2) {
+                // Dead zone so AI doesn't perfectly jitter to the ball
+                if (abs(distanceToBall) > 20) {
+                    moveSpeed = constrain(distanceToBall * 0.08, -6, 6)
+                }
             }
         }
 
@@ -56,12 +68,20 @@ class Paddle {
 
 class Ball {
     constructor(col) {
+        this.r = 12
+        this.col = col
+        this.reset()
+    }
+
+    reset() {
         this.x = width / 2
         this.y = height / 2
-        this.r = 12
-        this.xspeed = 10
-        this.yspeed = 4 // Slower speed
-        this.col = col
+
+        let xDirection = random([-1, 1])
+        let yDirection = random([-1, 1])
+
+        this.xspeed = 6 * xDirection
+        this.yspeed = random(2, 4) * yDirection
     }
 
     show() {
@@ -84,11 +104,17 @@ class Ball {
         // Check collision with paddles
         if (this.y > paddle.y && this.y < paddle.y + paddle.h) {
             if (paddle.isLeft && this.x - this.r < paddle.w) {
-                this.xspeed *= -1
                 this.x = paddle.w + this.r
-            } else if (!paddle.isLeft && this.x + this.r > width - paddle.w) {
                 this.xspeed *= -1
+
+                let hitPos = this.y - (paddle.y + paddle.h / 2)
+                this.yspeed = hitPos * 0.15
+            } else if (!paddle.isLeft && this.x + this.r > width - paddle.w) {
                 this.x = width - paddle.w - this.r
+                this.xspeed *= -1
+
+                let hitPos = this.y - (paddle.y + paddle.h / 2)
+                this.yspeed = hitPos * 0.15
             }
         }
     }
@@ -100,8 +126,30 @@ function setup() {
     initGame()
 }
 
+function drawNet() {
+    stroke("white")
+    strokeWeight(4)
+
+    for (let y = 0; y < height; y += 30) {
+        line(width / 2, y, width / 2, y + 15)
+    }
+
+    noStroke()
+}
+
+function displayScores() {
+    fill("black")
+    textSize(32)
+    textAlign(CENTER, TOP)
+
+    text(playerScore, width / 4, 20)
+    text(aiScore, width * 3 / 4, 20)
+}
+
 function draw() {
     background("white")
+    drawNet()
+    displayScores()
 
     if (gameOver) {
         displayGameOver()
@@ -113,7 +161,7 @@ function draw() {
 
     aiPaddle.show()
     aiPaddle.aiMove()
-    aiPaddle.update()
+    // aiPaddle.update()
 
     ball.show()
     ball.update()
@@ -122,29 +170,64 @@ function draw() {
     ball.checkPaddle(aiPaddle)
 
     if (ball.x + ball.r < 0) {
-        gameOver = true
+        aiScore += 1
+        checkGameOver()
+        if (!gameOver) {
+            ball.reset()
+        }
     } 
+
+    if (ball.x - ball.r > width) {
+        playerScore += 1
+        checkGameOver()
+        if (!gameOver) {
+            ball.reset()
+        }
+    }
 }
 
 // Display GAME OVER message
 function displayGameOver() {
-    textSize(48)
     fill("orange")
     textAlign(CENTER, CENTER)
-    text("GAME OVER", width / 2, height / 2)
+
+    textSize(48)
+    text("GAME OVER", width / 2, height / 2 - 60)
+
+    textSize(28)
+    if (playerScore > aiScore) {
+        text("You Win!", width / 2, height / 2)
+    } else {
+        text("You Lose!", width / 2, height / 2)
+    }
+
+    textSize(22)
+    fill("black")
+    text("High Score: " + highScore, width / 2, height / 2 + 45)
+    text("Press ENTER to play again", width / 2, height / 2 + 85)
+}
+
+function checkGameOver() {
+    if (playerScore > highScore) {
+        highScore = playerScore
+    }
+
+    if (playerScore >= WIN_SCORE || aiScore >= WIN_SCORE) {
+        gameOver = true
+    }
 }
 
 // Handles all key presses in a single function
 function keyPressed() {
+    if (gameOver && keyCode  === ENTER) {
+        initGame()
+        return
+    }
+    
     if (keyCode === UP_ARROW) {
         playerPaddle.move(-10)
     } else if (keyCode === DOWN_ARROW) {
         playerPaddle.move(10)
-    } else {
-        if(gameOver) {
-            initGame()
-            return
-        }
     }
 }
 
