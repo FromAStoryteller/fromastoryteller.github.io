@@ -1,6 +1,7 @@
 let gameState = "menu"
 let countdownValue = 3
 let countdownStartTime = 0
+let lastCountdownSound = 0
 
 let playerPaddle
 let aiPaddle
@@ -9,6 +10,14 @@ let ball
 let playerScore = 0
 let aiScore = 0
 let highScore = 0
+
+let paddleHitSound
+let wallHitSound
+let scoreSound
+let winSound
+let loseSound
+let countdownSound
+let startSound
 
 const WIN_SCORE = 5
 const PADDLE_MARGIN_RATIO = 0.04
@@ -41,6 +50,7 @@ window.addEventListener("keyup", function (e) {
 function startCountdown() {
     countdownValue = 3
     countdownStartTime = millis()
+    lastCountdownSound = 0
     gameState = "countdown"
 }
 
@@ -99,8 +109,14 @@ function displayCountdown() {
     countdownValue = 3 - floor(elapsed / 1000)
 
     if (countdownValue <= 0) {
+        playSound(startSound)
         gameState = "playing"
         return
+    }
+
+    if (countdownValue !== lastCountdownSound) {
+        playSound(countdownSound)
+        lastCountdownSound = countdownValue
     }
 
     const boxW = width * 0.22
@@ -214,9 +230,11 @@ class Ball {
         if (this.y - this.r <= 0) {
             this.y = this.r
             this.yspeed *= -1
+            playSound(wallHitSound)
         } else if (this.y + this.r >= height) {
             this.y = height - this.r
             this.yspeed *= -1
+            playSound(wallHitSound)
         }
     }
     
@@ -256,6 +274,23 @@ class Ball {
         this.yspeed = normalizedHit * this.baseSpeed * 1.8
 
         this.increaseSpeed()
+        playSound(paddleHitSound)
+    }
+}
+
+function preload() {
+    paddleHitSound = loadSound("/assets/sounds/games/pong/paddle-hit.wav")
+    wallHitSound = loadSound("/assets/sounds/games/pong/wall-hit.wav")
+    scoreSound = loadSound("/assets/sounds/games/pong/score.mp3")
+    winSound = loadSound("/assets/sounds/games/pong/win.wav")
+    loseSound = loadSound("/assets/sounds/games/pong/lose.wav")
+    countdownSound = loadSound("/assets/sounds/games/pong/countdown-beep.wav")
+    startSound = loadSound("/assets/sounds/games/pong/start.wav")
+}
+
+function playSound (sound) {
+    if (sound && sound.isLoaded()) {
+        sound.play()
     }
 }
 
@@ -329,8 +364,12 @@ function draw() {
 
         if (ball.x + ball.r < 0) {
             aiScore += 1
+            playSound(scoreSound)
             checkGameOver()
-            if (gameState !== "gameOver") {
+
+            if (gameState === "gameOver") {
+                playSound(loseSound)
+            } else {
                 ball.reset()
                 startCountdown()
             }
@@ -338,8 +377,12 @@ function draw() {
 
         if (ball.x - ball.r > width) {
             playerScore += 1
+            playSound(scoreSound)
             checkGameOver()
-            if (gameState !== "gameOver") {
+
+            if (gameState === "gameOver") {
+                playSound(winSound)
+            } else {
                 ball.reset()
                 startCountdown()
             }
@@ -404,9 +447,11 @@ function checkGameOver() {
 
 // Handles all key presses in a single function
 function keyPressed() {
+    userStartAudio()
+
     const paddleSpeed = height * 0.02
     
-    if (keyCode  === ENTER) {
+    if (keyCode === ENTER) {
         if (gameState === "menu") {
             initGame()
             return false
