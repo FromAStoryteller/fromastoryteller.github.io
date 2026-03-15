@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ])
   .then(() => {
     initSidebarToggle();
+    setActiveSidebarLink();
   })
   .catch(err => console.error("Error loading components:", err));
 });
@@ -50,4 +51,19 @@ function initSidebarToggle() {
     sidebar.classList.toggle("is-collapsed");
     mainContent.classList.toggle("is-collapsed");
   });
+}
+
+function setActiveSidebarLink() {
+  const currentPath = window.location.pathname
+  const sidebarLinks = document.querySelectorAll(".sidebar-item")
+
+  sidebarLinks.forEach(link => {
+    link.classList.remove("active")
+
+    const linkPath = new URL(link.href, window.location.origin).pathname
+
+    if (linkPath === currentPath) {
+      link.classList.add("active")
+    }
+  })
 }
