@@ -261,14 +261,20 @@ img {
 /* MAIN PAGE CONTENT POSITIONING */
 .page-content {
   margin-left: 220px; /* same width as sidebar */
-  padding: 24px
+  padding-top: 1px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
 }
 
 /* BODY */
 body {
-  padding-top: 64px;
   background: black;
   color: white;
+}
+
+.notice {
+  text-align: center;
 }
 
 /* TO DO LIST */
@@ -326,20 +332,59 @@ body {
   font-size: 1rem;
 }
 
-.meme {
+/* === GAMES === */
+.game-section {
+  width: 100%;
   display: flex;
-  justify-content: space-around;  
-  text-align: center;
-  max-width: 100%;
+  justify-content: center;
+  padding: 24px 0;
 }
 
-.meme img {
-  margin-left: auto;
-  margin-right: auto;
+.game-card {
+  width: min(100%, 920px);
+  padding: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 18px;
+  background: #111111;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.game-header {
   text-align: center;
-  max-width: 100%;
-  height: auto;
-  max-height: 700px;
+  margin-bottom: 18px;
+}
+
+.game-header h2 {
+  margin: 0 0 8px 0;
+  color: #d4af37;
+  font-size: 2rem;
+}
+
+.game-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.game-frame {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.game-canvas {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16 / 10;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #26231f;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 /* ==== 404 PAGE ==== */
