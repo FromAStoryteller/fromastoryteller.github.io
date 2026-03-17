@@ -1,26 +1,64 @@
-let gameState = "menu"
-let countdownValue = 3
-let countdownStartTime = 0
-let lastCountdownSound = 0
+// === CONSTANTS === //
+const GAME_STATE = {
+    MENU: "menu",
+    COUNTDOWN: "countdown",
+    PLAYING: "playing",
+    GAME_OVER: "gameOver"
+}
 
-let playerPaddle
-let aiPaddle
-let ball
+const SCORING_SIDE = {
+    PLAYER: "player",
+    AI: "ai"
+}
 
-let playerScore = 0
-let aiScore = 0
-let highScore = 0
+const GAME_CONFIG = {
+    winScore: 5,
+    countdownSeconds: 3
+}
 
-let paddleHitSound
-let wallHitSound
-let scoreSound
-let winSound
-let loseSound
-let countdownSound
-let startSound
+const LAYOUT = {
+    paddleMarginRatio: 0.04,
+    netWidthRatio: 0.008,
+}
 
-const WIN_SCORE = 5
-const PADDLE_MARGIN_RATIO = 0.04
+const PADDLE_CONFIG = {
+    widthRatio: 0.025,
+    heightRatio: 0.2,
+    playerSpeedRatio: 0.02,
+    aiDeadZoneRatio: 0.04,
+    aiMaxSpeedRatio: 0.012,
+    aiTrackingStrength: 0.08
+}
+
+const BALL_CONFIG = {
+    radiusRatio: 0.024,
+    baseSpeedRatio: 0.008,
+    speedIncrease: 1.08,
+    maxSpeedRatio: 0.022,
+    launchAngleMin: -0.6,
+    launchAngleMax: 0.6,
+    bounceAngleStrength: 1.8
+}
+
+const UI_CONFIG = {
+    messageRadius: 12,
+    messageFillAlpha: 230,
+    messageStrokeAlpha: 90,
+    menuTitleRatio: 0.085,
+    menuPromptRatio: 0.04,
+    menuControlsRatio: 0.03,
+    countdownTextRatio: 0.14,
+    scoreTextRatio: 0.064,
+    gameOverTitleRatio: 0.096,
+    gameOverResultRatio: 0.056,
+    gameOverTextRatio: 0.044
+}
+
+const UI_PANEL_STYLE = {
+    fillAlpha: UI_CONFIG.messageFillAlpha,
+    strokeAlpha: UI_CONFIG.messageStrokeAlpha,
+    radius: UI_CONFIG.messageRadius
+}
 
 const GAME_COLORS = {
     bg: "#26231f",
@@ -35,121 +73,166 @@ const GAME_COLORS = {
     ball: "#f3e7c2"
 }
 
-window.addEventListener("keydown", function (e) {
-    if (e.code === "ArrowUp" || e.code === "ArrowDown") {
-        e.preventDefault()
-    }
-}, {passive: false})
+const STORAGE_KEYS = {
+    highScore: "pongHighscore"
+}
 
-window.addEventListener("keyup", function (e) {
-    if (e.code === "ArrowUp" || e.code === "ArrowDown") {
-        e.preventDefault()
-    }
-}, {passive: false})
+// === VARIABLES === //
+let gameState = GAME_STATE.MENU
+let countdownValue = GAME_CONFIG.countdownSeconds
+let countdownStartTime = 0
+let lastCountdownSound = 0
 
+let playerPaddle
+let aiPaddle
+let ball
+
+let playerScore = 0
+let aiScore = 0
+let highScore = loadFromStorage(STORAGE_KEYS.highScore, 0)
+
+let sounds = {}
+
+// === SETUP HELPERS === //
 function startCountdown() {
-    countdownValue = 3
+    countdownValue = GAME_CONFIG.countdownSeconds
     countdownStartTime = millis()
     lastCountdownSound = 0
-    gameState = "countdown"
+    gameState = GAME_STATE.COUNTDOWN
 }
 
 function initGame() {
     playerScore = 0
     aiScore = 0
-    resetObjects()
+    createGameObjects()
     startCountdown()
 }
 
-function resetObjects() {
+function createGameObjects() {
     playerPaddle = new Paddle(true, GAME_COLORS.player)
     aiPaddle = new Paddle(false, GAME_COLORS.ai)
     ball = new Ball(GAME_COLORS.ball)
 }
 
-function drawMessageBox(boxY, boxW, boxH) {
-    rectMode(CENTER)
+function updateGameObjectSizes() {
+    // Update paddle sizes
+    playerPaddle.w = width * PADDLE_CONFIG.widthRatio
+    playerPaddle.h = height * PADDLE_CONFIG.heightRatio
 
-    fill(17, 17, 17, 230)
-    stroke(212, 175, 55, 90)
-    strokeWeight(2)
-    rect(width / 2, boxY, boxW, boxH, 12)
+    aiPaddle.w = width * PADDLE_CONFIG.widthRatio
+    aiPaddle.h = height * PADDLE_CONFIG.heightRatio
 
-    noStroke()
-    rectMode(CORNER)
+    // Keep paddles within bounds
+    playerPaddle.y = constrain(playerPaddle.y, 0, height - playerPaddle.h)
+    aiPaddle.y = constrain(aiPaddle.y, 0, height - aiPaddle.h)
+
+    // Update ball size + speed scaling
+    ball.r = getBaseSize() * BALL_CONFIG.radiusRatio
+    ball.baseSpeed = getBaseSize() * BALL_CONFIG.baseSpeedRatio
+    ball.maxSpeed = getBaseSize() * BALL_CONFIG.maxSpeedRatio
 }
 
-function displayMenu() {
-    const boxW = width * 0.55
-    const boxH = height * 0.36
-    const boxY = height / 2
+function resetRound() {
+    ball.reset()
+    startCountdown()
+}
 
-    drawMessageBox(boxY, boxW, boxH)
+// === UI HELPERS === //
+function drawMenu() {
+    const box = getCenteredBox(0.55, 0.36)
+
+    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
 
     textAlign(CENTER, CENTER)
 
-    const titleY = boxY - height * 0.045
-    const promptY = boxY + height * 0.015
-    const controlsY = boxY + height * 0.07
+    const titleY = box.y - height * 0.045
+    const promptY = box.y + height * 0.015
+    const controlsY = box.y + height * 0.07
 
     fill(GAME_COLORS.title)
-    textSize(min(width, height) * 0.085)
-    text("PONG", width / 2, titleY)
+    textSize(getBaseSize() * UI_CONFIG.menuTitleRatio)
+    text("PONG", box.x, titleY)
 
     fill(GAME_COLORS.text)
-    textSize(min(width, height) * 0.04)
-    text("Press ENTER to start game", width / 2, promptY)
+    textSize(getBaseSize() * UI_CONFIG.menuPromptRatio)
+    text("Press ENTER to start game", box.x, promptY)
 
-    textSize(min(width, height) * 0.03)
-    text("UP and DOWN arrows to control the left paddle", width / 2, controlsY)
+    textSize(getBaseSize() * UI_CONFIG.menuControlsRatio)
+    text("UP and DOWN arrows to control the left paddle", box.x, controlsY)
 }
 
-function displayCountdown() {
+function updateCountdown() {
     const elapsed = millis() - countdownStartTime
-    countdownValue = 3 - floor(elapsed / 1000)
+    countdownValue = GAME_CONFIG.countdownSeconds - floor(elapsed / 1000)
 
     if (countdownValue <= 0) {
-        playSound(startSound)
-        gameState = "playing"
+        playSound(sounds.start)
+        gameState = GAME_STATE.PLAYING
         return
     }
 
     if (countdownValue !== lastCountdownSound) {
-        playSound(countdownSound)
+        playSound(sounds.countdown)
         lastCountdownSound = countdownValue
     }
+}
 
-    const boxW = width * 0.22
-    const boxH = height * 0.2
-    const boxY = height / 2
+function drawCountdown() {
+    const box = getCenteredBox(0.22, 0.2)
 
-    drawMessageBox(boxY, boxW, boxH)
+    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
 
     fill(GAME_COLORS.title)
     textAlign(CENTER, CENTER)
-    textSize(min(width, height) * 0.14)
+    textSize(getBaseSize() * UI_CONFIG.countdownTextRatio)
 
-    const countdownY = boxY + height * 0.008
-    text(countdownValue, width / 2, countdownY)
+    const countdownY = box.y + height * 0.008
+    text(countdownValue, box.x, countdownY)
 }
 
+function drawGameOver() {
+    const box = getCenteredBox(0.5, 0.42)
+
+    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
+
+    textAlign(CENTER, CENTER)
+
+    fill(GAME_COLORS.title)
+    textSize(getBaseSize() * UI_CONFIG.gameOverTitleRatio)
+    text("GAME OVER", box.x, box.y - getBaseSize() * 0.12)
+
+    textSize(getBaseSize() * UI_CONFIG.gameOverResultRatio)
+    fill(GAME_COLORS.text)
+    if (playerScore > aiScore) {
+        text("You Win!", box.x, box.y)
+    } else {
+        text("You Lose!", box.x, box.y)
+    }
+
+    textSize(getBaseSize() * UI_CONFIG.gameOverTextRatio)
+    fill(GAME_COLORS.text)
+    text("High Score: " + highScore, box.x, box.y + getBaseSize() * 0.09)
+    text("Press ENTER to play again", box.x, box.y + getBaseSize() * 0.17)
+}
+
+// === CLASSES === //
 class Paddle {
-    constructor(isLeft, col) {
-        this.w = width * 0.025
-        this.h = height * 0.2
+    constructor(isLeft, color) {
+        this.w = width * PADDLE_CONFIG.widthRatio
+        this.h = height * PADDLE_CONFIG.heightRatio
         this.y = height / 2 - this.h / 2
         this.yChange = 0
         this.isLeft = isLeft
-        this.col = col
+        this.color = color
     }
 
     getX() {
-        const margin = width * PADDLE_MARGIN_RATIO
+        const margin = width * LAYOUT.paddleMarginRatio
         return this.isLeft ? margin : width - this.w - margin
     }
 
     show() {
-        fill(this.col)
+        fill(this.color)
         let x = this.getX()
         rect(x, this.y, this.w, this.h)
     }
@@ -160,40 +243,17 @@ class Paddle {
 
     update() {
         this.y += this.yChange
-        // Prevent paddle from leaving canvas
         this.y = constrain(this.y, 0, height - this.h)
-    }
-
-    aiMove() {
-        let moveSpeed = 0
-        const paddleCenter = this.y + this.h / 2
-        const distanceToBall = ball.y - paddleCenter
-        
-        // Only react when ball is moving toward the AI
-        if (ball.xspeed > 0) {
-            // Only start tracking when the ball is on the AI half
-            if (ball.x > width / 2) {
-                // Dead zone so AI doesn't perfectly jitter to the ball
-                const deadZone = height * 0.04
-                if (abs(distanceToBall) > deadZone) {
-                    const maxSpeed = height * 0.012
-                    moveSpeed = constrain(distanceToBall * 0.08, -maxSpeed, maxSpeed)
-                }
-            }
-        }
-
-        this.yChange = moveSpeed
-        this.update()
-    }    
+    }  
 }
 
 class Ball {
-    constructor(col) {
-        this.r = min(width, height) * 0.024
-        this.col = col
-        this.baseSpeed = min(width, height) * 0.008
-        this.speedIncrease = 1.08
-        this.maxSpeed = min(width, height) * 0.022
+    constructor(color) {
+        this.r = getBaseSize() * BALL_CONFIG.radiusRatio
+        this.color = color
+        this.baseSpeed = getBaseSize() * BALL_CONFIG.baseSpeedRatio
+        this.speedIncrease = BALL_CONFIG.speedIncrease
+        this.maxSpeed = getBaseSize() * BALL_CONFIG.maxSpeedRatio
         this.reset()
     }
 
@@ -202,7 +262,7 @@ class Ball {
         this.y = height / 2
 
         let xDirection = random([-1, 1])
-        let launchAngle = random(-0.6, 0.6)
+        let launchAngle = random(BALL_CONFIG.launchAngleMin, BALL_CONFIG.launchAngleMax)
         
         this.xspeed = this.baseSpeed * xDirection
         this.yspeed = this.baseSpeed * launchAngle
@@ -217,7 +277,7 @@ class Ball {
     }
 
     show() {
-        fill(this.col)
+        fill(this.color)
         ellipse(this.x, this.y, this.r * 2)
     }
 
@@ -230,16 +290,15 @@ class Ball {
         if (this.y - this.r <= 0) {
             this.y = this.r
             this.yspeed *= -1
-            playSound(wallHitSound)
+            playSound(sounds.wallHit)
         } else if (this.y + this.r >= height) {
             this.y = height - this.r
             this.yspeed *= -1
-            playSound(wallHitSound)
+            playSound(sounds.wallHit)
         }
     }
     
     checkPaddle(paddle) {
-        // Check collision with paddles
         const paddleLeft = paddle.getX()
         const paddleRight = paddleLeft + paddle.w
         const paddleTop = paddle.y
@@ -271,48 +330,95 @@ class Ball {
         const hitPos = this.y - paddleCenter
 
         const normalizedHit = hitPos / (paddle.h / 2)
-        this.yspeed = normalizedHit * this.baseSpeed * 1.8
+        this.yspeed = normalizedHit * this.baseSpeed * BALL_CONFIG.bounceAngleStrength
 
         this.increaseSpeed()
-        playSound(paddleHitSound)
+        playSound(sounds.paddleHit)
     }
 }
 
-function preload() {
-    paddleHitSound = loadSound("/assets/sounds/games/pong/paddle-hit.wav")
-    wallHitSound = loadSound("/assets/sounds/games/pong/wall-hit.wav")
-    scoreSound = loadSound("/assets/sounds/games/pong/score.mp3")
-    winSound = loadSound("/assets/sounds/games/pong/win.wav")
-    loseSound = loadSound("/assets/sounds/games/pong/lose.wav")
-    countdownSound = loadSound("/assets/sounds/games/pong/countdown-beep.wav")
-    startSound = loadSound("/assets/sounds/games/pong/start.wav")
-}
+// === GAME RULE HELPERS === //
+function awardPoint(scoringSide) {
+    if (scoringSide === SCORING_SIDE.PLAYER) {
+        playerScore += 1
+    } else {
+        aiScore += 1
+    }
 
-function playSound (sound) {
-    if (sound && sound.isLoaded()) {
-        sound.play()
+    playSound(sounds.score)
+    checkGameOver()
+
+    if (gameState === GAME_STATE.GAME_OVER) {
+        if (scoringSide === SCORING_SIDE.PLAYER) {
+            playSound(sounds.win)
+        } else {
+            playSound(sounds.lose)
+        }
+    } else {
+        resetRound()
     }
 }
 
-function setup() {
-    const container = document.getElementById("pong-game")
+function checkForScore() {
+    if (ball.x + ball.r < 0) {
+        awardPoint(SCORING_SIDE.AI)
+        return
+    }
 
-    const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
-    canvas.parent("pong-game")
-
-    resetObjects()
-    gameState = "menu"
+    if (ball.x - ball.r > width) {
+        awardPoint(SCORING_SIDE.PLAYER)
+    }
 }
 
-function windowResized() {
-    const container = document.getElementById("pong-game")
-    resizeCanvas(container.offsetWidth, container.offsetHeight)
-    resetObjects()
+function checkGameOver() {
+    if (playerScore > highScore) {
+        highScore = playerScore
+        saveToStorage(STORAGE_KEYS.highScore, highScore)
+    }
+
+    if (playerScore >= GAME_CONFIG.winScore || aiScore >= GAME_CONFIG.winScore) {
+        gameState = GAME_STATE.GAME_OVER
+    }
 }
 
+// === UPDATE HELPERS === //
+function updatePlayerPaddle() {
+    playerPaddle.update()
+}
+
+function updateAiPaddle() {
+    let moveSpeed = 0
+    const paddleCenter = aiPaddle.y + aiPaddle.h / 2
+    const distanceToBall = ball.y - paddleCenter
+        
+    if (ball.xspeed > 0) {
+        if (ball.x > width / 2) {
+            const deadZone = height * PADDLE_CONFIG.aiDeadZoneRatio
+            if (abs(distanceToBall) > deadZone) {
+                const maxSpeed = height * PADDLE_CONFIG.aiMaxSpeedRatio
+                moveSpeed = constrain(distanceToBall * PADDLE_CONFIG.aiTrackingStrength, -maxSpeed, maxSpeed)
+            }
+        }
+    }
+
+    aiPaddle.move(moveSpeed)
+    aiPaddle.update()
+}
+
+function updatePlaying() {
+    updateAiPaddle()
+
+    ball.update()
+    ball.edges()
+    ball.checkPaddle(playerPaddle)
+    ball.checkPaddle(aiPaddle)
+    checkForScore()
+}
+
+// === DRAW HELPERS === //
 function drawNet() {
     stroke(GAME_COLORS.net)
-    strokeWeight(min(width, height) * 0.008)
+    strokeWeight(getBaseSize() * LAYOUT.netWidthRatio)
     strokeCap(ROUND)
 
     const dashGap = height * 0.06
@@ -334,130 +440,101 @@ function drawNet() {
     noStroke()
 }
 
-function displayScores() {
+function drawScores() {
     fill(GAME_COLORS.score)
-    textSize(min(width, height) * 0.064)
+    textSize(getBaseSize() * UI_CONFIG.scoreTextRatio)
     textAlign(CENTER, TOP)
 
-    text(playerScore, width / 4, min(width, height) * 0.04)
-    text(aiScore, width * 3 / 4, min(width, height) * 0.04)
+    text(playerScore, width / 4, getBaseSize() * 0.04)
+    text(aiScore, width * 3 / 4, getBaseSize() * 0.04)
+}
+
+function drawGameScene() {
+    background(GAME_COLORS.bg)
+    drawNet()
+    drawScores()
+
+    playerPaddle.show()
+    aiPaddle.show()
+    ball.show()
+}
+
+function drawOverlay() {
+    if (gameState === GAME_STATE.MENU) {
+        drawMenu()
+        return
+    }
+
+    if (gameState === GAME_STATE.COUNTDOWN) {
+        drawCountdown()
+        return
+    }
+
+    if (gameState === GAME_STATE.GAME_OVER) {
+        drawGameOver()
+        return
+    }
+}
+
+// === P5 LIFECYCLE === //
+function preload() {
+    sounds.paddleHit = loadSound("/assets/sounds/games/pong/paddle-hit.wav")
+    sounds.wallHit = loadSound("/assets/sounds/games/pong/wall-hit.wav")
+    sounds.score = loadSound("/assets/sounds/games/pong/score.mp3")
+    sounds.win = loadSound("/assets/sounds/games/pong/win.wav")
+    sounds.lose = loadSound("/assets/sounds/games/pong/lose.wav")
+    sounds.countdown = loadSound("/assets/sounds/games/pong/countdown-beep.wav")
+    sounds.start = loadSound("/assets/sounds/games/pong/start.wav")
+}
+
+function setup() {
+    const container = document.getElementById("pong-game")
+
+    const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
+    canvas.parent("pong-game")
+
+    setupArrowKeyScrollBlocker()
+
+    createGameObjects()
+    gameState = GAME_STATE.MENU
+}
+
+function windowResized() {
+    const container = document.getElementById("pong-game")
+    resizeCanvas(container.offsetWidth, container.offsetHeight)
+
+    if (playerPaddle && aiPaddle && ball) {
+        updateGameObjectSizes()
+    }
 }
 
 function draw() {
-    background(GAME_COLORS.bg)
-    drawNet()
-    displayScores()
+    updatePlayerPaddle()
 
-    playerPaddle.show()
-    playerPaddle.update()
-
-    aiPaddle.show()
-
-    if (gameState === "playing") {
-        aiPaddle.aiMove()
-
-        ball.show()
-        ball.update()
-        ball.edges() // Check for ball hitting edges
-        ball.checkPaddle(playerPaddle)
-        ball.checkPaddle(aiPaddle)
-
-        if (ball.x + ball.r < 0) {
-            aiScore += 1
-            playSound(scoreSound)
-            checkGameOver()
-
-            if (gameState === "gameOver") {
-                playSound(loseSound)
-            } else {
-                ball.reset()
-                startCountdown()
-            }
-        } 
-
-        if (ball.x - ball.r > width) {
-            playerScore += 1
-            playSound(scoreSound)
-            checkGameOver()
-
-            if (gameState === "gameOver") {
-                playSound(winSound)
-            } else {
-                ball.reset()
-                startCountdown()
-            }
-        }
-    } else {
-        ball.show()
+    if (gameState === GAME_STATE.PLAYING) {
+        updatePlaying()
     }
 
-    if (gameState === "menu") {
-        displayMenu()
-        return
+    if (gameState === GAME_STATE.COUNTDOWN) {
+        updateCountdown()
     }
 
-    if (gameState === "countdown") {
-        displayCountdown()
-        return
-    }
-
-    if (gameState === "gameOver") {
-        displayGameOver()
-        return
-    }
+    drawGameScene()
+    drawOverlay()
 }
 
-// Display GAME OVER message
-function displayGameOver() {
-    const boxW = width * 0.5
-    const boxH = height * 0.42
-    const boxY = height / 2
-
-    drawMessageBox(boxY, boxW, boxH)
-
-    textAlign(CENTER, CENTER)
-
-    fill(GAME_COLORS.title)
-    textSize(min(width, height) * 0.096)
-    text("GAME OVER", width / 2, height / 2 - min(width, height) * 0.12)
-
-    textSize(min(width, height) * 0.056)
-    fill(GAME_COLORS.text)
-    if (playerScore > aiScore) {
-        text("You Win!", width / 2, height / 2)
-    } else {
-        text("You Lose!", width / 2, height / 2)
-    }
-
-    textSize(min(width, height) * 0.044)
-    fill(GAME_COLORS.text)
-    text("High Score: " + highScore, width / 2, height / 2 + min(width, height) * 0.09)
-    text("Press ENTER to play again", width / 2, height / 2 + min(width, height) * 0.17)
-}
-
-function checkGameOver() {
-    if (playerScore > highScore) {
-        highScore = playerScore
-    }
-
-    if (playerScore >= WIN_SCORE || aiScore >= WIN_SCORE) {
-        gameState = "gameOver"
-    }
-}
-
-// Handles all key presses in a single function
 function keyPressed() {
     userStartAudio()
 
-    const paddleSpeed = height * 0.02
+    const paddleSpeed = height * PADDLE_CONFIG.playerSpeedRatio
     
     if (keyCode === ENTER) {
-        if (gameState === "menu") {
+        if (gameState === GAME_STATE.MENU) {
             initGame()
             return false
         }
 
-        if (gameState === "gameOver") {
+        if (gameState === GAME_STATE.GAME_OVER) {
             initGame()
             return false
         }
