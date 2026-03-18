@@ -21,6 +21,11 @@ const LAYOUT = {
     netWidthRatio: 0.008,
 }
 
+const SIDE = {
+    LEFT: "left",
+    RIGHT: "right"
+}
+
 const PADDLE_CONFIG = {
     widthRatio: 0.025,
     heightRatio: 0.2,
@@ -40,6 +45,14 @@ const BALL_CONFIG = {
     bounceAngleStrength: 1.8
 }
 
+const TRAIL_CONFIG = {
+    minLength: 4,
+    maxLength: 14,
+    minAlpha: 40,
+    maxAlpha: 170,
+    sizeMultiplier: 0.9
+}
+
 const UI_CONFIG = {
     messageRadius: 12,
     messageFillAlpha: 230,
@@ -54,23 +67,28 @@ const UI_CONFIG = {
     gameOverTextRatio: 0.044
 }
 
-const UI_PANEL_STYLE = {
-    fillAlpha: UI_CONFIG.messageFillAlpha,
-    strokeAlpha: UI_CONFIG.messageStrokeAlpha,
-    radius: UI_CONFIG.messageRadius
-}
-
 const GAME_COLORS = {
     bg: "#26231f",
     net: "rgba(212, 175, 55, 0.28)",
     score: "#f5f1e8",
-    panel: "rgba(17, 17, 17, 0.88)",
-    panelBorder: "rgba(212, 175, 55, 0.35)",
     title: "#d4af37",
     text: "#f5f1e8",
     player: "#d4af37",
     ai: "#8b2f2f",
-    ball: "#f3e7c2"
+    ball: "#f3e7c2",
+
+    panelFill: "#111111",
+    panelStroke: "#d4af37",
+    trail: "#e6d7b5"
+}
+
+const UI_PANEL_STYLE = {
+    fillColor: GAME_COLORS.panelFill,
+    fillAlpha: UI_CONFIG.messageFillAlpha,
+    strokeColor: GAME_COLORS.panelStroke,
+    strokeAlpha: UI_CONFIG.messageStrokeAlpha,
+    strokeWeight: 2,
+    radius: UI_CONFIG.messageRadius
 }
 
 const STORAGE_KEYS = {
@@ -109,8 +127,8 @@ function initGame() {
 }
 
 function createGameObjects() {
-    playerPaddle = new Paddle(true, GAME_COLORS.player)
-    aiPaddle = new Paddle(false, GAME_COLORS.ai)
+    playerPaddle = new Paddle(SIDE.LEFT, GAME_COLORS.player)
+    aiPaddle = new Paddle(SIDE.RIGHT, GAME_COLORS.ai)
     ball = new Ball(GAME_COLORS.ball)
 }
 
@@ -217,23 +235,23 @@ function drawGameOver() {
 
 // === CLASSES === //
 class Paddle {
-    constructor(isLeft, color) {
+    constructor(side, color) {
         this.w = width * PADDLE_CONFIG.widthRatio
         this.h = height * PADDLE_CONFIG.heightRatio
         this.y = height / 2 - this.h / 2
         this.yChange = 0
-        this.isLeft = isLeft
+        this.side = side
         this.color = color
     }
 
     getX() {
         const margin = width * LAYOUT.paddleMarginRatio
-        return this.isLeft ? margin : width - this.w - margin
+        return this.side === SIDE.LEFT ? margin : width - this.w - margin
     }
 
     show() {
         fill(this.color)
-        let x = this.getX()
+        const x = this.getX()
         rect(x, this.y, this.w, this.h)
     }
 
@@ -254,18 +272,115 @@ class Ball {
         this.baseSpeed = getBaseSize() * BALL_CONFIG.baseSpeedRatio
         this.speedIncrease = BALL_CONFIG.speedIncrease
         this.maxSpeed = getBaseSize() * BALL_CONFIG.maxSpeedRatio
+        this.trail = []
         this.reset()
     }
 
     reset() {
         this.x = width / 2
         this.y = height / 2
+        this.trail = []
 
         let xDirection = random([-1, 1])
         let launchAngle = random(BALL_CONFIG.launchAngleMin, BALL_CONFIG.launchAngleMax)
         
         this.xspeed = this.baseSpeed * xDirection
         this.yspeed = this.baseSpeed * launchAngle
+    }
+
+    getSpeed() {
+        return sqrt(this.xspeed * this.xspeed + this.yspeed * this.yspeed)
+    }
+
+    updateTrail() {
+        const speed = this.getSpeed()
+        const trailLength = floor(
+            map(
+                speed,
+                this.baseSpeed,
+                this.maxSpeed,
+                TRAIL_CONFIG.minLength,
+                TRAIL_CONFIG.maxLength,
+                true
+            )
+        )
+
+        this.trail.push({
+            x: this.x,
+            y: this.y
+        })
+
+        while (this.trail.length > trailLength) {
+            this.trail.shift()
+        }
+    }
+
+    drawFeatheredTrailPoint(x, y, size, alpha, fillColor) {
+        noStroke()
+
+        const outerColor = color(fillColor)
+        outerColor.setAlpha(alpha * 0.05)
+        fill(outerColor)
+        ellipse(x, y, size * 1.18)
+
+        const midColor = color(fillColor)
+        midColor.setAlpha(alpha * 0.12)
+        fill(midColor)
+        ellipse(x, y, size * 1.08)
+
+        const innerColor = color(fillColor)
+        innerColor.setAlpha(alpha * 0.24)
+        fill(innerColor)
+        ellipse(x, y, size * 0.82)
+    }
+
+    drawTrail() {
+        if (this.trail.length < 3) {
+            return
+        }
+
+        noStroke()
+
+        const speed = this.getSpeed()
+        
+        const maxTrailAlpha = map(
+            speed,
+            this.baseSpeed,
+            this.maxSpeed,
+            TRAIL_CONFIG.minAlpha,
+            TRAIL_CONFIG.maxAlpha,
+            true
+        )
+
+        const speedFactor = map(
+            speed,
+            this.baseSpeed,
+            this.maxSpeed,
+            0,
+            1,
+            true
+        )
+
+        const baseTrailColor = color(GAME_COLORS.trail)
+        const fastTrailColor = color(GAME_COLORS.title)
+
+        const visibleTrailCount = this.trail.length - 2
+                        
+        for (let i = 0; i < visibleTrailCount; i++) {
+            const point = this.trail[i]            
+            const progress = (i + 1) / visibleTrailCount
+
+            const alpha = maxTrailAlpha * (0.15 + progress * 0.25)
+            const size = this.r * 2 * (TRAIL_CONFIG.sizeMultiplier * (0.35 + progress * 0.55))
+
+            const blendedColor = lerpColor(
+                baseTrailColor,
+                fastTrailColor,
+                speedFactor * 0.16
+            )
+            
+            this.drawFeatheredTrailPoint(point.x, point.y, size, alpha, blendedColor)
+        }
     }
 
     increaseSpeed() {
@@ -284,6 +399,7 @@ class Ball {
     update() {
         this.x += this.xspeed
         this.y += this.yspeed
+        this.updateTrail()
     }
 
     edges() {
@@ -313,10 +429,10 @@ class Ball {
         const overlapsHorizontally = ballRight > paddleLeft && ballLeft < paddleRight
 
         if (overlapsVertically && overlapsHorizontally) {
-            if (paddle.isLeft && this.xspeed < 0) {
+            if (paddle.side === SIDE.LEFT && this.xspeed < 0) {
                 this.x = paddleRight + this.r
                 this.handlePaddleBounce(paddle)
-            } else if (!paddle.isLeft && this.xspeed > 0) {
+            } else if (paddle.side === SIDE.RIGHT && this.xspeed > 0) {
                 this.x = paddleLeft - this.r
                 this.handlePaddleBounce(paddle)
             }
@@ -415,6 +531,18 @@ function updatePlaying() {
     checkForScore()
 }
 
+function updateGame() {
+    updatePlayerPaddle()
+
+    if (gameState === GAME_STATE.PLAYING) {
+        updatePlaying()
+    }
+
+    if (gameState === GAME_STATE.COUNTDOWN) {
+        updateCountdown()
+    }
+}
+
 // === DRAW HELPERS === //
 function drawNet() {
     stroke(GAME_COLORS.net)
@@ -456,6 +584,7 @@ function drawGameScene() {
 
     playerPaddle.show()
     aiPaddle.show()
+    ball.drawTrail()
     ball.show()
 }
 
@@ -476,32 +605,35 @@ function drawOverlay() {
     }
 }
 
+function renderGame() {
+    drawGameScene()
+    drawOverlay()
+}
+
 // === P5 LIFECYCLE === //
 function preload() {
-    sounds.paddleHit = loadSound("/assets/sounds/games/pong/paddle-hit.wav")
-    sounds.wallHit = loadSound("/assets/sounds/games/pong/wall-hit.wav")
-    sounds.score = loadSound("/assets/sounds/games/pong/score.mp3")
-    sounds.win = loadSound("/assets/sounds/games/pong/win.wav")
-    sounds.lose = loadSound("/assets/sounds/games/pong/lose.wav")
-    sounds.countdown = loadSound("/assets/sounds/games/pong/countdown-beep.wav")
-    sounds.start = loadSound("/assets/sounds/games/pong/start.wav")
+    sounds = loadSounds({
+        paddleHit: "/assets/sounds/games/pong/paddle-hit.wav",
+        wallHit: "/assets/sounds/games/pong/wall-hit.wav",
+        score: "/assets/sounds/games/pong/score.mp3",
+        win: "/assets/sounds/games/pong/win.wav",
+        lose: "/assets/sounds/games/pong/lose.wav",
+        countdown: "/assets/sounds/games/pong/countdown-beep.wav",
+        start: "/assets/sounds/games/pong/start.wav"
+    })
 }
 
 function setup() {
-    const container = document.getElementById("pong-game")
+    createResponsiveCanvas("pong-game")
 
-    const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
-    canvas.parent("pong-game")
-
-    setupArrowKeyScrollBlocker()
+    setupInput()
 
     createGameObjects()
     gameState = GAME_STATE.MENU
 }
 
 function windowResized() {
-    const container = document.getElementById("pong-game")
-    resizeCanvas(container.offsetWidth, container.offsetHeight)
+    resizeResponsiveCanvas("pong-game")
 
     if (playerPaddle && aiPaddle && ball) {
         updateGameObjectSizes()
@@ -509,51 +641,28 @@ function windowResized() {
 }
 
 function draw() {
-    updatePlayerPaddle()
-
-    if (gameState === GAME_STATE.PLAYING) {
-        updatePlaying()
-    }
-
-    if (gameState === GAME_STATE.COUNTDOWN) {
-        updateCountdown()
-    }
-
-    drawGameScene()
-    drawOverlay()
+    handleInput()
+    updateGame()
+    renderGame()
+    clearPressedKeys()
 }
 
-function keyPressed() {
-    userStartAudio()
-
+function handleInput() {
     const paddleSpeed = height * PADDLE_CONFIG.playerSpeedRatio
-    
-    if (keyCode === ENTER) {
-        if (gameState === GAME_STATE.MENU) {
-            initGame()
-            return false
-        }
 
-        if (gameState === GAME_STATE.GAME_OVER) {
+    if (wasKeyPressed("Enter")) {
+        userStartAudio()
+
+        if (gameState === GAME_STATE.MENU || gameState === GAME_STATE.GAME_OVER) {
             initGame()
-            return false
         }
     }
-    
-    if (keyCode === UP_ARROW) {
+
+    if (isKeyDown("ArrowUp")) {
         playerPaddle.move(-paddleSpeed)
-        return false
-    }
-    
-    if (keyCode === DOWN_ARROW) {
+    } else if (isKeyDown("ArrowDown")) {
         playerPaddle.move(paddleSpeed)
-        return false
-    }
-}
-
-function keyReleased() {
-    if (keyCode === UP_ARROW || keyCode === DOWN_ARROW) {
+    } else {
         playerPaddle.move(0)
-        return false
     }
 }
