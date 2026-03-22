@@ -1,31 +1,20 @@
 // === UI === //
-function getCenteredBox(widthRatio, heightRatio) {
-    const boxWidth = width * widthRatio
-    const boxHeight = height * heightRatio
+export const UI = {
+    drawMessageBox(x, y, w, h, config) {
+        rectMode(CENTER)
 
-    return {
-        x: width / 2,
-        y: height / 2,
-        w: boxWidth,
-        h: boxHeight
+        const fillCol = color(config.fillColor)
+        fillCol.setAlpha(config.fillAlpha)
+        fill(fillCol)
+
+        const strokeCol = color(config.strokeColor)
+        strokeCol.setAlpha(config.strokeAlpha)
+        stroke(strokeCol)
+
+        strokeWeight(config.strokeWeight)
+        rect(x, y, w, h, config.radius)
+
+        noStroke()
+        rectMode(CORNER)
     }
 }
-
-function drawMessageBox(x, y, w, h, config) {
-    rectMode(CENTER)
-
-    const fillCol = color(config.fillColor)
-    fillCol.setAlpha(config.fillAlpha)
-    fill(fillCol)
-
-    const strokeCol = color(config.strokeColor)
-    strokeCol.setAlpha(config.strokeAlpha)
-    stroke(strokeCol)
-
-    strokeWeight(config.strokeWeight)
-    rect(x, y, w, h, config.radius)
-
-    noStroke()
-    rectMode(CORNER)
-}
-

@@ -1,8 +1,19 @@
+// === IMPORTS === //
+import { Menu } from "../shared/menu/index.js"
+import { Input } from "../shared/input.js"
+import { AudioManager } from "../shared/audio.js"
+import { CanvasManager } from "../shared/canvas.js"
+import { Layout } from "../shared/layout.js"
+import { Storage } from "../shared/storage.js"
+import { UI } from "../shared/ui.js"
+import { Utils } from "../shared/utils.js"
+
 // === CONSTANTS === //
 const GAME_STATE = {
     MENU: "menu",
     COUNTDOWN: "countdown",
     PLAYING: "playing",
+    PAUSED: "paused",
     GAME_OVER: "gameOver"
 }
 
@@ -12,7 +23,7 @@ const SCORING_SIDE = {
 }
 
 const GAME_CONFIG = {
-    winScore: 5,
+    winScore: 1,
     countdownSeconds: 3
 }
 
@@ -30,9 +41,9 @@ const PADDLE_CONFIG = {
     widthRatio: 0.025,
     heightRatio: 0.2,
     playerSpeedRatio: 0.02,
-    aiDeadZoneRatio: 0.04,
-    aiMaxSpeedRatio: 0.012,
-    aiTrackingStrength: 0.08
+    aiDeadZoneRatio: 0.03,
+    aiMaxSpeedRatio: 0.014,
+    aiTrackingStrength: 0.09
 }
 
 const BALL_CONFIG = {
@@ -61,10 +72,25 @@ const UI_CONFIG = {
     menuPromptRatio: 0.04,
     menuControlsRatio: 0.03,
     countdownTextRatio: 0.14,
-    scoreTextRatio: 0.064,
-    gameOverTitleRatio: 0.096,
-    gameOverResultRatio: 0.056,
-    gameOverTextRatio: 0.044
+    scoreTextRatio: 0.064
+}
+
+const DIFFICULTY_SETTINGS = {
+    Easy: {
+        aiDeadZoneMultiplier: 1.2,
+        aiMaxSpeedMultiplier: 0.8,
+        aiTrackingMultiplier: 0.8
+    },
+    Normal: {
+        aiDeadZoneMultiplier: 1,
+        aiMaxSpeedMultiplier: 1,
+        aiTrackingMultiplier: 1
+    },
+    Hard: {
+        aiDeadZoneMultiplier: 0.8,
+        aiMaxSpeedMultiplier: 1.2,
+        aiTrackingMultiplier: 1.2
+    }
 }
 
 const GAME_COLORS = {
@@ -92,7 +118,22 @@ const UI_PANEL_STYLE = {
 }
 
 const STORAGE_KEYS = {
-    highScore: "pongHighscore"
+    bestRally: "pongBestRally",
+    soundEnabled: "pongSoundEnabled",
+    masterVolume: "pongMasterVolume"
+}
+
+const SOUND_VOLUMES = {
+    paddleHit: 0.45,
+    wallHit: 0.35,
+    score: 0.5,
+    win: 0.6,
+    lose: 0.55,
+    countdown: 0.4,
+    start: 0.5,
+    uiMove: 0.2,
+    uiSelect: 0.3,
+    uiBack: 0.25
 }
 
 // === VARIABLES === //
@@ -100,18 +141,39 @@ let gameState = GAME_STATE.MENU
 let countdownValue = GAME_CONFIG.countdownSeconds
 let countdownStartTime = 0
 let lastCountdownSound = 0
+let pausedFromState = null
+let hudAlpha = 0
 
 let playerPaddle
 let aiPaddle
 let ball
+let menu
+
+let selectedDifficulty = "Normal"
+let currentDifficultySettings = DIFFICULTY_SETTINGS.Normal
 
 let playerScore = 0
 let aiScore = 0
-let highScore = loadFromStorage(STORAGE_KEYS.highScore, 0)
+
+let currentRally = 0
+let longestRally = 0
+let bestRally = Storage.load(STORAGE_KEYS.bestRally, 0)
+let isNewBestRally = false
+let matchResult = null
 
 let sounds = {}
 
+let soundEnabled = Storage.load(STORAGE_KEYS.soundEnabled, true)
+let masterVolume = Storage.load(STORAGE_KEYS.masterVolume, 100)
+
 // === SETUP HELPERS === //
+function startGameFromMenu(sessionOptions = {}) {
+    userStartAudio()
+
+    applyDifficulty(sessionOptions.difficulty)
+    initGame()
+}
+
 function startCountdown() {
     countdownValue = GAME_CONFIG.countdownSeconds
     countdownStartTime = millis()
@@ -122,6 +184,12 @@ function startCountdown() {
 function initGame() {
     playerScore = 0
     aiScore = 0
+
+    currentRally = 0
+    longestRally = 0
+    isNewBestRally = false
+    matchResult = null
+
     createGameObjects()
     startCountdown()
 }
@@ -145,9 +213,9 @@ function updateGameObjectSizes() {
     aiPaddle.y = constrain(aiPaddle.y, 0, height - aiPaddle.h)
 
     // Update ball size + speed scaling
-    ball.r = getBaseSize() * BALL_CONFIG.radiusRatio
-    ball.baseSpeed = getBaseSize() * BALL_CONFIG.baseSpeedRatio
-    ball.maxSpeed = getBaseSize() * BALL_CONFIG.maxSpeedRatio
+    ball.r = Utils.getBaseSize() * BALL_CONFIG.radiusRatio
+    ball.baseSpeed = Utils.getBaseSize() * BALL_CONFIG.baseSpeedRatio
+    ball.maxSpeed = Utils.getBaseSize() * BALL_CONFIG.maxSpeedRatio
 }
 
 function resetRound() {
@@ -155,82 +223,64 @@ function resetRound() {
     startCountdown()
 }
 
-// === UI HELPERS === //
-function drawMenu() {
-    const box = getCenteredBox(0.55, 0.36)
+function applySoundEnabled(enabled) {
+    soundEnabled = enabled
+    AudioManager.setSoundEnabled(enabled)
+    Storage.save(STORAGE_KEYS.soundEnabled, enabled)
 
-    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
-
-    textAlign(CENTER, CENTER)
-
-    const titleY = box.y - height * 0.045
-    const promptY = box.y + height * 0.015
-    const controlsY = box.y + height * 0.07
-
-    fill(GAME_COLORS.title)
-    textSize(getBaseSize() * UI_CONFIG.menuTitleRatio)
-    text("PONG", box.x, titleY)
-
-    fill(GAME_COLORS.text)
-    textSize(getBaseSize() * UI_CONFIG.menuPromptRatio)
-    text("Press ENTER to start game", box.x, promptY)
-
-    textSize(getBaseSize() * UI_CONFIG.menuControlsRatio)
-    text("UP and DOWN arrows to control the left paddle", box.x, controlsY)
+    if (!enabled) {
+        AudioManager.stopAll()
+    }
 }
 
+function applyMasterVolume(volume) {
+    masterVolume = volume
+    AudioManager.setMasterVolume(volume)
+    Storage.save(STORAGE_KEYS.masterVolume, volume)
+}
+
+function applyDifficulty(difficultyName = "Normal") {
+    const validDifficulty = DIFFICULTY_SETTINGS[difficultyName] ? difficultyName : "Normal"
+    selectedDifficulty = validDifficulty
+    currentDifficultySettings = DIFFICULTY_SETTINGS[selectedDifficulty]
+}
+
+function registerRallyHit() {
+    currentRally += 1
+
+    if (currentRally > longestRally) {
+        longestRally = currentRally
+    }
+}
+
+// === UI HELPERS === //
 function updateCountdown() {
     const elapsed = millis() - countdownStartTime
     countdownValue = GAME_CONFIG.countdownSeconds - floor(elapsed / 1000)
 
     if (countdownValue <= 0) {
-        playSound(sounds.start)
+        AudioManager.play(sounds.start, SOUND_VOLUMES.start)
         gameState = GAME_STATE.PLAYING
         return
     }
 
     if (countdownValue !== lastCountdownSound) {
-        playSound(sounds.countdown)
+        AudioManager.play(sounds.countdown, SOUND_VOLUMES.countdown)
         lastCountdownSound = countdownValue
     }
 }
 
 function drawCountdown() {
-    const box = getCenteredBox(0.22, 0.2)
+    const box = Layout.getCenteredBox(0.22, 0.2)
 
-    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
+    UI.drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
 
     fill(GAME_COLORS.title)
     textAlign(CENTER, CENTER)
-    textSize(getBaseSize() * UI_CONFIG.countdownTextRatio)
+    textSize(Utils.getBaseSize() * UI_CONFIG.countdownTextRatio)
 
     const countdownY = box.y + height * 0.008
     text(countdownValue, box.x, countdownY)
-}
-
-function drawGameOver() {
-    const box = getCenteredBox(0.5, 0.42)
-
-    drawMessageBox(box.x, box.y, box.w, box.h, UI_PANEL_STYLE)
-
-    textAlign(CENTER, CENTER)
-
-    fill(GAME_COLORS.title)
-    textSize(getBaseSize() * UI_CONFIG.gameOverTitleRatio)
-    text("GAME OVER", box.x, box.y - getBaseSize() * 0.12)
-
-    textSize(getBaseSize() * UI_CONFIG.gameOverResultRatio)
-    fill(GAME_COLORS.text)
-    if (playerScore > aiScore) {
-        text("You Win!", box.x, box.y)
-    } else {
-        text("You Lose!", box.x, box.y)
-    }
-
-    textSize(getBaseSize() * UI_CONFIG.gameOverTextRatio)
-    fill(GAME_COLORS.text)
-    text("High Score: " + highScore, box.x, box.y + getBaseSize() * 0.09)
-    text("Press ENTER to play again", box.x, box.y + getBaseSize() * 0.17)
 }
 
 // === CLASSES === //
@@ -267,11 +317,11 @@ class Paddle {
 
 class Ball {
     constructor(color) {
-        this.r = getBaseSize() * BALL_CONFIG.radiusRatio
+        this.r = Utils.getBaseSize() * BALL_CONFIG.radiusRatio
         this.color = color
-        this.baseSpeed = getBaseSize() * BALL_CONFIG.baseSpeedRatio
+        this.baseSpeed = Utils.getBaseSize() * BALL_CONFIG.baseSpeedRatio
         this.speedIncrease = BALL_CONFIG.speedIncrease
-        this.maxSpeed = getBaseSize() * BALL_CONFIG.maxSpeedRatio
+        this.maxSpeed = Utils.getBaseSize() * BALL_CONFIG.maxSpeedRatio
         this.trail = []
         this.reset()
     }
@@ -406,11 +456,11 @@ class Ball {
         if (this.y - this.r <= 0) {
             this.y = this.r
             this.yspeed *= -1
-            playSound(sounds.wallHit)
+            AudioManager.play(sounds.wallHit, SOUND_VOLUMES.wallHit)
         } else if (this.y + this.r >= height) {
             this.y = height - this.r
             this.yspeed *= -1
-            playSound(sounds.wallHit)
+            AudioManager.play(sounds.wallHit, SOUND_VOLUMES.wallHit)
         }
     }
     
@@ -448,8 +498,10 @@ class Ball {
         const normalizedHit = hitPos / (paddle.h / 2)
         this.yspeed = normalizedHit * this.baseSpeed * BALL_CONFIG.bounceAngleStrength
 
+        registerRallyHit()
+
         this.increaseSpeed()
-        playSound(sounds.paddleHit)
+        AudioManager.play(sounds.paddleHit, SOUND_VOLUMES.paddleHit)
     }
 }
 
@@ -461,14 +513,16 @@ function awardPoint(scoringSide) {
         aiScore += 1
     }
 
-    playSound(sounds.score)
+    currentRally = 0
+
+    AudioManager.play(sounds.score, SOUND_VOLUMES.score)
     checkGameOver()
 
     if (gameState === GAME_STATE.GAME_OVER) {
         if (scoringSide === SCORING_SIDE.PLAYER) {
-            playSound(sounds.win)
+            AudioManager.play(sounds.win, SOUND_VOLUMES.win)
         } else {
-            playSound(sounds.lose)
+            AudioManager.play(sounds.lose, SOUND_VOLUMES.lose)
         }
     } else {
         resetRound()
@@ -487,13 +541,36 @@ function checkForScore() {
 }
 
 function checkGameOver() {
-    if (playerScore > highScore) {
-        highScore = playerScore
-        saveToStorage(STORAGE_KEYS.highScore, highScore)
-    }
-
     if (playerScore >= GAME_CONFIG.winScore || aiScore >= GAME_CONFIG.winScore) {
+        matchResult = playerScore > aiScore ? "victory" : "defeat"
+        
+        if (longestRally > bestRally) {
+            bestRally = longestRally
+            isNewBestRally = true
+            Storage.save(STORAGE_KEYS.bestRally, bestRally)
+        } else {
+            isNewBestRally = false
+        }
+
         gameState = GAME_STATE.GAME_OVER
+
+        menu.openScreen("matchResult", null, {
+            result: matchResult,
+            stats: [
+                {
+                    type: "stat",
+                    label: "Longest Rally",
+                    value: longestRally
+                },
+                {
+                    type: "stat",
+                    label: "All-Time Best",
+                    value: bestRally,
+                    highlight: isNewBestRally,
+                    suffix: isNewBestRally ? "NEW HIGHSCORE" : ""
+                }
+            ]
+        })
     }
 }
 
@@ -509,10 +586,23 @@ function updateAiPaddle() {
         
     if (ball.xspeed > 0) {
         if (ball.x > width / 2) {
-            const deadZone = height * PADDLE_CONFIG.aiDeadZoneRatio
+            const deadZone = height
+                * PADDLE_CONFIG.aiDeadZoneRatio
+                * currentDifficultySettings.aiDeadZoneMultiplier
+            
             if (abs(distanceToBall) > deadZone) {
-                const maxSpeed = height * PADDLE_CONFIG.aiMaxSpeedRatio
-                moveSpeed = constrain(distanceToBall * PADDLE_CONFIG.aiTrackingStrength, -maxSpeed, maxSpeed)
+                const maxSpeed = height
+                    * PADDLE_CONFIG.aiMaxSpeedRatio
+                    * currentDifficultySettings.aiMaxSpeedMultiplier
+                
+                const trackingStrength = PADDLE_CONFIG.aiTrackingStrength
+                    * currentDifficultySettings.aiTrackingMultiplier
+
+                moveSpeed = constrain(
+                    distanceToBall * trackingStrength,
+                    -maxSpeed,
+                    maxSpeed
+                )
             }
         }
     }
@@ -532,21 +622,32 @@ function updatePlaying() {
 }
 
 function updateGame() {
-    updatePlayerPaddle()
+    updateHudFade()
 
     if (gameState === GAME_STATE.PLAYING) {
+        updatePlayerPaddle()
         updatePlaying()
     }
 
     if (gameState === GAME_STATE.COUNTDOWN) {
+        updatePlayerPaddle()
         updateCountdown()
+    }
+}
+
+function updateHudFade() {
+    const targetAlpha = gameState === GAME_STATE.MENU ? 0 : 255
+    hudAlpha = lerp(hudAlpha, targetAlpha, 0.15)
+
+    if (abs(hudAlpha - targetAlpha) < 0.5) {
+        hudAlpha = targetAlpha
     }
 }
 
 // === DRAW HELPERS === //
 function drawNet() {
     stroke(GAME_COLORS.net)
-    strokeWeight(getBaseSize() * LAYOUT.netWidthRatio)
+    strokeWeight(Utils.getBaseSize() * LAYOUT.netWidthRatio)
     strokeCap(ROUND)
 
     const dashGap = height * 0.06
@@ -569,18 +670,24 @@ function drawNet() {
 }
 
 function drawScores() {
-    fill(GAME_COLORS.score)
-    textSize(getBaseSize() * UI_CONFIG.scoreTextRatio)
-    textAlign(CENTER, TOP)
+    const hudCenterY = height * 0.075
 
-    text(playerScore, width / 4, getBaseSize() * 0.04)
-    text(aiScore, width * 3 / 4, getBaseSize() * 0.04)
+    const scoreColor = color(GAME_COLORS.score)
+    scoreColor.setAlpha(hudAlpha)
+
+    fill(scoreColor)
+    textSize(Utils.getBaseSize() * UI_CONFIG.scoreTextRatio)
+    textAlign(CENTER, CENTER)
+
+    text(playerScore, width / 4, hudCenterY)
+    text(aiScore, width * 3 / 4, hudCenterY)
 }
 
 function drawGameScene() {
     background(GAME_COLORS.bg)
     drawNet()
     drawScores()
+    drawDifficultyBadge()
 
     playerPaddle.show()
     aiPaddle.show()
@@ -589,20 +696,41 @@ function drawGameScene() {
 }
 
 function drawOverlay() {
-    if (gameState === GAME_STATE.MENU) {
-        drawMenu()
-        return
-    }
-
     if (gameState === GAME_STATE.COUNTDOWN) {
         drawCountdown()
         return
     }
+}
 
-    if (gameState === GAME_STATE.GAME_OVER) {
-        drawGameOver()
-        return
-    }
+function drawDifficultyBadge() {
+    const hudCenterY = height * 0.075
+    const badgeWidth = width * 0.095
+    const badgeHeight = height * 0.038
+    const badgeX = width / 2
+    const badgeY = hudCenterY - Utils.getBaseSize() * 0.009
+
+    UI.drawMessageBox(
+        badgeX,
+        badgeY,
+        badgeWidth,
+        badgeHeight,
+        {
+            fillColor: GAME_COLORS.panelFill,
+            fillAlpha: 160 * (hudAlpha / 255),
+            strokeColor: GAME_COLORS.panelStroke,
+            strokeAlpha: 45 * (hudAlpha / 255),
+            strokeWeight: 1,
+            radius: 8
+        }
+    )
+    
+    const titleColor = color(GAME_COLORS.title)
+    titleColor.setAlpha(hudAlpha)
+    
+    fill(titleColor)
+    textAlign(CENTER, CENTER)
+    textSize(Utils.getBaseSize() * 0.015)
+    text(selectedDifficulty.toUpperCase(), badgeX, badgeY)
 }
 
 function renderGame() {
@@ -610,12 +738,12 @@ function renderGame() {
     drawOverlay()
 }
 
-// === P5 LIFECYCLE === //
-function preload() {
-    sounds = loadSounds({
+// === P5 LIFECYCLE (ES MODULE MODE) === //
+window.preload = function () {
+    sounds = AudioManager.loadSounds({
         paddleHit: "/assets/sounds/games/pong/paddle-hit.wav",
         wallHit: "/assets/sounds/games/pong/wall-hit.wav",
-        score: "/assets/sounds/games/pong/score.mp3",
+        score: "/assets/sounds/games/pong/score.wav",
         win: "/assets/sounds/games/pong/win.wav",
         lose: "/assets/sounds/games/pong/lose.wav",
         countdown: "/assets/sounds/games/pong/countdown-beep.wav",
@@ -623,44 +751,100 @@ function preload() {
     })
 }
 
-function setup() {
-    createResponsiveCanvas("pong-game")
+window.setup = function () {
+    CanvasManager.createResponsive("pong-game")
 
-    setupInput()
+    Input.init()
+
+    AudioManager.setSoundEnabled(soundEnabled)
+    AudioManager.setMasterVolume(masterVolume)
 
     createGameObjects()
+
+    menu = new Menu.Manager({
+        startGame: startGameFromMenu,
+
+        resumeGame: () => {
+            gameState = pausedFromState || GAME_STATE.PLAYING
+            pausedFromState = null
+        },
+
+        returnToTitle: () => {
+            gameState = GAME_STATE.MENU
+            pausedFromState = null
+            playerScore = 0
+            aiScore = 0
+            createGameObjects()
+            playerPaddle.move(0)
+        },
+
+        toggleSound: () => {
+            applySoundEnabled(!soundEnabled)
+        },
+
+        setSoundEnabled: (enabled) => {
+            applySoundEnabled(enabled)
+        },
+
+        setMasterVolume: (volume) => {
+            applyMasterVolume(volume)
+        },
+
+        getAudioSettings: () => ({
+            soundEnabled,
+            masterVolume
+        })
+    })
+
+    const gameContainer = document.getElementById("pong-game")
+    menu.init(gameContainer)
+    menu.openScreen("title")
+
     gameState = GAME_STATE.MENU
 }
 
-function windowResized() {
-    resizeResponsiveCanvas("pong-game")
+window.windowResized = function () {
+    CanvasManager.resizeResponsive("pong-game")
 
     if (playerPaddle && aiPaddle && ball) {
         updateGameObjectSizes()
     }
 }
 
-function draw() {
+window.draw = function () {
     handleInput()
     updateGame()
     renderGame()
-    clearPressedKeys()
+    Input.clearPressed()
 }
 
 function handleInput() {
-    const paddleSpeed = height * PADDLE_CONFIG.playerSpeedRatio
+    const menuHandled = menu.handleInput(
+        (code) => Input.wasPressed(code),
+        (code) => Input.wasPressedOrRepeated(code))
 
-    if (wasKeyPressed("Enter")) {
-        userStartAudio()
+    if (menuHandled) {
+        return
+    }
 
-        if (gameState === GAME_STATE.MENU || gameState === GAME_STATE.GAME_OVER) {
-            initGame()
+    if (Input.wasPressed("Escape")) {
+        if (gameState === GAME_STATE.PLAYING || gameState === GAME_STATE.COUNTDOWN) {
+            pausedFromState = gameState
+            gameState = GAME_STATE.PAUSED
+            menu.openScreen("pause")
+            return
         }
     }
 
-    if (isKeyDown("ArrowUp")) {
+    if (gameState !== GAME_STATE.PLAYING && gameState !== GAME_STATE.COUNTDOWN) {
+        return
+    }
+
+    const paddleSpeed = height * PADDLE_CONFIG.playerSpeedRatio
+
+    if (Input.isDown("ArrowUp")) {
         playerPaddle.move(-paddleSpeed)
-    } else if (isKeyDown("ArrowDown")) {
+    } else if (Input.isDown("ArrowDown")) {
         playerPaddle.move(paddleSpeed)
     } else {
         playerPaddle.move(0)

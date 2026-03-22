@@ -1,16 +1,43 @@
 // === REUSABLE SOUND HELPERS === //
-function loadSounds(soundMap) {
-    const sounds ={}
+export const AudioManager = {
+    sounds: {},
+    soundEnabled: true,
+    masterVolume: 1,
 
-    for (const key in soundMap) {
-        sounds[key] = loadSound(soundMap[key])
-    }
+    loadSounds(soundMap) {
+        this.sounds ={}
 
-    return sounds
-}
+        for (const key in soundMap) {
+            this.sounds[key] = loadSound(soundMap[key])
+        }
 
-function playSound (sound) {
-    if (sound && sound.isLoaded()) {
+        return this.sounds
+    },
+
+    setSoundEnabled(enabled) {
+        this.soundEnabled = enabled
+    },
+
+    setMasterVolume(volumePercent) {
+        const clamped = Math.max(0, Math.min(100, volumePercent))
+        this.masterVolume = clamped / 100
+    },
+
+    play(sound, baseVolume = 1) {
+        if (!this.soundEnabled) return
+        if (!sound || !sound.isLoaded()) return
+        
+        const finalVolume = Math.max(0, Math.min(1, baseVolume * this.masterVolume))
+        sound.setVolume(finalVolume)
         sound.play()
+    },
+
+    stopAll() {
+        for (const key in this.sounds) {
+            const sound = this.sounds[key]
+            if (sound && sound.isLoaded()) {
+                sound.stop()
+            }
+        }
     }
 }

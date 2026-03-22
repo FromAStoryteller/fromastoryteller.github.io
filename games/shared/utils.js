@@ -1,5 +1,7 @@
 // === GENERAL REUSABLE HELPER FUNCTIONS === //
-
-function getBaseSize() {
-    return min(width, height)
+export const Utils = {
+    // Size scaling //
+    getBaseSize() {
+        return min(width, height)
+    }
 }

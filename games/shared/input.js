@@ -1,63 +1,99 @@
 // === INPUT STATE === //
-const keyState = {}
-const keyPressed = {}
+export const Input = {
+    keyState: {},
+    keyPressed: {},
+    keyRepeatTimers: {},
 
-// === INTERNAL HELPERS === //
-function normalizeKeyCode(code) {
-    if (code === "NumpadEnter") {
-        return "Enter"
-    }
+    // === INTERNAL HELPERS === //
+    normalizeKeyCode(code) {
+        if (code === "NumpadEnter") {
+            return "Enter"
+        }
 
-    return code
-}
+        return code
+    },
 
-function shouldPreventDefault(code) {
-    return code === "ArrowUp" || code === "ArrowDown"
-}
+    shouldPreventDefault(code) {
+        return (
+            code === "ArrowUp" ||
+            code === "ArrowDown" ||
+            code === "ArrowLeft" ||
+            code === "ArrowRight" ||
+            code === "Space" ||
+            code === "Enter"
+        )
+    },
 
-function handleKeyDown(e) {
-    const code = normalizeKeyCode(e.code)
-    
-    if (shouldPreventDefault(code)) {
-        e.preventDefault()
-    }
+    handleKeyDown(e) {
+        const code = this.normalizeKeyCode(e.code)
+        
+        if (this.shouldPreventDefault(code)) {
+            e.preventDefault()
+        }
 
-    // Only mark as "pressed" if it wasn't already held
-    if (!keyState[code]) {
-        keyPressed[code] = true
-    }
+        // Only mark as "pressed" if it wasn't already held
+        if (!this.keyState[code]) {
+            this.keyPressed[code] = true
+            this.keyRepeatTimers[code] = {
+                nextTriggerTime: performance.now() + 300
+            }
+        }
 
-    keyState[code] = true
-}
+        this.keyState[code] = true
+    },
 
-function handleKeyUp(e) {
-    const code = normalizeKeyCode(e.code)
-    
-    if (shouldPreventDefault(code)) {
-        e.preventDefault()
-    }
+    handleKeyUp(e) {
+        const code = this.normalizeKeyCode(e.code)
+        
+        if (this.shouldPreventDefault(code)) {
+            e.preventDefault()
+        }
 
-    keyState[code] = false
-}
+        this.keyState[code] = false
+        delete this.keyRepeatTimers[code]
+    },
 
+    // === SETUP === //
+    init() {
+        window.addEventListener("keydown", (e) => this.handleKeyDown(e), { passive: false })
+        window.addEventListener("keyup", (e) => this.handleKeyUp(e), { passive: false })
+    },
 
-// === SETUP === //
-function setupInput() {
-    window.addEventListener("keydown", handleKeyDown, { passive: false })
-    window.addEventListener("keyup", handleKeyUp, { passive: false })
-}
+    // === PUBLIC HELPERS === //
+    isDown(code) {
+        return !!this.keyState[code]
+    },
 
-// === PUBLIC HELPERS === //
-function isKeyDown(code) {
-    return !!keyState[code]
-}
+    wasPressed(code) {
+        return !!this.keyPressed[code]
+    },
 
-function wasKeyPressed(code) {
-    return !!keyPressed[code]
-}
+    wasPressedOrRepeated(code, initialDelay = 300, repeatInterval = 60) {
+        if (this.wasPressed(code)) {
+            if (this.keyRepeatTimers[code]) {
+                this.keyRepeatTimers[code].nextTriggerTime = performance.now() + initialDelay
+            }
+            return true
+        }
 
-function clearPressedKeys() {
-    for (const code in keyPressed) {
-        delete keyPressed[code]
+        if (!this.isDown(code)) return false
+
+        const timer = this.keyRepeatTimers[code]
+        if (!timer) return false
+
+        const now = performance.now()
+
+        if (now >= timer.nextTriggerTime) {
+            timer.nextTriggerTime = now + repeatInterval
+            return true
+        }
+
+        return false
+    },
+
+    clearPressed() {
+        for (const code in this.keyPressed) {
+            delete this.keyPressed[code]
+        }
     }
 }

@@ -1,17 +1,18 @@
 // === CANVAS HELPERS === //
-function getGameContainer(containerId) {
-    return document.getElementById(containerId)
-}
+export const CanvasManager = {
+    getContainer(containerId) {
+        return document.getElementById(containerId)
+    },
 
-function createResponsiveCanvas(containerId) {
-    const container = getGameContainer(containerId)
-    const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
-    canvas.parent(containerId)
-    return canvas
-}
+    createResponsive(containerId) {
+        const container = this.getContainer(containerId)
+        const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
+        canvas.parent(containerId)
+        return canvas
+    },
 
-function resizeResponsiveCanvas(containerId) {
-    const container = getGameContainer(containerId)
-    resizeCanvas(container.offsetWidth, container.offsetHeight)
+    resizeResponsive(containerId) {
+        const container = this.getContainer(containerId)
+        resizeCanvas(container.offsetWidth, container.offsetHeight)
+    }
 }
-
