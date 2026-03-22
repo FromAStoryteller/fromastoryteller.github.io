@@ -41,9 +41,11 @@ const PADDLE_CONFIG = {
     widthRatio: 0.025,
     heightRatio: 0.2,
     playerSpeedRatio: 0.02,
-    aiDeadZoneRatio: 0.03,
-    aiMaxSpeedRatio: 0.014,
-    aiTrackingStrength: 0.09
+    aiDeadZoneRatio: 0.025,
+    aiMaxSpeedRatio: 0.02,
+    aiTrackingStartRatio: 0.25,
+    accelRatio: 0.0024,
+    decelRatio: 0.0032
 }
 
 const BALL_CONFIG = {
@@ -79,17 +81,14 @@ const DIFFICULTY_SETTINGS = {
     Easy: {
         aiDeadZoneMultiplier: 1.2,
         aiMaxSpeedMultiplier: 0.8,
-        aiTrackingMultiplier: 0.8
     },
     Normal: {
         aiDeadZoneMultiplier: 1,
         aiMaxSpeedMultiplier: 1,
-        aiTrackingMultiplier: 1
     },
     Hard: {
         aiDeadZoneMultiplier: 0.8,
         aiMaxSpeedMultiplier: 1.2,
-        aiTrackingMultiplier: 1.2
     }
 }
 
@@ -289,9 +288,12 @@ class Paddle {
         this.w = width * PADDLE_CONFIG.widthRatio
         this.h = height * PADDLE_CONFIG.heightRatio
         this.y = height / 2 - this.h / 2
-        this.yChange = 0
+
         this.side = side
         this.color = color
+
+        this.speed = 0
+        this.targetSpeed = 0
     }
 
     getX() {
@@ -305,13 +307,32 @@ class Paddle {
         rect(x, this.y, this.w, this.h)
     }
 
-    move(numPixels) {
-        this.yChange = numPixels
+    move(targetSpeed) {
+        this.targetSpeed = targetSpeed
     }
 
     update() {
-        this.y += this.yChange
+        const accel = height * PADDLE_CONFIG.accelRatio
+        const decel = height * PADDLE_CONFIG.decelRatio
+
+        if (this.targetSpeed === 0) {
+            if (abs(this.speed) <= decel) {
+                this.speed = 0
+            } else {
+                this.speed -= Math.sign(this.speed) * decel
+            }
+        } else {
+            const speedDifference = this.targetSpeed - this.speed
+            const step = abs(speedDifference) < accel ? abs(speedDifference) : accel
+            this.speed += Math.sign(speedDifference) * step
+        }
+
+        this.y += this.speed
         this.y = constrain(this.y, 0, height - this.h)
+
+        if (this.y <= 0 || this.y >= height - this.h) {
+            this.speed = 0
+        }
     }  
 }
 
@@ -581,29 +602,27 @@ function updatePlayerPaddle() {
 
 function updateAiPaddle() {
     let moveSpeed = 0
+
     const paddleCenter = aiPaddle.y + aiPaddle.h / 2
     const distanceToBall = ball.y - paddleCenter
-        
-    if (ball.xspeed > 0) {
-        if (ball.x > width / 2) {
-            const deadZone = height
-                * PADDLE_CONFIG.aiDeadZoneRatio
-                * currentDifficultySettings.aiDeadZoneMultiplier
-            
-            if (abs(distanceToBall) > deadZone) {
-                const maxSpeed = height
-                    * PADDLE_CONFIG.aiMaxSpeedRatio
-                    * currentDifficultySettings.aiMaxSpeedMultiplier
-                
-                const trackingStrength = PADDLE_CONFIG.aiTrackingStrength
-                    * currentDifficultySettings.aiTrackingMultiplier
 
-                moveSpeed = constrain(
-                    distanceToBall * trackingStrength,
-                    -maxSpeed,
-                    maxSpeed
-                )
-            }
+    const trackingStartX = width * PADDLE_CONFIG.aiTrackingStartRatio
+            
+    if (ball.xspeed > 0 && ball.x > trackingStartX) {
+        const deadZone = height
+            * PADDLE_CONFIG.aiDeadZoneRatio
+            * currentDifficultySettings.aiDeadZoneMultiplier
+        
+        if (abs(distanceToBall) > deadZone) {
+            const maxSpeed = height
+                * PADDLE_CONFIG.aiMaxSpeedRatio
+                * currentDifficultySettings.aiMaxSpeedMultiplier
+
+            moveSpeed = constrain(
+                distanceToBall,
+                -maxSpeed,
+                maxSpeed
+            )
         }
     }
 
