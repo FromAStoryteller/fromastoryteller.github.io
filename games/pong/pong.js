@@ -23,7 +23,7 @@ const SCORING_SIDE = {
 }
 
 const GAME_CONFIG = {
-    winScore: 1,
+    winScore: 5,
     countdownSeconds: 3
 }
 
