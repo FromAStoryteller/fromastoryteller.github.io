@@ -117,9 +117,9 @@ const UI_PANEL_STYLE = {
 }
 
 const STORAGE_KEYS = {
-    bestRally: "pongBestRally",
-    soundEnabled: "pongSoundEnabled",
-    masterVolume: "pongMasterVolume"
+    bestRally: "rallyClash_bestRally",
+    soundEnabled: "rallyClash_SoundEnabled",
+    masterVolume: "rallyClash_MasterVolume"
 }
 
 const SOUND_VOLUMES = {
@@ -760,18 +760,18 @@ function renderGame() {
 // === P5 LIFECYCLE (ES MODULE MODE) === //
 window.preload = function () {
     sounds = AudioManager.loadSounds({
-        paddleHit: "/assets/sounds/games/pong/paddle-hit.wav",
-        wallHit: "/assets/sounds/games/pong/wall-hit.wav",
-        score: "/assets/sounds/games/pong/score.wav",
-        win: "/assets/sounds/games/pong/win.wav",
-        lose: "/assets/sounds/games/pong/lose.wav",
-        countdown: "/assets/sounds/games/pong/countdown-beep.wav",
-        start: "/assets/sounds/games/pong/start.wav"
+        paddleHit: "/assets/sounds/games/rally-clash/paddle-hit.wav",
+        wallHit: "/assets/sounds/games/rally-clash/wall-hit.wav",
+        score: "/assets/sounds/games/rally-clash/score.wav",
+        win: "/assets/sounds/games/rally-clash/win.wav",
+        lose: "/assets/sounds/games/rally-clash/lose.wav",
+        countdown: "/assets/sounds/games/rally-clash/countdown-beep.wav",
+        start: "/assets/sounds/games/rally-clash/start.wav"
     })
 }
 
 window.setup = function () {
-    CanvasManager.createResponsive("pong-game")
+    CanvasManager.createResponsive("rally-clash-game")
 
     Input.init()
 
@@ -815,7 +815,7 @@ window.setup = function () {
         })
     })
 
-    const gameContainer = document.getElementById("pong-game")
+    const gameContainer = document.getElementById("rally-clash-game")
     menu.init(gameContainer)
     menu.openScreen("title")
 
@@ -823,7 +823,7 @@ window.setup = function () {
 }
 
 window.windowResized = function () {
-    CanvasManager.resizeResponsive("pong-game")
+    CanvasManager.resizeResponsive("rally-clash-game")
 
     if (playerPaddle && aiPaddle && ball) {
         updateGameObjectSizes()
