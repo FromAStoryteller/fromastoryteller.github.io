@@ -1,0 +1,427 @@
+// ==================================
+// SHARED CONTENT SYSTEM
+// Used by category pages and home page
+// ==================================
+
+// ----- CONFIG -----
+const CONTENT_INDEX_PATH = "/content/content-index.json"
+
+// ----- HELPERS -----
+function safeArray(value) {
+    return Array.isArray(value) ? value : []
+}
+
+function formatLabel(value) {
+    if (!value) return ""
+
+    return value
+        .split("-")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+}
+
+function getPrimaryActionLabel(item) {
+    const category = item?.category || ""
+
+    if (category === "games") return "Play"
+    if (category === "stories") return "Read"
+    if (category === "videos") return "Watch"
+    if (category === "tools") return "Use"
+
+    return "Explore"
+}
+
+function parseDate(dateString) {
+    const time = Date.parse(dateString)
+    return Number.isNaN(time) ? 0 : time
+}
+
+function escapeHtml(value) {
+    if (typeof value !== "string") return ""
+
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;")
+}
+
+function normalizeContentMeta(meta) {
+    return {
+        id: meta.id || "",
+        type: meta.type || "",
+        category: meta.category || "",
+        subtype: meta.subtype || "",
+        status: meta.status || "",
+        title: meta.title || "",
+        shortTitle: meta.shortTitle || "",
+        description: meta.description || "",
+        excerpt: meta.excerpt || "",
+        url: meta.url || "#",
+        canonicalUrl: meta.canonicalUrl || "",
+        slug: meta.slug || "",
+        featured: Boolean(meta.featured),
+        pinned: Boolean(meta.pinned),
+        draft: Boolean(meta.draft),
+        datePublished: meta.datePublished || "",
+        dateModified: meta.dateModified || "",
+        author: meta.author || "",
+        authorDisplay: meta.authorDisplay || "",
+        publisher: meta.publisher || "",
+        image: {
+            src: meta.image?.src || "",
+            alt: meta.image?.alt || "",
+            width: meta.image?.width || 0,
+            height: meta.image?.height || 0
+        },
+        card: {
+            title: meta.card?.title || meta.title || "",
+            description: meta.card?.description || meta.excerpt || meta.description || "",
+            image: meta.card?.image || meta.image?.src || "",
+            imageAlt: meta.card?.imageAlt || meta.image?.alt || "",
+            icon: meta.card?.icon || "fa-solid fa-file",
+            tags: safeArray(meta.card?.tags)
+        },
+        seo: meta.seo || {},
+        openGraph: meta.openGraph || {},
+        twitter: meta.twitter || {},
+        taxonomy: meta.taxonomy || {}
+    }
+}
+
+// ----- DATA LOADING -----
+async function loadContentIndex() {
+    const response = await fetch(CONTENT_INDEX_PATH)
+
+    if (!response.ok) {
+        throw new Error(`Failed to load content index: ${response.status}`)
+    }
+
+    return response.json()
+}
+
+async function loadMetaFile(metaPath) {
+    const response = await fetch(metaPath)
+
+    if (!response.ok) {
+        throw new Error(`Failed to load meta file: ${metaPath}`)
+    }
+
+    const meta = await response.json()
+    return normalizeContentMeta(meta)
+}
+
+async function loadAllContent() {
+    const metaPaths = await loadContentIndex()
+    const results = await Promise.all(metaPaths.map(loadMetaFile))
+    return results
+}
+
+// ----- SORT / FILTER -----
+function getPublishedContent(items) {
+    return items.filter(item => item.status === "published")
+}
+
+function sortContent(items) {
+    return [...items].sort((a, b) => {
+        if (a.pinned !== b.pinned) {
+            return a.pinned ? -1 : 1
+        }
+
+        if (a.featured !== b.featured) {
+            return a.featured ? -1 : 1
+        }
+
+        return parseDate(b.datePublished) - parseDate(a.datePublished)
+    })
+}
+
+function filterByCategory(items, category) {
+    if (!category) return items
+    return items.filter(item => item.category === category)
+}
+
+function getFeaturedItem(items) {
+    const featuredItems = items.filter(item => item.featured)
+
+    if (featuredItems.length > 0) {
+        return sortContent(featuredItems)[0]
+    }
+
+    return items[0] || null
+}
+
+function getFilterValues(items, filterMode) {
+    if (filterMode === "category") {
+        const values = [...new Set(
+            items
+                .map(item => item.category)
+                .filter(Boolean)
+        )]
+
+        return values.sort((a, b) => a.localeCompare(b))
+    }
+
+    if (filterMode === "subtype") {
+        const values = [...new Set(
+            items
+                .map(item => item.subtype)
+                .filter(Boolean)
+        )]
+
+        return values.sort((a, b) => a.localeCompare(b))
+    }
+
+    return []
+}
+
+function getFilteredItems(items, filterValue, filterMode) {
+    if (filterValue === "all") {
+        return items
+    }
+
+    if (filterMode === "category") {
+        return items.filter(item => item.category === filterValue)
+    }
+
+    if (filterMode === "subtype") {
+        return items.filter(item => item.subtype === filterValue)
+    }
+
+    return items
+}
+
+// ----- RENDER HELPERS -----
+function createFeaturedMarkup(item, label = "Featured") {
+    if (!item) return ""
+
+    const primaryActionLabel = getPrimaryActionLabel(item)
+
+    const featuredTags = item.card.tags.map(tag => `
+        <span>${escapeHtml(tag)}</span>
+    `).join("")
+
+    return `
+        <div class="content-featured-text">
+            <p class="content-featured-label">
+                <i class="fa-solid fa-star"></i> ${escapeHtml(label)}
+            </p>
+
+            <h2>${escapeHtml(item.title)}</h2>
+
+            <p class="content-featured-description">
+                ${escapeHtml(item.description || item.card.description)}
+            </p>
+
+            <div class="content-featured-tags">
+                ${featuredTags}
+            </div>
+
+            <div class="content-featured-actions">
+                <a href="${escapeHtml(item.url)}" class="btn-primary">${escapeHtml(primaryActionLabel)}</a>
+                <a href="${escapeHtml(item.url)}" class="btn-secondary">View Details</a>
+            </div>
+        </div>
+
+        <div class="content-featured-media">
+            <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}">
+        </div>
+    `
+}
+
+function createCardMarkup(item) {
+    const tagsMarkup = item.card.tags.map(tag => `
+        <span>${escapeHtml(tag)}</span>
+    `).join("")
+
+    return `
+        <article class="content-grid-card">
+            <a href="${escapeHtml(item.url)}" class="content-grid-card-link">
+                <div class="content-grid-card-image">
+                    <img src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">
+                    <span class="content-grid-card-banner">
+                        <i class="${escapeHtml(item.card.icon)}"></i>
+                    </span>
+                </div>
+
+                <div class="content-grid-card-body">
+                    <h3>${escapeHtml(item.card.title)}</h3>
+                    <p>${escapeHtml(item.card.description)}</p>
+
+                    <div class="content-grid-card-tags">
+                        ${tagsMarkup}
+                    </div>
+                </div>
+            </a>
+        </article>
+    `
+}
+
+function renderFeaturedItem(selector, item, label = "Featured") {
+    const container = document.querySelector(selector)
+    if (!container) return
+
+    if (!item) {
+        container.innerHTML = ""
+        return
+    }
+
+    container.innerHTML = createFeaturedMarkup(item, label)
+}
+
+function renderFilters(selector, filters, activeFilter, onFilterClick) {
+    const container = document.querySelector(selector)
+    if (!container) return
+
+    const allButton = `
+        <button
+            class="content-filter ${activeFilter === "all" ? "active" : ""}"
+            type="button"
+            data-filter="all"
+        >
+            All
+        </button>
+    `
+
+    const filterButtons = filters.map(filter => `
+        <button
+            class="content-filter ${activeFilter === filter ? "active" : ""}"
+            type="button"
+            data-filter="${escapeHtml(filter)}"
+        >
+            ${escapeHtml(formatLabel(filter))}
+        </button>
+    `).join("")
+
+    container.innerHTML = allButton + filterButtons
+
+    const buttons = container.querySelectorAll(".content-filter")
+    buttons.forEach(button => {
+        button.addEventListener("click", () => {
+            const nextFilter = button.dataset.filter || "all"
+            onFilterClick(nextFilter)
+        })
+    })
+}
+
+function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
+    const container = document.querySelector(selector)
+    if (!container) return
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <p class="content-grid-empty">${escapeHtml(emptyMessage)}</p>
+        `
+        return
+    }
+
+    container.innerHTML = items.map(createCardMarkup).join("")
+}
+
+// ----- PAGE INIT HELPERS -----
+export async function initCategoryPage(config) {
+    const {
+        category,
+        featuredSelector,
+        filtersSelector,
+        gridSelector,
+        filterMode = "subtype",
+        featuredLabel = "Featured",
+        emptyMessage = "Nothing to show yet."
+    } = config
+
+    let allItems = []
+    let activeFilter = "all"
+    let filters = []
+
+    function updatePage() {
+        const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
+
+        renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
+            activeFilter = nextFilter
+            updatePage()
+        })
+
+        renderGrid(gridSelector, filteredItems, emptyMessage)
+    }
+
+    try {
+        const loadedContent = await loadAllContent()
+        const publishedContent = getPublishedContent(loadedContent)
+        const categoryItems = filterByCategory(publishedContent, category)
+
+        allItems = sortContent(categoryItems)
+        filters = getFilterValues(allItems, filterMode)
+
+        const featuredItem = getFeaturedItem(allItems)
+
+        renderFeaturedItem(featuredSelector, featuredItem, featuredLabel)
+        updatePage()
+    } catch (error) {
+        console.error("Error loading category page:", error)
+
+        const featuredContainer = document.querySelector(featuredSelector)
+        const filtersContainer = document.querySelector(filtersSelector)
+        const gridContainer = document.querySelector(gridSelector)
+
+        if (featuredContainer) featuredContainer.innerHTML = ""
+        if (filtersContainer) filtersContainer.innerHTML = ""
+        if (gridContainer) {
+            gridContainer.innerHTML = `
+                <p class="content-grid-empty">Unable to load content right now.</p>
+            `
+        }
+    }
+}
+
+export async function initHomePage(config) {
+    const {
+        featuredSelector,
+        filtersSelector,
+        gridSelector,
+        filterMode = "category",
+        featuredLabel = "Featured",
+        emptyMessage = "Nothing to show yet."
+    } = config
+
+    let allItems = []
+    let activeFilter = "all"
+    let filters = []
+
+    function updatePage() {
+        const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
+
+        renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
+            activeFilter = nextFilter
+            updatePage()
+        })
+
+        renderGrid(gridSelector, filteredItems, emptyMessage)
+    }
+
+    try {
+        const loadedContent = await loadAllContent()
+        allItems = sortContent(getPublishedContent(loadedContent))
+        filters = getFilterValues(allItems, filterMode)
+
+        const featuredItem = getFeaturedItem(allItems)
+
+        renderFeaturedItem(featuredSelector, featuredItem, featuredLabel)
+        updatePage()
+    } catch (error) {
+        console.error("Error loading home page:", error)
+
+        const featuredContainer = document.querySelector(featuredSelector)
+        const filtersContainer = document.querySelector(filtersSelector)
+        const gridContainer = document.querySelector(gridSelector)
+
+        if (featuredContainer) featuredContainer.innerHTML = ""
+        if (filtersContainer) filtersContainer.innerHTML = ""
+        if (gridContainer) {
+            gridContainer.innerHTML = `
+                <p class="content-grid-empty">Unable to load content right now.</p>
+            `
+        }
+    }
+}

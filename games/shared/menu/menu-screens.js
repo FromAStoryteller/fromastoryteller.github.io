@@ -72,7 +72,13 @@ export const MenuScreens = {
             },
 
             matchResult: {
-                title: () => menu.getScreenData("result", "defeat") === "victory" ? "Victory" : "Defeat",
+                title: () => {
+                    const result = menu.getScreenData("result", "gameOver")
+
+                    if (result === "victory") return "Victory"
+                    if (result === "defeat") return "Defeat"
+                    return "Game Over"
+                },
 
                 content: () => menu.getScreenData("stats", []),
 

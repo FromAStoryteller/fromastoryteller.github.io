@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
   <!-- HEAD -->
@@ -12,14 +11,11 @@
 
     <!-- STYLES -->
     <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/games/shared/menu/menu.css">
+    <link rel="stylesheet" href="/content/content.css">
 
     <!-- GLOBAL SCRIPT -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
-    
     <script defer src="/script.js"></script>
-    <script type="module" src="/games/rally-clash/game.js"></script>
+    <script type="module" src="/games/games.js"></script>
 
     <!-- FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +26,6 @@
     <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
-
   </head>
 
   <!-- BODY -->
@@ -48,29 +43,26 @@
       <!-- MAIN CONTENT AREA -->
       <main class="page-content">
 
-        <!-- PAGE CONTENT START -->
-        
-        <!-- Replace everything inside this section -->
+        <section class="content-page">
 
-        <h1 class="notice">Games</h1>
+          <!-- HERO -->
+          <header class="content-page-hero">
+            <h1>Games</h1>
+            <p class="content-page-intro">
+              Discover interactive experiences built by me, From A Storyteller, while I learn the art of game development.
+            </p>
+          </header>
 
-        <h2 class="notice">Fun games to play</h2>
+          <!-- FEATURED GAME -->
+          <section class="content-featured" id="featured-game"></section>
 
-        <!-- PONG GAME -->
-        <section class="game-section">
-          <div class="game-card">
-            <div class="game-header">
-              <h2>Arcade: Rally Clash</h2>
-              <p>Battle against the computer. First to 5 wins</p>
-            </div>
+          <!-- FILTERS -->
+          <nav class="content-filter-row" id="games-filters" aria-label="Game Filters"></nav>
 
-            <div class="game-frame">
-              <div id="rally-clash-game" class="game-canvas"></div>
-            </div>
-          </div>
+          <!-- GAME GRID -->
+          <section class="content-grid" id="games-grid"></section>
+
         </section>
-
-        <!-- PAGE CONTENT END -->
 
       </main>
 
@@ -80,5 +72,4 @@
     <div id="footer-placeholder"></div>
 
   </body>
-
 </html>

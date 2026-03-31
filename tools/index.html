@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
   <!-- HEAD -->
@@ -12,9 +11,11 @@
 
     <!-- STYLES -->
     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/content/content.css">
 
     <!-- GLOBAL SCRIPT -->
     <script defer src="/script.js"></script>
+    <script type="module" src="/tools/tools.js"></script>
 
     <!-- FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +26,6 @@
     <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
-
   </head>
 
   <!-- BODY -->
@@ -43,17 +43,26 @@
       <!-- MAIN CONTENT AREA -->
       <main class="page-content">
 
-        <!-- PAGE CONTENT START -->
-        
-        <!-- Replace everything inside this section -->
+        <section class="content-page">
 
-        <h1>Tools</h1>
+          <!-- HERO -->
+          <header class="content-page-hero">
+            <h1>Tools</h1>
+            <p class="content-page-intro">
+              Discover creative tools designed to support storytelling, idea generation, and imagination.
+            </p>
+          </header>
 
-        <p>
-          Being added soon
-        </p>
+          <!-- FEATURED TOOL -->
+          <section class="content-featured" id="featured-tool"></section>
 
-        <!-- PAGE CONTENT END -->
+          <!-- FILTERS -->
+          <nav class="content-filter-row" id="tools-filters" aria-label="Tool Filters"></nav>
+
+          <!-- TOOL GRID -->
+          <section class="content-grid" id="tools-grid"></section>
+
+        </section>
 
       </main>
 
@@ -63,5 +72,4 @@
     <div id="footer-placeholder"></div>
 
   </body>
-
 </html>

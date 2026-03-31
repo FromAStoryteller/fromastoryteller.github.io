@@ -1,0 +1,73 @@
+{
+    "id": "rally-clash",
+    "type": "game",
+    "category": "games",
+    "subtype": "arcade",
+    "status": "published",
+
+    "title": "Arcade: Rally Clash",
+    "shortTitle": "Rally Clash",
+    "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
+    "excerpt": "Battle the computer and race to 5 points.",
+
+    "url": "/games/rally-clash/",
+    "canonicalUrl": "https://fromastoryteller.com/games/rally-clash/",
+    "slug": "rally-clash",
+
+    "datePublished": "2026-03-22",
+    "dateModified": "2026-03-29",
+
+    "author": "from-a-storyteller",
+    "authorDisplay": "From A Storyteller",
+    "publisher": "From A Storyteller",
+
+    "featured": false,
+    "pinned": false,
+    "draft": false,
+
+
+    "image": {
+        "src": "/assets/images/games/rally-clash.jpg",
+        "alt": "Arcade Rally Clash artwork",
+        "width": 0,
+        "height": 0
+    },
+
+    "card": {
+        "title": "Arcade: Rally Clash",
+        "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
+        "image": "/assets/images/games/rally-clash.jpg",
+        "imageAlt": "Arcade Rally Clash artwork",
+        "icon": "fa-solid fa-gamepad",
+        "tags": ["Arcade", "Retro"]
+    },
+
+    "seo": {
+        "pageTitle": "Arcade: Rally Clash | From A Storyteller",
+        "metaDescription": "Play Arcade: Rally Clash, a browser-based arcade paddle game by From A Storyteller. Battle the computer, survive long rallies, and race to 5 points.",
+        "metaKeywords": ["arcade game", "retro game", "paddle game", "rally clash"],
+        "robots": "index, follow"
+    },
+
+    "openGraph": {
+        "title": "Arcade: Rally Clash | From A Storyteller",
+        "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
+        "image": "/assets/images/games/rally-clash.jpg",
+        "imageAlt": "Arcade Rally Clash artwork",
+        "type": "website"
+    },
+
+    "twitter": {
+        "card": "summary_large_image",
+        "title": "Arcade: Rally Clash | From A Storyteller",
+        "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
+        "image": "/assets/images/games/rally-clash.jpg",
+        "imageAlt": "Arcade Rally Clash artwork"
+    },
+
+    "taxonomy": {
+        "tags": ["Arcade", "Retro"],
+        "genres": ["Arcade"],
+        "themes": ["Competition", "Skill"]
+    }
+}

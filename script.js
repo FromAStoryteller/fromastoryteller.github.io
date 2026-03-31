@@ -1,55 +1,58 @@
 // script.js
 
 // Load components, then wire up the sidebar toggle
-document.addEventListener("DOMContentLoaded", () => {
-  Promise.all([
-    loadComponent("/components/header.html", "header-placeholder"),
-    loadComponent("/components/sidebar.html", "sidebar-placeholder"),
-    loadComponent("/components/footer.html", "footer-placeholder")
-  ])
-  .then(() => {
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await loadComponent("/components/header.html", "header-placeholder");
+    await loadComponent("/components/sidebar.html", "sidebar-placeholder");
+    await loadComponent("/components/footer.html", "footer-placeholder");
+
     initSidebarToggle();
     setActiveSidebarLink();
-  })
-  .catch(err => console.error("Error loading components:", err));
+  } catch (err) {
+    console.error("Error loading components:", err);
+  }
 });
 
 // Reusable loader for header / sidebar / footer
-function loadComponent(path, placeholderId) {
-  return fetch(path)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`Failed to fetch ${path}: ${res.status}`);
-      }
-      return res.text();
-    })
-    .then(html => {
-      const container = document.getElementById(placeholderId);
-      if (container) {
-        container.innerHTML = html;
-      } else {
-        console.warn(`Placeholder #${placeholderId} not found`);
-      }
-    })
-    .catch(err => {
-      console.error("Error loading", path, err);
-    });
+async function loadComponent(path, placeholderId) {
+  const res = await fetch(path);
+  
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${path}: ${res.status}`);
+  }
+
+  const html = await res.text();
+  const container = document.getElementById(placeholderId);
+
+  if (!container) {
+    throw new Error(`Placeholder #${placeholderId} not found`);
+  }
+
+  container.innerHTML = html;
 }
 
-// Hook up the hamburger to the sidebar collapse
+// Hook up the hamburger to the sidebar expanded state
 function initSidebarToggle() {
-  const toggleBtn   = document.querySelector(".menu-toggle");
-  const sidebar     = document.querySelector(".sidebar");
-  const mainContent = document.querySelector(".page-content");
+  const toggleBtn = document.querySelector(".menu-toggle");
+  const sidebar = document.querySelector(".sidebar");
+  const body = document.body;
 
-  if (!toggleBtn || !sidebar || !mainContent) {
+  if (!toggleBtn || !sidebar) {
     console.warn("Sidebar toggle not initialized (missing elements).");
     return;
   }
 
+  // Default state on page load
+  if (body.classList.contains("home-page")) {
+    sidebar.classList.add("is-expanded");
+  } else {
+    sidebar.classList.remove("is-expanded");
+  }
+
+  // Toggle expanded / collapsed
   toggleBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("is-collapsed");
-    mainContent.classList.toggle("is-collapsed");
+    sidebar.classList.toggle("is-expanded");
   });
 }
 
@@ -65,5 +68,5 @@ function setActiveSidebarLink() {
     if (linkPath === currentPath) {
       link.classList.add("active")
     }
-  })
+  });
 }

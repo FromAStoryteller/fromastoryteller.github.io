@@ -6,13 +6,22 @@ export const CanvasManager = {
 
     createResponsive(containerId) {
         const container = this.getContainer(containerId)
-        const canvas = createCanvas(container.offsetWidth, container.offsetHeight)
+
+        const width = container.offsetWidth
+        const height = width * (10 / 16)
+
+        const canvas = createCanvas(width, height)
         canvas.parent(containerId)
+
         return canvas
     },
 
     resizeResponsive(containerId) {
         const container = this.getContainer(containerId)
-        resizeCanvas(container.offsetWidth, container.offsetHeight)
+
+        const width = container.offsetWidth
+        const height = width * (10 / 16)
+
+        resizeCanvas(width, height)
     }
 }

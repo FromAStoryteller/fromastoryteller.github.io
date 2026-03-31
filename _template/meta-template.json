@@ -1,0 +1,72 @@
+{
+  "id": "",
+  "type": "",
+  "category": "",
+  "subtype": "",
+  "status": "",
+
+  "title": "",
+  "shortTitle": "",
+  "description": "",
+  "excerpt": "",
+
+  "url": "",
+  "canonicalUrl": "",
+  "slug": "",
+
+  "datePublished": "",
+  "dateModified": "",
+
+  "author": "",
+  "authorDisplay": "",
+  "publisher": "",
+
+  "featured": false,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "",
+    "alt": "",
+    "width": 0,
+    "height": 0
+  },
+
+  "card": {
+    "title": "",
+    "description": "",
+    "image": "",
+    "imageAlt": "",
+    "icon": "",
+    "tags": []
+  },
+
+  "seo": {
+    "pageTitle": "",
+    "metaDescription": "",
+    "metaKeywords": [],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "",
+    "description": "",
+    "image": "",
+    "imageAlt": "",
+    "type": "website"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "",
+    "description": "",
+    "image": "",
+    "imageAlt": ""
+  },
+
+  "taxonomy": {
+    "tags": [],
+    "genres": [],
+    "themes": []
+  }
+}

@@ -1,49 +1,75 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
-    <!-- HEAD -->
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="/style.css">
-        <script defer src="/script.js"></script>
-        <title>Videos | From A Storyteller</title>
+  <!-- HEAD -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <!-- FONT -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Gabriela&display=swap" rel="stylesheet">
+    <!-- PAGE TITLE -->
+    <title>Videos | From A Storyteller</title>
 
-        <!-- FONT AWESOME - SOCIAL MEDIA ICONS -->
-        <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
-        <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
-        <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
-    </head>
+    <!-- STYLES -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/content/content.css">
 
-    <!-- BODY -->
-    <body>
-        <!-- HEADER -->
-        <div id="header-placeholder"></div>
-        <script src="/script.js"></script>
+    <!-- GLOBAL SCRIPT -->
+    <script defer src="/script.js"></script>
+    <script type="module" src="/videos/videos.js"></script>
 
-        <!-- SIDEBAR + MAIN CONTENT -->
-        <div class="site-layout">
-    
-            <!-- SIDEBAR -->
-            <div id="sidebar-placeholder"></div>
+    <!-- FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gabriela&display=swap" rel="stylesheet">
 
-            <!-- MAIN CONTENT AREA -->
-            <main class="page-content">
-                
-                <div class="to-do-container">
-                    <h1>Videos</h1>
-                </div>
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
+  </head>
 
-            </main>
-        </div>
+  <!-- BODY -->
+  <body>
 
-        <!-- FOOTER -->
-        <div id="footer-placeholder"></div>
-    </body>    
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+
+    <!-- SIDEBAR + MAIN CONTENT -->
+    <div class="site-layout">
+
+      <!-- SIDEBAR -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="page-content">
+
+        <section class="content-page">
+
+          <!-- HERO -->
+          <header class="content-page-hero">
+            <h1>Videos</h1>
+            <p class="content-page-intro">
+              Watch videos connected to storytelling, creativity, and the growing world of From A Storyteller.
+            </p>
+          </header>
+
+          <!-- FEATURED VIDEO -->
+          <section class="content-featured" id="featured-video"></section>
+
+          <!-- FILTERS -->
+          <nav class="content-filter-row" id="videos-filters" aria-label="Video Filters"></nav>
+
+          <!-- VIDEO GRID -->
+          <section class="content-grid" id="videos-grid"></section>
+
+        </section>
+
+      </main>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-placeholder"></div>
+
+  </body>
 </html>

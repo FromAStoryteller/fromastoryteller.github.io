@@ -1,0 +1,72 @@
+{
+    "id": "brick-blitz",
+    "type": "game",
+    "category": "games",
+    "subtype": "arcade",
+    "status": "published",
+
+    "title": "Arcade: Brick Blitz",
+    "shortTitle": "Brick Blitz",
+    "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
+    "excerpt": "Break bricks and try to beat your own highscore.",
+
+    "url": "/games/brick-blitz/",
+    "canonicalUrl": "https://fromastoryteller.com/games/brick-blitz/",
+    "slug": "brick-blitz",
+
+    "datePublished": "2026-03-31",
+    "dateModified": "2026-03-31",
+
+    "author": "from-a-storyteller",
+    "authorDisplay": "From A Storyteller",
+    "publisher": "From A Storyteller",
+
+    "featured": true,
+    "pinned": false,
+    "draft": false,
+
+    "image": {
+        "src": "/assets/images/games/brick-blitz.jpg",
+        "alt": "Arcade Brick Blitz artwork",
+        "width": 0,
+        "height": 0
+    },
+
+    "card": {
+        "title": "Arcade: Brick Blitz",
+        "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
+        "image": "/assets/images/games/brick-blitz.jpg",
+        "imageAlt": "Arcade Brick Blitz artwork",
+        "icon": "fa-solid fa-gamepad",
+        "tags": ["Arcade", "Retro"]
+    },
+
+    "seo": {
+        "pageTitle": "Arcade: Brick Blitz | From A Storyteller",
+        "metaDescription": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
+        "metaKeywords": ["arcade game", "retro game", "brick breaker", "breakout", "brick blitz"],
+        "robots": "index, follow"
+    },
+
+    "openGraph": {
+        "title": "Arcade: Brick Blitz | From A Storyteller",
+        "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
+        "image": "/assets/images/games/brick-blitz.jpg",
+        "imageAlt": "Arcade Brick Blitz artwork",
+        "type": "website"
+    },
+
+    "twitter": {
+        "card": "summary_large_image",
+        "title": "Arcade: Brick Blitz | From A Storyteller",
+        "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
+        "image": "/assets/images/games/brick-blitz.jpg",
+        "imageAlt": "Arcade Brick Blitz artwork"
+    },
+
+    "taxonomy": {
+        "tags": ["Arcade", "Retro"],
+        "genres": ["Arcade"],
+        "themes": ["Challenge", "Progression"]
+    }
+}
