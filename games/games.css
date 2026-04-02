@@ -5,9 +5,9 @@
 
 .game-page {
     width: 100%;
-    max-width: 1040px;
+    max-width: 1520px;
     margin: 0 auto;
-    padding: 40px 0 72px;
+    padding: 40px 28px 72px;
     box-sizing: border-box;
 }
 
@@ -16,12 +16,14 @@
 }
 
 .game-hero {
-    max-width: 980px;
-    margin: 0 auto 40px;
+    max-width: 1380px;
+    margin: 0 auto 32px;
+    text-align: center;
 }
 
 .game-eyebrow {
     margin: 0 0 12px;
+    text-align: center;
     font-size: 0.9rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -29,33 +31,40 @@
 }
 
 .game-hero h1 {
-    max-width: 760px;
-    margin: 0 0 16px;
+    max-width: 900px;
+    margin: 0 auto 16px;
     line-height: 1.1;
+    text-align: center;
 }
 
 .game-tagline {
-    margin: 0 0 16px;
+    margin: 0 auto 16px;
     font-size: 1.2rem;
     line-height: 1.5;
-    max-width: 700px;
+    max-width: 900px;
+    text-align: center;
 }
 
 .game-intro {
-    margin: 0;
-    max-width: 760px;
+    margin: 0 auto;
+    max-width: 920px;
     line-height: 1.7;
     opacity: 0.9;
+    text-align: center;
 }
 
 .game-play-section {
     margin-bottom: 48px;
 }
 
-.game-card {
+.game-shell {
     width: 100%;
-    max-width: 980px;
+    max-width: 1380px;
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 2.15fr) minmax(320px, 1fr);
+    gap: 24px;
+    align-items: center;
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.96));
     border: 1px solid rgba(212, 175, 55, 0.28);
     border-radius: 24px;
@@ -64,35 +73,30 @@
     box-sizing: border-box;
 }
 
-.game-header {
-    text-align: center;
-    margin-bottom: 24px;
+.game-shell-main {
+    min-width: 0;
 }
 
-.game-header h2 {
-    margin: 0 0 10px;
-    line-height: 1.2;
-}
-
-.game-header p {
-    margin: 0;
-    line-height: 1.6;
-    opacity: 0.88;
-}
-
-.game-frame {
+.game-shell-frame {
     background: linear-gradient(180deg, rgba(28, 28, 28, 0.92), rgba(18, 18, 18, 0.92));
     border: 1px solid rgba(212, 175, 55, 0.18);
     border-radius: 20px;
-    padding: 20px;
+    padding: 12px;
     box-sizing: border-box;
+}
+
+.game-shell-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: center;
 }
 
 .game-canvas {
     display: block;
     position: relative;
     width: 100%;
-    max-width: 800px;
+    max-width: none;
     aspect-ratio: 16 / 10;
     margin: 0 auto;
     background: #050505;
@@ -107,10 +111,16 @@
     height: 100%;
 }
 
-.game-info-section {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+.game-about-section {
+    width: 100%;
+    max-width: 1380px;
+    margin: 0 auto 48px;
+}
+
+.game-next-section {
+    width: 100%;
+    max-width: 1380px;
+    margin: 0 auto;
 }
 
 .info-card {
@@ -144,34 +154,59 @@
     margin-top: 10px;
 }
 
+.section-heading {
+    margin-bottom: 24px;
+}
+
+.section-heading h2 {
+    margin: 0 0 10px;
+    line-height: 1.2;
+}
+
+.section-heading p {
+    margin: 0;
+    line-height: 1.6;
+    opacity: 0.88;
+}
+
+@media (max-width: 1440px) {
+    .game-shell {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .game-shell-sidebar {
+        order: -1;
+    }
+}
+
 @media (max-width: 1100px) {
-    .game-info-section {
+    .content-grid{
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 768px) {
-    .game-info-section {
-        grid-template-columns: 1fr;
-    }
-
     .game-page {
         padding: 28px 20px 56px;
     }
 
-    .game-card {
+    .game-shell {
         padding: 20px;
         border-radius: 20px;
     }
 
-    .game-frame {
-        padding: 14px;
+    .game-shell-frame {
+        padding: 10px;
         border-radius: 16px;
     }
 
     .game-canvas {
-        max-width: 100%;
         border-radius: 12px;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
     }
 
     .game-tagline {

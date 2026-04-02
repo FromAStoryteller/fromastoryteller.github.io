@@ -14,11 +14,25 @@
     
       <!-- MIDDLE: Search -->
       <div class="header-center">
-        <form class="site-search" action="/search/" role="search">
-          <input type="search" name="q" placeholder="Search..." aria-label="Search">
-          <button type="submit" class="search-btn" aria-label="Search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
+        <form class="site-search" action="/search/" role="search" autocomplete="off">
+          <div class="site-search-wrap">
+            
+            <input
+              type="search"
+              name="q"
+              placeholder="Search..."
+              aria-label="Search"
+              autocomplete="off"
+              class="site-search-input"
+            >
+            
+            <button type="submit" class="search-btn" aria-label="Search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div class="site-search-suggestions"></div>
+
+          </div>
         </form>
       </div>
 
@@ -27,8 +41,8 @@
         <nav class="socials" aria-label="Social Links">
           <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i></a>
           <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>
           <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>       
         </nav>
       </div>
       

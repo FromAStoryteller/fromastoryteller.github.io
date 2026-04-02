@@ -192,6 +192,84 @@ function getFilteredItems(items, filterValue, filterMode) {
     return items
 }
 
+function getSearchableText(item) {
+    const parts = [
+        item.title,
+        item.shortTitle,
+        item.description,
+        item.excerpt,
+        item.category,
+        item.subtype,
+        item.author,
+        item.authorDisplay,
+        ...(item.card?.tags || [])
+    ]
+
+    return parts
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+}
+
+function scoreSearchMatch(item, query) {
+    const normalizedQuery = query.trim().toLowerCase()
+    if (!normalizedQuery) return 0
+
+    const searchableText = getSearchableText(item)
+    let score = 0
+
+    if (item.title?.toLowerCase() === normalizedQuery) score += 120
+    if (item.card?.title?.toLowerCase() === normalizedQuery) score += 110
+
+    if (item.title?.toLowerCase().includes(normalizedQuery)) score += 80
+    if (item.card?.title?.toLowerCase().includes(normalizedQuery)) score += 70
+
+    if (item.category?.toLowerCase() === normalizedQuery) score += 50
+    if (item.subtype?.toLowerCase() === normalizedQuery) score += 40
+
+    if (searchableText.includes(normalizedQuery)) score += 30
+
+    const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean)
+
+    queryTerms.forEach(term => {
+        if (item.title?.toLowerCase().includes(term)) score += 20
+        if (item.card?.title?.toLowerCase().includes(term)) score += 18
+        if (item.description?.toLowerCase().includes(term)) score += 10
+        if (item.excerpt?.toLowerCase().includes(term)) score += 8
+        if (item.category?.toLowerCase().includes(term)) score += 8
+        if (item.subtype?.toLowerCase().includes(term)) score += 8
+
+        if ((item.card?.tags || []).some(tag => tag.toLowerCase().includes(term))) {
+            score += 12
+        }
+    })
+
+    return score
+}
+
+function searchContentItems(items, query) {
+    const normalizedQuery = query.trim().toLowerCase()
+
+    if (!normalizedQuery) {
+        return []
+    }
+
+    return items
+        .map(item => ({
+            item,
+            score: scoreSearchMatch(item, normalizedQuery)
+        }))
+        .filter(result => result.score > 0)
+        .sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score
+            }
+
+            return parseDate(b.item.datePublished) - parseDate(a.item.datePublished)
+        })
+        .map(result => result.item)
+}
+
 // ----- RENDER HELPERS -----
 function createFeaturedMarkup(item, label = "Featured") {
     if (!item) return ""
@@ -424,4 +502,46 @@ export async function initHomePage(config) {
             `
         }
     }
+}
+
+export async function initRelatedContentSection(config) {
+    const {
+        gridSelector,
+        currentContentId = "",
+        limit = 3,
+        emptyMessage = "Nothing to show yet."
+    } = config
+
+    try {
+        const loadedContent = await loadAllContent()
+        const publishedContent = getPublishedContent(loadedContent)
+        const sortedContent = sortContent(publishedContent)
+
+        const filteredItems = sortedContent.filter(item => item.id !== currentContentId)
+        const relatedItems = filteredItems.slice(0, limit)
+
+        renderGrid(gridSelector, relatedItems, emptyMessage)
+    } catch (error) {
+        console.error("Error loading related content:", error)
+
+        const gridContainer = document.querySelector(gridSelector)
+        if (gridContainer) {
+            gridContainer.innerHTML = `
+                <p class="content-grid-empty">Unable to load content right now</p>
+            `
+        }
+    }
+}
+
+export async function getAllPublishedContent() {
+    const loadedContent = await loadAllContent()
+    return sortContent(getPublishedContent(loadedContent))
+}
+
+export function searchPublishedContent(items, query) {
+    return searchContentItems(items, query)
+}
+
+export function renderContentGrid(selector, items, emptyMessage = "Nothing to show yet.") {
+    renderGrid(selector, items, emptyMessage)
 }

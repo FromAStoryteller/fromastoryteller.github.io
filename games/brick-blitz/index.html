@@ -28,6 +28,7 @@
 
     <!-- STYLES -->
     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/content/content.css">
     <link rel="stylesheet" href="/games/games.css">
     <link rel="stylesheet" href="/games/shared/menu/menu.css">
 
@@ -40,8 +41,9 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
     
-    <script defer src="/script.js"></script>
+    <script type="module" src="/script.js"></script>
     <script type="module" src="/games/brick-blitz/game.js"></script>
+    <script type="module" src="/content/content-page.js"></script>
 
   </head>
 
@@ -72,42 +74,52 @@
         </section>
         
         <section class="game-play-section" aria-labelledby="play-heading">
-          <div class="game-card">
-            <div class="game-header">
-              <h2 id="play-heading">Play Arcade: Brick Blitz</h2>
-              <p>Break the bricks, keep the ball alive, and chase your best run.</p>
+          <div class="game-shell">
+
+            <div class="game-shell-main">
+              <div class="game-shell-frame">
+                <div id="brick-blitz-game" class="game-canvas"></div>
+              </div>
             </div>
 
-            <div class="game-frame">
-              <div id="brick-blitz-game" class="game-canvas"></div>
-            </div>
+            <aside class="game-shell-sidebar" aria-label="Game instructions">
+              <div class="info-card">
+                <h2>How to Play</h2>
+                <p>
+                  Bounce the ball off your paddle and smash through the brick wall. Keep the ball alive, clear as many bricks as you can.
+                </p>
+              </div>
+
+              <div class="info-card">
+                <h2>Controls</h2>
+                <ul>
+                  <li>Use the arrows and Enter or your mouse to navigate the menus.</li>
+                  <li>Use the Left and Right arrows to move the paddle.</li>
+                  <li>Press Escape to pause.</li>
+                </ul>
+              </div>              
+            </aside>
+
           </div>
         </section>
 
-        <section class="game-info-section">
+        <section class="game-about-section" aria-labelledby="about-heading">
           <div class="info-card">
-            <h2>How to Play</h2>
-            <p>
-              Bounce the ball off your paddle and smash through the brick wall. Keep the ball alive, clear as many bricks as you can.
-            </p>
-          </div>
-
-          <div class="info-card">
-            <h2>Controls</h2>
-            <ul>
-              <li>Use the arrows and Enter or your mouse to navigate the menus.</li>
-              <li>Use the Left and Right arrows to move the paddle.</li>
-              <li>Press Escape to pause.</li>
-            </ul>
-          </div>
-
-          <div class="info-card">
-            <h2>About the Game</h2>
+            <h2 id="about-heading">About the Game</h2>
             <p>
               Arcade: Brick Blitz is a Breakout-inspired browser arcade game built by From A Storyteller. It follows Rally Clash as part of the arcade collection and focuses on fast reactions, satisfying rebounds, and chasing a highscore.
             </p>
           </div>
         </section>
+        
+        <section class="game-next-section" aria-labelledby="next-heading" data-current-content-id="brick-blitz">
+          <div class="section-heading">
+            <h2 id="next-heading">Explore Next</h2>
+            <p>Continue exploring From A Storyteller</p>
+          </div>
+
+          <div id="related-content-grid" class="content-grid"></div>
+        </section>       
 
       </main>
     </div>
