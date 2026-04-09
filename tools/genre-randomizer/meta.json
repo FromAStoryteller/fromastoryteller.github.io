@@ -1,0 +1,72 @@
+{
+  "id": "genre-randomizer",
+  "type": "tool",
+  "category": "tools",
+  "subtype": "writing",
+  "status": "published",
+
+  "title": "Genre Randomizer",
+  "shortTitle": "Genre Randomizer",
+  "description": "Generate a random genre for your next story.",
+  "excerpt": "A genre picker to spark your next story idea.",
+
+  "url": "/tools/genre-randomizer/",
+  "canonicalUrl": "https://fromastoryteller.com/tools/genre-randomizer/",
+  "slug": "genre-randomizer",
+
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/tools/genre-randomizer.jpg",
+    "alt": "Genre Randomizer artwork",
+    "width": 0,
+    "height": 0
+  },
+
+  "card": {
+    "title": "Genre Randomizer",
+    "description": "Generate a genre for your next story idea.",
+    "image": "/assets/images/tools/genre-randomizer.jpg",
+    "imageAlt": "Genre Randomizer artwork",
+    "icon": "fa-solid fa-feather-pointed",
+    "tags": ["Tool", "Writing"]
+  },
+
+  "seo": {
+    "pageTitle": "Genre Randomizer | From A Storyteller",
+    "metaDescription": "Use the Genre Randomizer on From A Storyteller to spark your next story idea.",
+    "metaKeywords": ["tool", "randomizer", "genre"],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Genre Randomizer | From A Storyteller",
+    "description": "Use the Genre Randomizer on From A Storyteller to spark your next story idea.",
+    "image": "/assets/images/tools/genre-randomizer.jpg",
+    "imageAlt": "Genre Randomizer artwork",
+    "type": "website"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Genre Randomizer | From A Storyteller",
+    "description": "Use the Genre Randomizer on From A Storyteller to spark your next story idea.",
+    "image": "/assets/images/tools/genre-randomizer.jpg",
+    "imageAlt": "Genre Randomizer artwork"
+  },
+
+  "taxonomy": {
+    "tags": ["Tool", "Writing"],
+    "genres": ["Writing"],
+    "themes": ["Randomizer", "Writing"]
+  }
+}

@@ -117,12 +117,6 @@
     margin: 0 auto 48px;
 }
 
-.game-next-section {
-    width: 100%;
-    max-width: 1380px;
-    margin: 0 auto;
-}
-
 .info-card {
     height: 100%;
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.94), rgba(10, 10, 10, 0.94));
@@ -154,21 +148,6 @@
     margin-top: 10px;
 }
 
-.section-heading {
-    margin-bottom: 24px;
-}
-
-.section-heading h2 {
-    margin: 0 0 10px;
-    line-height: 1.2;
-}
-
-.section-heading p {
-    margin: 0;
-    line-height: 1.6;
-    opacity: 0.88;
-}
-
 @media (max-width: 1440px) {
     .game-shell {
         grid-template-columns: 1fr;
@@ -177,12 +156,6 @@
 
     .game-shell-sidebar {
         order: -1;
-    }
-}
-
-@media (max-width: 1100px) {
-    .content-grid{
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -203,10 +176,6 @@
 
     .game-canvas {
         border-radius: 12px;
-    }
-
-    .content-grid {
-        grid-template-columns: 1fr;
     }
 
     .game-tagline {

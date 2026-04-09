@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <!-- HEAD -->
+  <head>
+    <!-- CORE META -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PAGE TITLE -->
+    <title>Genre Randomizer | From A Storyteller</title>
+
+    <meta
+      name="description"
+      content="Use the Genre Randomizer on From A Storyteller to spark your next story idea."
+    />
+
+    <link rel="canonical" href="https://fromastoryteller.com/tools/genre-randomizer/" />
+
+    <!-- THEME. UI -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gabriela&display=swap" rel="stylesheet">
+
+    <!-- STYLES -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/content/content.css">
+    <link rel="stylesheet" href="/tools/tools.css">
+
+    <!-- FONT AWESOME ICONS -->
+    <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
+
+    <!-- SCRIPTS -->
+    <script type="module" src="/script.js"></script>
+    <script type="module" src="/tools/genre-randomizer/tool.js"></script>
+    <script type="module" src="/content/content-page.js"></script>
+
+  </head>
+
+  <!-- BODY -->
+  <body>
+
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+
+    <!-- SIDEBAR + MAIN CONTENT -->
+    <div class="site-layout">
+
+      <!-- SIDEBAR -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="page-content tool-page">
+
+        <section class="tool-hero">
+          <p class="tool-eyebrow">Tools / Writing</p>
+          <h1>Genre Randomizer</h1>
+          <p class="tool-tagline">
+            A simple genre picker to help spark your next story idea.
+          </p>
+          <p class="tool-intro">
+            Click the button to generate a genre.
+          </p>
+        </section>
+        
+        <section class="tool-play-section" aria-labelledby="tool-heading">
+          <div class="tool-shell">
+
+            <div class="tool-shell-main">
+              <div class="tool-shell-frame">
+                <div class="tool-widget">
+                    <h2 id="tool-heading" class="tool-widget-title">Random Genre Selector</h2>
+                    <p id="tool-result" class="tool-widget-result">Click the button to get a genre.</p>
+
+                    <div class="tool-widget-actions">
+                      <button id="tool-action-button" class="tool-button">Pick Genre</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="tool-shell-sidebar" aria-label="Tool instructions">
+              <div class="info-card">
+                <h2>How It Works</h2>
+                <p>
+                  This will randomly generate a genre for you.
+                </p>
+              </div>
+
+              <div class="info-card">
+                <h2>Why Use It</h2>
+                <p>
+                    Great for brainstorming story ideas, writing prompts, or pushing yourself into genres you haven't explored recently.
+                </p>
+              </div>
+            </aside>
+
+          </div>
+        </section>
+
+        <section class="content-next-section" aria-labelledby="next-heading" data-current-content-id="genre-randomizer">
+          <div class="section-heading">
+            <h2 id="next-heading">Explore Next</h2>
+            <p>Continue exploring From A Storyteller</p>
+          </div>
+
+          <div id="related-content-grid" class="content-grid"></div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-placeholder"></div>
+
+  </body>
+</html>

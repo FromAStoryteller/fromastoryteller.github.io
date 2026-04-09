@@ -271,7 +271,27 @@ function searchContentItems(items, query) {
 }
 
 // ----- RENDER HELPERS -----
-function createFeaturedMarkup(item, label = "Featured") {
+function getHomeFeaturedItems(items) {
+    const featuredItems = items.filter(item => item.featured)
+
+    if (featuredItems.length === 0) {
+        return items.length > 0 ? [items[0]] : []
+    }
+
+    const categoryOrder = ["games", "stories", "tools", "videos"]
+
+    const selectedItems = categoryOrder
+        .map(category => {
+            const categoryItems = featuredItems.filter(item => item.category === category)
+            if (categoryItems.length === 0) return null
+            return sortContent(categoryItems)[0]
+        })
+        .filter(Boolean)
+    
+    return selectedItems.sort((a, b) => parseDate(b.datePublished) - parseDate(a.datePublished))
+}
+
+function createFeaturedPanelMarkup(item, label = "Featured") {
     if (!item) return ""
 
     const primaryActionLabel = getPrimaryActionLabel(item)
@@ -282,23 +302,25 @@ function createFeaturedMarkup(item, label = "Featured") {
 
     return `
         <div class="content-featured-text">
-            <p class="content-featured-label">
-                <i class="fa-solid fa-star"></i> ${escapeHtml(label)}
-            </p>
+            <div class="content-featured-text-inner">
+                <p class="content-featured-label">
+                    <i class="fa-solid fa-star"></i> ${escapeHtml(label)}
+                </p>
 
-            <h2>${escapeHtml(item.title)}</h2>
+                <h2>${escapeHtml(item.title)}</h2>
 
-            <p class="content-featured-description">
-                ${escapeHtml(item.description || item.card.description)}
-            </p>
+                <p class="content-featured-description">
+                    ${escapeHtml(item.description || item.card.description)}
+                </p>
 
-            <div class="content-featured-tags">
-                ${featuredTags}
-            </div>
+                <div class="content-featured-tags">
+                    ${featuredTags}
+                </div>
 
-            <div class="content-featured-actions">
-                <a href="${escapeHtml(item.url)}" class="btn-primary">${escapeHtml(primaryActionLabel)}</a>
-                <a href="${escapeHtml(item.url)}" class="btn-secondary">View Details</a>
+                <div class="content-featured-actions">
+                    <a href="${escapeHtml(item.url)}" class="btn-primary">${escapeHtml(primaryActionLabel)}</a>
+                    <a href="${escapeHtml(item.url)}" class="btn-secondary">View Details</a>
+                </div>
             </div>
         </div>
 
@@ -306,6 +328,37 @@ function createFeaturedMarkup(item, label = "Featured") {
             <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}">
         </div>
     `
+}
+
+function createFeaturedShellMarkup(showControls = false) {
+    const controlsMarkup = showControls ? `
+        <div class="content-featured-controls" aria-label="Featured content controls">
+            <button type="button" class="content-featured-arrow content-featured-arrow-prev" aria-label="Previous featured item">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="content-featured-arrow content-featured-arrow-next" aria-label="Next featured item">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+    ` : ""
+
+    return `
+        ${controlsMarkup}
+        <div class="content-featured-viewport">
+            <div class="content-featured-track content-featured-track-carousel">
+                <div class="content-featured-slide content-featured-slide-current"></div>
+                <div class="content-featured-slide content-featured-slide-next"></div>
+            </div>
+        </div>
+    `
+}
+
+function renderFeaturedShell(selector, showControls = false) {
+    const container = document.querySelector(selector)
+    if (!container) return null
+
+    container.innerHTML = createFeaturedShellMarkup(showControls)
+    return container
 }
 
 function createCardMarkup(item) {
@@ -336,16 +389,122 @@ function createCardMarkup(item) {
     `
 }
 
-function renderFeaturedItem(selector, item, label = "Featured") {
+function initFeaturedRotator(selector, items, label = "Featured Content", interval = 6000) {
     const container = document.querySelector(selector)
     if (!container) return
 
-    if (!item) {
+    if (!items || items.length === 0) {
         container.innerHTML = ""
         return
     }
 
-    container.innerHTML = createFeaturedMarkup(item, label)
+    if (items.length === 1) {
+        renderFeaturedItem(selector, items[0], label)
+        return
+    }
+
+    let currentIndex = 0
+    let intervalId = null
+    let isTransitioning = false
+
+    const shell = renderFeaturedShell(selector, true)
+    if (!shell) return
+
+    let currentSlide = shell.querySelector(".content-featured-slide-current")
+    let nextSlide = shell.querySelector(".content-featured-slide-next")
+    const prevButton = shell.querySelector(".content-featured-arrow-prev")
+    const nextButton = shell.querySelector(".content-featured-arrow-next")
+
+    function setSlideContent(slideElement, item) {
+        slideElement.innerHTML = createFeaturedPanelMarkup(item, label)
+    }
+
+    function finishTransition(nextIndex) {
+        currentIndex = nextIndex
+
+        currentSlide.innerHTML = ""
+        currentSlide.classList.remove("content-featured-slide-current")
+        currentSlide.classList.add("content-featured-slide-next")
+
+        nextSlide.classList.remove("content-featured-slide-next")
+        nextSlide.classList.add("content-featured-slide-current")
+
+        const oldCurrent = currentSlide
+        currentSlide = nextSlide
+        nextSlide = oldCurrent
+
+        shell.classList.remove("is-sliding-next", "is-sliding-prev")
+        nextSlide.innerHTML = ""
+        isTransitioning = false
+    }
+
+    function goToIndex(nextIndex, direction = "next") {
+        if (isTransitioning || nextIndex === currentIndex) return
+        isTransitioning = true
+
+        setSlideContent(nextSlide, items[nextIndex])
+
+        shell.classList.remove("is-sliding-next", "is-sliding-prev")
+        void shell.offsetWidth
+        shell.classList.add(direction === "next" ? "is-sliding-next" : "is-sliding-prev")
+
+        window.setTimeout(() => {
+            finishTransition(nextIndex)
+        }, 420)
+    }
+
+    function goNext() {
+        const nextIndex = (currentIndex + 1) % items.length
+        goToIndex(nextIndex, "next")
+        restartAutoRotate()
+    }
+
+    function goPrev() {
+        const nextIndex = (currentIndex - 1 + items.length) % items.length
+        goToIndex(nextIndex, "prev")
+        restartAutoRotate()
+    }
+
+    function startAutoRotate() {
+        if (items.length <= 1 || intervalId) return
+
+        intervalId = window.setInterval(() => {
+            if (isTransitioning) return
+            const nextIndex = (currentIndex + 1) % items.length
+            goToIndex(nextIndex, "next")
+        }, interval)
+    }
+
+    function restartAutoRotate() {
+        if (intervalId) {
+            window.clearInterval(intervalId)
+        }
+        startAutoRotate()
+    }
+
+    function stopAutoRotate() {
+        if (intervalId) {
+            window.clearInterval(intervalId)
+            intervalId = null
+        }
+    }
+
+    setSlideContent(currentSlide, items[currentIndex])
+
+    if (prevButton) {
+        prevButton.addEventListener("click", goPrev)
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener("click", goNext)
+    }
+
+    shell.addEventListener("mouseenter", stopAutoRotate)
+    shell.addEventListener("mouseleave", startAutoRotate)
+    shell.addEventListener("focusin", stopAutoRotate)
+    shell.addEventListener("focusout", startAutoRotate)
+
+    startAutoRotate()
 }
 
 function renderFilters(selector, filters, activeFilter, onFilterClick) {
@@ -395,6 +554,26 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
     }
 
     container.innerHTML = items.map(createCardMarkup).join("")
+}
+
+function renderFeaturedItem(selector, item, label = "Featured") {
+    const container = document.querySelector(selector)
+    if (!container) return
+
+    if (!item) {
+        container.innerHTML = ""
+        return
+    }
+
+    container.innerHTML = `
+        <div class="content-featured-viewport">
+            <div class="content-featured-track">
+                <div class="content-featured-slide content-featured-slide-current">
+                    ${createFeaturedPanelMarkup(item, label)}
+                </div>
+            </div>
+        </div>
+    `
 }
 
 // ----- PAGE INIT HELPERS -----
@@ -483,9 +662,9 @@ export async function initHomePage(config) {
         allItems = sortContent(getPublishedContent(loadedContent))
         filters = getFilterValues(allItems, filterMode)
 
-        const featuredItem = getFeaturedItem(allItems)
+        const featuredItems = getHomeFeaturedItems(allItems)
 
-        renderFeaturedItem(featuredSelector, featuredItem, featuredLabel)
+        initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
         updatePage()
     } catch (error) {
         console.error("Error loading home page:", error)
