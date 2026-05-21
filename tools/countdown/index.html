@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <!-- HEAD -->
+  <head>
+    <!-- CORE META -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PAGE TITLE -->
+    <title>Countdown | From A Storyteller</title>
+
+    <meta
+      name="description"
+      content="Create a live countdown from a set amount of time to work on your project on From A Storyteller."
+    />
+
+    <link rel="canonical" href="https://fromastoryteller.com/tools/countdown/" />
+
+    <!-- THEME. UI -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gabriela&display=swap" rel="stylesheet">
+
+    <!-- STYLES -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/content/content.css">
+    <link rel="stylesheet" href="/tools/tools.css">
+
+    <!-- FONT AWESOME ICONS -->
+    <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
+
+    <!-- SCRIPTS -->
+    <script type="module" src="/script.js"></script>
+    <script type="module" src="/tools/countdown/tool.js"></script>
+    <script type="module" src="/content/content-page.js"></script>
+
+  </head>
+
+  <!-- BODY -->
+  <body>
+
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+
+    <!-- SIDEBAR + MAIN CONTENT -->
+    <div class="site-layout">
+
+      <!-- SIDEBAR -->
+      <div id="sidebar-placeholder"></div>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="page-content tool-page">
+
+        <section class="tool-hero">
+          <p class="tool-eyebrow">Tools / Focus</p>
+          <h1>Countdown</h1>
+          <p class="tool-tagline">
+            Set a focused countdown timer for your writing, coding, planning, or creative work.
+          </p>
+          <p class="tool-intro">
+            Choose an amount of time, press start, then work on your project until the timer reaches zero.
+          </p>
+        </section>
+        
+        <section class="tool-play-section" aria-labelledby="tool-heading">
+          <div class="tool-shell">
+
+            <div class="tool-shell-main">
+              <div class="tool-shell-frame">
+                <div class="tool-widget">
+                    <h2 id="tool-heading" class="tool-widget-title">Countdown</h2>
+                    <p id="tool-result" class="tool-widget-result">00:00:00</p>
+
+                    <div class="countdown-time-controls" aria-label="Countdown time settings">
+                        <div class="countdown-time-field">
+                            <label for="countdown-hours">Hours</label>
+                            <input
+                                id="countdown-hours"
+                                type="number"
+                                min="0"
+                                max="99"
+                                step="1"
+                                value="0"
+                            >
+                        </div>
+
+                        <div class="countdown-time-field">
+                            <label for="countdown-minutes">Minutes</label>
+                            <input
+                                id="countdown-minutes"
+                                type="number"
+                                min="0"
+                                max="59"
+                                step="1"
+                                value="30"
+                            >
+                        </div>
+
+                        <div class="countdown-time-field">
+                            <label for="countdown-seconds">Seconds</label>
+                            <input
+                                id="countdown-seconds"
+                                type="number"
+                                min="0"
+                                max="59"
+                                step="1"
+                                value="0"
+                            >
+                        </div>
+                    </div>
+
+                    <p id="tool-message" class="tool-widget-note">
+                        Set your time, then start the countdown.
+                    </p>
+
+                    <div class="tool-widget-actions">
+                        <button id="tool-action-button" class="tool-button" type="button">Start Countdown</button>
+                        <button id="tool-reset-button" class="tool-button" type="button">Reset</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="tool-shell-sidebar" aria-label="Tool instructions">
+              <div class="info-card">
+                <h2>How It Works</h2>
+                <p>
+                  Set the number of hours, minutes, and seconds you want to count down from. When you press start, the timer will update every second until it reaches zero.
+                </p>
+              </div>
+
+              <div class="info-card">
+                <h2>Why Use It</h2>
+                <p>
+                    Great for focused writing sessions, coding blocks, planning time, quick creative sprints, or giving yourself a clear window to make progress on a project.
+                </p>
+              </div>
+            </aside>
+
+          </div>
+        </section>
+
+        <section class="content-next-section" aria-labelledby="next-heading" data-current-content-id="countdown">
+          <div class="section-heading">
+            <h2 id="next-heading">Explore Next</h2>
+            <p>Continue exploring From A Storyteller</p>
+          </div>
+
+          <div id="related-content-grid" class="content-grid"></div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer-placeholder"></div>
+
+  </body>
+</html>

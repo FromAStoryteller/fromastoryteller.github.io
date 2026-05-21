@@ -1,0 +1,72 @@
+{
+  "id": "countdown",
+  "type": "tool",
+  "category": "tools",
+  "subtype": "focus",
+  "status": "published",
+
+  "title": "Countdown",
+  "shortTitle": "Countdown",
+  "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
+  "excerpt": "A simple countdown timer to help you focus on your next project session.",
+
+  "url": "/tools/countdown/",
+  "canonicalUrl": "https://fromastoryteller.com/tools/countdown/",
+  "slug": "countdown",
+
+  "datePublished": "2026-05-21",
+  "dateModified": "2026-05-21",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/tools/countdown.jpg",
+    "alt": "Countdown tool artwork",
+    "width": 0,
+    "height": 0
+  },
+
+  "card": {
+    "title": "Countdown",
+    "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
+    "image": "/assets/images/tools/countdown.jpg",
+    "imageAlt": "Countdown tool artwork",
+    "icon": "fa-solid fa-feather-pointed",
+    "tags": ["Tool", "Focus"]
+  },
+
+  "seo": {
+    "pageTitle": "Countdown | From A Storyteller",
+    "metaDescription": "Use the Countdown tool on From A Storyteller to set a focused timer for writing, coding, planning, or creative work.",
+    "metaKeywords": ["tool", "countdown", "timer", "focus timer", "writing timer", "coding timer", "productivity"],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Countdown | From A Storyteller",
+    "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
+    "image": "/assets/images/tools/countdown.jpg",
+    "imageAlt": "Countdown tool artwork",
+    "type": "website"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Countdown | From A Storyteller",
+    "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
+    "image": "/assets/images/tools/countdown.jpg",
+    "imageAlt": "Countdown tool artwork"
+  },
+
+  "taxonomy": {
+    "tags": ["Tool", "Focus", "Countdown"],
+    "genres": ["Focus"],
+    "themes": ["Countdown", "Productivity", "Creative Work"]
+  }
+}
