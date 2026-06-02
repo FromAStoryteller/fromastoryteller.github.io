@@ -27,6 +27,7 @@ function getPrimaryActionLabel(item) {
     if (category === "stories") return "Read"
     if (category === "videos") return "Watch"
     if (category === "tools") return "Use"
+    if (category === "blog") return "Read"
 
     return "Explore"
 }
@@ -278,7 +279,7 @@ function getHomeFeaturedItems(items) {
         return items.length > 0 ? [items[0]] : []
     }
 
-    const categoryOrder = ["games", "stories", "tools", "videos"]
+    const categoryOrder = ["blog", "games", "stories", "tools", "videos"]
 
     const selectedItems = categoryOrder
         .map(category => {
