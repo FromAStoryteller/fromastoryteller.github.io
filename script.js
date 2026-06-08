@@ -109,25 +109,37 @@ async function initHeaderSearch() {
     suggestionsContainer.classList.remove("is-visible")
   }
 
+  function goToSearchPage(query) {
+    const trimmedQuery = query.trim()
+
+    if (!trimmedQuery) return
+
+    const url = new URL("/search/", window.location.origin)
+    url.searchParams.set("q", trimmedQuery)
+
+    window.location.href = url.toString()
+  }
+
   function showSuggestions(suggestions) {
+    suggestionsContainer.innerHTML = ""
+
     if (!suggestions.length) {
       hideSuggestions()
       return
     }
 
-    suggestionsContainer.innerHTML = suggestions.map(item =>
-      `<button class="site-search-suggestion" data-url="${item.url}">
-        ${item.title}
-      </button>`
-    ).join("")
+    suggestions.forEach(item => {
+      const button = document.createElement("button")
+
+      button.type = "button"
+      button.className = "site-search-suggestion"
+      button.dataset.suggestion = item.title
+      button.textContent = item.title
+
+      suggestionsContainer.appendChild(button)
+    })
 
     suggestionsContainer.classList.add("is-visible")
-
-    suggestionsContainer.querySelectorAll(".site-search-suggestion").forEach(btn => {
-      btn.addEventListener("click", () => {
-        window.location.href = btn.dataset.url
-      })
-    })
   }
 
   function getSuggestions(query) {
@@ -137,20 +149,45 @@ async function initHeaderSearch() {
     return results.slice(0, 5)
   }
 
+  form.addEventListener("submit", event => {
+    event.preventDefault()
+
+    const query = input.value.trim()
+
+    hideSuggestions()
+    goToSearchPage(query)
+  })
+
   input.addEventListener("input", () => {
     const query = input.value.trim()
     const suggestions = getSuggestions(query)
+
     showSuggestions(suggestions)
   })
 
   input.addEventListener("focus", () => {
     const query = input.value.trim()
     const suggestions = getSuggestions(query)
+
     showSuggestions(suggestions)
   })
 
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".site-search-wrap")) {
+  suggestionsContainer.addEventListener("pointerdown", event => {
+    const button = event.target.closest(".site-search-suggestion")
+
+    if (!button) return
+
+    event.preventDefault()
+
+    const suggestion = button.dataset.suggestion || ""
+
+    input.value = suggestion
+    hideSuggestions()
+    goToSearchPage(suggestion)
+  })
+
+  document.addEventListener("pointerdown", event => {
+    if (!event.target.closest(".site-search-wrap")) {
       hideSuggestions()
     }
   })
