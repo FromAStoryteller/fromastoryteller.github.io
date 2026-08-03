@@ -1,0 +1,378 @@
+/* =========================================================
+   STORIES
+   Shared styling for individual story pages
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   STORY PAGE
+   --------------------------------------------------------- */
+
+.story-page {
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+
+
+/* ---------------------------------------------------------
+   STORY HEADER
+   --------------------------------------------------------- */
+
+.story-header {
+  width: min(100%, 720px);
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.story-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  margin-bottom: 2.5rem;
+
+  color: inherit;
+  font-size: 0.9rem;
+  text-decoration: none;
+  opacity: 0.7;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.story-back-link:hover,
+.story-back-link:focus-visible {
+  opacity: 1;
+  transform: translateX(-0.2rem);
+}
+
+.story-category {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  margin: 0 0 0.8rem;
+
+  font-family: "Gabriela", Georgia, serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.story-header h1 {
+  margin: 0;
+
+  font-family: "Gabriela", Georgia, serif;
+  font-size: clamp(2.3rem, 7vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.story-intro {
+  max-width: 560px;
+  margin: 1.25rem auto 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.7;
+  opacity: 0.72;
+}
+
+.story-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+
+  margin-top: 1.5rem;
+
+  font-size: 0.85rem;
+  opacity: 0.65;
+}
+
+.story-author,
+.story-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+
+/* ---------------------------------------------------------
+   FEATURE IMAGE
+   --------------------------------------------------------- */
+
+.story-feature-image {
+  width: min(100%, 820px);
+  margin: 0 auto 3.5rem;
+}
+
+.story-feature-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+
+  border-radius: 0.4rem;
+  object-fit: cover;
+}
+
+
+/* ---------------------------------------------------------
+   STORY TEXT
+   --------------------------------------------------------- */
+
+.story-content {
+  width: min(100%, 680px);
+  margin: 0 auto;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.16rem);
+  line-height: 1.85;
+  letter-spacing: 0.005em;
+  text-wrap: pretty;
+}
+
+/*
+  Every normal story paragraph:
+  - has no blank space above or below it
+  - starts with a book-style indent
+*/
+
+.story-content p {
+  margin: 0;
+  text-indent: 1.8em;
+}
+
+/*
+  The first paragraph of the story is not indented,
+  following common book typography.
+*/
+
+.story-content > p:first-child {
+  text-indent: 0;
+}
+
+/*
+  Add class="no-indent" to any paragraph that should
+  begin at the left edge.
+*/
+
+.story-content p.no-indent {
+  text-indent: 0;
+}
+
+
+/* ---------------------------------------------------------
+   UNMARKED STORY BREAK
+   Adds empty space without displaying a symbol.
+   The paragraph after it is automatically not indented.
+   --------------------------------------------------------- */
+
+.story-break {
+  height: 1.85rem;
+}
+
+.story-break + p {
+  text-indent: 0;
+}
+
+
+/* ---------------------------------------------------------
+   MARKED SCENE BREAK
+   Displays a star between scenes.
+   The paragraph after it is automatically not indented.
+   --------------------------------------------------------- */
+
+.story-scene-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 4.5rem;
+  margin: 0;
+
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.story-scene-break + p {
+  text-indent: 0;
+}
+
+
+/* ---------------------------------------------------------
+   OPTIONAL STORY ELEMENTS
+   --------------------------------------------------------- */
+
+.story-content blockquote {
+  margin: 2rem 1.5rem;
+  padding-left: 1.5rem;
+
+  border-left: 2px solid currentColor;
+
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.story-content blockquote p {
+  text-indent: 0;
+}
+
+.story-content em {
+  font-style: italic;
+}
+
+.story-content strong {
+  font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   STORY FOOTER
+   --------------------------------------------------------- */
+
+.story-footer {
+  width: min(100%, 680px);
+  margin: 4rem auto 0;
+  text-align: center;
+}
+
+.story-end-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 2rem;
+
+  font-size: 0.9rem;
+  opacity: 0.65;
+}
+
+.story-end-text {
+  margin: 0.7rem 0 2rem;
+
+  font-family: "Gabriela", Georgia, serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.story-return-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+
+  padding: 0.8rem 1.2rem;
+
+  border: 1px solid currentColor;
+  border-radius: 999px;
+
+  color: inherit;
+  font-size: 0.9rem;
+  text-decoration: none;
+
+  opacity: 0.75;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.story-return-link:hover,
+.story-return-link:focus-visible {
+  opacity: 1;
+  transform: translateY(-0.15rem);
+}
+
+
+/* ---------------------------------------------------------
+   ACCESSIBILITY
+   --------------------------------------------------------- */
+
+.story-back-link:focus-visible,
+.story-return-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+   --------------------------------------------------------- */
+
+@media (max-width: 700px) {
+
+  .story-page {
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .story-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .story-back-link {
+    margin-bottom: 2rem;
+  }
+
+  .story-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+
+  .story-content p {
+    text-indent: 1.5em;
+  }
+
+  .story-break {
+    height: 1.6rem;
+  }
+
+  .story-scene-break {
+    min-height: 4rem;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   PRINT
+   --------------------------------------------------------- */
+
+@media print {
+
+  .story-back-link,
+  .story-return-link,
+  #header-placeholder,
+  #sidebar-placeholder,
+  #footer-placeholder {
+    display: none;
+  }
+
+  .site-layout,
+  .page-content,
+  .story-page {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .story-content {
+    width: 100%;
+    max-width: none;
+
+    color: #000;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+}

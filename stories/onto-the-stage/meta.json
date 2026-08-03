@@ -1,0 +1,102 @@
+{
+  "id": "onto-the-stage",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "Onto the Stage",
+  "shortTitle": "Onto the Stage",
+  "description": "On the final night of a successful theatre run, Arthur must overcome his fear of his father's judgement and find the courage to step onto the stage.",
+  "excerpt": "Arthur has faced nineteen packed audiences, but on the final night, one silent face in the front row threatens to undo his courage.",
+
+  "url": "/stories/onto-the-stage/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/onto-the-stage/",
+  "slug": "onto-the-stage",
+
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/onto-the-stage.png",
+    "alt": "A nervous performer looking through a red theatre curtain towards the audience",
+    "width": 1200,
+    "height": 630
+  },
+
+  "card": {
+    "title": "Onto the Stage",
+    "description": "With his disapproving father watching from the front row, Arthur must decide whether fear will stop him from taking the stage.",
+    "image": "/assets/images/stories/onto-the-stage.png",
+    "imageAlt": "A nervous performer looking through a red theatre curtain towards the audience",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Drama",
+      "Courage"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "Onto the Stage — Short Story | From A Storyteller",
+    "metaDescription": "Read Onto the Stage, a short story about a performer overcoming fear, parental judgement and self-doubt on the final night of a theatre run.",
+    "metaKeywords": [
+      "Onto the Stage",
+      "From A Storyteller",
+      "short story",
+      "theatre story",
+      "performance anxiety",
+      "parental expectations",
+      "courage",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Onto the Stage | From A Storyteller",
+    "description": "On the final night of a successful theatre run, Arthur must overcome his fear of his father's judgement and find the courage to perform.",
+    "image": "https://fromastoryteller.com/assets/images/stories/onto-the-stage.png",
+    "imageAlt": "A nervous performer looking through a red theatre curtain towards the audience",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Onto the Stage | From A Storyteller",
+    "description": "With his father watching silently from the front row, Arthur must overcome his fear and step onto the stage.",
+    "image": "https://fromastoryteller.com/assets/images/stories/onto-the-stage.png",
+    "imageAlt": "A nervous performer looking through a red theatre curtain towards the audience"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "theatre",
+      "performance",
+      "family expectations",
+      "self-doubt",
+      "friendship",
+      "courage"
+    ],
+    "genres": [
+      "literary fiction",
+      "contemporary fiction",
+      "drama"
+    ],
+    "themes": [
+      "overcoming fear",
+      "pursuing personal fulfilment",
+      "parental judgement",
+      "supportive friendship",
+      "choosing your own path"
+    ]
+  }
+}
