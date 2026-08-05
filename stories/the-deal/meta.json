@@ -1,0 +1,104 @@
+{
+  "id": "the-deal",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "The Deal",
+  "shortTitle": "The Deal",
+  "description": "Desperate to bring back her little sister, Dina enters a moonless forest to complete her side of a dangerous bargain with an unseen entity.",
+  "excerpt": "Dina has made the required sacrifices. Now, deep within a moonless forest, she must discover whether the entity she bargained with will honour its side of the deal.",
+
+  "url": "/stories/the-deal/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/the-deal/",
+  "slug": "the-deal",
+
+  "datePublished": "2026-08-05",
+  "dateModified": "2026-08-05",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/the-deal.png",
+    "alt": "Featured artwork for The Deal",
+    "width": 1200,
+    "height": 630
+  },
+
+  "card": {
+    "title": "The Deal",
+    "description": "After completing a series of sacrifices, Dina enters a dark forest to demand that a mysterious entity return her little sister.",
+    "image": "/assets/images/stories/the-deal.png",
+    "imageAlt": "Featured artwork for The Deal",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Supernatural Horror",
+      "Dark Fantasy"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "The Deal — Supernatural Horror Short Story | From A Storyteller",
+    "metaDescription": "Read The Deal, a supernatural horror short story about a grieving sister, a series of sacrifices and a dangerous bargain made in a moonless forest.",
+    "metaKeywords": [
+      "The Deal",
+      "From A Storyteller",
+      "short story",
+      "supernatural horror story",
+      "dark fantasy story",
+      "forest horror",
+      "occult bargain",
+      "sacrifice",
+      "resurrection story",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "The Deal | From A Storyteller",
+    "description": "Dina has completed the sacrifices. Now she must enter a moonless forest and demand that a mysterious entity honour their deal.",
+    "image": "https://fromastoryteller.com/assets/images/stories/the-deal.png",
+    "imageAlt": "Featured artwork for The Deal",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "The Deal | From A Storyteller",
+    "description": "A grieving sister enters a moonless forest to collect what she was promised in return for a series of sacrifices.",
+    "image": "https://fromastoryteller.com/assets/images/stories/the-deal.png",
+    "imageAlt": "Featured artwork for The Deal"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "moonless forest",
+      "supernatural entity",
+      "dangerous bargain",
+      "sacrifice",
+      "resurrection",
+      "sisters"
+    ],
+    "genres": [
+      "supernatural horror",
+      "dark fantasy",
+      "occult fiction"
+    ],
+    "themes": [
+      "grief and desperation",
+      "the price of resurrection",
+      "dangerous bargains",
+      "sacrifice for family",
+      "power and manipulation"
+    ]
+  }
+}
