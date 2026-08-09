@@ -1,0 +1,104 @@
+{
+  "id": "a-place-left-behind",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "A Place Left Behind",
+  "shortTitle": "A Place Left Behind",
+  "description": "Zachary returns to an abandoned house scarred by fire, where familiar rooms, old photographs and a small pink-taped key draw him back into memories of what was lost.",
+  "excerpt": "On a stormy night, Zachary returns to an abandoned house carrying two old keys. As he climbs the stairs, the place begins to reveal the memories he left behind.",
+
+  "url": "/stories/a-place-left-behind/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/a-place-left-behind/",
+  "slug": "a-place-left-behind",
+
+  "datePublished": "2026-08-09",
+  "dateModified": "2026-08-09",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/a-place-left-behind.jpg",
+    "alt": "Featured artwork for A Place Left Behind",
+    "width": 1200,
+    "height": 630
+  },
+
+  "card": {
+    "title": "A Place Left Behind",
+    "description": "Zachary returns to an abandoned, fire-scarred house where old photographs and a small pink-taped key awaken memories of the life once lived there.",
+    "image": "/assets/images/stories/a-place-left-behind.jpg",
+    "imageAlt": "Featured artwork for A Place Left Behind",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Emotional Fiction",
+      "Atmospheric Fiction"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "A Place Left Behind — Emotional Short Story | From A Storyteller",
+    "metaDescription": "Read A Place Left Behind, an emotional short story about a man returning to an abandoned, fire-scarred house and confronting memories of what was lost.",
+    "metaKeywords": [
+      "A Place Left Behind",
+      "From A Storyteller",
+      "short story",
+      "emotional short story",
+      "atmospheric fiction",
+      "grief story",
+      "memory and loss",
+      "abandoned house story",
+      "fire damaged house",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "A Place Left Behind | From A Storyteller",
+    "description": "On a stormy night, Zachary returns to an abandoned house where familiar rooms and old photographs stir memories of everything left behind.",
+    "image": "https://fromastoryteller.com/assets/images/stories/a-place-left-behind.jpg",
+    "imageAlt": "Featured artwork for A Place Left Behind",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "A Place Left Behind | From A Storyteller",
+    "description": "Zachary returns to an abandoned, fire-scarred house and follows old memories toward a room that has been waiting for him.",
+    "image": "https://fromastoryteller.com/assets/images/stories/a-place-left-behind.jpg",
+    "imageAlt": "Featured artwork for A Place Left Behind"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "abandoned house",
+      "old photographs",
+      "childhood memories",
+      "fire damage",
+      "returning home",
+      "loss"
+    ],
+    "genres": [
+      "emotional fiction",
+      "atmospheric fiction",
+      "literary fiction"
+    ],
+    "themes": [
+      "grief and loss",
+      "memory and the past",
+      "returning to a place left behind",
+      "family",
+      "confronting painful memories"
+    ]
+  }
+}
