@@ -1,0 +1,106 @@
+{
+"id": "the-labyrinth",
+"type": "story",
+"category": "stories",
+"subtype": "short-story",
+"status": "published",
+
+"title": "The Labyrinth",
+"shortTitle": "The Labyrinth",
+"description": "Areteon and Dolosa enter a deadly labyrinth in pursuit of glory and freedom, but escaping its final challenge may demand a sacrifice neither expected.",
+"excerpt": "Areteon and Dolosa enter a towering labyrinth filled with beasts and deadly obstacles. When the exit finally comes into sight, only one question remains: what are they willing to sacrifice to escape?",
+
+"url": "/stories/the-labyrinth/",
+"canonicalUrl": "https://fromastoryteller.com/stories/the-labyrinth/",
+"slug": "the-labyrinth",
+
+"datePublished": "2026-08-10",
+"dateModified": "2026-08-10",
+
+"author": "from-a-storyteller",
+"authorDisplay": "From A Storyteller",
+"publisher": "From A Storyteller",
+
+"featured": true,
+"pinned": false,
+"draft": false,
+
+"image": {
+"src": "/assets/images/stories/the-labyrinth.png",
+"alt": "Featured artwork for The Labyrinth",
+"width": 1200,
+"height": 630
+},
+
+"card": {
+"title": "The Labyrinth",
+"description": "Areteon and Dolosa battle their way through a deadly labyrinth, but the final obstacle forces one of them to choose between loyalty and freedom.",
+"image": "/assets/images/stories/the-labyrinth.png",
+"imageAlt": "Featured artwork for The Labyrinth",
+"icon": "fa-solid fa-book-open",
+"tags": [
+"Short Story",
+"Fantasy Fiction",
+"Dark Fantasy"
+]
+},
+
+"seo": {
+"pageTitle": "The Labyrinth — Fantasy Short Story | From A Storyteller",
+"metaDescription": "Read The Labyrinth, a fantasy short story about two warriors battling through a deadly maze where betrayal may prove more dangerous than the creatures within.",
+"metaKeywords": [
+"The Labyrinth",
+"From A Storyteller",
+"short story",
+"fantasy short story",
+"dark fantasy",
+"labyrinth story",
+"maze story",
+"warrior story",
+"betrayal story",
+"Greek inspired fantasy",
+"original fiction"
+],
+"robots": "index, follow"
+},
+
+"openGraph": {
+"title": "The Labyrinth | From A Storyteller",
+"description": "Two warriors enter a deadly labyrinth together, but when the exit is finally within reach, survival comes at a brutal cost.",
+"image": "https://fromastoryteller.com/assets/images/stories/the-labyrinth.png",
+"imageAlt": "Featured artwork for The Labyrinth",
+"type": "article"
+},
+
+"twitter": {
+"card": "summary_large_image",
+"title": "The Labyrinth | From A Storyteller",
+"description": "Areteon and Dolosa fight their way through a deadly labyrinth, only to discover that escaping may require one final betrayal.",
+"image": "https://fromastoryteller.com/assets/images/stories/the-labyrinth.png",
+"imageAlt": "Featured artwork for The Labyrinth"
+},
+
+"taxonomy": {
+"tags": [
+"labyrinth",
+"warriors",
+"betrayal",
+"survival",
+"monsters",
+"sacrifice"
+],
+"genres": [
+"fantasy fiction",
+"dark fantasy",
+"adventure fiction"
+],
+"themes": [
+"betrayal and self-preservation",
+"loyalty",
+"survival",
+"ambition and glory",
+"sacrifice",
+"trust"
+]
+}
+}
