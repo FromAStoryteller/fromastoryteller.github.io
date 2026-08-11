@@ -1,0 +1,107 @@
+{
+"id": "sunset-at-the-lighthouse",
+"type": "story",
+"category": "stories",
+"subtype": "short-story",
+"status": "published",
+
+"title": "Sunset at the Lighthouse",
+"shortTitle": "Sunset at the Lighthouse",
+
+"description": "Every sunset for nearly a year, Erin waits at the lighthouse for Lyndsey to return. As another day fades into darkness, a familiar whistle carries across the ocean.",
+"excerpt": "Erin promised she would wait at the lighthouse every sunset until Lyndsey returned. Nearly a year later, as the last light disappears beneath the ocean, she finally hears something familiar on the wind.",
+
+"url": "/stories/sunset-at-the-lighthouse/",
+"canonicalUrl": "https://fromastoryteller.com/stories/sunset-at-the-lighthouse/",
+"slug": "sunset-at-the-lighthouse",
+
+"datePublished": "2026-08-11",
+"dateModified": "2026-08-11",
+
+"author": "from-a-storyteller",
+"authorDisplay": "From A Storyteller",
+"publisher": "From A Storyteller",
+
+"featured": true,
+"pinned": false,
+"draft": false,
+
+"image": {
+"src": "/assets/images/stories/sunset-at-the-lighthouse.png",
+"alt": "Featured artwork for Sunset at the Lighthouse",
+"width": 1200,
+"height": 630
+},
+
+"card": {
+"title": "Sunset at the Lighthouse",
+"description": "For nearly a year, Erin has watched every sunset from the lighthouse, waiting for the person who promised she would return.",
+"image": "/assets/images/stories/sunset-at-the-lighthouse.png",
+"imageAlt": "Featured artwork for Sunset at the Lighthouse",
+"icon": "fa-solid fa-book-open",
+"tags": [
+"Short Story",
+"Fantasy Fiction",
+"Romantic Fantasy"
+]
+},
+
+"seo": {
+"pageTitle": "Sunset at the Lighthouse — Fantasy Short Story | From A Storyteller",
+"metaDescription": "Read Sunset at the Lighthouse, a fantasy short story about love, waiting and a promise kept as Erin watches the ocean each evening for Lyndsey's return.",
+"metaKeywords": [
+"Sunset at the Lighthouse",
+"From A Storyteller",
+"short story",
+"fantasy short story",
+"romantic fantasy",
+"mermaid story",
+"lighthouse story",
+"ocean story",
+"reunion story",
+"love story",
+"original fiction"
+],
+"robots": "index, follow"
+},
+
+"openGraph": {
+"title": "Sunset at the Lighthouse | From A Storyteller",
+"description": "Erin has waited at the lighthouse every sunset for nearly a year. Then, as darkness falls over the ocean, a familiar whistle finally answers her promise.",
+"image": "https://fromastoryteller.com/assets/images/stories/sunset-at-the-lighthouse.png",
+"imageAlt": "Featured artwork for Sunset at the Lighthouse",
+"type": "article"
+},
+
+"twitter": {
+"card": "summary_large_image",
+"title": "Sunset at the Lighthouse | From A Storyteller",
+"description": "Every sunset, Erin waits at the lighthouse for Lyndsey to return. Nearly a year later, a familiar whistle finally carries across the ocean.",
+"image": "https://fromastoryteller.com/assets/images/stories/sunset-at-the-lighthouse.png",
+"imageAlt": "Featured artwork for Sunset at the Lighthouse"
+},
+
+"taxonomy": {
+"tags": [
+"lighthouse",
+"mermaid",
+"ocean",
+"sunset",
+"reunion",
+"waiting"
+],
+"genres": [
+"fantasy fiction",
+"romantic fantasy",
+"mermaid fiction"
+],
+"themes": [
+"love and devotion",
+"keeping promises",
+"waiting and hope",
+"reunion",
+"separation",
+"faithfulness"
+]
+}
+}
