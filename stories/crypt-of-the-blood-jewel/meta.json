@@ -1,0 +1,106 @@
+{
+  "id": "crypt-of-the-blood-jewel",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "Crypt of the Blood Jewel",
+  "shortTitle": "Crypt of the Blood Jewel",
+  "description": "After breaking into a long-lost crypt, treasure hunter Kieren finally finds the legendary Blood Jewel. But a single drop of blood awakens something that has been waiting in the darkness.",
+  "excerpt": "Kieren has finally found the legendary Blood Jewel hidden deep within an ancient crypt. But when his blood touches the jewel, the treasure's towering guardian awakens.",
+
+  "url": "/stories/crypt-of-the-blood-jewel/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/crypt-of-the-blood-jewel/",
+  "slug": "crypt-of-the-blood-jewel",
+
+  "datePublished": "2026-08-12",
+  "dateModified": "2026-08-12",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/crypt-of-the-blood-jewel.jpg",
+    "alt": "Featured artwork for Crypt of the Blood Jewel",
+    "width": 1200,
+    "height": 630
+  },
+
+  "card": {
+    "title": "Crypt of the Blood Jewel",
+    "description": "Deep within an ancient crypt, Kieren finally finds the legendary Blood Jewel—only to awaken the towering guardian protecting it.",
+    "image": "/assets/images/stories/crypt-of-the-blood-jewel.jpg",
+    "imageAlt": "Featured artwork for Crypt of the Blood Jewel",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Fantasy Fiction",
+      "Adventure Fantasy"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "Crypt of the Blood Jewel — Fantasy Adventure Short Story | From A Storyteller",
+    "metaDescription": "Read Crypt of the Blood Jewel, a fantasy adventure short story about a treasure hunter who discovers a legendary jewel and awakens its ancient guardian.",
+    "metaKeywords": [
+      "Crypt of the Blood Jewel",
+      "From A Storyteller",
+      "short story",
+      "fantasy short story",
+      "fantasy adventure",
+      "adventure fantasy",
+      "treasure hunter story",
+      "ancient crypt",
+      "Blood Jewel",
+      "ancient guardian",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Crypt of the Blood Jewel | From A Storyteller",
+    "description": "Kieren finally discovers the legendary Blood Jewel deep within an ancient crypt. Then a drop of his blood awakens the towering guardian protecting it.",
+    "image": "https://fromastoryteller.com/assets/images/stories/crypt-of-the-blood-jewel.jpg",
+    "imageAlt": "Featured artwork for Crypt of the Blood Jewel",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Crypt of the Blood Jewel | From A Storyteller",
+    "description": "Kieren has finally found the legendary Blood Jewel. But when his blood touches it, the ancient guardian of the crypt awakens.",
+    "image": "https://fromastoryteller.com/assets/images/stories/crypt-of-the-blood-jewel.jpg",
+    "imageAlt": "Featured artwork for Crypt of the Blood Jewel"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "crypt",
+      "treasure",
+      "Blood Jewel",
+      "treasure hunter",
+      "ancient guardian",
+      "statue"
+    ],
+    "genres": [
+      "fantasy fiction",
+      "adventure fantasy",
+      "dark fantasy"
+    ],
+    "themes": [
+      "greed and temptation",
+      "discovery",
+      "ancient dangers",
+      "risk and consequence",
+      "forbidden treasure",
+      "awakening"
+    ]
+  }
+}
