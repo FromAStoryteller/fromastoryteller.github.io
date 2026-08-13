@@ -221,24 +221,69 @@
     min-height: calc(1.7em * 3);
 }
 
-.content-featured-tags,
-.content-grid-card-tags {
+/* FEATURED TAGS */
+.content-featured-tags {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.content-featured-tags span,
-.content-grid-card-tags span {
+.content-featured-tags::-webkit-scrollbar {
+    display: none;
+}
+
+.content-featured-tags span {
     display: inline-flex;
     align-items: center;
-    min-height: 32px;
-    padding: 6px 12px;
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 5px 10px;
     border-radius: 999px;
     background: rgba(212, 175, 55, 0.08);
     border: 1px solid rgba(212, 175, 55, 0.22);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     line-height: 1;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+
+/* GRID CARD TAGS */
+.content-grid-card-tags {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: auto;
+}
+
+.content-grid-card-tags::-webkit-scrollbar {
+    display: none;
+}
+
+.content-grid-card-tags span {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    font-size: 0.82rem;
+    line-height: 1;
+    white-space: nowrap;
     box-sizing: border-box;
 }
 
@@ -504,6 +549,11 @@
         grid-template-rows: auto 300px;
         height: auto;
     }
+
+    .content-featured-tags {
+        flex-wrap: wrap;
+        overflow-x: visible;
+    }
 }
 
 @media (max-width: 768px) {
@@ -537,6 +587,11 @@
 
     .content-grid {
         grid-template-columns: 1fr;
+    }
+
+    .content-grid-card-tags {
+        flex-wrap: wrap;
+        overflow-x: visible;
     }
 
     .content-featured-arrow {

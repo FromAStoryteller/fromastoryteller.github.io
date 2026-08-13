@@ -543,6 +543,75 @@ function renderFilters(selector, filters, activeFilter, onFilterClick) {
     })
 }
 
+function initGridCardTagScroll(container) {
+    const cards = container.querySelectorAll(".content-grid-card")
+
+    cards.forEach(card => {
+        const tags = card.querySelector(".content-grid-card-tags")
+
+        if (!tags) return
+
+        let animationFrame = null
+
+        function animateTo(target, speed = 50) {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame)
+            }
+
+            // Make absolutely sure CSS smooth scrolling
+            // does not interfere with the animation.
+            tags.style.scrollBehavior = "auto"
+
+            const start = tags.scrollLeft
+            const distance = target - start
+
+            if (Math.abs(distance) < 1) {
+                tags.scrollLeft = target
+                return
+            }
+
+            const duration = Math.abs(distance) / speed * 1000
+            const startTime = performance.now()
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime
+                const progress = Math.min(elapsed / duration, 1)
+
+                /*
+                 * Ease-out starts moving immediately,
+                 * then gently slows as it reaches the end.
+                 */
+                const eased = 1 - Math.pow(1 - progress, 3)
+
+                tags.scrollLeft = start + distance * eased
+
+                if (progress < 1) {
+                    animationFrame = requestAnimationFrame(animate)
+                } else {
+                    tags.scrollLeft = target
+                    animationFrame = null
+                }
+            }
+
+            animationFrame = requestAnimationFrame(animate)
+        }
+
+        card.addEventListener("pointerenter", () => {
+            const maxScroll = tags.scrollWidth - tags.clientWidth
+
+            if (maxScroll > 0) {
+                animateTo(maxScroll)
+            }
+        })
+
+        card.addEventListener("pointerleave", () => {
+            if (tags.scrollLeft > 0) {
+                animateTo(0)
+            }
+        })
+    })
+}
+
 function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
     const container = document.querySelector(selector)
     if (!container) return
@@ -555,6 +624,8 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
     }
 
     container.innerHTML = items.map(createCardMarkup).join("")
+
+    initGridCardTagScroll(container)
 }
 
 function renderFeaturedItem(selector, item, label = "Featured") {

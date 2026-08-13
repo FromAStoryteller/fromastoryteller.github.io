@@ -1,0 +1,109 @@
+{
+  "id": "date-night-jigsaw",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "Date Night Jigsaw",
+  "shortTitle": "Date Night Jigsaw",
+  "description": "When a mysterious jigsaw arrives on Catherine and Bruce's doorstep for their date night, the picture slowly reveals something disturbingly familiar.",
+  "excerpt": "Catherine and Bruce settle in for a quiet date night when an anonymous jigsaw appears on their doorstep. As they piece together the image, familiar objects begin to reveal a horrifying message.",
+
+  "url": "/stories/date-night-jigsaw/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/date-night-jigsaw/",
+  "slug": "date-night-jigsaw",
+
+  "datePublished": "2026-08-13",
+  "dateModified": "2026-08-13",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/date-night-jigsaw.png",
+    "alt": "Featured artwork for Date Night Jigsaw",
+    "width": 1200,
+    "height": 630
+  },
+
+  "card": {
+    "title": "Date Night Jigsaw",
+    "description": "A mysterious jigsaw arrives for Catherine and Bruce's date night. But as the image takes shape, its familiar details become increasingly disturbing.",
+    "image": "/assets/images/stories/date-night-jigsaw.png",
+    "imageAlt": "Featured artwork for Date Night Jigsaw",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Psychological Horror",
+      "Mystery Fiction"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "Date Night Jigsaw — Psychological Horror Short Story | From A Storyteller",
+    "metaDescription": "Read Date Night Jigsaw, a psychological horror short story about a couple whose quiet evening turns sinister when an anonymous jigsaw reveals a disturbing image.",
+    "metaKeywords": [
+      "Date Night Jigsaw",
+      "From A Storyteller",
+      "short story",
+      "psychological horror",
+      "horror short story",
+      "mystery short story",
+      "thriller fiction",
+      "jigsaw puzzle story",
+      "mysterious package",
+      "creepy jigsaw",
+      "suspense story",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Date Night Jigsaw | From A Storyteller",
+    "description": "An anonymous jigsaw arrives on Catherine and Bruce's doorstep for their date night. As the pieces come together, they recognise something they wish they hadn't.",
+    "image": "https://fromastoryteller.com/assets/images/stories/date-night-jigsaw.png",
+    "imageAlt": "Featured artwork for Date Night Jigsaw",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Date Night Jigsaw | From A Storyteller",
+    "description": "A mysterious jigsaw seems like an unusual date-night surprise. Then Catherine and Bruce begin to recognise the picture taking shape.",
+    "image": "https://fromastoryteller.com/assets/images/stories/date-night-jigsaw.png",
+    "imageAlt": "Featured artwork for Date Night Jigsaw"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "jigsaw",
+      "puzzle",
+      "mysterious package",
+      "date night",
+      "phone call",
+      "dagger",
+      "missing person"
+    ],
+    "genres": [
+      "psychological horror",
+      "mystery fiction",
+      "thriller fiction"
+    ],
+    "themes": [
+      "hidden messages",
+      "fear of the unknown",
+      "discovery",
+      "deception",
+      "threat",
+      "dread",
+      "familiarity turned sinister"
+    ]
+  }
+}
