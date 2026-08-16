@@ -1,0 +1,111 @@
+{
+  "id": "michaels-choice",
+  "type": "story",
+  "category": "stories",
+  "subtype": "short-story",
+  "status": "published",
+
+  "title": "Michael's Choice",
+  "shortTitle": "Michael's Choice",
+  "description": "After failing to defend his friend from a vicious attack, Michael must face the cost of his silence and decide what kind of man he wants to become.",
+  "excerpt": "Michael has always gone along with the crowd. But when a brutal night ends in tragedy, a final message from his friend forces him to confront the person he has become.",
+
+  "url": "/stories/michaels-choice/",
+  "canonicalUrl": "https://fromastoryteller.com/stories/michaels-choice/",
+  "slug": "michaels-choice",
+
+  "datePublished": "2026-08-16",
+  "dateModified": "2026-08-16",
+
+  "author": "from-a-storyteller",
+  "authorDisplay": "From A Storyteller",
+  "publisher": "From A Storyteller",
+
+  "featured": true,
+  "pinned": false,
+  "draft": false,
+
+  "image": {
+    "src": "/assets/images/stories/michaels-choice.png",
+    "alt": "Featured artwork for Michael's Choice",
+    "width": 1920,
+    "height": 1200
+  },
+
+  "card": {
+    "title": "Michael's Choice",
+    "description": "A night of cruelty leaves Michael facing guilt, loss and a choice between following the crowd and becoming someone better.",
+    "image": "/assets/images/stories/michaels-choice.png",
+    "imageAlt": "Featured artwork for Michael's Choice",
+    "icon": "fa-solid fa-book-open",
+    "tags": [
+      "Short Story",
+      "Literary Fiction",
+      "Contemporary Fiction"
+    ]
+  },
+
+  "seo": {
+    "pageTitle": "Michael's Choice — Redemption Short Story | From A Storyteller",
+    "metaDescription": "Read Michael's Choice, a contemporary short story about friendship, bullying, complicity and the difficult decision to break a cycle of cruelty.",
+    "metaKeywords": [
+      "Michael's Choice",
+      "From A Storyteller",
+      "short story",
+      "contemporary short story",
+      "literary fiction",
+      "redemption story",
+      "workplace bullying",
+      "peer pressure",
+      "bystander guilt",
+      "friendship and loss",
+      "breaking cycles of cruelty",
+      "moral choice",
+      "suicide aftermath",
+      "original fiction"
+    ],
+    "robots": "index, follow"
+  },
+
+  "openGraph": {
+    "title": "Michael's Choice | From A Storyteller",
+    "description": "Michael stays silent when his friend needs him most. What follows forces him to confront guilt, cruelty and the possibility of choosing a different path.",
+    "image": "https://fromastoryteller.com/assets/images/stories/michaels-choice.png",
+    "imageAlt": "Featured artwork for Michael's Choice",
+    "type": "article"
+  },
+
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Michael's Choice | From A Storyteller",
+    "description": "A friend's tragedy forces Michael to confront his silence, his choices and the person he wants to become.",
+    "image": "https://fromastoryteller.com/assets/images/stories/michaels-choice.png",
+    "imageAlt": "Featured artwork for Michael's Choice"
+  },
+
+  "taxonomy": {
+    "tags": [
+      "workplace",
+      "bullying",
+      "harassment",
+      "friendship",
+      "alcohol",
+      "bar",
+      "yoga",
+      "cafe"
+    ],
+    "genres": [
+      "literary fiction",
+      "contemporary fiction"
+    ],
+    "themes": [
+      "complicity",
+      "peer pressure",
+      "guilt",
+      "grief",
+      "redemption",
+      "breaking cycles of cruelty",
+      "personal responsibility"
+    ]
+  }
+}
