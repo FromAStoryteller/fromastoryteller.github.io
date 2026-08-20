@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- HOME -->
+  <url>
+    <loc>https://fromastoryteller.com/</loc>
+  </url>
+
+  <!-- MAIN SECTIONS -->
+  <url>
+    <loc>https://fromastoryteller.com/about/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/contact/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/blog/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/games/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/tools/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/videos/</loc>
+  </url>
+
+
+  <!-- STORIES -->
+  <url>
+    <loc>https://fromastoryteller.com/stories/moon-hoc-meeting/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/the-deal/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/a-place-left-behind/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/the-labyrinth/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/sunset-at-the-lighthouse/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/crypt-of-the-blood-jewel/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/date-night-jigsaw/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/tea-at-the-summit/</loc>
+  </url>
+
+
+  <!-- LEGAL -->
+  <url>
+    <loc>https://fromastoryteller.com/privacy/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/terms/</loc>
+  </url>
+
+</urlset>
