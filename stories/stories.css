@@ -1,17 +1,31 @@
 /* =========================================================
-   STORIES
+   FROM A STORYTELLER - STORIES.CSS
+   Version: 2.0
    Shared styling for individual story pages
    ========================================================= */
 
+/*
+   Individual stories now use the same shared content-card system as
+   Games and Tools for the Explore Next section.
+
+   Keeping this import here also upgrades all EXISTING story HTML files,
+   without requiring every old story page to gain another stylesheet link.
+*/
+@import url("/content/content.css");
+
 
 /* ---------------------------------------------------------
-   STORY PAGE
+   STORY PAGE SHELL
+   Aligns the page footprint with Games and Tools while retaining a
+   narrower editorial reading column for the actual story text.
    --------------------------------------------------------- */
 
 .story-page {
-  width: min(100%, 860px);
+  width: 100%;
+  max-width: 1520px;
   margin: 0 auto;
-  padding: 3rem 2rem 5rem;
+  padding: 40px 28px 32px;
+  box-sizing: border-box;
 }
 
 
@@ -20,8 +34,9 @@
    --------------------------------------------------------- */
 
 .story-header {
-  width: min(100%, 720px);
-  margin: 0 auto 3rem;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto 32px;
   text-align: center;
 }
 
@@ -30,7 +45,7 @@
   align-items: center;
   gap: 0.55rem;
 
-  margin-bottom: 2.5rem;
+  margin-bottom: 24px;
 
   color: inherit;
   font-size: 0.9rem;
@@ -54,31 +69,33 @@
   justify-content: center;
   gap: 0.55rem;
 
-  margin: 0 0 0.8rem;
+  margin: 0 0 12px;
 
   font-family: "Gabriela", Georgia, serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.65;
+  opacity: 0.75;
 }
 
 .story-header h1 {
-  margin: 0;
+  max-width: 900px;
+  margin: 0 auto 16px;
 
   font-family: "Gabriela", Georgia, serif;
-  font-size: clamp(2.3rem, 7vw, 4.5rem);
+  font-size: clamp(2.3rem, 5vw, 4rem);
   font-weight: 400;
-  line-height: 1.15;
+  line-height: 1.1;
+  text-align: center;
   text-wrap: balance;
 }
 
 .story-intro {
-  max-width: 560px;
-  margin: 1.25rem auto 0;
+  max-width: 700px;
+  margin: 0 auto;
 
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-style: italic;
   line-height: 1.7;
   opacity: 0.72;
@@ -90,7 +107,7 @@
   justify-content: center;
   gap: 0.75rem 1.5rem;
 
-  margin-top: 1.5rem;
+  margin-top: 16px;
 
   font-size: 0.85rem;
   opacity: 0.65;
@@ -106,11 +123,13 @@
 
 /* ---------------------------------------------------------
    FEATURE IMAGE
+   Wider than the reading column, matching the more generous visual
+   footprint used by other individual content pages.
    --------------------------------------------------------- */
 
 .story-feature-image {
-  width: min(100%, 820px);
-  margin: 0 auto 3.5rem;
+  width: min(100%, 1100px);
+  margin: 0 auto 48px;
 }
 
 .story-feature-image img {
@@ -118,8 +137,9 @@
   width: 100%;
   height: auto;
 
-  border-radius: 0.4rem;
+  border-radius: 16px;
   object-fit: cover;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
 }
 
 
@@ -128,7 +148,7 @@
    --------------------------------------------------------- */
 
 .story-content {
-  width: min(100%, 680px);
+  width: min(100%, 700px);
   margin: 0 auto;
 
   font-family: Georgia, "Times New Roman", serif;
@@ -138,30 +158,14 @@
   text-wrap: pretty;
 }
 
-/*
-  Every normal story paragraph:
-  - has no blank space above or below it
-  - starts with a book-style indent
-*/
-
 .story-content p {
   margin: 0;
   text-indent: 1.8em;
 }
 
-/*
-  The first paragraph of the story is not indented,
-  following common book typography.
-*/
-
 .story-content > p:first-child {
   text-indent: 0;
 }
-
-/*
-  Add class="no-indent" to any paragraph that should
-  begin at the left edge.
-*/
 
 .story-content p.no-indent {
   text-indent: 0;
@@ -170,8 +174,6 @@
 
 /* ---------------------------------------------------------
    UNMARKED STORY BREAK
-   Adds empty space without displaying a symbol.
-   The paragraph after it is automatically not indented.
    --------------------------------------------------------- */
 
 .story-break {
@@ -185,8 +187,6 @@
 
 /* ---------------------------------------------------------
    MARKED SCENE BREAK
-   Displays a star between scenes.
-   The paragraph after it is automatically not indented.
    --------------------------------------------------------- */
 
 .story-scene-break {
@@ -239,8 +239,8 @@
    --------------------------------------------------------- */
 
 .story-footer {
-  width: min(100%, 680px);
-  margin: 4rem auto 0;
+  width: min(100%, 700px);
+  margin: 56px auto 0;
   text-align: center;
 }
 
@@ -271,26 +271,50 @@
   justify-content: center;
   gap: 0.65rem;
 
+  min-height: 44px;
   padding: 0.8rem 1.2rem;
 
-  border: 1px solid currentColor;
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 999px;
 
   color: inherit;
   font-size: 0.9rem;
   text-decoration: none;
 
-  opacity: 0.75;
+  opacity: 0.82;
 
   transition:
     opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .story-return-link:hover,
 .story-return-link:focus-visible {
   opacity: 1;
+  border-color: rgba(212, 175, 55, 0.6);
   transform: translateY(-0.15rem);
+}
+
+
+/* ---------------------------------------------------------
+   EXPLORE NEXT
+   Uses content.css for the actual cards. These rules only position the
+   shared section beneath the story.
+   --------------------------------------------------------- */
+
+.story-related-section.content-page {
+  margin-top: 0;
+  padding-top: 16px;
+}
+
+.story-related-hero {
+  margin-bottom: 28px;
+}
+
+.story-related-hero h2 {
+  margin: 0 0 12px;
+  line-height: 1.15;
 }
 
 
@@ -309,18 +333,29 @@
    RESPONSIVE
    --------------------------------------------------------- */
 
-@media (max-width: 700px) {
-
+@media (max-width: 768px) {
   .story-page {
-    padding: 2rem 1.25rem 4rem;
+    padding: 28px 20px 24px;
   }
 
   .story-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 28px;
   }
 
   .story-back-link {
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .story-header h1 {
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .story-feature-image {
+    margin-bottom: 36px;
+  }
+
+  .story-feature-image img {
+    border-radius: 12px;
   }
 
   .story-content {
@@ -340,6 +375,13 @@
     min-height: 4rem;
   }
 
+  .story-footer {
+    margin-top: 44px;
+  }
+
+  .story-related-section.content-page {
+    padding-top: 12px;
+  }
 }
 
 
@@ -348,9 +390,9 @@
    --------------------------------------------------------- */
 
 @media print {
-
   .story-back-link,
   .story-return-link,
+  .story-related-section,
   #header-placeholder,
   #sidebar-placeholder,
   #footer-placeholder {
@@ -362,6 +404,7 @@
   .story-page {
     display: block;
     width: 100%;
+    max-width: none;
     margin: 0;
     padding: 0;
   }
@@ -374,5 +417,4 @@
     font-size: 12pt;
     line-height: 1.6;
   }
-
 }

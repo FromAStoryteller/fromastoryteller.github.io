@@ -1,6 +1,7 @@
 /* =======================================
-    TOOL CONTENT PAGE STYLES
-    Used by individual tool pages only
+   FROM A STORYTELLER - TOOLS.CSS
+   Version: 2.0
+   Shared individual tool page layout
 ======================================= */
 
 .tool-page {
@@ -53,8 +54,14 @@
     text-align: center;
 }
 
+/*
+   Match the game-page approach: react to the ACTUAL width available to
+   the tool, rather than switching the whole layout at one viewport width.
+*/
 .tool-play-section {
     margin-bottom: 48px;
+    container-type: inline-size;
+    container-name: tool-play;
 }
 
 .tool-shell {
@@ -62,7 +69,7 @@
     max-width: 1380px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 2.15fr) minmax(320px, 1fr);
+    grid-template-columns: minmax(0, 2.15fr) minmax(280px, 0.95fr);
     gap: 24px;
     align-items: center;
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.96));
@@ -74,10 +81,14 @@
 }
 
 .tool-shell-main {
+    width: 100%;
     min-width: 0;
+    justify-self: center;
 }
 
 .tool-shell-frame {
+    width: 100%;
+    min-width: 0;
     background: linear-gradient(180deg, rgba(28, 28, 28, 0.92), rgba(18, 18, 18, 0.92));
     border: 1px solid rgba(212, 175, 55, 0.18);
     border-radius: 20px;
@@ -90,6 +101,7 @@
 }
 
 .tool-shell-sidebar {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -128,8 +140,7 @@
 }
 
 /* ============================
-    SHARED TOOL UI
-    Reusable inside tool pages
+   SHARED TOOL UI
 ============================ */
 
 .tool-widget {
@@ -197,14 +208,50 @@
     outline-offset: 3px;
 }
 
-@media (max-width: 1440px) {
+/* ---------- Container-responsive tool layout ---------- */
+
+@container tool-play (max-width: 1040px) {
     .tool-shell {
         grid-template-columns: 1fr;
         align-items: start;
     }
 
+    .tool-shell-main,
     .tool-shell-sidebar {
-        order: -1;
+        width: 100%;
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tool-shell-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+    }
+}
+
+@container tool-play (max-width: 700px) {
+    .tool-shell-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Fallback for browsers without container queries. */
+@supports not (container-type: inline-size) {
+    @media (max-width: 1120px) {
+        .tool-shell {
+            grid-template-columns: 1fr;
+            align-items: start;
+        }
+
+        .tool-shell-main,
+        .tool-shell-sidebar {
+            width: 100%;
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
     }
 }
 
@@ -214,11 +261,13 @@
     }
 
     .tool-shell {
-        padding: 20px;
+        gap: 18px;
+        padding: 18px;
         border-radius: 20px;
     }
 
     .tool-shell-frame {
+        min-height: 0;
         padding: 10px;
         border-radius: 16px;
     }

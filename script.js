@@ -1,6 +1,6 @@
 // =======================================
 // FROM A STORYTELLER - SCRIPT.JS
-// Version: 2.5
+// Version: 2.6
 // Global component, sidebar and search behaviour
 // =======================================
 
@@ -20,10 +20,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     setActiveSidebarLink();
     syncHeaderSearchQuery();
     initHeaderSearch();
+    initContentDetailEnhancements();
   } catch (err) {
     console.error("Error loading components:", err);
   } 
 });
+
+
+// Load detail-page enhancements only where they are needed.
+// This keeps the global script lightweight while allowing older story HTML
+// files to gain the current individual-story behaviour automatically.
+async function initContentDetailEnhancements() {
+  if (!document.querySelector(".story-page")) {
+    return;
+  }
+
+  try {
+    await import("/stories/story-page.js");
+  } catch (err) {
+    console.error("Story page enhancements failed to load:", err);
+  }
+}
 
 // Reusable loader for header / sidebar / footer
 async function loadComponent(path, placeholderId) {
