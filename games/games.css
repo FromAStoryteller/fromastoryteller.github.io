@@ -1,6 +1,6 @@
 /* =======================================
    FROM A STORYTELLER - GAMES.CSS
-   Version: 3.0
+   Version: 3.1
    Shared individual game page layout
 ======================================= */
 
@@ -444,11 +444,47 @@ body.game-fullscreen-active {
     }
 }
 
+/* ---------- Device-aware control instructions ---------- */
+
 /*
-   Portrait phones remain useful as normal web pages, but gameplay is
-   deliberately blocked until the device is rotated to landscape.
+   Do not identify "mobile" from screen width alone.
+
+   These media features describe the visitor's PRIMARY input:
+   - pointer: coarse = finger/touch-style pointing
+   - hover: none     = primary input cannot hover like a mouse
+
+   A narrow desktop browser therefore remains in desktop-control mode,
+   while a touch-first phone/tablet receives the touch instructions.
 */
-@media (max-width: 900px) and (orientation: portrait) {
+.game-controls-touch {
+    display: none;
+}
+
+.game-controls-desktop {
+    display: block;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .game-controls-desktop {
+        display: none;
+    }
+
+    .game-controls-touch {
+        display: block;
+    }
+}
+
+/*
+   Show the rotate-to-landscape gate only for touch-first devices.
+   Screen size remains a secondary guard so a large touch display is not
+   unnecessarily blocked merely because it happens to be portrait.
+*/
+@media
+    (max-width: 900px)
+    and (orientation: portrait)
+    and (hover: none)
+    and (pointer: coarse) {
+
     .game-rotate-overlay {
         display: flex;
     }
