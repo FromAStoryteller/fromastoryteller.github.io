@@ -1,4 +1,11 @@
-import { MenuScreens } from "./menu-screens.js";
+// =======================================
+// FROM A STORYTELLER - MENU-MANAGER.JS
+// Version: 3.0
+// Shared menu manager for all games
+// =======================================
+
+import { MenuScreens } from "./menu-screens.js"
+import { CanvasManager } from "../canvas.js"
 
 export class MenuManager {
     constructor(actions = {}) {
@@ -21,7 +28,7 @@ export class MenuManager {
                 soundEnabled: true,
                 masterVolume: 100
             }
-        
+
         this.settings = {
             soundEnabled: audioSettings.soundEnabled,
             masterVolume: audioSettings.masterVolume
@@ -31,9 +38,13 @@ export class MenuManager {
 
         this.container = null
         this.panel = null
+        this.mountElement = null
+        this.fullscreenEventsBound = false
     }
 
     init(mountElement) {
+        this.mountElement = mountElement
+
         this.container = document.createElement("div")
         this.container.className = "menu-overlay hidden"
 
@@ -42,6 +53,24 @@ export class MenuManager {
 
         this.container.appendChild(this.panel)
         mountElement.appendChild(this.container)
+
+        if (!this.fullscreenEventsBound) {
+            const handleFullscreenChange = (event) => {
+                /*
+                   Only rerender this menu when the fullscreen event belongs
+                   to the game container that this MenuManager controls.
+                */
+                if (
+                    this.isOpen &&
+                    event.detail?.container === this.mountElement
+                ) {
+                    this.render()
+                }
+            }
+
+            document.addEventListener("gamefullscreenchange", handleFullscreenChange)
+            this.fullscreenEventsBound = true
+        }
 
         this.render()
     }
@@ -217,6 +246,20 @@ export class MenuManager {
         return value ?? fallback
     }
 
+    getFullscreenLabel() {
+        return CanvasManager.isFullscreen(this.mountElement)
+            ? "Exit Expanded View"
+            : "Expand Game"
+    }
+
+    toggleFullscreen() {
+        if (!this.mountElement) {
+            return
+        }
+
+        CanvasManager.toggleFullscreen(this.mountElement)
+    }
+
     render() {
         const screen = this.screens[this.currentScreen]
         if (!screen || !this.panel) return
@@ -266,7 +309,7 @@ export class MenuManager {
         if (this.currentScreen === "matchResult") {
             list.classList.add("menu-result-actions")
         }
-        
+
         const items = screen.items ?? []
 
         items.forEach((item, index) => {
@@ -291,7 +334,7 @@ export class MenuManager {
 
             const label = document.createElement("span")
             label.className = "menu-label"
-            label.textContent = item.label
+            label.textContent = this.resolveScreenValue(item.label, "")
 
             row.appendChild(label)
 
@@ -459,48 +502,111 @@ export class MenuManager {
             valueLabel.textContent = clampedValue
         }
 
-        const setSliderFromPointer = (clientX, shouldRender = false) => {
+        const setSliderFromPointer = (clientX) => {
             const rect = track.getBoundingClientRect()
+
+            if (rect.width <= 0) {
+                return
+            }
+
             const rawRatio = (clientX - rect.left) / rect.width
             const clampedRatio = Math.max(0, Math.min(1, rawRatio))
 
             const rawValue = min + clampedRatio * (max - min)
-            const steppedValue = Math.round((rawValue - min) / step) * step + min
-            const finalValue = Math.max(min, Math.min(max, steppedValue))
+            const steppedValue =
+                Math.round((rawValue - min) / step) * step + min
 
-            this.selectedIndex = this.screens[this.currentScreen].items.indexOf(item)
+            const finalValue = Math.max(
+                min,
+                Math.min(max, steppedValue)
+            )
+
+            this.selectedIndex =
+                this.screens[this.currentScreen].items.indexOf(item)
+
             this.setValue(item, finalValue)
             updateSliderVisuals(finalValue)
-
-            if (shouldRender) {
-                this.render()
-            }
         }
 
         updateSliderVisuals(this.getValue(item))
 
-        const startSliderDrag = (event) => {
+        let activePointerId = null
+
+        const finishPointerDrag = (event) => {
+            if (
+                activePointerId === null ||
+                event.pointerId !== activePointerId
+            ) {
+                return
+            }
+
             event.preventDefault()
             event.stopPropagation()
 
-            setSliderFromPointer(event.clientX, false)
-            
-            const handleMouseMove = (mouseEvent) => {
-                setSliderFromPointer(mouseEvent.clientX, false)
+            try {
+                if (track.hasPointerCapture?.(activePointerId)) {
+                    track.releasePointerCapture(activePointerId)
+                }
+            } catch {
+                // Safe fallback for partial Pointer Events support.
             }
 
-            const handleMouseUp = () => {
-                window.removeEventListener("mousemove", handleMouseMove)
-                window.removeEventListener("mouseup", handleMouseUp)
-                this.render()
-            }
-
-            window.addEventListener("mousemove", handleMouseMove)
-            window.addEventListener("mouseup", handleMouseUp)
+            activePointerId = null
+            this.render()
         }
 
-        track.addEventListener("mousedown", startSliderDrag)
-        thumb.addEventListener("mousedown", startSliderDrag)
+        track.addEventListener(
+            "pointerdown",
+            (event) => {
+                if (event.pointerType === "mouse" && event.button !== 0) {
+                    return
+                }
+
+                event.preventDefault()
+                event.stopPropagation()
+
+                activePointerId = event.pointerId
+
+                try {
+                    track.setPointerCapture(event.pointerId)
+                } catch {
+                    // Drag still works while the pointer remains on the track.
+                }
+
+                setSliderFromPointer(event.clientX)
+            },
+            { passive: false }
+        )
+
+        track.addEventListener(
+            "pointermove",
+            (event) => {
+                if (
+                    activePointerId === null ||
+                    event.pointerId !== activePointerId
+                ) {
+                    return
+                }
+
+                event.preventDefault()
+                event.stopPropagation()
+
+                setSliderFromPointer(event.clientX)
+            },
+            { passive: false }
+        )
+
+        track.addEventListener(
+            "pointerup",
+            finishPointerDrag,
+            { passive: false }
+        )
+
+        track.addEventListener(
+            "pointercancel",
+            finishPointerDrag,
+            { passive: false }
+        )
 
         track.appendChild(fill)
         track.appendChild(thumb)
@@ -519,7 +625,7 @@ export class MenuManager {
 
     handleInput(wasKeyPressed, wasKeyPressedOrRepeated = wasKeyPressed) {
         if (!this.isOpen) return false
-        
+
         if (this.currentScreen === "matchResult") {
             if(wasKeyPressedOrRepeated("ArrowLeft")) {
                 this.moveSelection(-1)
@@ -568,7 +674,7 @@ export class MenuManager {
 
         return false
     }
-    
+
     startGame() {      
         if (typeof this.actions.startGame !== "function") {
             throw new Error("MenuManager actions.startGame is missing or not a function")

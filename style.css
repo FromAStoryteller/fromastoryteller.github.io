@@ -1,3 +1,8 @@
+/* =======================================
+   FROM A STORYTELLER - STYLE.CSS
+   Version: 2.5
+======================================= */
+
 /* Main CSS File */
 *,
 *::before,
@@ -301,7 +306,11 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: width 0.25s ease, box-shadow 0.25s ease;
+  transform: translateX(0);
+  transition:
+    width 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   z-index: 9998;
   overflow: hidden;
 }
@@ -310,6 +319,29 @@ img {
 .sidebar.is-expanded {
   width: 220px;
   box-shadow: 12px 0 30px rgba(0, 0, 0, 0.35);
+}
+
+/* SIDEBAR BACKDROP - used by compact overlay mode */
+.sidebar-backdrop {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9997;
+  background: rgba(0, 0, 0, 0.58);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.sidebar-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* NAV LIST INSIDE SIDEBAR */
@@ -429,6 +461,40 @@ img {
 .home-page .page-content {
   margin-left: 64px;
 }
+
+/*
+   COMPACT SIDEBAR MODE
+   Below the compact breakpoint the 64px icon rail disappears completely.
+   The burger opens the full 220px sidebar as an overlay instead.
+*/
+@media (max-width: 1573px) {
+  .header-center {
+    left: 50%;
+  }
+
+  .sidebar {
+    width: 220px;
+    transform: translateX(-100%);
+    pointer-events: none;
+    box-shadow: 12px 0 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .sidebar.is-expanded,
+  .home-page .sidebar.is-expanded {
+    width: 220px;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .page-content,
+  .home-page .page-content {
+    margin-left: 0;
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
 /* END OF SIDEBAR */
 
 /* MAIN PAGE CONTENT POSITIONING */
@@ -437,6 +503,17 @@ img {
   min-width: 0;
   padding: 24px;
   box-sizing: border-box;
+}
+
+/*
+   Keep the compact no-sidebar margin after the base page-content rule.
+   This deliberately comes later in the cascade.
+*/
+@media (max-width: 1573px) {
+  .page-content,
+  .home-page .page-content {
+    margin-left: 0;
+  }
 }
 
 /* BODY */

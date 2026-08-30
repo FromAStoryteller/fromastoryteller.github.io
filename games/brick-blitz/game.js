@@ -468,15 +468,20 @@ function updateCountdown() {
 }
 
 function updatePaddle () {
-    if (keyIsDown(LEFT_ARROW)) {
-        paddle.x -= paddle.speed
+    const touchPosition = Input.getPointerPosition("brick-blitz-game")
+
+    if (Input.isTouchActive() && touchPosition) {
+        paddle.x = touchPosition.x - paddle.w / 2
+    } else {
+        if (Input.isDown("ArrowLeft")) {
+            paddle.x -= paddle.speed
+        }
+
+        if (Input.isDown("ArrowRight")) {
+            paddle.x += paddle.speed
+        }
     }
 
-    if (keyIsDown(RIGHT_ARROW)) {
-        paddle.x += paddle.speed
-    }
-
-    // Clamp to screen
     if (paddle.x < 0) {
         paddle.x = 0
     }

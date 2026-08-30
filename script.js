@@ -1,11 +1,15 @@
-// script.js
+// =======================================
+// FROM A STORYTELLER - SCRIPT.JS
+// Version: 2.5
+// Global component, sidebar and search behaviour
+// =======================================
 
 import {
   getAllPublishedContent,
   searchPublishedContent
 } from "/content/content-system.js"
 
-// Load components, then wire up the sidebar toggle
+// Load components, then wire up global page behaviour
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     await loadComponent("/components/header.html", "header-placeholder");
@@ -24,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Reusable loader for header / sidebar / footer
 async function loadComponent(path, placeholderId) {
   const res = await fetch(path);
-  
+
   if (!res.ok) {
     throw new Error(`Failed to fetch ${path}: ${res.status}`);
   }
@@ -39,28 +43,110 @@ async function loadComponent(path, placeholderId) {
   container.innerHTML = html;
 }
 
-// Hook up the hamburger to the sidebar expanded state
+// Shared responsive sidebar behaviour
 function initSidebarToggle() {
   const toggleBtn = document.querySelector(".menu-toggle");
   const sidebar = document.querySelector(".sidebar");
   const body = document.body;
+  const compactSidebarQuery = window.matchMedia("(max-width: 1573px)");
 
   if (!toggleBtn || !sidebar) {
     console.warn("Sidebar toggle not initialized (missing elements).");
     return;
   }
 
-  // Default state on page load
-  if (body.classList.contains("home-page")) {
-    sidebar.classList.add("is-expanded");
-  } else {
-    sidebar.classList.remove("is-expanded");
+  if (!sidebar.id) {
+    sidebar.id = "site-sidebar";
   }
 
-  // Toggle expanded / collapsed
+  toggleBtn.setAttribute("aria-controls", sidebar.id);
+
+  let backdrop = document.querySelector(".sidebar-backdrop");
+
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.className = "sidebar-backdrop";
+    backdrop.setAttribute("aria-hidden", "true");
+    document.body.appendChild(backdrop);
+  }
+
+  function isCompactSidebar() {
+    return compactSidebarQuery.matches;
+  }
+
+  function setSidebarExpanded(expanded) {
+    sidebar.classList.toggle("is-expanded", expanded);
+    toggleBtn.setAttribute("aria-expanded", String(expanded));
+
+    const compact = isCompactSidebar();
+
+    if (compact) {
+      sidebar.setAttribute("aria-hidden", String(!expanded));
+      backdrop.classList.toggle("is-visible", expanded);
+      body.classList.toggle("sidebar-open", expanded);
+    } else {
+      sidebar.setAttribute("aria-hidden", "false");
+      backdrop.classList.remove("is-visible");
+      body.classList.remove("sidebar-open");
+    }
+  }
+
+  function applyDefaultSidebarState() {
+    const shouldStartExpanded =
+      body.classList.contains("home-page") &&
+      !isCompactSidebar();
+
+    setSidebarExpanded(shouldStartExpanded);
+  }
+
+  // Initial state:
+  // - large-screen home page = expanded
+  // - other large pages = 64px icon rail
+  // - 1573px and below = completely hidden (including the home page)
+  applyDefaultSidebarState();
+
   toggleBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("is-expanded");
+    setSidebarExpanded(!sidebar.classList.contains("is-expanded"));
   });
+
+  backdrop.addEventListener("pointerdown", () => {
+    if (isCompactSidebar()) {
+      setSidebarExpanded(false);
+    }
+  });
+
+  sidebar.addEventListener("click", event => {
+    if (
+      isCompactSidebar() &&
+      event.target.closest(".sidebar-item")
+    ) {
+      setSidebarExpanded(false);
+    }
+  });
+
+  /*
+     When the compact overlay sidebar is open, Escape belongs to the
+     website navigation first. Stopping propagation prevents the same
+     Escape press from also pausing an active game underneath it.
+  */
+  document.addEventListener("keydown", event => {
+    if (
+      event.key === "Escape" &&
+      isCompactSidebar() &&
+      sidebar.classList.contains("is-expanded")
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      setSidebarExpanded(false);
+    }
+  });
+
+  // Keep behaviour correct if a browser window crosses the breakpoint.
+  if (typeof compactSidebarQuery.addEventListener === "function") {
+    compactSidebarQuery.addEventListener("change", applyDefaultSidebarState);
+  } else if (typeof compactSidebarQuery.addListener === "function") {
+    compactSidebarQuery.addListener(applyDefaultSidebarState);
+  }
 }
 
 function setActiveSidebarLink() {
@@ -75,7 +161,7 @@ function setActiveSidebarLink() {
     if (linkPath === currentPath) {
       link.classList.add("active")
     }
-  });
+  })
 }
 
 function syncHeaderSearchQuery() {

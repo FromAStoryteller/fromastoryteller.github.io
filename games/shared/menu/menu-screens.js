@@ -1,3 +1,9 @@
+// =======================================
+// FROM A STORYTELLER - MENU-SCREENS.JS
+// Version: 2.0
+// Shared menu definitions for all games
+// =======================================
+
 export const MenuScreens = {
     create(menu) {
         return {
@@ -20,6 +26,11 @@ export const MenuScreens = {
                         type: "button",
                         label: "Settings",
                         action: () => menu.openScreen("settings", "title")
+                    },
+                    {
+                        type: "button",
+                        label: () => menu.getFullscreenLabel(),
+                        action: () => menu.toggleFullscreen()
                     }
                 ]
             },
@@ -36,6 +47,11 @@ export const MenuScreens = {
                         type: "button",
                         label: "Settings",
                         action: () => menu.openScreen("settings", "pause")
+                    },
+                    {
+                        type: "button",
+                        label: () => menu.getFullscreenLabel(),
+                        action: () => menu.toggleFullscreen()
                     },
                     {
                         type: "button",

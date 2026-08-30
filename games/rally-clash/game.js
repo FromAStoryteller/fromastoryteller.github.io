@@ -840,14 +840,18 @@ window.draw = function () {
 function handleInput() {
     const menuHandled = menu.handleInput(
         (code) => Input.wasPressed(code),
-        (code) => Input.wasPressedOrRepeated(code))
+        (code) => Input.wasPressedOrRepeated(code)
+    )
 
     if (menuHandled) {
         return
     }
 
     if (Input.wasPressed("Escape")) {
-        if (gameState === GAME_STATE.PLAYING || gameState === GAME_STATE.COUNTDOWN) {
+        if (
+            gameState === GAME_STATE.PLAYING ||
+            gameState === GAME_STATE.COUNTDOWN
+        ) {
             pausedFromState = gameState
             gameState = GAME_STATE.PAUSED
             menu.openScreen("pause")
@@ -855,7 +859,25 @@ function handleInput() {
         }
     }
 
-    if (gameState !== GAME_STATE.PLAYING && gameState !== GAME_STATE.COUNTDOWN) {
+    if (
+        gameState !== GAME_STATE.PLAYING &&
+        gameState !== GAME_STATE.COUNTDOWN
+    ) {
+        return
+    }
+
+    const touchPosition = Input.getPointerPosition("rally-clash-game")
+
+    if (Input.isTouchActive() && touchPosition) {
+        playerPaddle.move(0)
+        playerPaddle.speed = 0
+
+        playerPaddle.y = constrain(
+            touchPosition.y - playerPaddle.h / 2,
+            0,
+            height - playerPaddle.h
+        )
+
         return
     }
 

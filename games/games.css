@@ -1,6 +1,7 @@
 /* =======================================
-    GAME CONTENT PAGE STYLES
-    Used by individual game pages only
+   FROM A STORYTELLER - GAMES.CSS
+   Version: 3.0
+   Shared individual game page layout
 ======================================= */
 
 .game-page {
@@ -53,8 +54,15 @@
     text-align: center;
 }
 
+/*
+   The play section is the responsive container.
+   This lets the game react to its ACTUAL available width instead of
+   relying only on the browser viewport width.
+*/
 .game-play-section {
     margin-bottom: 48px;
+    container-type: inline-size;
+    container-name: game-play;
 }
 
 .game-shell {
@@ -62,7 +70,7 @@
     max-width: 1380px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 2.15fr) minmax(320px, 1fr);
+    grid-template-columns: minmax(0, 2.15fr) minmax(280px, 0.95fr);
     gap: 24px;
     align-items: center;
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 12, 0.96));
@@ -74,10 +82,15 @@
 }
 
 .game-shell-main {
+    width: 100%;
     min-width: 0;
+    justify-self: center;
 }
 
 .game-shell-frame {
+    position: relative;
+    width: 100%;
+    min-width: 0;
     background: linear-gradient(180deg, rgba(28, 28, 28, 0.92), rgba(18, 18, 18, 0.92));
     border: 1px solid rgba(212, 175, 55, 0.18);
     border-radius: 20px;
@@ -86,6 +99,7 @@
 }
 
 .game-shell-sidebar {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -96,13 +110,17 @@
     display: block;
     position: relative;
     width: 100%;
-    max-width: none;
-    aspect-ratio: 16 / 10;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
     margin: 0 auto;
     background: #050505;
     border: 1px solid rgba(212, 175, 55, 0.12);
     border-radius: 16px;
     overflow: hidden;
+
+    /* Lets the shared game menu respond to the canvas size itself. */
+    container-type: inline-size;
+    container-name: game-canvas;
 }
 
 .game-canvas canvas {
@@ -110,6 +128,202 @@
     width: 100%;
     height: 100%;
 }
+
+/*
+   Short laptop screens:
+   Keep the embedded game from becoming taller than the usable viewport.
+   The cap only applies above mobile/tablet widths so landscape phones
+   still get a useful in-page game size.
+*/
+@media (min-width: 901px) {
+    .game-shell-main {
+        max-width: min(100%, calc((100vh - 180px) * 16 / 9));
+        max-width: min(100%, calc((100dvh - 180px) * 16 / 9));
+    }
+}
+
+/* ---------- Portrait-phone play gate ---------- */
+
+.game-rotate-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    background:
+        radial-gradient(circle at center, rgba(28, 28, 28, 0.97), rgba(5, 5, 5, 0.99));
+    color: #f5f1e8;
+    box-sizing: border-box;
+}
+
+.game-rotate-overlay-inner {
+    max-width: 340px;
+}
+
+.game-rotate-icon {
+    display: block;
+    margin-bottom: 12px;
+    color: #d4af37;
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.game-rotate-overlay strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #d4af37;
+    font-size: 1.08rem;
+}
+
+.game-rotate-overlay p {
+    margin: 0;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+/* ---------- Immersive game fullscreen ---------- */
+
+/*
+   We intentionally do NOT use the browser Fullscreen API.
+
+   Browser-native fullscreen reserves Escape for leaving fullscreen, which
+   conflicts with Escape being the shared Pause control.
+
+   The shared CanvasManager moves .game-shell-frame directly under <body>,
+   then applies this class. The p5 canvas keeps its existing logical
+   resolution and is visually scaled to fill the browser viewport at 16:9.
+   This keeps bricks, paddles, balls and HUD positions stable.
+*/
+body.game-fullscreen-active {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+.game-shell-frame.is-game-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 0;
+    background: #050505;
+}
+
+.game-shell-frame.is-game-fullscreen .game-canvas {
+    /*
+       CanvasManager supplies the exact largest 16:9 width/height as inline
+       values. These rules only remove normal embedded-page constraints.
+    */
+    max-width: none;
+    max-height: none;
+    flex: 0 0 auto;
+    aspect-ratio: 16 / 9;
+
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+/*
+   p5 writes an inline CSS width/height onto the actual <canvas> element.
+   In the normal embedded view that matches the container, so it is invisible.
+   In Expanded View the container becomes larger, but p5's inline dimensions
+   would otherwise leave the rendered game stuck at its old embedded size.
+
+   The !important rules override only the canvas PRESENTATION size. The p5
+   logical width/height and all game-world coordinates remain unchanged.
+*/
+.game-shell-frame.is-game-fullscreen .game-canvas > canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+
+
+/* ---------- Shared touch controls ---------- */
+
+.game-canvas > canvas {
+    touch-action: none;
+}
+
+.game-touch-pause-button {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1500;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+    padding: 0;
+
+    border: 1px solid rgba(212, 175, 55, 0.48);
+    border-radius: 50%;
+
+    background: rgba(10, 10, 10, 0.68);
+    color: #d4af37;
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(4px);
+
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.game-touch-pause-button:active {
+    background: rgba(212, 175, 55, 0.16);
+    transform: scale(0.96);
+}
+
+.game-touch-pause-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 18px;
+    height: 18px;
+}
+
+.game-touch-pause-icon > span {
+    display: block;
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: currentColor;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .game-touch-pause-button {
+        display: flex;
+    }
+
+    .game-canvas:has(.menu-overlay:not(.hidden)) .game-touch-pause-button {
+        display: none;
+    }
+}
+
+/* ---------- About / info ---------- */
 
 .game-about-section {
     width: 100%;
@@ -148,16 +362,62 @@
     margin-top: 10px;
 }
 
-@media (max-width: 1440px) {
+/* ---------- Container-responsive game layout ---------- */
+
+/*
+   Stack only when the GAME AREA is too narrow, regardless of whether that
+   width came from a smaller browser, zoom, sidebar state, or future layout.
+*/
+@container game-play (max-width: 1040px) {
     .game-shell {
         grid-template-columns: 1fr;
         align-items: start;
     }
 
+    .game-shell-main,
     .game-shell-sidebar {
-        order: -1;
+        width: 100%;
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .game-shell-main {
+        max-width: min(960px, 100%);
+    }
+
+    .game-shell-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
     }
 }
+
+@container game-play (max-width: 700px) {
+    .game-shell-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Fallback for older browsers without container queries. */
+@supports not (container-type: inline-size) {
+    @media (max-width: 1120px) {
+        .game-shell {
+            grid-template-columns: 1fr;
+            align-items: start;
+        }
+
+        .game-shell-main,
+        .game-shell-sidebar {
+            width: 100%;
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+}
+
+/* ---------- Tablet / phone ---------- */
 
 @media (max-width: 768px) {
     .game-page {
@@ -165,12 +425,13 @@
     }
 
     .game-shell {
-        padding: 20px;
+        gap: 18px;
+        padding: 18px;
         border-radius: 20px;
     }
 
     .game-shell-frame {
-        padding: 10px;
+        padding: 8px;
         border-radius: 16px;
     }
 
@@ -180,5 +441,15 @@
 
     .game-tagline {
         font-size: 1.08rem;
+    }
+}
+
+/*
+   Portrait phones remain useful as normal web pages, but gameplay is
+   deliberately blocked until the device is rotated to landscape.
+*/
+@media (max-width: 900px) and (orientation: portrait) {
+    .game-rotate-overlay {
+        display: flex;
     }
 }
