@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "Updating generated site indexes..."
+
+node scripts/generate-site-indexes.mjs
+
+if [ $? -ne 0 ]; then
+  echo "Site index generation failed. Commit cancelled."
+  exit 1
+fi
+
+git add content/content-index.json sitemap.xml
+
+echo "Site indexes updated and staged."
