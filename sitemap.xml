@@ -2,12 +2,10 @@
 
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- HOME -->
   <url>
     <loc>https://fromastoryteller.com/</loc>
   </url>
 
-  <!-- MAIN SECTIONS -->
   <url>
     <loc>https://fromastoryteller.com/about/</loc>
   </url>
@@ -36,48 +34,82 @@
     <loc>https://fromastoryteller.com/videos/</loc>
   </url>
 
-
-  <!-- STORIES -->
-  <url>
-    <loc>https://fromastoryteller.com/stories/moon-hoc-meeting/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/the-deal/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/a-place-left-behind/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/the-labyrinth/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/sunset-at-the-lighthouse/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/crypt-of-the-blood-jewel/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/date-night-jigsaw/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/stories/tea-at-the-summit/</loc>
-  </url>
-
-
-  <!-- LEGAL -->
   <url>
     <loc>https://fromastoryteller.com/privacy/</loc>
   </url>
 
   <url>
     <loc>https://fromastoryteller.com/terms/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/games/rally-clash/</loc>
+    <lastmod>2026-03-29</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/games/brick-blitz/</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/tools/genre-randomizer/</loc>
+    <lastmod>2026-04-09</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/tools/countdown/</loc>
+    <lastmod>2026-05-21</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/onto-the-stage/</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/moon-hoc-meeting/</loc>
+    <lastmod>2026-08-04</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/the-deal/</loc>
+    <lastmod>2026-08-05</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/a-place-left-behind/</loc>
+    <lastmod>2026-08-09</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/the-labyrinth/</loc>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/sunset-at-the-lighthouse/</loc>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/crypt-of-the-blood-jewel/</loc>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/date-night-jigsaw/</loc>
+    <lastmod>2026-08-13</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/tea-at-the-summit/</loc>
+    <lastmod>2026-08-14</lastmod>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/stories/michaels-choice/</loc>
+    <lastmod>2026-08-16</lastmod>
   </url>
 
 </urlset>
