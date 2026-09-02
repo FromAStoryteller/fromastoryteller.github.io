@@ -10,17 +10,30 @@ const CONTENT_ROOT_ORDER = new Map(
   CONTENT_ROOTS.map((name, index) => [name, index])
 );
 
-const STATIC_PAGES = [
-  "/",
-  "/about/",
-  "/contact/",
-  "/blog/",
-  "/games/",
-  "/stories/",
-  "/tools/",
-  "/videos/",
-  "/privacy/",
-  "/terms/"
+const STATIC_PAGE_GROUPS = [
+  {
+    label: "HOME",
+    pages: ["/"]
+  },
+  {
+    label: "MAIN SECTIONS",
+    pages: [
+      "/about/",
+      "/contact/",
+      "/blog/",
+      "/games/",
+      "/stories/",
+      "/tools/",
+      "/videos/"
+    ]
+  },
+  {
+    label: "LEGAL",
+    pages: [
+      "/privacy/",
+      "/terms/"
+    ]
+  }
 ];
 
 const CONTENT_INDEX_PATH = join(ROOT, "content", "content-index.json");
@@ -165,14 +178,16 @@ function getPublishedItems() {
 }
 
 function validateStaticPages() {
-  for (const urlPath of STATIC_PAGES) {
-    const pagePath =
-      urlPath === "/"
-        ? join(ROOT, "index.html")
-        : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
+  for (const group of STATIC_PAGE_GROUPS) {
+    for (const urlPath of group.pages) {
+      const pagePath =
+        urlPath === "/"
+          ? join(ROOT, "index.html")
+          : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
 
-    if (!existsSync(pagePath) || !statSync(pagePath).isFile()) {
-      fail(`Static sitemap page ${urlPath} has no matching index.html.`);
+      if (!existsSync(pagePath) || !statSync(pagePath).isFile()) {
+        fail(`Static sitemap page ${urlPath} has no matching index.html.`);
+      }
     }
   }
 }
@@ -186,34 +201,91 @@ function xmlEscape(value) {
     .replaceAll("'", "&apos;");
 }
 
-function buildContentIndex(items) {
-  return `${JSON.stringify(items.map(({ metaPath }) => `/${metaPath}`), null, 2)}\n`;
+function formatJsonArrayGroup(paths, isLastGroup) {
+  return paths
+    .map((path, index) => {
+      const isLastItem = index === paths.length - 1;
+      const needsComma = !isLastItem || !isLastGroup;
+      return `  ${JSON.stringify(path)}${needsComma ? "," : ""}`;
+    })
+    .join("\n");
 }
 
-function buildSitemap(items) {
-  const staticEntries = STATIC_PAGES.map((urlPath) => ({
-    loc: new URL(urlPath, SITE_ORIGIN).toString()
-  }));
+function buildContentIndex(items) {
+  const groups = CONTENT_ROOTS
+    .map((rootName) => ({
+      rootName,
+      paths: items
+        .filter((item) => getRootName(item.metaPath) === rootName)
+        .map((item) => `/${item.metaPath}`)
+    }))
+    .filter((group) => group.paths.length > 0);
 
-  const dynamicEntries = items.map((item) => ({
-    loc: item.canonicalUrl,
-    lastmod: item.dateModified
-  }));
+  const body = groups
+    .map((group, index) =>
+      formatJsonArrayGroup(group.paths, index === groups.length - 1)
+    )
+    .join("\n\n");
 
-  const body = [...staticEntries, ...dynamicEntries]
-    .map((entry) => {
-      const lines = ["  <url>", `    <loc>${xmlEscape(entry.loc)}</loc>`];
+  return `[\n${body}\n]\n`;
+}
 
-      if (entry.lastmod) {
-        lines.push(`    <lastmod>${xmlEscape(entry.lastmod)}</lastmod>`);
-      }
+function buildStaticSitemapGroup(label, pages) {
+  const urls = pages
+    .map((urlPath) => {
+      const loc = new URL(urlPath, SITE_ORIGIN).toString();
 
-      lines.push("  </url>");
-      return lines.join("\n");
+      return [
+        "  <url>",
+        `    <loc>${xmlEscape(loc)}</loc>`,
+        "  </url>"
+      ].join("\n");
     })
     .join("\n\n");
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n${body}\n\n</urlset>\n`;
+  return `  <!-- ${label} -->\n${urls}`;
+}
+
+function buildDynamicSitemapGroup(rootName, items) {
+  const groupItems = items.filter(
+    (item) => getRootName(item.metaPath) === rootName
+  );
+
+  if (groupItems.length === 0) return "";
+
+  const label = rootName.toUpperCase();
+
+  const urls = groupItems
+    .map((item) => [
+      "  <url>",
+      `    <loc>${xmlEscape(item.canonicalUrl)}</loc>`,
+      `    <lastmod>${xmlEscape(item.dateModified)}</lastmod>`,
+      "  </url>"
+    ].join("\n"))
+    .join("\n\n");
+
+  return `  <!-- ${label} -->\n${urls}`;
+}
+
+function buildSitemap(items) {
+  const sections = [];
+
+  for (const group of STATIC_PAGE_GROUPS) {
+    if (group.label === "LEGAL") continue;
+    sections.push(buildStaticSitemapGroup(group.label, group.pages));
+  }
+
+  for (const rootName of CONTENT_ROOTS) {
+    const section = buildDynamicSitemapGroup(rootName, items);
+    if (section) sections.push(section);
+  }
+
+  const legalGroup = STATIC_PAGE_GROUPS.find((group) => group.label === "LEGAL");
+  if (legalGroup) {
+    sections.push(buildStaticSitemapGroup(legalGroup.label, legalGroup.pages));
+  }
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n${sections.join("\n\n")}\n\n</urlset>\n`;
 }
 
 function writeIfChanged(path, content) {

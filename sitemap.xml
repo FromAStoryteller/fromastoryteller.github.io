@@ -2,10 +2,12 @@
 
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- HOME -->
   <url>
     <loc>https://fromastoryteller.com/</loc>
   </url>
 
+  <!-- MAIN SECTIONS -->
   <url>
     <loc>https://fromastoryteller.com/about/</loc>
   </url>
@@ -34,14 +36,7 @@
     <loc>https://fromastoryteller.com/videos/</loc>
   </url>
 
-  <url>
-    <loc>https://fromastoryteller.com/privacy/</loc>
-  </url>
-
-  <url>
-    <loc>https://fromastoryteller.com/terms/</loc>
-  </url>
-
+  <!-- GAMES -->
   <url>
     <loc>https://fromastoryteller.com/games/rally-clash/</loc>
     <lastmod>2026-03-29</lastmod>
@@ -52,6 +47,7 @@
     <lastmod>2026-03-31</lastmod>
   </url>
 
+  <!-- TOOLS -->
   <url>
     <loc>https://fromastoryteller.com/tools/genre-randomizer/</loc>
     <lastmod>2026-04-09</lastmod>
@@ -62,6 +58,7 @@
     <lastmod>2026-05-21</lastmod>
   </url>
 
+  <!-- STORIES -->
   <url>
     <loc>https://fromastoryteller.com/stories/onto-the-stage/</loc>
     <lastmod>2026-08-03</lastmod>
@@ -110,6 +107,15 @@
   <url>
     <loc>https://fromastoryteller.com/stories/michaels-choice/</loc>
     <lastmod>2026-08-16</lastmod>
+  </url>
+
+  <!-- LEGAL -->
+  <url>
+    <loc>https://fromastoryteller.com/privacy/</loc>
+  </url>
+
+  <url>
+    <loc>https://fromastoryteller.com/terms/</loc>
   </url>
 
 </urlset>
