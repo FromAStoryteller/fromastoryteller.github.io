@@ -28,10 +28,10 @@ jobs:
       - name: Check generated files are up to date
         shell: bash
         run: |
-          if ! git diff --quiet -- content/content-index.json sitemap.xml; then
+          if ! git diff --quiet -- content/content-index.json sitemap.xml '*.html'; then
             echo "Generated site indexes are out of date."
             echo "Commit the regenerated files before pushing."
-            git diff -- content/content-index.json sitemap.xml
+            git diff -- content/content-index.json sitemap.xml '*.html'
             exit 1
           fi
 

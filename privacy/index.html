@@ -42,13 +42,128 @@
   <body>
 
     <!-- HEADER -->
-    <div id="header-placeholder"></div>
+    <div id="header-placeholder">
+<!-- static:header-placeholder:start -->
+<!-- HEADER -->
+  
+  <header data-static-component class="site-header">
+    <div class="header-inner">
+      
+      <!-- LEFT: Toggle + Logo -->
+      <div class="header-left">
+        <button class="menu-toggle" aria-label="Open Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <a href="/" class="logo">From A Storyteller</a>
+      </div>
+    
+      <!-- MIDDLE: Search -->
+      <div class="header-center">
+        <form class="site-search" action="/search/" role="search" autocomplete="off">
+          <div class="site-search-wrap">
+            
+            <input
+              type="search"
+              name="q"
+              placeholder="Search the World..."
+              aria-label="Search blogs, games, stories, tools, and videos"
+              autocomplete="off"
+              class="site-search-input"
+            >
+            
+            <button type="submit" class="search-btn" aria-label="Search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div class="site-search-suggestions"></div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT: Socials -->
+      <div class="header-right">
+        <nav class="socials" aria-label="Social Links">
+          <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>       
+        </nav>
+      </div>
+      
+    </div>
+  </header>
+<!-- static:header-placeholder:end -->
+</div>
 
     <!-- SIDEBAR + MAIN CONTENT -->
     <div class="site-layout">
 
       <!-- SIDEBAR -->
-      <div id="sidebar-placeholder"></div>
+      <div id="sidebar-placeholder">
+<!-- static:sidebar-placeholder:start -->
+<!-- SIDEBAR -->
+<aside data-static-component class="sidebar">
+  
+  <nav class="sidebar-nav">
+
+    <!-- KEY PAGES -->
+    <div class="sidebar-section">
+      <a href="/" class="sidebar-item">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+
+      <a href="/about/" class="sidebar-item">
+        <i class="fa-solid fa-user"></i>
+        <span>About Me</span>
+      </a>
+
+      <a href="/contact/" class="sidebar-item">
+        <i class="fa-solid fa-envelope"></i>
+        <span>Contact</span>
+      </a>
+    </div>
+
+    <!-- MAIN PAGES -->
+    <div class="sidebar-section">
+      <a href="/blog/" class="sidebar-item">
+        <i class="fa-solid fa-newspaper"></i>
+        <span>Blog</span>
+      </a>
+
+      <a href="/games/" class="sidebar-item">
+        <i class="fa-solid fa-gamepad"></i>
+        <span>Games</span>
+      </a>
+
+      <a href="/stories/" class="sidebar-item">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Stories</span>
+      </a>
+
+      <a href="/tools/" class="sidebar-item">
+        <i class="fa-solid fa-feather-pointed"></i>
+        <span>Tools</span>
+      </a>
+
+      <a href="/videos/" class="sidebar-item">
+        <i class="fa-solid fa-film"></i>
+        <span>Videos</span>
+      </a>
+    </div>
+
+  </nav>
+
+  <!-- FOOTER-STYLE LINKS AT BOTTOM OF SIDEBAR -->
+  <div class="sidebar-footer-links">
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+  </div>
+
+</aside>
+<!-- static:sidebar-placeholder:end -->
+</div>
 
       <!-- MAIN CONTENT AREA -->
       <main class="page-content">

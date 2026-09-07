@@ -115,13 +115,15 @@ async function loadMetaFile(metaPath) {
 
 async function loadAllContent() {
     const metaPaths = await loadContentIndex()
-    const results = await Promise.all(metaPaths.map(loadMetaFile))
-    return results
+    const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
+    const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
+    if (metaPaths.length && !loaded.length) throw new Error("No content metadata could be loaded")
+    return loaded
 }
 
 // ----- SORT / FILTER -----
 function getPublishedContent(items) {
-    return items.filter(item => item.status === "published")
+    return items.filter(item => item.status === "published" && !item.draft)
 }
 
 function sortContent(items) {
@@ -696,7 +698,7 @@ export async function initCategoryPage(config) {
 
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
-        if (gridContainer) {
+        if (gridContainer && !gridContainer.querySelector("a[href]")) {
             gridContainer.innerHTML = `
                 <p class="content-grid-empty">Unable to load content right now.</p>
             `
@@ -747,7 +749,7 @@ export async function initHomePage(config) {
 
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
-        if (gridContainer) {
+        if (gridContainer && !gridContainer.querySelector("a[href]")) {
             gridContainer.innerHTML = `
                 <p class="content-grid-empty">Unable to load content right now.</p>
             `
@@ -776,7 +778,7 @@ export async function initRelatedContentSection(config) {
         console.error("Error loading related content:", error)
 
         const gridContainer = document.querySelector(gridSelector)
-        if (gridContainer) {
+        if (gridContainer && !gridContainer.querySelector("a[href]")) {
             gridContainer.innerHTML = `
                 <p class="content-grid-empty">Unable to load content right now</p>
             `
@@ -796,3 +798,5 @@ export function searchPublishedContent(items, query) {
 export function renderContentGrid(selector, items, emptyMessage = "Nothing to show yet.") {
     renderGrid(selector, items, emptyMessage)
 }
+// Shared with the build script so static and interactive cards stay identical.
+export { normalizeContentMeta, sortContent, createCardMarkup };

@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { normalizeContentMeta, sortContent, createCardMarkup } from "../content/content-system.js";
+
 const SITE_ORIGIN = "https://fromastoryteller.com";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -20,11 +22,9 @@ const STATIC_PAGE_GROUPS = [
     pages: [
       "/about/",
       "/contact/",
-      "/blog/",
       "/games/",
       "/stories/",
-      "/tools/",
-      "/videos/"
+      "/tools/"
     ]
   },
   {
@@ -120,6 +120,7 @@ function validatePublishedMeta(meta, metaPath, absoluteMetaPath) {
     fail(`Published file ${metaPath} has no matching index.html.`);
   }
 
+  validateIndexableHtml(pagePath, canonicalUrl);
   return { url, canonicalUrl, datePublished, dateModified };
 }
 
@@ -171,7 +172,7 @@ function getPublishedItems() {
     seenUrls.set(validated.url, metaPath);
     seenCanonicalUrls.set(validated.canonicalUrl, metaPath);
 
-    published.push({ metaPath, ...validated });
+    published.push({ metaPath, meta, ...validated });
   }
 
   return published.sort(comparePublishedItems);
@@ -188,7 +189,79 @@ function validateStaticPages() {
       if (!existsSync(pagePath) || !statSync(pagePath).isFile()) {
         fail(`Static sitemap page ${urlPath} has no matching index.html.`);
       }
+      validateIndexableHtml(pagePath, new URL(urlPath, SITE_ORIGIN).href);
     }
+  }
+}
+
+function attributes(tag) {
+  return Object.fromEntries(Array.from(tag.matchAll(/([\w-]+)\s*=\s*(["'])(.*?)\2/gs),
+    match => [match[1].toLowerCase(), match[3]]));
+}
+
+function validateIndexableHtml(pagePath, canonicalUrl) {
+  const html = readFileSync(pagePath, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+  const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] || "";
+  const links = Array.from(head.matchAll(/<link\b[^>]*>/gi), match => attributes(match[0]));
+  const canonical = links.filter(tag => tag.rel?.toLowerCase() === "canonical");
+  if (canonical.length !== 1 || canonical[0].href !== canonicalUrl) {
+    fail(`${relative(ROOT, pagePath)} must have exactly one head canonical matching ${canonicalUrl}.`);
+  }
+  const metas = Array.from(head.matchAll(/<meta\b[^>]*>/gi), match => attributes(match[0]));
+  if (metas.some(tag => ["robots", "googlebot"].includes(tag.name?.toLowerCase()) &&
+      /(?:^|[\s,])(noindex|none)(?:$|[\s,])/i.test(tag.content || ""))) {
+    fail(`${relative(ROOT, pagePath)} is noindexed but included in the sitemap.`);
+  }
+  if (metas.some(tag => tag["http-equiv"]?.toLowerCase() === "refresh")) {
+    fail(`${relative(ROOT, pagePath)} redirects but is included in the sitemap.`);
+  }
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
+  const text = main.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<[^>]+>/g, "").trim();
+  if (!text || !/<h1\b[^>]*>[^<\s]/i.test(main)) {
+    fail(`${relative(ROOT, pagePath)} has no meaningful main content or heading.`);
+  }
+}
+
+function replaceGenerated(html, id, markup, tagName = "div") {
+  const start = `<!-- static:${id}:start -->`;
+  const end = `<!-- static:${id}:end -->`;
+  const region = `${start}\n${markup}\n${end}`;
+  if (html.includes(start)) {
+    const begin = html.indexOf(start);
+    const finish = html.indexOf(end, begin);
+    if (finish < 0) fail(`Missing generated closing marker: ${id}`);
+    return html.slice(0, begin) + region + html.slice(finish + end.length);
+  }
+  const empty = new RegExp(`(<${tagName}\\b[^>]*\\bid=["']${id}["'][^>]*>)\\s*(<\\/${tagName}>)`);
+  if (!empty.test(html)) fail(`Missing empty container or generated markers: ${id}`);
+  return html.replace(empty, (_, open, close) => `${open}\n${region}\n${close}`);
+}
+
+function generateStaticHtml(items) {
+  // Use the same card renderer and sorting as the interactive browser listing.
+  const content = sortContent(items.map(item => normalizeContentMeta(item.meta)));
+  const components = ["header", "sidebar"].map(name => ({
+    id: `${name}-placeholder`,
+    html: readFileSync(join(ROOT, "components", `${name}.html`), "utf8")
+      .replace(name === "header" ? "<header " : "<aside ",
+        name === "header" ? "<header data-static-component " : "<aside data-static-component ")
+  }));
+  const pagePaths = [
+    ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/search/",
+    ...items.map(item => item.url)
+  ];
+  for (const urlPath of new Set(pagePaths)) {
+    const path = join(ROOT, urlPath.replace(/^\//, ""), "index.html");
+    let html = readFileSync(path, "utf8");
+    for (const component of components) html = replaceGenerated(html, component.id, component.html.trim());
+    const section = urlPath === "/" ? "home" : urlPath.split("/")[1];
+    if (urlPath === "/" || CONTENT_ROOTS.some(name => urlPath === `/${name}/`)) {
+      const categoryItems = section === "home" ? content : content.filter(item => item.category === section);
+      const empty = section === "blog" ? "No blogs found yet." : section === "videos" ? "No videos found yet." : "Nothing to show yet.";
+      const markup = categoryItems.map(createCardMarkup).join("\n") || `<p class="content-grid-empty">${empty}</p>`;
+      html = replaceGenerated(html, `${section}-grid`, markup, "section");
+    }
+    writeIfChanged(path, html);
   }
 }
 
@@ -301,6 +374,7 @@ function main() {
   validateStaticPages();
 
   const publishedItems = getPublishedItems();
+  generateStaticHtml(publishedItems);
   const contentIndexChanged = writeIfChanged(
     CONTENT_INDEX_PATH,
     buildContentIndex(publishedItems)

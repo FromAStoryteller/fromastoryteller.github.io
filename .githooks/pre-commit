@@ -9,6 +9,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+if ! git diff --quiet -- '*.html'; then
+  echo "Generated HTML or page edits need staging. Review and stage the HTML changes, then commit again."
+  exit 1
+fi
+
 git add content/content-index.json sitemap.xml
 
 echo "Site indexes updated and staged."

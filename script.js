@@ -44,6 +44,9 @@ async function initContentDetailEnhancements() {
 
 // Reusable loader for header / sidebar / footer
 async function loadComponent(path, placeholderId) {
+  const existing = document.getElementById(placeholderId);
+  if (existing?.querySelector("[data-static-component]")) return;
+
   const res = await fetch(path);
 
   if (!res.ok) {
@@ -167,7 +170,7 @@ function initSidebarToggle() {
 }
 
 function setActiveSidebarLink() {
-  const currentPath = window.location.pathname
+  const currentPath = window.location.pathname.replace(/index\.html$/, "")
   const sidebarLinks = document.querySelectorAll(".sidebar-item")
 
   sidebarLinks.forEach(link => {
