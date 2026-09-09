@@ -27,20 +27,27 @@
     <!-- THEME -->
     <meta name="theme-color" content="#000000">
 
+    <!-- Page-only theme pilot: set preference before styles load. -->
+    
+    
+
     <!-- STYLES -->
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/stories/stories.css">
+    
+    
+    <script src="/scripts/theme.js"></script>
+    <script src="/scripts/story-theme-controls.js" defer></script>
+    <link rel="stylesheet" href="/css/foundations.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/utilities.css">
+<link rel="stylesheet" href="/stories/stories.css">
+    
+    
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/script.js"></script>
 
-    <!-- FONT -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Gabriela&display=swap"
-      rel="stylesheet"
-    >
+    <!-- Fonts are self-hosted through /css/foundations.css. -->
 
     <!-- FONT AWESOME -->
     <link
@@ -74,7 +81,7 @@
         <button class="menu-toggle" aria-label="Open Menu">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <a href="/" class="logo">From A Storyteller</a>
+        <a href="/" class="logo"><span class="visually-hidden">From A Storyteller</span><span class="wordmark__from" aria-hidden="true">from,</span><span class="wordmark__name" aria-hidden="true">A Storyteller</span></a>
       </div>
     
       <!-- MIDDLE: Search -->
@@ -652,21 +659,25 @@
                 Michael picked up the half-full bottle of whisky and took a swig. Holding it to his lips, letting it warm his throat. He pulled the bottle away, gasping for air. His eyes watering. He began to read.
             </p>
 
+            <em>
+            <div class="story-break" aria-hidden="true"></div>
             <p>
                 Michael, I’m sorry.
             </p>
-
+            <div class="story-break" aria-hidden="true"></div>
             <p>
                 How did we get here? I don’t know who I am anymore. How have you managed to turn yourself into one of them? I tried. I really tried but I wasn’t able to like you were. All I hope is that it’s not too late for you like it is for me. I lost who I am. Who I was. I can’t see myself in the mirror anymore. Someone else is staring back at me. I used to be scared but now I’m numb. I took the entire bottle, and the world is fading now. I think that means I don’t have long left. I’ve made my choice now. I’ve accepted this is the end. Please remember who you are before your only choice is the same as mine. Do better than I did.
             </p>
-
+            <div class="story-break" aria-hidden="true"></div>
             <p>
                 Please don’t think any less of me for this.
             </p>
-
+            <div class="story-break" aria-hidden="true"></div>            
             <p>
                 Samisoni
             </p>
+            </em>
+            <div class="story-break" aria-hidden="true"></div>            
 
             <p>
                 Michael read the letter again. Tears streaming down his face. He read it again and again until the tears filled his eyes, and he was no longer able to make out the words. Michael placed the letter on the coffee table. Still holding the half-drunken bottle of whisky in his other hand. He glanced between the bottle and the letter. A lone ray of sunlight burst through a gap in the curtain and cast the letter in a bright glow. Michael stood up and stumbled his way to the kitchen. He took one final look at the bottle and poured the last of the whisky down the drain.

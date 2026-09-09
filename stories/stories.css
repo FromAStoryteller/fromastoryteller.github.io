@@ -1,37 +1,12 @@
-/* =========================================================
-   FROM A STORYTELLER - STORIES.CSS
-   Version: 2.0
-   Shared styling for individual story pages
-   ========================================================= */
-
-/*
-   Individual stories now use the same shared content-card system as
-   Games and Tools for the Explore Next section.
-
-   Keeping this import here also upgrades all EXISTING story HTML files,
-   without requiring every old story page to gain another stylesheet link.
-*/
-@import url("/content/content.css");
-
-
-/* ---------------------------------------------------------
-   STORY PAGE SHELL
-   Aligns the page footprint with Games and Tools while retaining a
-   narrower editorial reading column for the actual story text.
-   --------------------------------------------------------- */
+/* Story reading, scene breaks and print presentation. */
 
 .story-page {
   width: 100%;
-  max-width: 1520px;
+  max-width: var(--site-page-max);
   margin: 0 auto;
   padding: 40px 28px 32px;
   box-sizing: border-box;
 }
-
-
-/* ---------------------------------------------------------
-   STORY HEADER
-   --------------------------------------------------------- */
 
 .story-header {
   width: 100%;
@@ -44,16 +19,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-
   margin-bottom: 24px;
-
   color: inherit;
   font-size: 0.9rem;
   text-decoration: none;
   opacity: 0.7;
-
-  transition:
-    opacity 0.2s ease,
+  transition: opacity 0.2s ease,
     transform 0.2s ease;
 }
 
@@ -68,10 +39,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-
   margin: 0 0 12px;
-
-  font-family: "Gabriela", Georgia, serif;
+  font-family: var(--font-family-interface);
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -81,8 +50,7 @@
 .story-header h1 {
   max-width: 900px;
   margin: 0 auto 16px;
-
-  font-family: "Gabriela", Georgia, serif;
+  font-family: var(--font-family-display);
   font-size: clamp(2.3rem, 5vw, 4rem);
   font-weight: 400;
   line-height: 1.1;
@@ -93,8 +61,7 @@
 .story-intro {
   max-width: 700px;
   margin: 0 auto;
-
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-family-interface);
   font-size: 1.08rem;
   font-style: italic;
   line-height: 1.7;
@@ -106,9 +73,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem 1.5rem;
-
   margin-top: 16px;
-
   font-size: 0.85rem;
   opacity: 0.65;
 }
@@ -120,13 +85,6 @@
   gap: 0.45rem;
 }
 
-
-/* ---------------------------------------------------------
-   FEATURE IMAGE
-   Wider than the reading column, matching the more generous visual
-   footprint used by other individual content pages.
-   --------------------------------------------------------- */
-
 .story-feature-image {
   width: min(100%, 1100px);
   margin: 0 auto 48px;
@@ -136,22 +94,14 @@
   display: block;
   width: 100%;
   height: auto;
-
-  border-radius: 16px;
+  border-radius: var(--site-card-radius);
   object-fit: cover;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
 }
-
-
-/* ---------------------------------------------------------
-   STORY TEXT
-   --------------------------------------------------------- */
 
 .story-content {
   width: min(100%, 700px);
   margin: 0 auto;
-
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-family-reading);
   font-size: clamp(1.05rem, 1.5vw, 1.16rem);
   line-height: 1.85;
   letter-spacing: 0.005em;
@@ -167,15 +117,6 @@
   text-indent: 0;
 }
 
-.story-content p.no-indent {
-  text-indent: 0;
-}
-
-
-/* ---------------------------------------------------------
-   UNMARKED STORY BREAK
-   --------------------------------------------------------- */
-
 .story-break {
   height: 1.85rem;
 }
@@ -184,19 +125,12 @@
   text-indent: 0;
 }
 
-
-/* ---------------------------------------------------------
-   MARKED SCENE BREAK
-   --------------------------------------------------------- */
-
 .story-scene-break {
   display: flex;
   align-items: center;
   justify-content: center;
-
   min-height: 4.5rem;
   margin: 0;
-
   font-size: 0.9rem;
   line-height: 1;
   opacity: 0.65;
@@ -206,17 +140,10 @@
   text-indent: 0;
 }
 
-
-/* ---------------------------------------------------------
-   OPTIONAL STORY ELEMENTS
-   --------------------------------------------------------- */
-
 .story-content blockquote {
   margin: 2rem 1.5rem;
   padding-left: 1.5rem;
-
   border-left: 2px solid currentColor;
-
   font-style: italic;
   opacity: 0.8;
 }
@@ -233,11 +160,6 @@
   font-weight: 700;
 }
 
-
-/* ---------------------------------------------------------
-   STORY FOOTER
-   --------------------------------------------------------- */
-
 .story-footer {
   width: min(100%, 700px);
   margin: 56px auto 0;
@@ -248,17 +170,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   min-height: 2rem;
-
   font-size: 0.9rem;
   opacity: 0.65;
 }
 
 .story-end-text {
   margin: 0.7rem 0 2rem;
-
-  font-family: "Gabriela", Georgia, serif;
+  font-family: var(--font-family-interface);
   font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -270,21 +189,15 @@
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-
   min-height: 44px;
   padding: 0.8rem 1.2rem;
-
   border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 999px;
-
   color: inherit;
   font-size: 0.9rem;
   text-decoration: none;
-
   opacity: 0.82;
-
-  transition:
-    opacity 0.2s ease,
+  transition: opacity 0.2s ease,
     transform 0.2s ease,
     border-color 0.2s ease;
 }
@@ -295,13 +208,6 @@
   border-color: rgba(212, 175, 55, 0.6);
   transform: translateY(-0.15rem);
 }
-
-
-/* ---------------------------------------------------------
-   EXPLORE NEXT
-   Uses content.css for the actual cards. These rules only position the
-   shared section beneath the story.
-   --------------------------------------------------------- */
 
 .story-related-section.content-page {
   margin-top: 0;
@@ -317,104 +223,141 @@
   line-height: 1.15;
 }
 
-
-/* ---------------------------------------------------------
-   ACCESSIBILITY
-   --------------------------------------------------------- */
-
 .story-back-link:focus-visible,
 .story-return-link:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 4px;
 }
 
-
-/* ---------------------------------------------------------
-   RESPONSIVE
-   --------------------------------------------------------- */
-
 @media (max-width: 768px) {
   .story-page {
     padding: 28px 20px 24px;
   }
+}
 
+@media (max-width: 768px) {
   .story-header {
     margin-bottom: 28px;
   }
+}
 
+@media (max-width: 768px) {
   .story-back-link {
     margin-bottom: 20px;
   }
+}
 
+@media (max-width: 768px) {
   .story-header h1 {
     font-size: clamp(2rem, 10vw, 3rem);
   }
+}
 
+@media (max-width: 768px) {
   .story-feature-image {
     margin-bottom: 36px;
   }
+}
 
+@media (max-width: 768px) {
   .story-feature-image img {
     border-radius: 12px;
   }
+}
 
+@media (max-width: 768px) {
   .story-content {
     font-size: 1.05rem;
     line-height: 1.8;
   }
+}
 
+@media (max-width: 768px) {
   .story-content p {
     text-indent: 1.5em;
   }
+}
 
+@media (max-width: 768px) {
   .story-break {
     height: 1.6rem;
   }
+}
 
+@media (max-width: 768px) {
   .story-scene-break {
     min-height: 4rem;
   }
+}
 
+@media (max-width: 768px) {
   .story-footer {
     margin-top: 44px;
   }
+}
 
+@media (max-width: 768px) {
   .story-related-section.content-page {
     padding-top: 12px;
   }
 }
 
-
-/* ---------------------------------------------------------
-   PRINT
-   --------------------------------------------------------- */
-
 @media print {
   .story-back-link,
-  .story-return-link,
-  .story-related-section,
-  #header-placeholder,
-  #sidebar-placeholder,
-  #footer-placeholder {
+    .story-return-link,
+    .story-related-section,
+    #header-placeholder,
+    #sidebar-placeholder,
+    #footer-placeholder {
     display: none;
   }
+}
 
+@media print {
   .site-layout,
-  .page-content,
-  .story-page {
+    .page-content,
+    .story-page {
     display: block;
     width: 100%;
     max-width: none;
     margin: 0;
     padding: 0;
   }
+}
 
+@media print {
   .story-content {
     width: 100%;
     max-width: none;
-
     color: #000;
     font-size: 12pt;
     line-height: 1.6;
   }
+}
+
+.story-header h1, .story-related-hero h2 {
+  color: var(--colour-heading);
+}
+
+.story-category, .story-intro, .story-meta, .story-end-text, .story-end-mark, .story-scene-break, .story-content blockquote {
+  color: var(--colour-text-secondary);
+  opacity: 1;
+}
+
+.story-back-link, .story-return-link {
+  color: var(--colour-link);
+  opacity: 1;
+}
+
+.story-return-link {
+  border-color: var(--colour-control-border);
+}
+
+.story-feature-image img {
+  box-shadow: var(--shadow-raised);
+}
+
+.story-back-link:focus-visible, .story-return-link:focus-visible {
+  outline: 3px solid var(--colour-focus-ring);
+  outline-offset: 4px;
 }
