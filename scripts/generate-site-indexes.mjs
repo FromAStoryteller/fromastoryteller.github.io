@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { normalizeContentMeta, sortContent, createCardMarkup } from "../content/content-system.js";
+import { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup } from "../content/content-system.js";
 
 const SITE_ORIGIN = "https://fromastoryteller.com";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -240,18 +240,18 @@ function replaceGenerated(html, id, markup, tagName = "div") {
 function generateStaticHtml(items) {
   // Use the same card renderer and sorting as the interactive browser listing.
   const content = sortContent(items.map(item => normalizeContentMeta(item.meta)));
-  const components = ["header", "sidebar"].map(name => ({
+  const components = ["header", "sidebar", "footer"].map(name => ({
     id: `${name}-placeholder`,
     html: readFileSync(join(ROOT, "components", `${name}.html`), "utf8")
-      .replace(name === "header" ? "<header " : "<aside ",
-        name === "header" ? "<header data-static-component " : "<aside data-static-component ")
+      .replace(new RegExp(`<${{header: 'header', sidebar: 'aside', footer: 'footer'}[name]} `),
+        `<${{header: 'header', sidebar: 'aside', footer: 'footer'}[name]} data-static-component `)
   }));
   const pagePaths = [
     ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/search/",
-    ...items.map(item => item.url)
+    ...items.map(item => item.url), "/404.html", "/_template/page-template.html"
   ];
   for (const urlPath of new Set(pagePaths)) {
-    const path = join(ROOT, urlPath.replace(/^\//, ""), "index.html");
+    const path = urlPath.endsWith(".html") ? join(ROOT, urlPath.slice(1)) : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
     let html = readFileSync(path, "utf8");
     for (const component of components) html = replaceGenerated(html, component.id, component.html.trim());
     const section = urlPath === "/" ? "home" : urlPath.split("/")[1];
@@ -260,7 +260,17 @@ function generateStaticHtml(items) {
       const empty = section === "blog" ? "No blogs found yet." : section === "videos" ? "No videos found yet." : "Nothing to show yet.";
       const markup = categoryItems.map(createCardMarkup).join("\n") || `<p class="content-grid-empty">${empty}</p>`;
       html = replaceGenerated(html, `${section}-grid`, markup, "section");
+      // Render the first featured panel before first paint to avoid pushing the grid
+      // down after metadata arrives. Browser code uses the same panel renderer.
+      const featuredId = section === 'home' ? 'home-featured' : {stories:'featured-story', games:'featured-game', tools:'featured-tool', blog:'featured-blog', videos:'featured-video'}[section];
+      const label = section === 'home' ? 'Featured Content' : `Featured ${{stories:'Story', games:'Game', tools:'Tool', blog:'Blog', videos:'Video'}[section]}`;
+      const featured = section === 'home' ? getHomeFeaturedItems(categoryItems)[0] : getFeaturedItem(categoryItems);
+      if (featuredId && html.includes(`id="${featuredId}"`)) {
+        const panel = featured ? `<div class="content-featured-viewport"><div class="content-featured-track"><div class="content-featured-slide content-featured-slide-current">${createFeaturedPanelMarkup(featured, label)}</div></div></div>` : '';
+        html = replaceGenerated(html, featuredId, panel, 'section');
+      }
     }
+    html = html.replace(/<main\b([^>]*)>/, (tag, attrs) => /\bid=/.test(attrs) ? tag : `<main id="main-content" tabindex="-1"${attrs}>`);
     writeIfChanged(path, html);
   }
 }

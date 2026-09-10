@@ -1,0 +1,11 @@
+node_modules/
+.sites-runtime/
+
+# Studio private data must never be published
+workspace/
+.studio/
+scheduled/
+private-control/
+Studio Installer/
+.env*
+*.key

@@ -1,0 +1,19 @@
+{
+  "id": "storage",
+  "version": "1.0.0",
+  "category": "Persistence",
+  "description": "Shared local storage helpers.",
+  "entry": "games/shared/storage.js",
+  "capabilities": [
+    {
+      "id": "local-saves",
+      "name": "Local saves",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

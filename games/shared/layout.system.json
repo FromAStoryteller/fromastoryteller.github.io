@@ -1,0 +1,19 @@
+{
+  "id": "layout",
+  "version": "1.0.0",
+  "category": "Layout",
+  "description": "Shared game layout helpers.",
+  "entry": "games/shared/layout.js",
+  "capabilities": [
+    {
+      "id": "layout",
+      "name": "Layout",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

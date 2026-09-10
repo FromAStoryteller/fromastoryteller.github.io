@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-09-10",
+  "expiresAfterDays": 30,
+  "modes": {
+    "balanced": {
+      "id": "gpt-5.6-terra",
+      "inputPerMillion": 2,
+      "cachedPerMillion": 0.2,
+      "outputPerMillion": 12,
+      "priceSource": "https://developers.openai.com/api/docs/models/gpt-5.6-terra",
+      "longContextThreshold": 272000,
+      "longInputMultiplier": 2,
+      "longOutputMultiplier": 1.5
+    },
+    "economy": {
+      "id": "gpt-5.6-luna",
+      "inputPerMillion": 0.2,
+      "cachedPerMillion": 0.02,
+      "outputPerMillion": 1.2,
+      "priceSource": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+      "longContextThreshold": 272000,
+      "longInputMultiplier": 2,
+      "longOutputMultiplier": 1.5
+    },
+    "quality": {
+      "id": "gpt-6-astra",
+      "inputPerMillion": 10,
+      "cachedPerMillion": 1,
+      "outputPerMillion": 50,
+      "priceSource": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "longContextThreshold": 272000,
+      "longInputMultiplier": 2,
+      "longOutputMultiplier": 1.5
+    }
+  }
+}

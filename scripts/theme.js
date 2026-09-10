@@ -7,31 +7,32 @@
   const root = document.documentElement;
   const system = window.matchMedia('(prefers-color-scheme: dark)');
   let preference = null;
-  try { const saved = localStorage.getItem(key); if (saved === 'light' || saved === 'dark') preference = saved; } catch (_) {}
-  const effective = () => preference || (system.matches ? 'dark' : 'light');
+  try { const saved = localStorage.getItem(key); if (saved === 'light' || saved === 'dark' || saved === 'auto') preference = saved; } catch (_) {}
+  const effective = () => preference && preference !== 'auto' ? preference : (system.matches ? 'dark' : 'light');
   function syncButtons() {
-    const dark = effective() === 'dark';
+    const current = preference || 'auto';
+    const next = {auto: 'light', light: 'dark', dark: 'auto'}[current];
     document.querySelectorAll('[data-theme-toggle]').forEach(button => {
       button.hidden = false;
-      button.setAttribute('aria-pressed', String(dark));
-      button.setAttribute('aria-label', 'Dark mode');
-      button.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+      button.removeAttribute('aria-pressed');
+      button.setAttribute('aria-label', `Theme: ${current}. Switch to ${next} mode`);
+      button.title = `Theme: ${current}. Switch to ${next} mode`;
       const label = button.querySelector('[data-theme-label]');
-      if (label && label.textContent !== (dark ? 'Dark' : 'Light')) label.textContent = dark ? 'Dark' : 'Light';
+      if (label) label.textContent = current;
     });
   }
   function apply() { root.dataset.theme = effective(); syncButtons(); }
   apply();
   document.addEventListener('click', event => {
     if (!(event.target instanceof Element) || !event.target.closest('[data-theme-toggle]')) return;
-    preference = effective() === 'dark' ? 'light' : 'dark';
+    preference = {auto: 'light', light: 'dark', dark: 'auto'}[preference || 'auto'];
     try { localStorage.setItem(key, preference); } catch (_) { /* Works for this visit even when storage is blocked. */ }
     apply();
   });
-  system.addEventListener('change', () => { if (!preference) apply(); });
+  system.addEventListener('change', () => { if (!preference || preference === 'auto') apply(); });
   window.addEventListener('storage', event => {
     if (event.key !== key && event.key !== null) return;
-    preference = event.newValue === 'light' || event.newValue === 'dark' ? event.newValue : null;
+    preference = event.newValue === 'light' || event.newValue === 'dark' || event.newValue === 'auto' ? event.newValue : null;
     apply();
   });
   function ready() {

@@ -1,0 +1,19 @@
+{
+  "id": "canvas",
+  "version": "1.0.0",
+  "category": "Rendering",
+  "description": "Shared canvas setup and sizing.",
+  "entry": "games/shared/canvas.js",
+  "capabilities": [
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

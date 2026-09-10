@@ -68,55 +68,30 @@
     <!-- HEADER -->
     <div id="header-placeholder">
 <!-- static:header-placeholder:start -->
-<!-- HEADER -->
-  
-  <header data-static-component class="site-header">
-    <div class="header-inner">
-      
-      <!-- LEFT: Toggle + Logo -->
-      <div class="header-left">
-        <button class="menu-toggle" aria-label="Open Menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-        <a href="/" class="logo"><span class="visually-hidden">From A Storyteller</span><span class="wordmark__from" aria-hidden="true">from,</span><span class="wordmark__name" aria-hidden="true">A Storyteller</span></a>
-      </div>
-    
-      <!-- MIDDLE: Search -->
-      <div class="header-center">
-        <form class="site-search" action="/search/" role="search" autocomplete="off">
-          <div class="site-search-wrap">
-            
-            <input
-              type="search"
-              name="q"
-              placeholder="Search the World..."
-              aria-label="Search blogs, games, stories, tools, and videos"
-              autocomplete="off"
-              class="site-search-input"
-            >
-            
-            <button type="submit" class="search-btn" aria-label="Search">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-
-            <div class="site-search-suggestions"></div>
-
-          </div>
-        </form>
-      </div>
-
-      <!-- RIGHT: Socials -->
-      <div class="header-right">
-        <nav class="socials" aria-label="Social Links">
-          <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
-          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>       
-        </nav>
-      </div>
-      
+<header data-static-component class="site-header">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="header-inner">
+    <button class="menu-toggle shell-control" type="button" aria-label="Open menu" aria-controls="site-sidebar" aria-expanded="false"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    <div class="header-brand"><a href="/" class="logo"><span class="visually-hidden">From A Storyteller</span><span class="wordmark__from" aria-hidden="true">from,</span><span class="wordmark__name" aria-hidden="true">A Storyteller</span></a></div>
+    <!-- Insert the approved quill as an img with alt="" here. The slot is non-interactive. -->
+    <span class="header-quill" data-quill-slot="header" aria-hidden="true"></span>
+    <div class="header-right">
+      <button class="search-toggle shell-control" type="button" aria-label="Open search" aria-controls="header-search-panel" aria-expanded="false"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+      <button class="theme-toggle shell-control" type="button" data-theme-toggle aria-label="Theme: Auto. Switch to light mode"><svg class="theme-toggle__icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg><span class="visually-hidden" data-theme-label>Auto</span></button>
     </div>
-  </header>
+    <div class="header-search-panel" id="header-search-panel" hidden>
+      <form class="site-search" action="/search/" role="search" autocomplete="off">
+        <div class="site-search-wrap">
+          <input type="search" name="q" placeholder="Search the World…" aria-label="Search blogs, games, stories, tools, and videos" autocomplete="off" class="site-search-input">
+          <button type="submit" class="search-btn shell-control" aria-label="Search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+          <div class="site-search-suggestions" aria-label="Search suggestions"></div>
+        </div>
+      </form>
+      <button class="search-close shell-control" type="button" aria-label="Close search"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</header>
+<div class="header-body-fade" aria-hidden="true"></div>
 <!-- static:header-placeholder:end -->
 </div>
 
@@ -127,70 +102,71 @@
       <div id="sidebar-placeholder">
 <!-- static:sidebar-placeholder:start -->
 <!-- SIDEBAR -->
-<aside data-static-component class="sidebar">
+<aside data-static-component class="sidebar" id="site-sidebar" aria-label="Site navigation">
   
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" aria-label="Primary">
 
     <!-- KEY PAGES -->
     <div class="sidebar-section">
-      <a href="/" class="sidebar-item">
-        <i class="fa-solid fa-house"></i>
+      <a href="/" class="sidebar-item" aria-label="Home" title="Home">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
         <span>Home</span>
       </a>
 
-      <a href="/about/" class="sidebar-item">
-        <i class="fa-solid fa-user"></i>
+      <a href="/about/" class="sidebar-item" aria-label="About Me" title="About Me">
+        <i class="fa-solid fa-user" aria-hidden="true"></i>
         <span>About Me</span>
       </a>
 
-      <a href="/contact/" class="sidebar-item">
-        <i class="fa-solid fa-envelope"></i>
+      <a href="/contact/" class="sidebar-item" aria-label="Contact" title="Contact">
+        <i class="fa-solid fa-envelope" aria-hidden="true"></i>
         <span>Contact</span>
       </a>
     </div>
 
     <!-- MAIN PAGES -->
     <div class="sidebar-section">
-      <a href="/blog/" class="sidebar-item">
-        <i class="fa-solid fa-newspaper"></i>
+      <a href="/blog/" class="sidebar-item" aria-label="Blog" title="Blog">
+        <i class="fa-solid fa-newspaper" aria-hidden="true"></i>
         <span>Blog</span>
       </a>
 
-      <a href="/games/" class="sidebar-item">
-        <i class="fa-solid fa-gamepad"></i>
+      <a href="/games/" class="sidebar-item" aria-label="Games" title="Games">
+        <i class="fa-solid fa-gamepad" aria-hidden="true"></i>
         <span>Games</span>
       </a>
 
-      <a href="/stories/" class="sidebar-item">
-        <i class="fa-solid fa-book-open"></i>
+      <a href="/stories/" class="sidebar-item" aria-label="Stories" title="Stories">
+        <i class="fa-solid fa-book-open" aria-hidden="true"></i>
         <span>Stories</span>
       </a>
 
-      <a href="/tools/" class="sidebar-item">
-        <i class="fa-solid fa-feather-pointed"></i>
+      <a href="/tools/" class="sidebar-item" aria-label="Tools" title="Tools">
+        <i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>
         <span>Tools</span>
       </a>
 
-      <a href="/videos/" class="sidebar-item">
-        <i class="fa-solid fa-film"></i>
+      <a href="/videos/" class="sidebar-item" aria-label="Videos" title="Videos">
+        <i class="fa-solid fa-film" aria-hidden="true"></i>
         <span>Videos</span>
       </a>
     </div>
 
   </nav>
 
-  <!-- FOOTER-STYLE LINKS AT BOTTOM OF SIDEBAR -->
-  <div class="sidebar-footer-links">
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-  </div>
+<section class="sidebar-follow" aria-label="Follow From A Storyteller"><h2 class="sidebar-follow__title">Follow</h2><nav class="socials" aria-label="Social Links">
+          <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" aria-hidden="true"></i></a>
+          <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+          <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" aria-hidden="true"></i></a>
+          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>       
+        </nav></section>
 
 </aside>
 <!-- static:sidebar-placeholder:end -->
 </div>
 
       <!-- MAIN CONTENT AREA -->
-      <main class="page-content">
+      <main id="main-content" tabindex="-1" class="page-content">
 
         <!-- STORY PAGE -->
         <article class="story-page">
@@ -329,7 +305,20 @@
     </div>
 
     <!-- FOOTER -->
-    <div id="footer-placeholder"></div>
+    <div id="footer-placeholder">
+<!-- static:footer-placeholder:start -->
+<footer data-static-component class="site-footer">
+  <a class="footer-brand" href="/"><span class="footer-quill" data-quill-slot="footer" aria-hidden="true"></span><span>From A Storyteller</span></a>
+  <nav class="socials" aria-label="Social Links">
+          <a href="https://www.facebook.com/fromastoryteller/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/fromastoryteller/" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>       
+        </nav>
+  <div class="footer-details"><nav class="footer-legal" aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav><p class="footer-copyright">© <span data-copyright-year>2026</span> From A Storyteller</p></div>
+</footer>
+<!-- static:footer-placeholder:end -->
+</div>
 
   </body>
 

@@ -63,110 +63,73 @@ async function loadComponent(path, placeholderId) {
   container.innerHTML = html;
 }
 
-// Shared responsive sidebar behaviour
+// One shell state coordinates focus, Escape, the veil and background scrolling.
 function initSidebarToggle() {
-  const toggleBtn = document.querySelector(".menu-toggle");
-  const sidebar = document.querySelector(".sidebar");
-  const body = document.body;
-  const compactSidebarQuery = window.matchMedia("(max-width: 1573px)");
-
-  if (!toggleBtn || !sidebar) {
-    console.warn("Sidebar toggle not initialized (missing elements).");
-    return;
-  }
-
-  if (!sidebar.id) {
-    sidebar.id = "site-sidebar";
-  }
-
-  toggleBtn.setAttribute("aria-controls", sidebar.id);
-
-  let backdrop = document.querySelector(".sidebar-backdrop");
-
-  if (!backdrop) {
-    backdrop = document.createElement("div");
-    backdrop.className = "sidebar-backdrop";
-    backdrop.setAttribute("aria-hidden", "true");
-    document.body.appendChild(backdrop);
-  }
-
-  function isCompactSidebar() {
-    return compactSidebarQuery.matches;
-  }
-
-  function setSidebarExpanded(expanded) {
-    sidebar.classList.toggle("is-expanded", expanded);
-    toggleBtn.setAttribute("aria-expanded", String(expanded));
-
-    const compact = isCompactSidebar();
-
-    if (compact) {
-      sidebar.setAttribute("aria-hidden", String(!expanded));
-      backdrop.classList.toggle("is-visible", expanded);
-      body.classList.toggle("sidebar-open", expanded);
-    } else {
-      sidebar.setAttribute("aria-hidden", "false");
-      backdrop.classList.remove("is-visible");
-      body.classList.remove("sidebar-open");
+  const toggle = document.querySelector('.menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const searchToggle = document.querySelector('.search-toggle');
+  const panel = document.querySelector('.header-search-panel');
+  const brand = document.querySelector('.header-brand');
+  const right = document.querySelector('.header-right');
+  if (!toggle || !sidebar || !panel) return;
+  const compact = matchMedia('(max-width: 64rem)');
+  const backdrop = document.createElement('div');
+  backdrop.className = 'sidebar-backdrop';
+  backdrop.setAttribute('aria-hidden', 'true');
+  document.body.append(backdrop);
+  const background = [...document.querySelectorAll('main, #footer-placeholder')];
+  let mode = null;
+  const focusable = container => [...container.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), [tabindex="0"]')].filter(el => !el.closest('[hidden], [inert]') && el.getClientRects().length);
+  function setMode(next, returnFocus = true) {
+    const previous = mode;
+    mode = next;
+    const navOpen = mode === 'nav';
+    const searchOpen = mode === 'search';
+    sidebar.classList.toggle('is-expanded', navOpen);
+    sidebar.inert = searchOpen || (compact.matches && !navOpen);
+    sidebar.setAttribute('aria-hidden', String(sidebar.inert));
+    toggle.setAttribute('aria-expanded', String(navOpen));
+    toggle.setAttribute('aria-label', navOpen ? 'Close menu' : 'Open menu');
+    panel.hidden = !searchOpen;
+    brand.hidden = searchOpen;
+    right.hidden = searchOpen;
+    searchToggle.setAttribute('aria-expanded', String(searchOpen));
+    document.body.classList.toggle('shell-open', !!mode);
+    backdrop.classList.toggle('is-visible', !!mode);
+    background.forEach(el => { el.inert = !!mode; });
+    if (navOpen) focusable(sidebar)[0]?.focus({preventScroll: true});
+    else if (searchOpen) panel.querySelector('input').focus({preventScroll: true});
+    else if (returnFocus && previous) (previous === 'nav' ? toggle : searchToggle).focus({preventScroll: true});
+    if (!searchOpen) {
+      const suggestions = panel.querySelector('.site-search-suggestions');
+      suggestions?.classList.remove('is-visible');
     }
   }
-
-  function applyDefaultSidebarState() {
-    const shouldStartExpanded =
-      body.classList.contains("home-page") &&
-      !isCompactSidebar();
-
-    setSidebarExpanded(shouldStartExpanded);
-  }
-
-  // Initial state:
-  // - large-screen home page = expanded
-  // - other large pages = 64px icon rail
-  // - 1573px and below = completely hidden (including the home page)
-  applyDefaultSidebarState();
-
-  toggleBtn.addEventListener("click", () => {
-    setSidebarExpanded(!sidebar.classList.contains("is-expanded"));
-  });
-
-  backdrop.addEventListener("pointerdown", () => {
-    if (isCompactSidebar()) {
-      setSidebarExpanded(false);
+  toggle.addEventListener('click', () => setMode(mode === 'nav' ? null : 'nav'));
+  searchToggle.addEventListener('click', () => setMode('search'));
+  panel.querySelector('.search-close').addEventListener('click', () => setMode(null));
+  backdrop.addEventListener('click', () => setMode(null));
+  sidebar.addEventListener('click', event => { if (event.target.closest('a')) setMode(null); });
+  document.addEventListener('keydown', event => {
+    if (!mode) return;
+    if (event.key === 'Escape') {
+      event.preventDefault(); event.stopImmediatePropagation(); setMode(null); return;
     }
+    if (event.key !== 'Tab') return;
+    const elements = mode === 'nav' ? [toggle, ...focusable(sidebar)] : [toggle, ...focusable(panel)];
+    const index = elements.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) { event.preventDefault(); elements.at(-1)?.focus(); }
+    else if (!event.shiftKey && (index < 0 || index === elements.length - 1)) { event.preventDefault(); elements[0]?.focus(); }
+  }, true);
+  // Header controls remain operable but the keyboard cycle stays within the open surface.
+  document.addEventListener('focusin', event => {
+    if (!mode || event.target === toggle) return;
+    const surface = mode === 'nav' ? sidebar : panel;
+    if (!surface.contains(event.target)) focusable(surface)[0]?.focus({preventScroll: true});
   });
-
-  sidebar.addEventListener("click", event => {
-    if (
-      isCompactSidebar() &&
-      event.target.closest(".sidebar-item")
-    ) {
-      setSidebarExpanded(false);
-    }
-  });
-
-  /*
-     When the compact overlay sidebar is open, Escape belongs to the
-     website navigation first. Stopping propagation prevents the same
-     Escape press from also pausing an active game underneath it.
-  */
-  document.addEventListener("keydown", event => {
-    if (
-      event.key === "Escape" &&
-      isCompactSidebar() &&
-      sidebar.classList.contains("is-expanded")
-    ) {
-      event.preventDefault();
-      event.stopPropagation();
-      setSidebarExpanded(false);
-    }
-  });
-
-  // Keep behaviour correct if a browser window crosses the breakpoint.
-  if (typeof compactSidebarQuery.addEventListener === "function") {
-    compactSidebarQuery.addEventListener("change", applyDefaultSidebarState);
-  } else if (typeof compactSidebarQuery.addListener === "function") {
-    compactSidebarQuery.addListener(applyDefaultSidebarState);
-  }
+  compact.addEventListener('change', () => setMode(null));
+  setMode(null, false);
+  document.querySelectorAll('[data-copyright-year]').forEach(el => { el.textContent = new Date().getFullYear(); });
 }
 
 function setActiveSidebarLink() {
@@ -175,11 +138,12 @@ function setActiveSidebarLink() {
 
   sidebarLinks.forEach(link => {
     link.classList.remove("active")
+    link.removeAttribute("aria-current")
 
     const linkPath = new URL(link.href, window.location.origin).pathname
 
-    if (linkPath === currentPath) {
-      link.classList.add("active")
+    if (linkPath === currentPath || (linkPath !== "/" && currentPath.startsWith(linkPath))) {
+      link.setAttribute("aria-current", "page")
     }
   })
 }
@@ -207,7 +171,6 @@ async function initHeaderSearch() {
     allItems = await getAllPublishedContent()
   } catch (err) {
     console.error("Header search failed to load content:", err)
-    return
   }
 
   function hideSuggestions() {
@@ -278,7 +241,7 @@ async function initHeaderSearch() {
     showSuggestions(suggestions)
   })
 
-  suggestionsContainer.addEventListener("pointerdown", event => {
+  suggestionsContainer.addEventListener("click", event => {
     const button = event.target.closest(".site-search-suggestion")
 
     if (!button) return

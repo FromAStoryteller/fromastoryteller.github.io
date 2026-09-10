@@ -1,0 +1,19 @@
+{
+  "id": "ui",
+  "version": "1.0.0",
+  "category": "UI",
+  "description": "Shared game UI helpers.",
+  "entry": "games/shared/ui.js",
+  "capabilities": [
+    {
+      "id": "ui",
+      "name": "UI",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

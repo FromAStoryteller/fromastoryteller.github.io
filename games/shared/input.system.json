@@ -1,0 +1,24 @@
+{
+  "id": "input",
+  "version": "1.0.0",
+  "category": "Input",
+  "description": "Shared player input handling.",
+  "entry": "games/shared/input.js",
+  "capabilities": [
+    {
+      "id": "keyboard",
+      "name": "Keyboard",
+      "integration": "review-required"
+    },
+    {
+      "id": "pointer",
+      "name": "Pointer",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

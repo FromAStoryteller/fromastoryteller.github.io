@@ -1,0 +1,1 @@
+{"name":"from-a-storyteller","private":true,"scripts":{"dev":"vite","validate":"node scripts/generate-site-indexes.mjs"},"devDependencies":{"vite":"^8.2.2"}}

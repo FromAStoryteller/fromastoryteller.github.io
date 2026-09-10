@@ -1,0 +1,101 @@
+{
+  "versions": {
+    "site": "1.0.0",
+    "template": "1.0.0",
+    "schema": "1.0.0",
+    "sharedApi": "1.0.0"
+  },
+  "origin": "https://fromastoryteller.com",
+  "pageTemplate": "_template/page-template.html",
+  "metadataTemplate": "_template/meta-template.json",
+  "metadataSchema": "_template/studio/metadata.schema.json",
+  "aiSchema": "_template/studio/interpretive.schema.json",
+  "styles": [
+    "css/foundations.css",
+    "css/layout.css",
+    "css/components.css",
+    "css/utilities.css"
+  ],
+  "author": {
+    "id": "from-a-storyteller",
+    "display": "From A Storyteller"
+  },
+  "categories": {
+    "stories": {
+      "type": "story",
+      "subtype": "short-story",
+      "icon": "fa-solid fa-book-open",
+      "template": "_template/studio/stories.html",
+      "styles": [
+        "stories/stories.css"
+      ],
+      "openGraphType": "article"
+    },
+    "blog": {
+      "type": "blog",
+      "subtype": "article",
+      "icon": "fa-solid fa-newspaper",
+      "template": "_template/studio/blog.html",
+      "styles": [
+        "stories/stories.css"
+      ],
+      "openGraphType": "article"
+    },
+    "videos": {
+      "type": "video",
+      "subtype": "video",
+      "icon": "fa-solid fa-video",
+      "template": "_template/studio/videos.html",
+      "styles": [
+        "stories/stories.css"
+      ],
+      "openGraphType": "website"
+    },
+    "games": {
+      "type": "game",
+      "subtype": "game",
+      "icon": "fa-solid fa-gamepad",
+      "template": "_template/studio/games.html",
+      "styles": [
+        "games/games.css"
+      ],
+      "openGraphType": "website"
+    },
+    "tools": {
+      "type": "tool",
+      "subtype": "tool",
+      "icon": "fa-solid fa-wrench",
+      "template": "_template/studio/tools.html",
+      "styles": [
+        "stories/stories.css"
+      ],
+      "openGraphType": "website"
+    }
+  },
+  "assets": {
+    "imageDirectory": "assets/images",
+    "videoDirectory": "assets/videos",
+    "extensions": [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".webp",
+      ".mp4",
+      ".webm"
+    ]
+  },
+  "video": {
+    "warnBytes": 26214400,
+    "blockBytes": 104857599,
+    "providers": [
+      "youtube",
+      "direct",
+      "external"
+    ],
+    "externalEnabled": false
+  },
+  "countdown": {
+    "publicEnabled": false
+  }
+}

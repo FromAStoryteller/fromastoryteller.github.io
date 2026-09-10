@@ -1,0 +1,19 @@
+{
+  "id": "utils",
+  "version": "1.0.0",
+  "category": "Utilities",
+  "description": "Reusable utility functions for game code.",
+  "entry": "games/shared/utils.js",
+  "capabilities": [
+    {
+      "id": "utilities",
+      "name": "Utilities",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "menu",
+  "version": "1.0.0",
+  "category": "Menu",
+  "description": "Menu manager and screen definitions: main menu, pause, replay, settings and controls.",
+  "entry": "games/shared/menu/index.js",
+  "capabilities": [
+    {
+      "id": "main-menu",
+      "name": "Main Menu",
+      "integration": "review-required"
+    },
+    {
+      "id": "pause",
+      "name": "Pause",
+      "integration": "review-required"
+    },
+    {
+      "id": "play-again",
+      "name": "Play Again",
+      "integration": "review-required"
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "integration": "review-required"
+    },
+    {
+      "id": "controls",
+      "name": "Controls",
+      "integration": "review-required"
+    },
+    {
+      "id": "confirmations",
+      "name": "Confirmations",
+      "integration": "review-required"
+    },
+    {
+      "id": "navigation",
+      "name": "Navigation",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [
+    "canvas"
+  ],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

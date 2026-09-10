@@ -472,7 +472,11 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
         if (items.length <= 1 || intervalId) return
 
         intervalId = window.setInterval(() => {
-            if (isTransitioning) return
+            const rect = shell.getBoundingClientRect()
+            const headerHeight = document.querySelector('.site-header')?.getBoundingClientRect().height || 0
+            if (isTransitioning || document.hidden || document.body.classList.contains('shell-open') ||
+                matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                rect.top < headerHeight || rect.bottom > innerHeight) return
             const nextIndex = (currentIndex + 1) % items.length
             goToIndex(nextIndex, "next")
         }, interval)
@@ -481,6 +485,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     function restartAutoRotate() {
         if (intervalId) {
             window.clearInterval(intervalId)
+            intervalId = null
         }
         startAutoRotate()
     }
@@ -799,4 +804,4 @@ export function renderContentGrid(selector, items, emptyMessage = "Nothing to sh
     renderGrid(selector, items, emptyMessage)
 }
 // Shared with the build script so static and interactive cards stay identical.
-export { normalizeContentMeta, sortContent, createCardMarkup };
+export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup };

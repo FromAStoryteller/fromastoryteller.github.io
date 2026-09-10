@@ -1,0 +1,24 @@
+{
+  "id": "audio",
+  "version": "1.0.0",
+  "category": "Audio",
+  "description": "Shared sound playback and volume settings.",
+  "entry": "games/shared/audio.js",
+  "capabilities": [
+    {
+      "id": "sound",
+      "name": "Sound",
+      "integration": "review-required"
+    },
+    {
+      "id": "volume",
+      "name": "Volume",
+      "integration": "review-required"
+    }
+  ],
+  "dependencies": [],
+  "integration": {
+    "mode": "import-only",
+    "rationale": "Do not invent lifecycle wiring in existing games; inspect exported APIs and integrate explicitly."
+  }
+}

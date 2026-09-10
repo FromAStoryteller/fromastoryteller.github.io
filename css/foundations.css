@@ -48,7 +48,7 @@
   --breakpoint-tablet: 48rem;
   --breakpoint-large-tablet: 64rem;
   --breakpoint-small-desktop: 75rem;
-  --breakpoint-sidebar-overlay: 98.375rem;
+  --breakpoint-sidebar-overlay: 64rem;
   --breakpoint-wide-desktop: 100rem;
   --breakpoint-short-screen-height: 40rem;
   --container-compact: 20rem;
@@ -752,15 +752,7 @@
   }
 }
 
-:root {
-  --story-header-height: 64px;
-}
 
-@media (max-width: 600px) {
-  :root {
-    --story-header-height: 112px;
-  }
-}
 
 *,
 *::before,
@@ -804,10 +796,6 @@ a:hover {
   color: var(--colour-selection-text);
 }
 
-:focus-visible {
-  outline: 3px solid var(--colour-focus-ring);
-  outline-offset: 4px;
-}
 
 @media print {
   body {
@@ -836,8 +824,8 @@ h1, h2 {
 
 /* Current site geometry and component values, retained during consolidation. */
 :root {
-  --site-page-max: 1520px;
-  --site-page-padding: 40px 28px 72px;
+  --site-page-max: var(--width-wide);
+  --site-page-padding: 0 0 4.5rem;
   --site-gap: 24px;
   --site-panel-radius: 20px;
   --site-card-radius: 16px;
@@ -845,3 +833,37 @@ h1, h2 {
   --site-motion-normal: 180ms;
   --site-motion-sidebar: 0.25s;
 }
+
+
+
+/* Shell geometry: the 64rem drawer query in layout.css matches the shared large-tablet breakpoint.
+   The quill slots stay empty until the approved asset is available. */
+:root {
+  --width-reading: 65ch;
+  --width-editorial: 66rem;
+  --width-wide: 82rem;
+  --size-header-height: clamp(2.75rem, 3.5vw, 3rem);
+  --size-wordmark: min(clamp(1.65rem, 3.2vw, 2.45rem), calc((100vw - 12rem) / 4.5));
+  --size-quill-width: clamp(2.25rem, 5vw, 4rem);
+  --size-quill-overhang: clamp(0.75rem, 1.6vw, 1.25rem);
+  --size-centre-rule-gap: calc(var(--size-wordmark) * 5 + 2rem);
+  --size-header-fade: clamp(1rem, 2vw, 1.75rem);
+  --size-shell-gutter: clamp(1rem, 2.5vw, 2rem);
+  --size-sidebar-expanded: min(18rem, calc(100vw - 3rem));
+  --size-content-gutter: calc(var(--size-sidebar-collapsed) + var(--size-shell-gutter));
+  --size-content-top: calc(var(--size-header-height) + var(--size-quill-overhang) + var(--size-header-fade) + 1.5rem);
+  --story-header-height: var(--size-header-height);
+  --z-page: 0;
+  --z-header-fade: 80;
+  --state-hover-background: var(--colour-control-background-hover);
+  --state-hover-colour: var(--colour-link-hover);
+  --state-current-background: var(--colour-surface-sunken);
+  --state-current-colour: var(--colour-accent-primary);
+  --state-focus-width: 3px;
+  --state-focus-offset: 4px;
+}
+html { scrollbar-gutter: stable both-edges; scroll-padding-top: var(--size-content-top); }
+:where([id]) { scroll-margin-top: 1rem; }
+:focus-visible { outline: var(--state-focus-width) solid var(--colour-focus-ring); outline-offset: var(--state-focus-offset); }
+:where(button, input, select, textarea):disabled, [aria-disabled="true"] { opacity: var(--opacity-disabled); cursor: not-allowed; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }

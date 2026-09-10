@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "description",
+    "excerpt",
+    "cardDescription",
+    "seoTitle",
+    "seoDescription",
+    "socialTitle",
+    "socialDescription",
+    "tags",
+    "themes",
+    "genres",
+    "altText"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "cardDescription": {
+      "type": "string"
+    },
+    "seoTitle": {
+      "type": "string"
+    },
+    "seoDescription": {
+      "type": "string"
+    },
+    "socialTitle": {
+      "type": "string"
+    },
+    "socialDescription": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "themes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "genres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "altText": {
+      "type": "string"
+    }
+  }
+}
