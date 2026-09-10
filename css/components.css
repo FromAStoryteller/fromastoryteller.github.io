@@ -2064,7 +2064,12 @@ html, body, button, input, textarea, select,
 .site-search input::placeholder { color: var(--colour-control-placeholder); opacity: 1; }
 .site-search input:hover { border-color: var(--colour-control-border-hover); }
 .site-search input:focus-visible { border-color: var(--colour-control-border-focus); }
+/* A single inset indicator keeps keyboard focus visible without a double outer ring. */
+.header-search-panel .site-search input { box-sizing: border-box; height: calc(var(--size-header-height) - 12px); min-height: 0; padding: 0.25rem 2.75rem 0.25rem 0.75rem; border-color: var(--colour-divider); border-radius: 0.25rem; }
+.header-search-panel .site-search input:focus-visible { outline: none; box-shadow: inset 0 -2px var(--colour-focus-ring); border-color: var(--colour-divider); }
 .site-search .search-btn { position: absolute; right: 0; top: 0; }
+.header-search-panel .search-btn { top: 50%; transform: translateY(-50%); width: 40px; height: calc(var(--size-header-height) - 12px); min-height: 0; border-radius: 0.25rem; }
+.header-search-panel .search-btn:hover, .header-search-panel .search-btn:active { background: transparent; }
 .site-search-suggestions { display: none; padding: 0.5rem; border: 1px solid var(--colour-border-default); border-radius: 0.5rem; background: var(--colour-surface); box-shadow: var(--shadow-raised); }
 .site-search-suggestions.is-visible { display: block; }
 .site-search-suggestion { display: block; width: 100%; min-height: 44px; padding: 0.65rem; border: 0; background: transparent; color: var(--colour-text-primary); text-align: left; font: inherit; cursor: pointer; }

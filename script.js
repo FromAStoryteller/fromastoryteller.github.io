@@ -91,7 +91,7 @@ function initSidebarToggle() {
     toggle.setAttribute('aria-expanded', String(navOpen));
     toggle.setAttribute('aria-label', navOpen ? 'Close menu' : 'Open menu');
     panel.hidden = !searchOpen;
-    brand.hidden = searchOpen;
+    brand.hidden = searchOpen && compact.matches;
     right.hidden = searchOpen;
     searchToggle.setAttribute('aria-expanded', String(searchOpen));
     document.body.classList.toggle('shell-open', !!mode);

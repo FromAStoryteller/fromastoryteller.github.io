@@ -23,7 +23,8 @@
     width: min(520px, calc(100% - 32px));
     max-height: calc(100% - 32px);
     overflow-y: auto;
-    overscroll-behavior: contain;
+    /* Let wheel/touch scrolling continue to the page at the menu edges. */
+    overscroll-behavior: auto;
     box-sizing: border-box;
     background: rgba(20, 18, 16, 0.96);
     border: 1px solid rgba(212, 175, 55, 0.35);
