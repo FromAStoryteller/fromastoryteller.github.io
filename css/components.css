@@ -2052,6 +2052,9 @@ html, body, button, input, textarea, select,
 .site-header::before, .site-header::after { content: ""; position: absolute; bottom: 0; width: calc(50% - var(--size-centre-rule-gap) / 2); height: 1px; background: var(--colour-divider); }
 .site-header::before { left: 0; }
 .site-header::after { right: 0; }
+/* Search hides the compact wordmark; its divider must close at the same time. */
+.site-header:has(.header-brand[hidden])::before { width: 100%; z-index: 1; pointer-events: none; }
+.site-header:has(.header-brand[hidden])::after { display: none; }
 .header-body-fade { background: linear-gradient(to bottom, var(--background-page) 0, var(--background-page) var(--size-quill-overhang), transparent 100%); }
 .logo { display: flex; flex-direction: column; font-family: var(--font-family-display); font-size: var(--size-wordmark); font-weight: 400; font-style: normal; line-height: 0.92; white-space: nowrap; text-decoration: none; color: var(--colour-heading); }
 .wordmark__from { display: block; width: 100%; font-size: 0.72em; line-height: 1; text-align: left; padding-left: 0.5em; }

@@ -20,7 +20,7 @@ name, From A Storyteller. Written brand references retain that formal name.
 `games/shared/menu/menu.css` contains the game menu, sliders and result screens.
 The three stylesheets under `assets/fontawesome/css/` belong to the icon library.
 
-`scripts/theme.js` supports saved light/dark choices and Auto (device preference).
+`scripts/theme.js` currently cycles Light and Dark only. Saved Auto (device preference) is migrated to its effective light/dark appearance; new visits also start with a saved device-resolved choice. Set `AUTO_MODE_ENABLED` to `true` to restore the retained Auto cycle and OS listener. The control uses a sun for Light, a moon for Dark, and a monitor with an A for Auto.
 Time-of-day interpolation is not yet implemented; automatic-period tokens remain
 available and the shell fade inherits the active surface automatically.
 
