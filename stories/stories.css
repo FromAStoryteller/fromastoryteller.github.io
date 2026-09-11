@@ -23,7 +23,7 @@
 }
 
 .story-back-link:hover,
-.story-back-link:focus-visible {
+.story-back-link:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
   opacity: 1;
   transform: translateX(-0.2rem);
 }
@@ -197,9 +197,9 @@
 }
 
 .story-return-link:hover,
-.story-return-link:focus-visible {
+.story-return-link:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
   opacity: 1;
-  border-color: rgba(212, 175, 55, 0.6);
+  border-color: var(--colour-control-border-hover);
   transform: translateY(-0.15rem);
 }
 
@@ -334,5 +334,6 @@
 .story-feature-image img {
   box-shadow: var(--shadow-raised);
 }
+
 
 

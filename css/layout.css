@@ -293,7 +293,10 @@
 .sidebar-backdrop { position: fixed; inset: var(--size-header-height) 0 0; z-index: var(--z-sidebar-backdrop); }
 .site-layout { padding-top: var(--size-content-top); min-height: calc(100svh - 8rem); }
 .page-content { position: relative; z-index: var(--z-page); width: calc(100% - 2 * var(--size-content-gutter)); max-width: var(--width-wide); margin-inline: auto; padding: 0; min-width: 0; }
-.site-footer { width: 100%; max-width: none; box-sizing: border-box; padding-inline: var(--size-content-gutter); margin: 2rem auto 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.site-footer { width: 100%; max-width: none; box-sizing: border-box; padding-inline: var(--size-content-gutter); margin: 2rem auto 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
+.site-footer > .footer-brand { justify-self: start; }
+.site-footer > .socials { justify-self: center; }
+.site-footer > .footer-details { justify-self: end; justify-content: flex-end; text-align: right; min-width: 0; }
 .footer-brand { display: inline-flex; align-items: center; gap: 0.75rem; }
 .footer-quill { display: inline-block; width: var(--size-quill-width); }
 .footer-quill:empty { display: none; }
@@ -347,6 +350,7 @@ body.shell-open { overflow: hidden; }
 .footer-legal { gap: var(--space-4); }
 @media (max-width: 48rem) {
   .site-footer { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; text-align: center; column-gap: var(--space-3); }
+  .site-footer > .footer-brand { justify-self: center; }
   .site-footer > .socials { flex-wrap: nowrap; gap: 0; }
   .footer-details { grid-column: 1 / -1; display: contents; }
   .footer-legal, .footer-copyright { grid-column: 1 / -1; justify-content: center; }

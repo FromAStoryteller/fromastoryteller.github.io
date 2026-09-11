@@ -118,8 +118,8 @@
 
 .menu-toggle-option.active,
 .menu-select-option.active {
-    color: var(--colour-text-inverse);
-    background: var(--colour-accent-primary);
+    color: var(--state-selected-colour);
+    background: var(--state-selected-background);
     border-color: var(--colour-accent-primary);
     font-weight: 700;
     box-shadow: var(--shadow-surface);
@@ -164,7 +164,7 @@
     left: 0;
     height: 100%;
     border-radius: 999px;
-    background: var(--colour-accent-primary);
+    background: var(--state-selected-background);
     pointer-events: none;
 }
 
@@ -175,7 +175,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--colour-accent-primary);
+    background: var(--state-selected-background);
     border: 2px solid var(--colour-surface);
     box-shadow: var(--shadow-surface);
     cursor: grab;
@@ -198,7 +198,7 @@
 }
 
 .menu-row.selected .menu-slider-fill {
-    background: var(--colour-accent-primary);
+    background: var(--state-selected-background);
 }
 
 /* === MATCH RESULT SCREEN === */
@@ -462,4 +462,3 @@
 .menu-title { font-family: var(--font-family-heading); }
 .menu-toggle-option, .menu-select-option { min-height: var(--size-touch-target-minimum); }
 .menu-row.selected .menu-value { color: inherit; }
-.menu-toggle-option:focus-visible, .menu-select-option:focus-visible { outline: var(--state-focus-width) solid var(--colour-focus-ring); }

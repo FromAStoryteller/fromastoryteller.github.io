@@ -864,7 +864,10 @@ h1 {
 }
 html { scrollbar-gutter: stable both-edges; scroll-padding-top: var(--size-content-top); }
 :where([id]) { scroll-margin-top: 1rem; }
-:focus-visible { outline: var(--state-focus-width) solid var(--colour-focus-ring); outline-offset: var(--state-focus-offset); }
+:focus-visible:not([data-restored-focus]):not([data-escape-focus]) { outline: var(--state-focus-width) solid var(--colour-focus-ring); outline-offset: var(--state-focus-offset); }
+main[tabindex="-1"]:focus-visible { outline: none; }
+/* Suppress only pointer focus and explicitly marked restoration, never keyboard focus. */
+:focus:not(:focus-visible), [data-restored-focus]:focus, [data-escape-focus]:focus { outline: none; }
 :where(button, input, select, textarea):disabled, [aria-disabled="true"] { opacity: var(--opacity-disabled); cursor: not-allowed; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
@@ -897,15 +900,15 @@ h2, h3, h4, h5, h6 {
 h2 { font-size: var(--font-size-2xl); }
 h3 { font-size: var(--font-size-lg); }
 :where(button, a, input, textarea, select) { -webkit-tap-highlight-color: transparent; }
-:where(button, [role="button"]):active:not(:disabled) { box-shadow: var(--shadow-inset); }
+:where(button, [role="button"]):active:not(:disabled):not([aria-disabled="true"]) { box-shadow: var(--shadow-inset); }
 :where(input, select, textarea) {
   max-width: 100%; min-height: var(--size-touch-target-minimum);
   background: var(--colour-control-background); color: var(--colour-control-text);
   border: var(--border-width-default) solid var(--colour-control-border);
   border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
 }
-:where(input, select, textarea):hover { border-color: var(--colour-control-border-hover); }
-:where(input, select, textarea):focus-visible { border-color: var(--colour-control-border-focus); }
+:where(input, select, textarea):hover:not(:disabled):not([aria-disabled="true"]) { border-color: var(--colour-control-border-hover); }
+:where(input, select, textarea):focus-visible:not([data-restored-focus]):not([data-escape-focus]) { border-color: var(--colour-control-border-focus); }
 :where(input, textarea)::placeholder { color: var(--colour-control-placeholder); }
 @media (max-width: 48rem) {
   :root { --card-padding: var(--space-4); --hero-after: var(--space-5); }

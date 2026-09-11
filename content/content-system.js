@@ -1,3 +1,5 @@
+import {isKeyboardInteraction} from "../scripts/focus.js"
+
 // ==================================
 // SHARED CONTENT SYSTEM
 // Used by category pages and home page
@@ -368,6 +370,8 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     let index = 0
     let paused = false
     let hovered = false
+    let remaining = interval
+    let deadline = 0
     let timer = null
     let gesture = null
     let suppressClick = false
@@ -379,14 +383,14 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     shell.innerHTML = `
         <div class="content-featured-viewport">
             <div class="content-featured-slide" role="group" aria-roledescription="slide"></div>
+            <button type="button" class="content-featured-pause" aria-label="Pause carousel"><i class="fa-solid fa-pause" aria-hidden="true"></i></button>
         </div>
         <div class="content-featured-controls" role="group" aria-label="Featured content controls">
-            <button type="button" class="content-featured-arrow" data-step="-1" aria-label="Previous featured item">‹</button>
+            <button type="button" class="content-featured-arrow" data-step="-1" aria-label="Previous featured item"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
             <div class="content-featured-segments" role="group" aria-label="Choose featured item">
                 ${items.map((item, i) => `<button type="button" class="content-featured-segment" data-index="${i}" aria-label="Show ${escapeHtml(item.title)}"><span></span></button>`).join("")}
             </div>
-            <button type="button" class="content-featured-arrow" data-step="1" aria-label="Next featured item">›</button>
-            <button type="button" class="content-featured-pause" aria-label="Pause automatic rotation">Ⅱ</button>
+            <button type="button" class="content-featured-arrow" data-step="1" aria-label="Next featured item"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
         </div>
         <p class="visually-hidden content-featured-status" aria-live="polite" aria-atomic="true"></p>`
     const slide = shell.querySelector(".content-featured-slide")
@@ -408,34 +412,54 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
             })
         }
     }
-    function schedule() {
-        clearInterval(timer)
-        timer = null
-        pause.hidden = reducedMotion.matches
-        if (paused || hovered || reducedMotion.matches || shell.contains(document.activeElement)) return
-        timer = setInterval(() => {
-            const rect = shell.getBoundingClientRect()
-            const header = document.querySelector(".site-header")?.getBoundingClientRect().height || 0
-            if (!document.hidden && !document.body.classList.contains("shell-open") && rect.top >= header && rect.bottom <= innerHeight) show(index + 1, false)
-        }, interval)
+    function canRun() {
+        const rect = shell.getBoundingClientRect()
+        const header = document.querySelector(".site-header")?.getBoundingClientRect().height || 0
+        return !paused && !hovered && !reducedMotion.matches && !document.hidden
+            && !document.body.classList.contains("shell-open")
+            && !(isKeyboardInteraction() && shell.contains(document.activeElement))
+            && rect.top >= header && rect.bottom <= innerHeight
     }
-    shell.querySelectorAll("[data-step]").forEach(button => button.addEventListener("click", () => show(index + Number(button.dataset.step))))
-    segments.forEach((button, i) => button.addEventListener("click", () => show(i)))
+    function schedule(reset = false) {
+        pause.hidden = reducedMotion.matches
+        if (reset) {
+            clearTimeout(timer)
+            timer = null
+            remaining = interval
+        }
+        if (!canRun()) {
+            if (timer !== null) remaining = Math.max(0, deadline - performance.now())
+            clearTimeout(timer)
+            timer = null
+            return
+        }
+        if (timer !== null) return
+        deadline = performance.now() + remaining
+        timer = setTimeout(() => {
+            timer = null
+            if (canRun()) { show(index + 1, false); remaining = interval }
+            else remaining = 0
+            schedule()
+        }, remaining)
+    }
+    function select(next) { show(next); schedule(true) }
+    shell.querySelectorAll("[data-step]").forEach(button => button.addEventListener("click", () => select(index + Number(button.dataset.step))))
+    segments.forEach((button, i) => button.addEventListener("click", () => select(i)))
     pause.addEventListener("click", () => {
         paused = !paused
-        pause.textContent = paused ? "▷" : "Ⅱ"
-        pause.setAttribute("aria-label", paused ? "Start automatic rotation" : "Pause automatic rotation")
-        schedule()
+        pause.querySelector("i").className = paused ? "fa-solid fa-play" : "fa-solid fa-pause"
+        pause.setAttribute("aria-label", paused ? "Play carousel" : "Pause carousel")
+        schedule(true)
     })
     shell.addEventListener("keydown", event => {
         if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key) || event.target.closest("input, textarea, select")) return
         event.preventDefault()
         // Keep focus stable when the current CTA is replaced.
         if (slide.contains(document.activeElement)) shell.focus({preventScroll: true})
-        show(event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : index + (event.key === "ArrowRight" ? 1 : -1))
+        select(event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : index + (event.key === "ArrowRight" ? 1 : -1))
     })
     viewport.addEventListener("pointerdown", event => {
-        if (event.pointerType === "mouse" || !event.isPrimary) return
+        if (event.pointerType === "mouse" || !event.isPrimary || event.target.closest(".content-featured-pause")) return
         gesture = {x: event.clientX, y: event.clientY, id: event.pointerId}
     })
     viewport.addEventListener("pointerup", event => {
@@ -445,8 +469,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
         if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
             suppressClick = true
             if (slide.contains(document.activeElement)) shell.focus({preventScroll: true})
-            show(index + (dx < 0 ? 1 : -1))
-            schedule()
+            select(index + (dx < 0 ? 1 : -1))
             setTimeout(() => { suppressClick = false }, 0)
         }
     })
@@ -454,9 +477,15 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     viewport.addEventListener("click", event => { if (suppressClick) { event.preventDefault(); event.stopPropagation() } }, true)
     shell.addEventListener("mouseenter", () => { hovered = true; schedule() })
     shell.addEventListener("mouseleave", () => { hovered = false; schedule() })
-    shell.addEventListener("focusin", schedule)
+    shell.addEventListener("focusin", () => schedule())
     shell.addEventListener("focusout", () => queueMicrotask(schedule))
-    reducedMotion.addEventListener("change", schedule)
+    reducedMotion.addEventListener("change", () => schedule(true))
+    document.addEventListener("focusmodalitychange", () => schedule())
+    document.addEventListener("visibilitychange", () => schedule())
+    window.addEventListener("scroll", () => schedule(), {passive: true})
+    window.addEventListener("resize", () => schedule())
+    new ResizeObserver(() => schedule()).observe(shell)
+    new MutationObserver(() => schedule()).observe(document.body, {attributes: true, attributeFilter: ["class"]})
     show(0, false)
     schedule()
 }
@@ -684,3 +713,4 @@ export function renderContentGrid(selector, items, emptyMessage = "Nothing to sh
 }
 // Shared with the build script so static and interactive cards stay identical.
 export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup };
+

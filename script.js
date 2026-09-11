@@ -1,3 +1,5 @@
+import {restoreFocus} from "/scripts/focus.js"
+
 // =======================================
 // FROM A STORYTELLER - SCRIPT.JS
 // Version: 2.6
@@ -80,7 +82,7 @@ function initSidebarToggle() {
   const background = [...document.querySelectorAll('main, #footer-placeholder')];
   let mode = null;
   const focusable = container => [...container.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), [tabindex="0"]')].filter(el => !el.closest('[hidden], [inert]') && el.getClientRects().length);
-  function setMode(next, returnFocus = true) {
+  function setMode(next, returnFocus = true, silent = false) {
     const previous = mode;
     mode = next;
     const navOpen = mode === 'nav';
@@ -99,7 +101,7 @@ function initSidebarToggle() {
     background.forEach(el => { el.inert = !!mode; });
     if (navOpen) focusable(sidebar)[0]?.focus({preventScroll: true});
     else if (searchOpen) panel.querySelector('input').focus({preventScroll: true});
-    else if (returnFocus && previous) (previous === 'nav' ? toggle : searchToggle).focus({preventScroll: true});
+    else if (returnFocus && previous) restoreFocus(previous === 'nav' ? toggle : searchToggle, {silent});
     if (!searchOpen) {
       const suggestions = panel.querySelector('.site-search-suggestions');
       suggestions?.classList.remove('is-visible');
@@ -113,7 +115,7 @@ function initSidebarToggle() {
   document.addEventListener('keydown', event => {
     if (!mode) return;
     if (event.key === 'Escape') {
-      event.preventDefault(); event.stopImmediatePropagation(); setMode(null); return;
+      event.preventDefault(); event.stopImmediatePropagation(); setMode(null, true, true); return;
     }
     if (event.key !== 'Tab') return;
     const elements = mode === 'nav' ? [toggle, ...focusable(sidebar)] : [toggle, ...focusable(panel)];

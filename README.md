@@ -64,3 +64,36 @@ return; search suggestion keyboard activation; light/dark/Auto cycling; stable
 centred geometry while scroll is locked; and local link/CSS/syntax checks.
 Auto remains device preference, not sunrise/sunset interpolation. Precise logo
 geometry remains deferred until the real Guiding Quill is supplied.
+
+
+## Escape focus and carousel controls — 11 September 2026
+
+`scripts/focus.js` exports `restoreFocus(element, {silent})`. The shared shell uses
+silent restoration only when Escape dismisses menu/search. The destination remains
+focused; its temporary marker clears on blur, pointer input, or the next trusted
+non-modifier/non-Escape key. Shared focus selectors exclude this marker while
+ordinary keyboard navigation retains the intentional focus ring. Search inputs use
+focus-visible, and duplicate component/game-menu focus rules inherit foundations.
+
+Featured autoplay uses Font Awesome Solid play/pause in a token-styled circular
+overlay inside the card. Regular icons are not installed; the filled circle variant
+was visually compared and the plain glyphs retained for clarity at compact size.
+Navigation contains only Font Awesome chevrons and the existing gold indicators.
+Mobile actions reserve room for the overlay. The 7000ms interval, focus/hover guards,
+offscreen checks and reduced-motion behavior remain unchanged.
+
+Verification: 26 pages passed desktop-light/mobile-dark shell checks (52 cases);
+carousel geometry and interactions passed both themes at 320, 768, 1024 and 1280px.
+Browser checks covered Escape destination/ring suppression, subsequent Tab rings,
+mouse search dismissal, arrow/Home navigation, stable play/pause dimensions,
+non-overlapping CTA/overlay, autoplay, persistent pause and reduced motion. No page
+JavaScript errors were recorded. The generator validated 14 published items without
+changing generated files; Studio's 13 existing tests passed. Full game play/audio
+acceptance was not performed. No Git publication was requested or performed.
+
+
+## Escape, carousel cadence and footer follow-up — 11 September 2026
+
+Shared focus state now suppresses Escape on the already-focused element, clears on real keyboard/pointer input or focus change, and preserves normal Tab rings. Featured autoplay uses one deadline timeout with a 7000ms dwell, manual/Play resets, preserved remaining time during hover, visibility, shell and keyboard interruptions, and pointer-aware focus. The pause button retains its touch target with a smaller 24px translucent visual. Desktop footer uses equal outer grid tracks. Studio consumes the canonical assets at runtime; no bundled copy needs updating.
+
+Verification: Chrome Escape/Tab checks on six control groups at 1440, 1024, 768, 390 and 320px in both themes; desktop footer midpoint and overflow checks; controlled-clock 7s cycles, mouse navigation, pause/play, hover, reduced motion, keyboard and shell checks; simulated document visibility transitions; search/menu Escape dismissal. Site generator passed for 14 items; 13 Studio tests passed. Native background-tab throttling and every game/dialog were not exhaustively exercised. No Git commit or push performed.
