@@ -261,3 +261,12 @@ async function initHeaderSearch() {
     }
   })
 }
+// Footer navigation works for both static and dynamically loaded shells.
+document.addEventListener("click", event => {
+  const link = event.target.closest(".back-to-top")
+  if (!link) return
+  event.preventDefault()
+  const target = document.querySelector(".skip-link") || document.querySelector("main")
+  target?.focus({preventScroll: true})
+  window.scrollTo({top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"})
+})

@@ -806,7 +806,7 @@ a:hover {
 
 :root {
   --font-family-display: "MonteCarlo", cursive;
-  --font-family-heading: var(--font-family-display);
+  --font-family-heading: var(--font-family-interface);
   --font-family-interface: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-family-body: var(--font-family-interface);
   --font-family-reading: "Literata", Georgia, "Times New Roman", serif;
@@ -816,7 +816,7 @@ html, body, button, input, textarea, select {
   font-family: var(--font-family-interface);
 }
 
-h1, h2 {
+h1 {
   font-family: var(--font-family-display);
   font-weight: 400;
   font-style: normal;
@@ -851,7 +851,7 @@ h1, h2 {
   --size-shell-gutter: clamp(1rem, 2.5vw, 2rem);
   --size-sidebar-expanded: min(18rem, calc(100vw - 3rem));
   --size-content-gutter: calc(var(--size-sidebar-collapsed) + var(--size-shell-gutter));
-  --size-content-top: calc(var(--size-header-height) + var(--size-quill-overhang) + var(--size-header-fade) + 1.5rem);
+  --size-content-top: calc(var(--size-header-height) + var(--size-quill-overhang) + var(--size-header-fade) + var(--space-3));
   --story-header-height: var(--size-header-height);
   --z-page: 0;
   --z-header-fade: 80;
@@ -867,3 +867,46 @@ html { scrollbar-gutter: stable both-edges; scroll-padding-top: var(--size-conte
 :focus-visible { outline: var(--state-focus-width) solid var(--colour-focus-ring); outline-offset: var(--state-focus-offset); }
 :where(button, input, select, textarea):disabled, [aria-disabled="true"] { opacity: var(--opacity-disabled); cursor: not-allowed; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* Shared card family, editorial spacing and selected-state semantics. */
+:root {
+  --colour-wordmark: var(--colour-accent-primary);
+  --state-selected-background: var(--colour-accent-primary);
+  --state-selected-colour: var(--colour-text-inverse);
+  --card-ratio-standard: 16 / 9;
+  --card-ratio-featured: 16 / 7;
+  --card-ratio-compact: 1;
+  --card-title-lines: 2;
+  --card-excerpt-lines: 2;
+  --card-thumbnail-size: 5.5rem;
+  --card-padding: var(--space-5);
+  --card-gap: var(--space-3);
+  --card-radius: var(--radius-xl);
+  --card-image-fit: cover;
+  --hero-gap: var(--space-3);
+  --hero-after: var(--space-6);
+  --carousel-bar-size: var(--space-4);
+  --carousel-bar-active-size: var(--space-7);
+  --carousel-bar-thickness: var(--space-1);
+}
+h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+}
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-lg); }
+:where(button, a, input, textarea, select) { -webkit-tap-highlight-color: transparent; }
+:where(button, [role="button"]):active:not(:disabled) { box-shadow: var(--shadow-inset); }
+:where(input, select, textarea) {
+  max-width: 100%; min-height: var(--size-touch-target-minimum);
+  background: var(--colour-control-background); color: var(--colour-control-text);
+  border: var(--border-width-default) solid var(--colour-control-border);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+}
+:where(input, select, textarea):hover { border-color: var(--colour-control-border-hover); }
+:where(input, select, textarea):focus-visible { border-color: var(--colour-control-border-focus); }
+:where(input, textarea)::placeholder { color: var(--colour-control-placeholder); }
+@media (max-width: 48rem) {
+  :root { --card-padding: var(--space-4); --hero-after: var(--space-5); }
+}

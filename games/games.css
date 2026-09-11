@@ -7,7 +7,7 @@
   max-width: 100%;
   aspect-ratio: 16 / 9;
   margin: 0 auto;
-  background: #050505;
+  background: var(--colour-midnight-dark);
   border: 1px solid rgba(212, 175, 55, 0.12);
   border-radius: var(--site-card-radius);
   overflow: hidden;
@@ -79,7 +79,7 @@ body.game-fullscreen-active {
   justify-content: center;
   border: 0;
   border-radius: 0;
-  background: #050505;
+  background: var(--colour-midnight-dark);
 }
 
 .game-shell-frame.is-game-fullscreen .game-canvas {
@@ -118,7 +118,7 @@ body.game-fullscreen-active {
   border-radius: 50%;
   background: rgba(10, 10, 10, 0.68);
   color: #d4af37;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 6px 18px var(--colour-overlay);
   backdrop-filter: blur(4px);
   cursor: pointer;
   touch-action: manipulation;

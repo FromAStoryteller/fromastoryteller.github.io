@@ -299,7 +299,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
 
     const primaryActionLabel = getPrimaryActionLabel(item)
 
-    const featuredTags = item.card.tags.map(tag => `
+    const featuredTags = item.card.tags.slice(0, 2).map(tag => `
         <span>${escapeHtml(tag)}</span>
     `).join("")
 
@@ -322,7 +322,6 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
 
                 <div class="content-featured-actions">
                     <a href="${escapeHtml(item.url)}" class="btn-primary">${escapeHtml(primaryActionLabel)}</a>
-                    <a href="${escapeHtml(item.url)}" class="btn-secondary">View Details</a>
                 </div>
             </div>
         </div>
@@ -333,47 +332,17 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
     `
 }
 
-function createFeaturedShellMarkup(showControls = false) {
-    const controlsMarkup = showControls ? `
-        <div class="content-featured-controls" aria-label="Featured content controls">
-            <button type="button" class="content-featured-arrow content-featured-arrow-prev" aria-label="Previous featured item">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button type="button" class="content-featured-arrow content-featured-arrow-next" aria-label="Next featured item">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-    ` : ""
-
-    return `
-        ${controlsMarkup}
-        <div class="content-featured-viewport">
-            <div class="content-featured-track content-featured-track-carousel">
-                <div class="content-featured-slide content-featured-slide-current"></div>
-                <div class="content-featured-slide content-featured-slide-next"></div>
-            </div>
-        </div>
-    `
-}
-
-function renderFeaturedShell(selector, showControls = false) {
-    const container = document.querySelector(selector)
-    if (!container) return null
-
-    container.innerHTML = createFeaturedShellMarkup(showControls)
-    return container
-}
-
-function createCardMarkup(item) {
-    const tagsMarkup = item.card.tags.map(tag => `
+function createCardMarkup(item, variant = "standard") {
+    const cardVariant = variant === "compact" ? "compact" : "standard"
+    const tagsMarkup = item.card.tags.slice(0, 2).map(tag => `
         <span>${escapeHtml(tag)}</span>
     `).join("")
 
     return `
-        <article class="content-grid-card">
+        <article class="content-grid-card content-card--${cardVariant}">
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link">
                 <div class="content-grid-card-image">
-                    <img src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">
+                    <img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">
                     <span class="content-grid-card-banner">
                         <i class="${escapeHtml(item.card.icon)}"></i>
                     </span>
@@ -392,127 +361,104 @@ function createCardMarkup(item) {
     `
 }
 
-function initFeaturedRotator(selector, items, label = "Featured Content", interval = 6000) {
-    const container = document.querySelector(selector)
-    if (!container) return
-
-    if (!items || items.length === 0) {
-        container.innerHTML = ""
-        return
+function initFeaturedRotator(selector, items, label = "Featured Content", interval = 7000) {
+    const shell = document.querySelector(selector)
+    if (!shell || !items?.length) return
+    if (items.length === 1) return renderFeaturedItem(selector, items[0], label)
+    let index = 0
+    let paused = false
+    let hovered = false
+    let timer = null
+    let gesture = null
+    let suppressClick = false
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)")
+    shell.setAttribute("role", "region")
+    shell.setAttribute("aria-roledescription", "carousel")
+    shell.setAttribute("aria-label", label)
+    shell.tabIndex = 0
+    shell.innerHTML = `
+        <div class="content-featured-viewport">
+            <div class="content-featured-slide" role="group" aria-roledescription="slide"></div>
+        </div>
+        <div class="content-featured-controls" role="group" aria-label="Featured content controls">
+            <button type="button" class="content-featured-arrow" data-step="-1" aria-label="Previous featured item">‹</button>
+            <div class="content-featured-segments" role="group" aria-label="Choose featured item">
+                ${items.map((item, i) => `<button type="button" class="content-featured-segment" data-index="${i}" aria-label="Show ${escapeHtml(item.title)}"><span></span></button>`).join("")}
+            </div>
+            <button type="button" class="content-featured-arrow" data-step="1" aria-label="Next featured item">›</button>
+            <button type="button" class="content-featured-pause" aria-label="Pause automatic rotation">Ⅱ</button>
+        </div>
+        <p class="visually-hidden content-featured-status" aria-live="polite" aria-atomic="true"></p>`
+    const slide = shell.querySelector(".content-featured-slide")
+    const viewport = shell.querySelector(".content-featured-viewport")
+    const pause = shell.querySelector(".content-featured-pause")
+    const segments = [...shell.querySelectorAll(".content-featured-segment")]
+    function show(next, announce = true) {
+        index = (next + items.length) % items.length
+        slide.innerHTML = createFeaturedPanelMarkup(items[index], label)
+        slide.setAttribute("aria-label", `${index + 1} of ${items.length}`)
+        segments.forEach((button, i) => {
+            if (i === index) button.setAttribute("aria-current", "true")
+            else button.removeAttribute("aria-current")
+        })
+        if (announce) shell.querySelector(".content-featured-status").textContent = `${index + 1} of ${items.length}: ${items[index].title}`
+        if (announce && !reducedMotion.matches) {
+            slide.animate([{opacity: 0.65}, {opacity: 1}], {
+                duration: parseFloat(getComputedStyle(shell).getPropertyValue("--duration-normal")) || 180
+            })
+        }
     }
-
-    if (items.length === 1) {
-        renderFeaturedItem(selector, items[0], label)
-        return
-    }
-
-    let currentIndex = 0
-    let intervalId = null
-    let isTransitioning = false
-
-    const shell = renderFeaturedShell(selector, true)
-    if (!shell) return
-
-    let currentSlide = shell.querySelector(".content-featured-slide-current")
-    let nextSlide = shell.querySelector(".content-featured-slide-next")
-    const prevButton = shell.querySelector(".content-featured-arrow-prev")
-    const nextButton = shell.querySelector(".content-featured-arrow-next")
-
-    function setSlideContent(slideElement, item) {
-        slideElement.innerHTML = createFeaturedPanelMarkup(item, label)
-    }
-
-    function finishTransition(nextIndex) {
-        currentIndex = nextIndex
-
-        currentSlide.innerHTML = ""
-        currentSlide.classList.remove("content-featured-slide-current")
-        currentSlide.classList.add("content-featured-slide-next")
-
-        nextSlide.classList.remove("content-featured-slide-next")
-        nextSlide.classList.add("content-featured-slide-current")
-
-        const oldCurrent = currentSlide
-        currentSlide = nextSlide
-        nextSlide = oldCurrent
-
-        shell.classList.remove("is-sliding-next", "is-sliding-prev")
-        nextSlide.innerHTML = ""
-        isTransitioning = false
-    }
-
-    function goToIndex(nextIndex, direction = "next") {
-        if (isTransitioning || nextIndex === currentIndex) return
-        isTransitioning = true
-
-        setSlideContent(nextSlide, items[nextIndex])
-
-        shell.classList.remove("is-sliding-next", "is-sliding-prev")
-        void shell.offsetWidth
-        shell.classList.add(direction === "next" ? "is-sliding-next" : "is-sliding-prev")
-
-        window.setTimeout(() => {
-            finishTransition(nextIndex)
-        }, 420)
-    }
-
-    function goNext() {
-        const nextIndex = (currentIndex + 1) % items.length
-        goToIndex(nextIndex, "next")
-        restartAutoRotate()
-    }
-
-    function goPrev() {
-        const nextIndex = (currentIndex - 1 + items.length) % items.length
-        goToIndex(nextIndex, "prev")
-        restartAutoRotate()
-    }
-
-    function startAutoRotate() {
-        if (items.length <= 1 || intervalId) return
-
-        intervalId = window.setInterval(() => {
+    function schedule() {
+        clearInterval(timer)
+        timer = null
+        pause.hidden = reducedMotion.matches
+        if (paused || hovered || reducedMotion.matches || shell.contains(document.activeElement)) return
+        timer = setInterval(() => {
             const rect = shell.getBoundingClientRect()
-            const headerHeight = document.querySelector('.site-header')?.getBoundingClientRect().height || 0
-            if (isTransitioning || document.hidden || document.body.classList.contains('shell-open') ||
-                matchMedia('(prefers-reduced-motion: reduce)').matches ||
-                rect.top < headerHeight || rect.bottom > innerHeight) return
-            const nextIndex = (currentIndex + 1) % items.length
-            goToIndex(nextIndex, "next")
+            const header = document.querySelector(".site-header")?.getBoundingClientRect().height || 0
+            if (!document.hidden && !document.body.classList.contains("shell-open") && rect.top >= header && rect.bottom <= innerHeight) show(index + 1, false)
         }, interval)
     }
-
-    function restartAutoRotate() {
-        if (intervalId) {
-            window.clearInterval(intervalId)
-            intervalId = null
+    shell.querySelectorAll("[data-step]").forEach(button => button.addEventListener("click", () => show(index + Number(button.dataset.step))))
+    segments.forEach((button, i) => button.addEventListener("click", () => show(i)))
+    pause.addEventListener("click", () => {
+        paused = !paused
+        pause.textContent = paused ? "▷" : "Ⅱ"
+        pause.setAttribute("aria-label", paused ? "Start automatic rotation" : "Pause automatic rotation")
+        schedule()
+    })
+    shell.addEventListener("keydown", event => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key) || event.target.closest("input, textarea, select")) return
+        event.preventDefault()
+        // Keep focus stable when the current CTA is replaced.
+        if (slide.contains(document.activeElement)) shell.focus({preventScroll: true})
+        show(event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : index + (event.key === "ArrowRight" ? 1 : -1))
+    })
+    viewport.addEventListener("pointerdown", event => {
+        if (event.pointerType === "mouse" || !event.isPrimary) return
+        gesture = {x: event.clientX, y: event.clientY, id: event.pointerId}
+    })
+    viewport.addEventListener("pointerup", event => {
+        if (!gesture || gesture.id !== event.pointerId) return
+        const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y
+        gesture = null
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+            suppressClick = true
+            if (slide.contains(document.activeElement)) shell.focus({preventScroll: true})
+            show(index + (dx < 0 ? 1 : -1))
+            schedule()
+            setTimeout(() => { suppressClick = false }, 0)
         }
-        startAutoRotate()
-    }
-
-    function stopAutoRotate() {
-        if (intervalId) {
-            window.clearInterval(intervalId)
-            intervalId = null
-        }
-    }
-
-    setSlideContent(currentSlide, items[currentIndex])
-
-    if (prevButton) {
-        prevButton.addEventListener("click", goPrev)
-    }
-
-    if (nextButton) {
-        nextButton.addEventListener("click", goNext)
-    }
-
-    shell.addEventListener("mouseenter", stopAutoRotate)
-    shell.addEventListener("mouseleave", startAutoRotate)
-    shell.addEventListener("focusin", stopAutoRotate)
-    shell.addEventListener("focusout", startAutoRotate)
-
-    startAutoRotate()
+    })
+    viewport.addEventListener("pointercancel", () => { gesture = null })
+    viewport.addEventListener("click", event => { if (suppressClick) { event.preventDefault(); event.stopPropagation() } }, true)
+    shell.addEventListener("mouseenter", () => { hovered = true; schedule() })
+    shell.addEventListener("mouseleave", () => { hovered = false; schedule() })
+    shell.addEventListener("focusin", schedule)
+    shell.addEventListener("focusout", () => queueMicrotask(schedule))
+    reducedMotion.addEventListener("change", schedule)
+    show(0, false)
+    schedule()
 }
 
 function renderFilters(selector, filters, activeFilter, onFilterClick) {
@@ -523,6 +469,7 @@ function renderFilters(selector, filters, activeFilter, onFilterClick) {
         <button
             class="content-filter ${activeFilter === "all" ? "active" : ""}"
             type="button"
+            aria-pressed="${activeFilter === "all"}"
             data-filter="all"
         >
             All
@@ -533,6 +480,7 @@ function renderFilters(selector, filters, activeFilter, onFilterClick) {
         <button
             class="content-filter ${activeFilter === filter ? "active" : ""}"
             type="button"
+            aria-pressed="${activeFilter === filter}"
             data-filter="${escapeHtml(filter)}"
         >
             ${escapeHtml(formatLabel(filter))}
@@ -546,80 +494,12 @@ function renderFilters(selector, filters, activeFilter, onFilterClick) {
         button.addEventListener("click", () => {
             const nextFilter = button.dataset.filter || "all"
             onFilterClick(nextFilter)
+            container.querySelector(`[data-filter="${CSS.escape(nextFilter)}"]`)?.focus({preventScroll: true})
         })
     })
 }
 
-function initGridCardTagScroll(container) {
-    const cards = container.querySelectorAll(".content-grid-card")
-
-    cards.forEach(card => {
-        const tags = card.querySelector(".content-grid-card-tags")
-
-        if (!tags) return
-
-        let animationFrame = null
-
-        function animateTo(target, speed = 50) {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame)
-            }
-
-            // Make absolutely sure CSS smooth scrolling
-            // does not interfere with the animation.
-            tags.style.scrollBehavior = "auto"
-
-            const start = tags.scrollLeft
-            const distance = target - start
-
-            if (Math.abs(distance) < 1) {
-                tags.scrollLeft = target
-                return
-            }
-
-            const duration = Math.abs(distance) / speed * 1000
-            const startTime = performance.now()
-
-            function animate(currentTime) {
-                const elapsed = currentTime - startTime
-                const progress = Math.min(elapsed / duration, 1)
-
-                /*
-                 * Ease-out starts moving immediately,
-                 * then gently slows as it reaches the end.
-                 */
-                const eased = 1 - Math.pow(1 - progress, 3)
-
-                tags.scrollLeft = start + distance * eased
-
-                if (progress < 1) {
-                    animationFrame = requestAnimationFrame(animate)
-                } else {
-                    tags.scrollLeft = target
-                    animationFrame = null
-                }
-            }
-
-            animationFrame = requestAnimationFrame(animate)
-        }
-
-        card.addEventListener("pointerenter", () => {
-            const maxScroll = tags.scrollWidth - tags.clientWidth
-
-            if (maxScroll > 0) {
-                animateTo(maxScroll)
-            }
-        })
-
-        card.addEventListener("pointerleave", () => {
-            if (tags.scrollLeft > 0) {
-                animateTo(0)
-            }
-        })
-    })
-}
-
-function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
+function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", variant = "standard") {
     const container = document.querySelector(selector)
     if (!container) return
 
@@ -630,9 +510,8 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.") {
         return
     }
 
-    container.innerHTML = items.map(createCardMarkup).join("")
-
-    initGridCardTagScroll(container)
+    container.classList.toggle("content-grid--compact", variant === "compact")
+    container.innerHTML = items.map(item => createCardMarkup(item, variant)).join("")
 }
 
 function renderFeaturedItem(selector, item, label = "Featured") {
@@ -766,7 +645,7 @@ export async function initRelatedContentSection(config) {
     const {
         gridSelector,
         currentContentId = "",
-        limit = 3,
+        limit = 6,
         emptyMessage = "Nothing to show yet."
     } = config
 
@@ -778,7 +657,7 @@ export async function initRelatedContentSection(config) {
         const filteredItems = sortedContent.filter(item => item.id !== currentContentId)
         const relatedItems = filteredItems.slice(0, limit)
 
-        renderGrid(gridSelector, relatedItems, emptyMessage)
+        renderGrid(gridSelector, relatedItems, emptyMessage, "compact")
     } catch (error) {
         console.error("Error loading related content:", error)
 

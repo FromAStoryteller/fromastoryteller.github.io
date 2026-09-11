@@ -5,7 +5,7 @@
 .story-header {
   width: 100%;
   max-width: var(--width-editorial);
-  margin: 0 auto 32px;
+  margin: 0 auto var(--hero-after);
   text-align: center;
 }
 
@@ -43,7 +43,7 @@
 
 .story-header h1 {
   max-width: var(--width-editorial);
-  margin: 0 auto 16px;
+  margin: 0 auto var(--hero-gap);
   font-family: var(--font-family-display);
   font-size: clamp(2.3rem, 5vw, 4rem);
   font-weight: 400;
@@ -209,7 +209,7 @@
 }
 
 .story-related-hero {
-  margin-bottom: 28px;
+  margin-bottom: var(--hero-after);
 }
 
 .story-related-hero h2 {
@@ -223,7 +223,7 @@
 
 @media (max-width: 768px) {
   .story-header {
-    margin-bottom: 28px;
+    margin-bottom: var(--hero-after);
   }
 }
 
@@ -307,7 +307,7 @@
   .story-content {
     width: 100%;
     max-width: none;
-    color: #000;
+    color: var(--colour-midnight);
     font-size: 12pt;
     line-height: 1.6;
   }

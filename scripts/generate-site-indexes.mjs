@@ -270,6 +270,15 @@ function generateStaticHtml(items) {
         html = replaceGenerated(html, featuredId, panel, 'section');
       }
     }
+    // Related content uses the same compact renderer before and after hydration.
+    const relatedId = html.match(/id=["'](related-content-grid|story-related-grid)["']/)?.[1];
+    if (relatedId) {
+      const currentId = html.match(/data-current-content-id=["']([^"']+)["']/)?.[1] || '';
+      const related = content.filter(item => item.id !== currentId).slice(0, 6);
+      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item, 'compact')).join('\n'), 'div');
+      html = html.replace(new RegExp(`(id=["']${relatedId}["'][^>]*class=["'])([^"']*)`), (_, before, classes) => before + (classes.includes('content-grid--compact') ? classes : classes + ' content-grid--compact'));
+    }
+    html = html.replace(/<body(?![^>]*\bid=)\b/, '<body id="top"');
     html = html.replace(/<main\b([^>]*)>/, (tag, attrs) => /\bid=/.test(attrs) ? tag : `<main id="main-content" tabindex="-1"${attrs}>`);
     writeIfChanged(path, html);
   }

@@ -118,7 +118,7 @@ async function initStoryPage() {
     await initRelatedContentSection({
         gridSelector: "#related-content-grid",
         currentContentId,
-        limit: 3,
+        limit: 6,
         emptyMessage: "More content is coming soon."
     })
 }
