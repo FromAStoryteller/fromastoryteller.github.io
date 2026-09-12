@@ -1505,10 +1505,6 @@
 html, body, button, input, textarea, select,
 .story-category, .story-end-text, .story-intro {
   font-family: var(--font-family-interface);
-} .story-header h1 {
-  font-family: var(--font-family-display);
-  font-weight: 400;
-  font-style: normal;
 }
 
 .story-content {
@@ -1525,7 +1521,7 @@ html, body, button, input, textarea, select,
 .site-header:has(.header-brand[hidden])::before { width: 100%; z-index: 1; pointer-events: none; }
 .site-header:has(.header-brand[hidden])::after { display: none; }
 .header-body-fade { background: linear-gradient(to bottom, var(--background-page) 0, var(--background-page) var(--size-quill-overhang), transparent 100%); }
-.logo { display: flex; flex-direction: column; font-family: var(--font-family-display); font-size: var(--size-wordmark); font-weight: 400; font-style: normal; line-height: 0.92; white-space: nowrap; text-decoration: none; color: var(--colour-wordmark); }
+.logo { display: flex; flex-direction: column; font-family: var(--font-family-brand); font-size: var(--size-wordmark); font-weight: 400; font-style: normal; line-height: 0.92; white-space: nowrap; text-decoration: none; color: var(--colour-wordmark); }
 .wordmark__from { display: block; width: 100%; font-size: 0.72em; line-height: 1; text-align: left; padding-left: 0.5em; }
 .wordmark__name { display: block; }
 .shell-control, .socials a { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 0; border-radius: 0.5rem; background: transparent; color: var(--colour-control-text); text-decoration: none; cursor: pointer; font-size: 1rem; transition: background var(--site-motion-normal), color var(--site-motion-normal); }
@@ -1562,7 +1558,7 @@ html, body, button, input, textarea, select,
 .sidebar-backdrop { visibility: hidden; opacity: 0; pointer-events: none; background: var(--colour-sidebar-backdrop); transition: opacity var(--site-motion-normal), visibility var(--site-motion-normal); }
 .sidebar-backdrop.is-visible { visibility: visible; opacity: 1; pointer-events: auto; }
 .site-footer { border-top: 1px solid var(--colour-divider); color: var(--colour-text-muted); font-size: 0.875rem; }
-.footer-brand { color: var(--colour-wordmark); text-decoration: none; font: 1.8rem var(--font-family-display); }
+.footer-brand { color: var(--colour-wordmark); text-decoration: none; font: 1.8rem var(--font-family-brand); }
 .footer-legal a { display: inline-flex; align-items: center; min-height: 44px; color: var(--colour-link); text-underline-offset: 0.2em; }
 .footer-legal a:hover { color: var(--colour-link-hover); }
 .footer-copyright { margin: 0; }

@@ -1,11 +1,14 @@
-/* Story reading, scene breaks and print presentation. */
+/* =========================================================
+   From A Storyteller — Story Reading
+   Story-specific editorial layout, scene breaks and print.
+   ========================================================= */
 
 
+/* =========================================================
+   STORY HEADER
+   ========================================================= */
 
 .story-header {
-  width: 100%;
-  max-width: var(--width-editorial);
-  margin: 0 auto var(--hero-after);
   text-align: center;
 }
 
@@ -13,18 +16,22 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+
   margin-bottom: 24px;
-  color: inherit;
+
+  color: var(--colour-link);
+
   font-size: 0.9rem;
   text-decoration: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease,
-    transform 0.2s ease;
+
+  transition:
+    color var(--duration-normal),
+    transform var(--duration-normal);
 }
 
 .story-back-link:hover,
 .story-back-link:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
-  opacity: 1;
+  color: var(--colour-link-hover);
   transform: translateX(-0.2rem);
 }
 
@@ -33,21 +40,18 @@
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
+
   margin: 0 0 12px;
-  font-family: var(--font-family-interface);
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
+
+  color: var(--colour-text-secondary);
+
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-label);
   text-transform: uppercase;
-  opacity: 0.75;
 }
 
 .story-header h1 {
-  max-width: var(--width-editorial);
   margin: 0 auto var(--hero-gap);
-  font-family: var(--font-family-display);
-  font-size: clamp(2.3rem, 5vw, 4rem);
-  font-weight: 400;
-  line-height: 1.1;
   text-align: center;
   text-wrap: balance;
 }
@@ -55,21 +59,24 @@
 .story-intro {
   max-width: 700px;
   margin: 0 auto;
-  font-family: var(--font-family-interface);
+
+  color: var(--colour-text-secondary);
+
   font-size: 1.08rem;
   font-style: italic;
   line-height: 1.7;
-  opacity: 0.72;
 }
 
 .story-meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+
   gap: 0.75rem 1.5rem;
   margin-top: 16px;
+
+  color: var(--colour-text-secondary);
   font-size: 0.85rem;
-  opacity: 0.65;
 }
 
 .story-author,
@@ -79,67 +86,93 @@
   gap: 0.45rem;
 }
 
+
+/* =========================================================
+   FEATURE IMAGE
+   ========================================================= */
+
 .story-feature-image {
   width: min(100%, var(--width-editorial));
   margin: 0 auto 48px;
 }
 
 .story-feature-image img {
-  display: block;
   width: 100%;
-  height: auto;
+
   border-radius: var(--site-card-radius);
+
   object-fit: cover;
+
+  box-shadow: var(--shadow-raised);
 }
+
+
+/* =========================================================
+   STORY READING
+   ========================================================= */
 
 .story-content {
   width: min(100%, var(--width-reading));
   margin: 0 auto;
+
   font-family: var(--font-family-reading);
+  font-optical-sizing: var(--font-optical-sizing-reading);
+
   font-size: clamp(1.05rem, 1.5vw, 1.16rem);
   line-height: 1.85;
   letter-spacing: 0.005em;
+
   text-wrap: pretty;
 }
 
 .story-content p {
   margin: 0;
-  text-indent: 1.8em;
+  text-indent: var(--paragraph-indent);
 }
 
-.story-content > p:first-child {
+.story-content > p:first-child,
+.story-break + p,
+.story-scene-break + p {
   text-indent: 0;
 }
+
+
+/* =========================================================
+   STORY BREAKS
+   ========================================================= */
 
 .story-break {
   height: 1.85rem;
-}
-
-.story-break + p {
-  text-indent: 0;
 }
 
 .story-scene-break {
   display: flex;
   align-items: center;
   justify-content: center;
+
   min-height: 4.5rem;
   margin: 0;
-  font-size: 0.9rem;
+
+  color: var(--colour-text-secondary);
+
+  font-size: var(--font-size-sm);
   line-height: 1;
-  opacity: 0.65;
 }
 
-.story-scene-break + p {
-  text-indent: 0;
-}
+
+/* =========================================================
+   STORY EMPHASIS
+   ========================================================= */
 
 .story-content blockquote {
   margin: 2rem 1.5rem;
   padding-left: 1.5rem;
+
   border-left: 2px solid currentColor;
+
+  color: var(--colour-text-secondary);
+
   font-style: italic;
-  opacity: 0.8;
 }
 
 .story-content blockquote p {
@@ -151,12 +184,18 @@
 }
 
 .story-content strong {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
+
+
+/* =========================================================
+   STORY FOOTER
+   ========================================================= */
 
 .story-footer {
   width: min(100%, var(--width-editorial));
   margin: 56px auto 0;
+
   text-align: center;
 }
 
@@ -164,44 +203,60 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   min-height: 2rem;
-  font-size: 0.9rem;
-  opacity: 0.65;
+
+  color: var(--colour-text-secondary);
+
+  font-size: var(--font-size-sm);
 }
 
 .story-end-text {
   margin: 0.7rem 0 2rem;
-  font-family: var(--font-family-interface);
-  font-size: 0.9rem;
+
+  color: var(--colour-text-secondary);
+
+  font-size: var(--font-size-sm);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.65;
 }
 
 .story-return-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   gap: 0.65rem;
-  min-height: 44px;
+
+  min-height: var(--size-touch-target-minimum);
   padding: 0.8rem 1.2rem;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 999px;
-  color: inherit;
+
+  border: var(--border-width-default) solid var(--colour-control-border);
+  border-radius: var(--radius-round);
+
+  color: var(--colour-link);
+
   font-size: 0.9rem;
   text-decoration: none;
-  opacity: 0.82;
-  transition: opacity 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease;
+
+  transition:
+    color var(--duration-normal),
+    transform var(--duration-normal),
+    border-color var(--duration-normal);
 }
 
 .story-return-link:hover,
 .story-return-link:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
-  opacity: 1;
+  color: var(--colour-link-hover);
   border-color: var(--colour-control-border-hover);
+
   transform: translateY(-0.15rem);
 }
+
+
+/* =========================================================
+   RELATED STORIES
+   ========================================================= */
 
 .story-related-section.content-page {
   margin-top: 0;
@@ -214,126 +269,86 @@
 
 .story-related-hero h2 {
   margin: 0 0 12px;
-  line-height: 1.15;
 }
 
 
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
-
-
-@media (max-width: 768px) {
-  .story-header {
-    margin-bottom: var(--hero-after);
-  }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .story-back-link {
     margin-bottom: 20px;
   }
-}
 
-@media (max-width: 768px) {
-  .story-header h1 {
-    font-size: clamp(2rem, 10vw, 3rem);
-  }
-}
-
-@media (max-width: 768px) {
   .story-feature-image {
     margin-bottom: 36px;
   }
-}
 
-@media (max-width: 768px) {
   .story-feature-image img {
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
   }
-}
 
-@media (max-width: 768px) {
   .story-content {
     font-size: 1.05rem;
     line-height: 1.8;
   }
-}
 
-@media (max-width: 768px) {
   .story-content p {
     text-indent: 1.5em;
   }
-}
 
-@media (max-width: 768px) {
   .story-break {
     height: 1.6rem;
   }
-}
 
-@media (max-width: 768px) {
   .story-scene-break {
     min-height: 4rem;
   }
-}
 
-@media (max-width: 768px) {
   .story-footer {
     margin-top: 44px;
   }
-}
 
-@media (max-width: 768px) {
   .story-related-section.content-page {
     padding-top: 12px;
   }
 }
 
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
 @media print {
   .story-back-link,
-    .story-return-link,
-    .story-related-section,
-    #header-placeholder,
-    #sidebar-placeholder,
-    #footer-placeholder {
+  .story-return-link,
+  .story-related-section,
+  #header-placeholder,
+  #sidebar-placeholder,
+  #footer-placeholder {
     display: none;
   }
-}
 
-@media print {
-  .site-layout, .page-content, .story-page { display: block; width: 100%; max-width: none; margin: 0; padding: 0; }
-}
+  .site-layout,
+  .page-content,
+  .story-page {
+    display: block;
 
-@media print {
+    width: 100%;
+    max-width: none;
+
+    margin: 0;
+    padding: 0;
+  }
+
   .story-content {
     width: 100%;
     max-width: none;
+
     color: var(--colour-midnight);
+
     font-size: 12pt;
     line-height: 1.6;
   }
 }
-
-.story-header h1, .story-related-hero h2 {
-  color: var(--colour-heading);
-}
-
-.story-category, .story-intro, .story-meta, .story-end-text, .story-end-mark, .story-scene-break, .story-content blockquote {
-  color: var(--colour-text-secondary);
-  opacity: 1;
-}
-
-.story-back-link, .story-return-link {
-  color: var(--colour-link);
-  opacity: 1;
-}
-
-.story-return-link {
-  border-color: var(--colour-control-border);
-}
-
-.story-feature-image img {
-  box-shadow: var(--shadow-raised);
-}
-
-
-
