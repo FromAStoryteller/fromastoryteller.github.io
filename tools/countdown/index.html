@@ -39,9 +39,11 @@
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/utilities.css">
-<link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/fontawesome.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/brands.min.css">
     <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
+
+    <link rel="stylesheet" href="/tools/countdown/tool.css">
 
     <!-- SCRIPTS -->
     <script type="module" src="/script.js"></script>
@@ -167,61 +169,171 @@
           </p>
         </section>
         
-        <section class="tool-play-section" aria-labelledby="tool-heading">
+        <section class="tool-play-section" aria-label="Countdown timer">
           <div class="tool-shell">
 
             <div class="tool-shell-main">
               <div class="tool-shell-frame">
                 <div class="tool-widget">
-                    <h2 id="tool-heading" class="tool-widget-title">Countdown</h2>
-                    <p id="tool-result" class="tool-widget-result">00:00:00</p>
+                  <div id="countdown-setup" class="countdown-setup">
 
-                    <div class="countdown-time-controls" aria-label="Countdown time settings">
-                        <div class="countdown-time-field">
-                            <label for="countdown-hours">Hours</label>
-                            <input
-                                id="countdown-hours"
-                                type="number"
-                                min="0"
-                                max="99"
-                                step="1"
-                                value="0"
-                            >
-                        </div>
+                      <div class="countdown-presets" aria-label="Common countdown times">
+                          <button class="countdown-preset" type="button" data-seconds="300" aria-pressed="false">
+                              5 min
+                          </button>
 
-                        <div class="countdown-time-field">
-                            <label for="countdown-minutes">Minutes</label>
-                            <input
-                                id="countdown-minutes"
-                                type="number"
-                                min="0"
-                                max="59"
-                                step="1"
-                                value="30"
-                            >
-                        </div>
+                          <button class="countdown-preset" type="button" data-seconds="600" aria-pressed="false">
+                              10 min
+                          </button>
 
-                        <div class="countdown-time-field">
-                            <label for="countdown-seconds">Seconds</label>
-                            <input
-                                id="countdown-seconds"
-                                type="number"
-                                min="0"
-                                max="59"
-                                step="1"
-                                value="0"
-                            >
-                        </div>
-                    </div>
+                          <button class="countdown-preset" type="button" data-seconds="900" aria-pressed="false">
+                              15 min
+                          </button>
 
-                    <p id="tool-message" class="tool-widget-note">
-                        Set your time, then start the countdown.
-                    </p>
+                          <button class="countdown-preset" type="button" data-seconds="1800" aria-pressed="false">
+                              30 min
+                          </button>
 
-                    <div class="tool-widget-actions">
-                        <button id="tool-action-button" class="tool-button" type="button">Start Countdown</button>
-                        <button id="tool-reset-button" class="tool-button" type="button">Reset</button>
-                    </div>
+                          <button class="countdown-preset" type="button" data-seconds="2700" aria-pressed="false">
+                              45 min
+                          </button>
+
+                          <button class="countdown-preset" type="button" data-seconds="3600" aria-pressed="false">
+                              1 hr
+                          </button>
+                      </div>
+
+                      <div class="countdown-time-controls" aria-label="Countdown time settings">
+                          <div class="countdown-time-field">
+                              <label for="countdown-hours">Hours</label>
+                              <input
+                                  id="countdown-hours"
+                                  type="number"
+                                  min="0"
+                                  max="99"
+                                  step="1"
+                                  value="0"
+                              >
+                          </div>
+
+                          <div class="countdown-time-field">
+                              <label for="countdown-minutes">Minutes</label>
+                              <input
+                                  id="countdown-minutes"
+                                  type="number"
+                                  min="0"
+                                  max="59"
+                                  step="1"
+                                  value="30"
+                              >
+                          </div>
+
+                          <div class="countdown-time-field">
+                              <label for="countdown-seconds">Seconds</label>
+                              <input
+                                  id="countdown-seconds"
+                                  type="number"
+                                  min="0"
+                                  max="59"
+                                  step="1"
+                                  value="0"
+                              >
+                          </div>
+                      </div>
+
+                  </div>
+
+                  <div id="countdown-active" class="countdown-active" hidden>
+
+                      <div class="countdown-progress">
+
+                          <svg
+                              class="countdown-progress-ring"
+                              viewBox="0 0 200 200"
+                              aria-hidden="true"
+                          >
+                            <circle
+                                class="countdown-progress-track"
+                                cx="100"
+                                cy="100"
+                                r="88"
+                            ></circle>
+
+                            <circle
+                                id="countdown-progress-glow"
+                                class="countdown-progress-glow"
+                                cx="100"
+                                cy="100"
+                                r="88"
+                            ></circle>
+
+                            <circle
+                                id="countdown-progress-value"
+                                class="countdown-progress-value"
+                                cx="100"
+                                cy="100"
+                                r="88"
+                            ></circle>
+                          </svg>
+
+                          <p id="tool-result" class="countdown-progress-time">
+                              00:00:00
+                          </p>
+
+                      </div>
+
+                  </div>
+
+                  <div class="countdown-quick-add" aria-label="Add time">
+                      <button class="countdown-add" type="button" data-add-seconds="30">
+                          +30 sec
+                      </button>
+
+                      <button class="countdown-add" type="button" data-add-seconds="60">
+                          +1 min
+                      </button>
+
+                      <button class="countdown-add" type="button" data-add-seconds="300">
+                          +5 min
+                      </button>
+                  </div>
+
+                  <p id="tool-message" class="tool-widget-note">
+                      Set your time, then start the countdown.
+                  </p>
+
+                  <div class="tool-widget-actions countdown-actions">
+                      <button
+                          id="tool-action-button"
+                          class="tool-button countdown-action-button"
+                          type="button"
+                          aria-label="Start countdown"
+                          title="Start countdown"
+                      >
+                          <i class="fa-solid fa-play" aria-hidden="true"></i>
+                      </button>
+
+                      <button
+                          id="tool-stop-button"
+                          class="tool-button countdown-action-button"
+                          type="button"
+                          aria-label="Stop countdown"
+                          title="Stop countdown"
+                          disabled
+                      >
+                          <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                      </button>
+
+                      <button
+                          id="tool-reset-button"
+                          class="tool-button countdown-action-button"
+                          type="button"
+                          aria-label="Reset countdown"
+                          title="Reset countdown"
+                      >
+                          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                      </button>
+                  </div>
                 </div>
               </div>
             </div>

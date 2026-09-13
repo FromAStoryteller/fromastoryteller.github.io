@@ -5,7 +5,14 @@ const minutesInput = document.getElementById("countdown-minutes")
 const secondsInput = document.getElementById("countdown-seconds")
 const messageElement = document.getElementById("tool-message")
 const startButton = document.getElementById("tool-action-button")
+const stopButton = document.getElementById("tool-stop-button")
 const resetButton = document.getElementById("tool-reset-button")
+const presetButtons = document.querySelectorAll(".countdown-preset")
+const quickAddButtons = document.querySelectorAll(".countdown-add")
+const setupElement = document.getElementById("countdown-setup")
+const activeElement = document.getElementById("countdown-active")
+const progressCircle = document.getElementById("countdown-progress-value")
+const progressGlow = document.getElementById("countdown-progress-glow")
 
 // === AUDIO ===
 const completeSound = new Audio("/assets/sounds/tools/countdown/countdown-complete.wav")
@@ -14,7 +21,9 @@ completeSound.loop = false
 
 // === STATE ===
 let remainingSeconds = 0
+let initialSeconds = 0
 let countdownInterval = null
+let alarmIsPlaying = false
 
 // === FUNCTIONS ===
 function getCountdownInputValues() {
@@ -96,6 +105,7 @@ function setupWholeNumberInput(input) {
 
     input.addEventListener("input", () => {
         cleanWholeNumberInput(input)
+        clearSelectedPreset()
     })
 }
 
@@ -111,22 +121,38 @@ function startCountdown(totalSeconds) {
     stopCompleteSound()
 
     remainingSeconds = totalSeconds
+
+    if (initialSeconds === 0) {
+        initialSeconds = totalSeconds
+    }
+
     resultElement.textContent = formatTime(remainingSeconds)
+
+    const nextVisualSecond = Math.max(remainingSeconds - 1, 0)
+    updateProgressRing(nextVisualSecond)
+
+    setCountdownView("active")
+    setActionButtonsForState("playing")
+
     messageElement.textContent = "Countdown running."
-    startButton.textContent = "Pause Countdown"
     setInputsDisabled(true)
+    stopButton.disabled = false
 
     countdownInterval = setInterval(() => {
         remainingSeconds--
 
         resultElement.textContent = formatTime(remainingSeconds)
+        
+        const nextVisualSecond = Math.max(remainingSeconds - 1, 0)
+        updateProgressRing(nextVisualSecond)
 
         if (remainingSeconds <= 0) {
             stopCountdown()
+            setCountdownView("setup")
             messageElement.textContent = "Countdown complete."
-            startButton.textContent = "Start Countdown"
             setInputsDisabled(false)
             playCompleteSound()
+            setAlarmCompleteState()
         }
     }, 1000)
 }
@@ -134,8 +160,28 @@ function startCountdown(totalSeconds) {
 function pauseCountdown() {
     stopCountdown()
 
-    startButton.textContent = "Resume Countdown"
+    setActionButtonsForState("paused")
     messageElement.textContent = "Countdown paused."
+}
+
+function stopAndRestoreCountdown() {
+    stopCountdown()
+    stopCompleteSound()
+
+    remainingSeconds = 0
+
+    resultElement.textContent = formatTime(initialSeconds)
+    setTimeInputsFromSeconds(initialSeconds)
+
+    setCountdownView("setup")
+
+    messageElement.textContent = "Countdown stopped."
+
+    setActionButtonsForState("setup")
+    setInputsDisabled(false)
+
+    stopButton.disabled = true
+    initialSeconds = 0
 }
 
 function resetCountdown() {
@@ -150,21 +196,34 @@ function resetCountdown() {
     minutesInput.value = 30
     secondsInput.value = 0
 
+    setCountdownView("setup")
+
     messageElement.textContent = "Set your time, then start the countdown."
-    startButton.textContent = "Start Countdown"
+    setActionButtonsForState("setup")
     setInputsDisabled(false)
+
+    initialSeconds = 0
+    stopButton.disabled = true
+
+    clearSelectedPreset()
 }
 
 function setInputsDisabled(isDisabled) {
     hoursInput.disabled = isDisabled
     minutesInput.disabled = isDisabled
     secondsInput.disabled = isDisabled
+
+    presetButtons.forEach((button) => {
+        button.disabled = isDisabled
+    })
 }
 
 function playCompleteSound() {
     completeSound.currentTime = 0
+    alarmIsPlaying = true
 
     completeSound.play().catch(() => {
+        alarmIsPlaying = false
         console.warn("Countdown complete sound could not play.")
     })
 }
@@ -172,6 +231,154 @@ function playCompleteSound() {
 function stopCompleteSound() {
     completeSound.pause()
     completeSound.currentTime = 0
+    alarmIsPlaying = false
+}
+
+function setStartButtonState(state) {
+    const icon = startButton.querySelector("i")
+
+    if (state === "playing") {
+        icon.className = "fa-solid fa-pause"
+        startButton.setAttribute("aria-label", "Pause countdown")
+        startButton.setAttribute("title", "Pause countdown")
+        return
+    }
+
+    icon.className = "fa-solid fa-play"
+
+    if (state === "paused") {
+        startButton.setAttribute("aria-label", "Resume countdown")
+        startButton.setAttribute("title", "Resume countdown")
+        return
+    }
+
+    startButton.setAttribute("aria-label", "Start countdown")
+    startButton.setAttribute("title", "Start countdown")
+}
+
+function setTimeInputsFromSeconds(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    hoursInput.value = hours
+    minutesInput.value = minutes
+    secondsInput.value = seconds
+}
+
+function setSelectedPreset(selectedButton) {
+    presetButtons.forEach((button) => {
+        button.setAttribute(
+            "aria-pressed",
+            button === selectedButton ? "true" : "false"
+        )
+    })
+}
+
+function clearSelectedPreset() {
+    presetButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", false)
+    })
+}
+
+function getCurrentTotalSeconds() {
+    if (remainingSeconds > 0) {
+        return remainingSeconds
+    }
+
+    const countdownTime = getCountdownInputValues()
+
+    return getTotalSeconds(
+        countdownTime.hours,
+        countdownTime.minutes,
+        countdownTime.seconds
+    )
+}
+
+function setCountdownView(state) {
+    const isActive = state === "active"
+
+    setupElement.hidden = isActive
+    activeElement.hidden = !isActive
+}
+
+function setActionButtonsForState(state) {
+    const isSetup = state === "setup"
+    const isPlaying = state === "playing"
+    const isPaused = state === "paused"
+
+    const stopIcon = stopButton.querySelector("i")
+
+    stopIcon.className = "fa-solid fa-stop"
+    stopButton.setAttribute("aria-label", "Stop countdown")
+    stopButton.setAttribute("title", "Stop countdown")
+
+    startButton.hidden = false
+    stopButton.hidden = isSetup
+    resetButton.hidden = !isSetup
+
+    if (isPlaying) {
+        setStartButtonState("playing")
+    } else if (isPaused) {
+        setStartButtonState("paused")
+    } else {
+        setStartButtonState("ready")
+    }
+}
+
+function setAlarmCompleteState() {
+    startButton.hidden = true
+    resetButton.hidden = true
+    stopButton.hidden = false
+    stopButton.disabled = false
+
+    const icon = stopButton.querySelector("i")
+
+    icon.className = "fa-solid fa-volume-xmark"
+
+    stopButton.setAttribute("aria-label", "Stop alarm")
+    stopButton.setAttribute("title", "Stop alarm")
+}
+
+function updateProgressRing(displaySeconds = remainingSeconds) {
+    if (!progressCircle || !progressGlow || initialSeconds <= 0) {
+        return
+    }
+
+    const radius = progressCircle.r.baseVal.value
+    const circumference = 2 * Math.PI * radius
+
+    const progress = Math.max(
+        0,
+        Math.min(displaySeconds / initialSeconds, 1)
+    )
+
+    const progressOffset =
+        circumference * (1 - progress)
+
+    progressCircle.style.strokeDasharray =
+        circumference
+
+    progressCircle.style.strokeDashoffset =
+        -progressOffset
+
+    /*
+     * Keep the glow just behind the moving edge,
+     * entirely on the already-used/gold side.
+     */
+    const glowLength = 7
+
+    const glowPosition =
+        circumference * progress - glowLength
+
+    progressGlow.style.strokeDasharray =
+        `${glowLength} ${circumference - glowLength}`
+
+    progressGlow.style.strokeDashoffset =
+        glowPosition
+
+    progressGlow.style.opacity =
+        progress > 0 && progress < 1 ? 0.35 : 0
 }
 
 // === EVENT LISTENERS ===
@@ -182,11 +389,56 @@ if (
     secondsInput &&
     messageElement &&
     startButton &&
-    resetButton
+    stopButton &&
+    resetButton &&
+    setupElement &&
+    activeElement &&
+    progressCircle &&
+    progressGlow
 ) {
     setupWholeNumberInput(hoursInput)
     setupWholeNumberInput(minutesInput)
     setupWholeNumberInput(secondsInput)
+
+    setActionButtonsForState("setup")
+
+    presetButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const totalSeconds = Number(button.dataset.seconds)
+
+            setTimeInputsFromSeconds(totalSeconds)
+            resultElement.textContent = formatTime(totalSeconds)
+
+            remainingSeconds = 0
+            initialSeconds = 0
+
+            setSelectedPreset(button)
+
+            messageElement.textContent = "Countdown time updated."
+        })
+    })
+
+    quickAddButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const secondsToAdd = Number(button.dataset.addSeconds)
+            const currentSeconds = getCurrentTotalSeconds()
+            const updatedSeconds = currentSeconds + secondsToAdd
+
+            remainingSeconds = updatedSeconds
+
+            if (initialSeconds > 0) {
+                initialSeconds += secondsToAdd
+            }
+
+            setTimeInputsFromSeconds(updatedSeconds)
+            resultElement.textContent = formatTime(updatedSeconds)
+            updateProgressRing()
+
+            clearSelectedPreset()
+
+            messageElement.textContent = `Added ${button.textContent.trim()}`
+        })
+    })
 
     startButton.addEventListener("click", () => {
         if (countdownInterval) {
@@ -213,6 +465,19 @@ if (
         }
 
         startCountdown(totalSeconds)
+    })
+
+    stopButton.addEventListener("click", () => {
+        if (alarmIsPlaying) {
+            stopCompleteSound()
+
+            setActionButtonsForState("setup")
+            messageElement.textContent = "Countdown complete."
+
+            return
+        }
+        
+        stopAndRestoreCountdown()
     })
 
     resetButton.addEventListener("click", () => {

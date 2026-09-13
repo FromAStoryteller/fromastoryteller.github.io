@@ -1,0 +1,500 @@
+.tool-widget {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--border-width-default)
+    14rem;
+
+  grid-template-rows:
+    var(--size-touch-target-minimum)
+    1fr
+    var(--size-touch-target-minimum);
+
+  grid-template-areas:
+    "state divider quick"
+    "state divider message"
+    "state divider actions";
+
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
+
+  width: 100%;
+  min-width: 0;
+
+  align-items: center;
+  justify-items: stretch;
+}
+
+.tool-widget::after {
+  content: "";
+
+  grid-area: divider;
+
+  width: var(--border-width-default);
+  height: 17rem;
+
+  background: var(--colour-control-border);
+  opacity: 0.45;
+
+  justify-self: center;
+  align-self: center;
+
+  pointer-events: none;
+}
+
+
+/* === TIME FIELDS === */
+
+.countdown-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  min-width: 0;
+}
+
+.countdown-time-field label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
+  color: var(--colour-text-secondary);
+  text-align: center;
+}
+
+.countdown-time-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--size-touch-target-minimum);
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  font: inherit;
+  font-size: var(--font-size-md);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keep number values visually centred by hiding browser spinner controls. */
+.countdown-time-field input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.countdown-time-field input[type="number"]::-webkit-inner-spin-button,
+.countdown-time-field input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+
+/* === MESSAGE === */
+
+#tool-message {
+  grid-area: message;
+
+  min-height: 1.5em;
+  margin: 0;
+
+  text-align: center;
+
+  align-self: center;
+}
+
+
+/* === ACTION BUTTONS === */
+
+.countdown-actions {
+  grid-area: actions;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: var(--size-touch-target-minimum);
+  margin: 0;
+
+  align-self: center;
+}
+
+.countdown-action-button {
+  flex: 0 0 var(--size-touch-target-minimum);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--size-touch-target-minimum);
+  height: var(--size-touch-target-minimum);
+  min-width: var(--size-touch-target-minimum);
+
+  padding: 0;
+
+  border-radius: var(--radius-round);
+}
+
+.countdown-action-button i {
+  font-size: var(--size-icon-sm);
+  line-height: 1;
+}
+
+
+/* === PRESETS === */
+
+.countdown-presets {
+  grid-row: 1;
+
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-1);
+
+  width: 100%;
+  max-width: 29rem;
+
+  margin: 0 auto;
+}
+
+.countdown-preset {
+  width: 100%;
+  height: var(--size-touch-target-minimum);
+  min-width: 0;
+
+  padding: 0 var(--space-1);
+
+  border: var(--border-width-default) solid var(--colour-control-border);
+  border-radius: var(--radius-round);
+
+  background: var(--colour-control-background);
+  color: var(--colour-control-text);
+
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background var(--duration-normal),
+    border-color var(--duration-normal),
+    color var(--duration-normal),
+    transform var(--duration-fast);
+}
+
+.countdown-preset:hover:not(:disabled) {
+  background: var(--state-hover-background);
+  border-color: var(--colour-control-border-hover);
+  color: var(--state-hover-colour);
+
+  transform: translateY(-1px);
+}
+
+.countdown-preset:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.countdown-preset[aria-pressed="true"] {
+  background: var(--state-selected-background);
+  color: var(--state-selected-colour);
+  border-color: var(--state-selected-background);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+.countdown-preset[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--colour-accent-primary-hover);
+  border-color: var(--colour-accent-primary-hover);
+  color: var(--state-selected-colour);
+}
+
+
+/* === MANUAL TIME CONTROLS === */
+
+.countdown-time-controls {
+  grid-row: 2 / 4;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+
+  width: 100%;
+  max-width: 27rem;
+
+  margin: 0 auto;
+
+  align-self: center;
+}
+
+
+/* === QUICK ADD === */
+
+.countdown-quick-add {
+  grid-area: quick;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+
+  width: 100%;
+  max-width: 14rem;
+  min-width: 0;
+  min-height: var(--size-touch-target-minimum);
+
+  margin: 0 auto;
+}
+
+.countdown-add {
+  width: 100%;
+  height: var(--size-touch-target-minimum);
+  min-width: 0;
+
+  padding: 0 var(--space-1);
+
+  border: var(--border-width-default) solid var(--colour-control-border);
+  border-radius: var(--radius-md);
+
+  background: transparent;
+  color: var(--colour-control-text);
+
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background var(--duration-normal),
+    border-color var(--duration-normal),
+    color var(--duration-normal),
+    transform var(--duration-fast);
+}
+
+.countdown-add:hover:not(:disabled) {
+  background: var(--state-hover-background);
+  border-color: var(--colour-control-border-hover);
+  color: var(--state-hover-colour);
+
+  transform: translateY(-1px);
+}
+
+.countdown-add:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* === SETUP / ACTIVE STATE === */
+
+.countdown-setup,
+.countdown-active {
+  grid-area: state;
+
+  width: 100%;
+  min-width: 0;
+  height: 17rem;
+}
+
+.countdown-setup:not([hidden]) {
+  display: grid;
+
+  grid-template-rows:
+    var(--size-touch-target-minimum)
+    1fr
+    var(--size-touch-target-minimum);
+
+  row-gap: var(--space-3);
+
+  align-items: center;
+  justify-items: center;
+}
+
+.countdown-active:not([hidden]) {
+  display: grid;
+  place-items: center;
+}
+
+
+/* === PROGRESS RING === */
+
+.countdown-progress {
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  width: min(17rem, 92%);
+  aspect-ratio: 1;
+
+  margin: 0 auto;
+}
+
+.countdown-progress-ring {
+  width: 100%;
+  height: 100%;
+
+  overflow: visible;
+}
+
+.countdown-progress-track,
+.countdown-progress-value {
+  fill: none;
+
+  stroke-width: 12;
+
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.countdown-progress-track {
+  stroke: var(--colour-control-border);
+}
+
+.countdown-progress-value {
+  stroke: var(--colour-accent-primary);
+  stroke-linecap: round;
+
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdown-progress-time {
+  position: absolute;
+
+  margin: 0;
+
+  color: var(--colour-text-primary);
+
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Soft light behind the moving edge of the progress bar. */
+.countdown-progress-glow {
+  fill: none;
+
+  stroke: #f3d77a;
+  stroke-width: 18;
+  stroke-linecap: round;
+
+  opacity: 0.35;
+
+  filter:
+    blur(4px)
+    drop-shadow(0 0 4px #f3d77a)
+    drop-shadow(0 0 8px rgba(243, 215, 122, 0.45));
+
+  pointer-events: none;
+
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+
+  transition:
+    stroke-dashoffset 1s linear,
+    opacity var(--duration-normal);
+}
+
+
+/* === STACKED LAYOUT === */
+
+@media (max-width: 60rem) {
+  .tool-widget {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+
+    grid-template-areas:
+      "state"
+      "quick"
+      "message"
+      "actions";
+
+    row-gap: var(--space-4);
+
+    justify-items: center;
+  }
+
+  .tool-widget::after {
+    display: none;
+  }
+
+  .countdown-setup,
+  .countdown-active {
+    height: 14rem;
+  }
+
+  .countdown-setup:not([hidden]) {
+    display: grid;
+
+    grid-template-rows: auto auto;
+    row-gap: var(--space-4);
+
+    place-content: center;
+  }
+
+  .countdown-active:not([hidden]) {
+    display: grid;
+    place-items: center;
+  }
+
+  .countdown-presets {
+    grid-row: auto;
+
+    max-width: 30rem;
+  }
+
+  .countdown-time-controls {
+    grid-row: auto;
+
+    max-width: 28rem;
+  }
+
+  .countdown-progress {
+    width: min(13.5rem, 68vw);
+  }
+
+  .countdown-quick-add {
+    max-width: 16rem;
+  }
+}
+
+
+/* === MOBILE === */
+
+@media (max-width: 30rem) {
+  .countdown-setup,
+  .countdown-active {
+    height: auto;
+    min-height: 13rem;
+  }
+
+  .countdown-presets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+
+    width: 100%;
+    max-width: 20rem;
+  }
+
+  .countdown-preset {
+    font-size: var(--font-size-sm);
+  }
+
+  .countdown-time-controls {
+    gap: var(--space-2);
+  }
+
+  .countdown-time-field input {
+    font-size: var(--font-size-base);
+    padding-inline: var(--space-2);
+  }
+
+  .countdown-progress {
+    width: min(12.5rem, 68vw);
+  }
+
+  .countdown-quick-add {
+    max-width: 15rem;
+  }
+}
