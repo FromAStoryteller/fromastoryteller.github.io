@@ -57,7 +57,8 @@
       "icon": "fa-solid fa-gamepad",
       "template": "_template/studio/games.html",
       "styles": [
-        "games/games.css"
+        "games/games.css",
+        "stories/stories.css"
       ],
       "openGraphType": "website"
     },

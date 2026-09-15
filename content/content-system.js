@@ -1,3 +1,4 @@
+import { readingTimeLabel } from "./reading-time.mjs"
 import {isKeyboardInteraction} from "../scripts/focus.js"
 
 // ==================================
@@ -72,6 +73,7 @@ function normalizeContentMeta(meta) {
         author: meta.author || "",
         authorDisplay: meta.authorDisplay || "",
         publisher: meta.publisher || "",
+        readingMinutes: Number(meta.readingMinutes) || 0,
         image: {
             src: meta.image?.src || "",
             alt: meta.image?.alt || "",
@@ -116,11 +118,11 @@ async function loadMetaFile(metaPath) {
 }
 
 async function loadAllContent() {
-    const metaPaths = await loadContentIndex()
+    const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
     const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
     if (metaPaths.length && !loaded.length) throw new Error("No content metadata could be loaded")
-    return loaded
+    return loaded.map(item => ({...item, readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
 }
 
 // ----- SORT / FILTER -----
@@ -296,67 +298,44 @@ function getHomeFeaturedItems(items) {
     return selectedItems.sort((a, b) => parseDate(b.datePublished) - parseDate(a.datePublished))
 }
 
+function cardTypeLabel(item) {
+    const type = item.category === "stories" ? "Story" : formatLabel(item.type || item.category)
+    const time = item.category === "stories" ? readingTimeLabel(item.readingMinutes) : ""
+    return time ? type + " · " + time : type
+}
+
 function createFeaturedPanelMarkup(item, label = "Featured") {
     if (!item) return ""
-
-    const primaryActionLabel = getPrimaryActionLabel(item)
-
-    const featuredTags = item.card.tags.slice(0, 2).map(tag => `
-        <span>${escapeHtml(tag)}</span>
-    `).join("")
-
+    const type = cardTypeLabel(item)
     return `
-        <div class="content-featured-text">
-            <div class="content-featured-text-inner">
-                <p class="content-featured-label">
-                    <i class="fa-solid fa-star"></i> ${escapeHtml(label)}
-                </p>
-
-                <h2>${escapeHtml(item.title)}</h2>
-
-                <p class="content-featured-description">
-                    ${escapeHtml(item.description || item.card.description)}
-                </p>
-
-                <div class="content-featured-tags">
-                    ${featuredTags}
-                </div>
-
-                <div class="content-featured-actions">
-                    <a href="${escapeHtml(item.url)}" class="btn-primary">${escapeHtml(primaryActionLabel)}</a>
+        <a class="content-featured-link image-overlay" href="${escapeHtml(item.url)}" aria-label="${escapeHtml(getPrimaryActionLabel(item) + ': ' + item.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
+            <div class="content-featured-media image-overlay__media">
+                <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}" fetchpriority="high" decoding="async">
+            </div>
+            <div class="content-featured-text image-overlay__content">
+                <div class="content-featured-text-inner">
+                    <p class="content-featured-label image-overlay__label">Featured · ${escapeHtml(type)}</p>
+                    <h2>${escapeHtml(item.title)}</h2>
+                    <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>
+                    <span class="content-featured-action"><span class="content-featured-action-label">${escapeHtml(getPrimaryActionLabel(item))}</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
                 </div>
             </div>
-        </div>
-
-        <div class="content-featured-media">
-            <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}">
-        </div>
+        </a>
     `
 }
 
 function createCardMarkup(item, variant = "standard") {
-    const cardVariant = variant === "compact" ? "compact" : "standard"
-    const tagsMarkup = item.card.tags.slice(0, 2).map(tag => `
-        <span>${escapeHtml(tag)}</span>
-    `).join("")
-
+    const cardVariant = "standard"
     return `
         <article class="content-grid-card content-card--${cardVariant}">
-            <a href="${escapeHtml(item.url)}" class="content-grid-card-link">
-                <div class="content-grid-card-image">
+            <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
+                <div class="content-grid-card-image image-overlay__media">
                     <img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">
-                    <span class="content-grid-card-banner">
-                        <i class="${escapeHtml(item.card.icon)}"></i>
-                    </span>
                 </div>
-
-                <div class="content-grid-card-body">
+                <div class="content-grid-card-body image-overlay__content">
+                    <span class="image-overlay__label">${escapeHtml(cardTypeLabel(item))}</span>
                     <h3>${escapeHtml(item.card.title)}</h3>
-                    <p>${escapeHtml(item.card.description)}</p>
-
-                    <div class="content-grid-card-tags">
-                        ${tagsMarkup}
-                    </div>
+                    ${cardVariant === "standard" ? `<p class="content-grid-card-excerpt">${escapeHtml(item.card.description || item.excerpt || item.description)}</p>` : ""}
                 </div>
             </a>
         </article>
@@ -539,7 +518,7 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", vari
         return
     }
 
-    container.classList.toggle("content-grid--compact", variant === "compact")
+    container.classList.remove("content-grid--compact")
     container.innerHTML = items.map(item => createCardMarkup(item, variant)).join("")
 }
 
@@ -686,7 +665,7 @@ export async function initRelatedContentSection(config) {
         const filteredItems = sortedContent.filter(item => item.id !== currentContentId)
         const relatedItems = filteredItems.slice(0, limit)
 
-        renderGrid(gridSelector, relatedItems, emptyMessage, "compact")
+        renderGrid(gridSelector, relatedItems, emptyMessage)
     } catch (error) {
         console.error("Error loading related content:", error)
 

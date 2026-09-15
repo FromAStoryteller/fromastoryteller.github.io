@@ -329,10 +329,8 @@ body.shell-open { overflow: hidden; }
 
 /* Shared responsive browsing and recommendation grids. */
 .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
-.content-grid--compact { gap: var(--space-4); }
 @media (max-width: 75rem) { .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 47.999rem) { .content-grid { grid-template-columns: minmax(0, 1fr); } .content-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 37.5rem) { .content-grid--compact { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 47.999rem) { .content-grid { grid-template-columns: minmax(0, 1fr); } }
 .content-page-hero, .about-hero, .contact-hero, .privacy-hero, .terms-hero, .search-hero, .tool-hero, .game-hero, .story-header {
   margin-block: 0 var(--hero-after);
 }

@@ -63,7 +63,8 @@
       href="/assets/fontawesome/css/solid.min.css"
     >
 
-  </head>
+  <script type="module" src="/stories/reading-time.js"></script>
+</head>
 
   <!-- BODY -->
   <body id="top">
@@ -175,46 +176,38 @@
         <article class="story-page">
 
           <!-- STORY HEADER -->
-          <header class="story-header">
-
-            <a href="/stories/" class="story-back-link">
+          <a href="/stories/" class="story-back-link">
               <i class="fa-solid fa-arrow-left"></i>
               <span>Back to Stories</span>
             </a>
-
-            <p class="story-category">
-              <i class="fa-solid fa-book-open"></i>
-              Story
-            </p>
-
-            <h1>Michael's Choice</h1>
-
-            <p class="story-intro">
-              An original story by From A Storyteller.
-            </p>
-
-            <div class="story-meta">
-              <span class="story-author">
-                <i class="fa-solid fa-feather-pointed"></i>
-                From A Storyteller
-              </span>
-
-              <time datetime="2026-08-16" class="story-date">
-                <i class="fa-regular fa-calendar"></i>
-                16 August 2026
-              </time>
-
-            </div>
-
-          </header>
-
-          <!-- FEATURE IMAGE -->
-          <figure class="story-feature-image">
+<header class="story-header">
+  <div class="story-hero image-overlay">
+    <figure class="story-feature-image image-overlay__media">
             <img
               src="/assets/images/stories/michaels-choice.png"
               alt="Featured artwork for Michael's Choice"
             >
           </figure>
+    <div class="story-hero-copy image-overlay__content"><p class="story-category">
+              <i class="fa-solid fa-book-open"></i>
+              Story
+            </p>
+
+            <h1>Michael's Choice</h1></div>
+  </div>
+  <div class="story-meta">
+<span class="story-author">
+                <i class="fa-solid fa-feather-pointed"></i>
+                From A Storyteller
+              </span>
+<span data-story-reading-time><i class="fa-solid fa-clock" aria-hidden="true"></i>22 min read</span>
+<time datetime="2026-08-16" class="story-date">
+                <i class="fa-regular fa-calendar"></i>
+                16 August 2026
+              </time>
+
+            </div>
+</header>
 
           <!-- STORY CONTENT -->
           <section class="story-content">

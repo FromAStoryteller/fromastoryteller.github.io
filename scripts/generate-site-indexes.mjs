@@ -1,3 +1,4 @@
+import { readingTimeFromHtml, storyBodyHtml, readingTimeMarkup } from "../content/reading-time.mjs";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -270,13 +271,13 @@ function generateStaticHtml(items) {
         html = replaceGenerated(html, featuredId, panel, 'section');
       }
     }
-    // Related content uses the same compact renderer before and after hydration.
+    // Related content uses the same standard renderer before and after hydration.
     const relatedId = html.match(/id=["'](related-content-grid|story-related-grid)["']/)?.[1];
     if (relatedId) {
       const currentId = html.match(/data-current-content-id=["']([^"']+)["']/)?.[1] || '';
       const related = content.filter(item => item.id !== currentId).slice(0, 6);
-      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item, 'compact')).join('\n'), 'div');
-      html = html.replace(new RegExp(`(id=["']${relatedId}["'][^>]*class=["'])([^"']*)`), (_, before, classes) => before + (classes.includes('content-grid--compact') ? classes : classes + ' content-grid--compact'));
+      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item)).join('\n'), 'div');
+      html = html.replace(new RegExp(`(id=["']${relatedId}["'][^>]*class=["'])([^"']*)`), (_, before, classes) => before + classes.replace(/\s*content-grid--compact\b/g, ''));
     }
     html = html.replace(/<body(?![^>]*\bid=)\b/, '<body id="top"');
     html = html.replace(/<main\b([^>]*)>/, (tag, attrs) => /\bid=/.test(attrs) ? tag : `<main id="main-content" tabindex="-1"${attrs}>`);
@@ -393,6 +394,24 @@ function main() {
   validateStaticPages();
 
   const publishedItems = getPublishedItems();
+  const times = {};
+  for (const item of publishedItems.filter(item => item.meta.category === "stories")) {
+    const pagePath = join(ROOT, item.url.replace(/^\//, ""), "index.html");
+    let html = readFileSync(pagePath, "utf8");
+    const body = storyBodyHtml(html);
+    if (body === null) fail("Missing story prose: " + item.url);
+    const estimate = readingTimeFromHtml(body);
+    times[item.meta.id] = estimate;
+    item.meta.readingMinutes = estimate.minutes;
+    const label = '<span data-story-reading-time>' + readingTimeMarkup(estimate.minutes) + '</span>';
+    html = html.replace(/(<(?:div|p) class="story-meta">)([\s\S]*?)(<\/(?:div|p)>)/, (_, open, body, close) => {
+      const clean = body.replace(/\s*<span\b[^>]*data-story-reading-time[^>]*>[\s\S]*?<\/span>\s*/g, '\n');
+      return open + (clean.includes('<time') ? clean.replace('<time', label + '\n<time') : clean + label) + close;
+    });
+    if (!html.includes('/stories/reading-time.js')) html = html.replace('</head>', '<script type="module" src="/stories/reading-time.js"></script>\n</head>');
+    writeIfChanged(pagePath, html);
+  }
+  writeIfChanged(join(ROOT, "content/story-reading-times.json"), JSON.stringify(times, null, 2) + "\n");
   generateStaticHtml(publishedItems);
   const contentIndexChanged = writeIfChanged(
     CONTENT_INDEX_PATH,

@@ -97,6 +97,7 @@
   --colour-forest-light: #B9DEC3;
   --colour-forest-dark: #182E24;
 
+  --colour-parchment: #E3D5B8;
   --colour-neutral-050: #FFFAF0;
   --colour-neutral-100: #F4EEDF;
   --colour-neutral-200: #EAE1D1;
@@ -419,7 +420,7 @@
   --colour-overlay: rgb(13 16 23 / 72%);
   --colour-backdrop: rgb(13 16 23 / 60%);
 
-  --colour-text-primary: #E3D5B8;
+  --colour-text-primary: var(--colour-parchment);
   --colour-text-secondary: #CFC5B4;
   --colour-text-muted: #B9B0A2;
   --colour-text-inverse: #182A46;
@@ -508,7 +509,7 @@
     --colour-overlay: rgb(13 16 23 / 72%);
     --colour-backdrop: rgb(13 16 23 / 60%);
 
-    --colour-text-primary: #E3D5B8;
+    --colour-text-primary: var(--colour-parchment);
     --colour-text-secondary: #CFC5B4;
     --colour-text-muted: #B9B0A2;
     --colour-text-inverse: #182A46;
@@ -851,14 +852,20 @@ main[tabindex="-1"]:focus-visible {
    ========================================================= */
 
 :root {
-  --card-ratio-standard: 16 / 9;
-  --card-ratio-featured: 16 / 7;
-  --card-ratio-compact: 1;
+  --content-artwork-ratio: 16 / 9;
+  --card-ratio-standard: var(--content-artwork-ratio);
+  --card-ratio-featured: var(--content-artwork-ratio);
+  --card-ratio-compact: var(--content-artwork-ratio);
+  --width-featured: 50rem;
+  --width-story-hero: 54rem;
+  /* Website master: 1920 × 1080. Existing files are cropped only in CSS. */
+  --colour-overlay-text: var(--colour-parchment);
+  --colour-overlay-accent: var(--colour-gold-light);
+  --colour-overlay-scrim: color-mix(in srgb, var(--colour-walnut-dark) 75%, var(--colour-midnight-dark));
 
   --card-title-lines: 2;
   --card-excerpt-lines: 2;
 
-  --card-thumbnail-size: 5.5rem;
   --card-padding: var(--space-5);
   --card-gap: var(--space-3);
   --card-radius: var(--radius-xl);
@@ -896,4 +903,13 @@ main[tabindex="-1"]:focus-visible {
     background: var(--colour-neutral-100);
     color: var(--colour-midnight);
   }
+}
+/* Semantic overlay colours can also be supplied by future time-of-day themes. */
+[data-theme="dark"],
+[data-theme-mode="auto"][data-theme-period="dusk"],
+[data-theme-mode="auto"][data-theme-period="night"] {
+  --colour-overlay-scrim: var(--colour-midnight-dark);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) { --colour-overlay-scrim: var(--colour-midnight-dark); }
 }
