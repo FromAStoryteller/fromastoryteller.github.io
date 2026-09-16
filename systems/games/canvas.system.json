@@ -1,13 +1,13 @@
 {
-  "id": "layout",
+  "id": "canvas",
   "version": "1.0.0",
-  "category": "Layout",
-  "description": "Shared game layout helpers.",
-  "entry": "games/shared/layout.js",
+  "category": "Rendering",
+  "description": "Shared canvas setup and sizing.",
+  "entry": "systems/games/canvas.js",
   "capabilities": [
     {
-      "id": "layout",
-      "name": "Layout",
+      "id": "canvas",
+      "name": "Canvas",
       "integration": "review-required"
     }
   ],

@@ -1,13 +1,13 @@
 {
-  "id": "utils",
+  "id": "storage",
   "version": "1.0.0",
-  "category": "Utilities",
-  "description": "Reusable utility functions for game code.",
-  "entry": "games/shared/utils.js",
+  "category": "Persistence",
+  "description": "Shared local storage helpers.",
+  "entry": "systems/games/storage.js",
   "capabilities": [
     {
-      "id": "utilities",
-      "name": "Utilities",
+      "id": "local-saves",
+      "name": "Local saves",
       "integration": "review-required"
     }
   ],

@@ -1,13 +1,18 @@
 {
-  "id": "storage",
+  "id": "input",
   "version": "1.0.0",
-  "category": "Persistence",
-  "description": "Shared local storage helpers.",
-  "entry": "games/shared/storage.js",
+  "category": "Input",
+  "description": "Shared player input handling.",
+  "entry": "systems/games/input.js",
   "capabilities": [
     {
-      "id": "local-saves",
-      "name": "Local saves",
+      "id": "keyboard",
+      "name": "Keyboard",
+      "integration": "review-required"
+    },
+    {
+      "id": "pointer",
+      "name": "Pointer",
       "integration": "review-required"
     }
   ],

@@ -1,4 +1,4 @@
-import { initRelatedContentSection } from "/content/content-system.js"
+import { initRelatedContentSection } from "/systems/content/content-system.js"
 
 const relatedSection = document.querySelector("[data-current-content-id]")
 

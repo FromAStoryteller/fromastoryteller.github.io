@@ -1,12 +1,12 @@
 // === IMPORTS === //
-import { Menu } from "../shared/menu/index.js"
-import { Input } from "../shared/input.js"
-import { AudioManager } from "../shared/audio.js"
-import { CanvasManager } from "../shared/canvas.js"
-import { Layout } from "../shared/layout.js"
-import { Storage } from "../shared/storage.js"
-import { UI } from "../shared/ui.js"
-import { Utils } from "../shared/utils.js"
+import { Menu } from "../../systems/games/menu/index.js"
+import { Input } from "../../systems/games/input.js"
+import { AudioManager } from "../../systems/games/audio.js"
+import { CanvasManager } from "../../systems/games/canvas.js"
+import { Layout } from "../../systems/games/layout.js"
+import { Storage } from "../../systems/games/storage.js"
+import { UI } from "../../systems/games/ui.js"
+import { Utils } from "../../systems/games/utils.js"
 
 // === CONSTANTS === //
 const GAME_STATE = {

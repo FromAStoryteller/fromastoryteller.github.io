@@ -1,4 +1,4 @@
-import { initHomePage } from "/content/content-system.js"
+import { initHomePage } from "/systems/content/content-system.js"
 
 initHomePage({
     featuredSelector: "#home-featured",

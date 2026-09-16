@@ -4,7 +4,7 @@
 // Shared enhancements for individual story pages
 // =======================================
 
-import { initRelatedContentSection } from "/content/content-system.js"
+import { initRelatedContentSection } from "/systems/content/content-system.js"
 
 function getCurrentStoryId() {
     const explicitSection = document.querySelector("[data-current-content-id]")

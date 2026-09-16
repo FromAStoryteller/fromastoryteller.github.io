@@ -1,4 +1,4 @@
-import { initCategoryPage } from "/content/content-system.js"
+import { initCategoryPage } from "/systems/content/content-system.js"
 
 initCategoryPage({
     category: "tools",

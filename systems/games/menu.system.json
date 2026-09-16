@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "category": "Menu",
   "description": "Menu manager and screen definitions: main menu, pause, replay, settings and controls.",
-  "entry": "games/shared/menu/index.js",
+  "entry": "systems/games/menu/index.js",
   "capabilities": [
     {
       "id": "main-menu",

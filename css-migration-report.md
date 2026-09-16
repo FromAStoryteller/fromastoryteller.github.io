@@ -23,7 +23,7 @@ No GitHub commit or public deployment was performed.
 
 - `404.html`
 - `README.md`
-- `_template/page-template.html`
+- `_templates/page-template.html`
 - `about/index.html`
 - `blog/index.html`
 - `components/header.html`
@@ -38,7 +38,7 @@ No GitHub commit or public deployment was performed.
 - `games/rally-clash/index.html`
 - `index.html`
 - `privacy/index.html`
-- `scripts/story-theme-controls.js`
+- `systems/themes/theme.js` (theme-colour synchronization consolidated during the shared-system reorganisation)
 - `search/index.html`
 - `stories/a-place-left-behind/index.html`
 - `stories/crypt-of-the-blood-jewel/index.html`
@@ -76,7 +76,7 @@ Original copies are retained in the rollback folder outside the website.
 - `css/story-theme.css`
 - `blog/blog.css`
 - `videos/videos.css`
-- `games/_template/style.css`
+- `games/_templates/style.css`
 
 The root `style.css` no longer exists in the project. Its live rules have been
 migrated. The empty blog, video and game-template stylesheets were removed.
@@ -135,7 +135,7 @@ repeated shared information panels and superseded declarations were removed.
 - Finalise dawn/dusk colours, then implement sunrise/sunset timing and continuous transitions as a separate feature.
 - Review story reading width, title sizes and paragraph rhythm visually; existing reader geometry was retained.
 - The privacy page still describes requesting Gabriela from Google Fonts. Font requests are now self-hosted. This legal wording was intentionally left unchanged and needs a content review.
-- `games/_template/index.html` was empty before this work and remains empty; `_template/page-template.html` is the populated future-page template and now loads the four-file system.
+- `_templates/games/index.html` was empty before this work and remains empty; `_templates/page-template.html` is the populated future-page template and now loads the four-file system.
 
 ## Rollback
 

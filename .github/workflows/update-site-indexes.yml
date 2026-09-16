@@ -22,6 +22,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Check shared systems and references
+        run: |
+          npm test
+          npm run validate:references
+
       - name: Regenerate site indexes
         run: node scripts/generate-site-indexes.mjs
 

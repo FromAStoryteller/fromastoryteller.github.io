@@ -1,13 +1,13 @@
 {
-  "id": "canvas",
+  "id": "utils",
   "version": "1.0.0",
-  "category": "Rendering",
-  "description": "Shared canvas setup and sizing.",
-  "entry": "games/shared/canvas.js",
+  "category": "Utilities",
+  "description": "Reusable utility functions for game code.",
+  "entry": "systems/games/utils.js",
   "capabilities": [
     {
-      "id": "canvas",
-      "name": "Canvas",
+      "id": "utilities",
+      "name": "Utilities",
       "integration": "review-required"
     }
   ],

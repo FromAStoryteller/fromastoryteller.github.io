@@ -781,7 +781,8 @@ h6 {
   scroll-margin-top: 1rem;
 }
 
-:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
+/* Keep exclusions specificity-neutral so structural focus exceptions win. */
+:focus-visible:where(:not([data-restored-focus])) {
   outline: var(--state-focus-width) solid var(--colour-focus-ring);
   outline-offset: var(--state-focus-offset);
 }
@@ -791,8 +792,7 @@ main[tabindex="-1"]:focus-visible {
 }
 
 :focus:not(:focus-visible),
-[data-restored-focus]:focus,
-[data-escape-focus]:focus {
+[data-restored-focus]:focus {
   outline: none;
 }
 
@@ -838,7 +838,7 @@ main[tabindex="-1"]:focus-visible {
   border-color: var(--colour-control-border-hover);
 }
 
-:where(input, select, textarea):focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
+:where(input, select, textarea):focus-visible:where(:not([data-restored-focus])) {
   border-color: var(--colour-control-border-focus);
 }
 

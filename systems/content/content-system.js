@@ -1,5 +1,5 @@
-import { readingTimeLabel } from "./reading-time.mjs"
-import {isKeyboardInteraction} from "../scripts/focus.js"
+import { readingTimeLabel } from "../reading/reading-time.mjs"
+import {isKeyboardInteraction} from "../core/focus.js"
 
 // ==================================
 // SHARED CONTENT SYSTEM

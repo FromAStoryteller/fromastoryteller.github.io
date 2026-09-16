@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readingTimeFromHtml, storyBodyHtml} from '../content/reading-time.mjs';
+import {readingTimeFromHtml, storyBodyHtml} from '../systems/reading/reading-time.mjs';
 
 test('reading estimate rounds upward at the 225-word boundary', () => {
   assert.deepEqual(readingTimeFromHtml('word '.repeat(225)), {words:225,minutes:1});

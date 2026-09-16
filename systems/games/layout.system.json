@@ -1,13 +1,13 @@
 {
-  "id": "ui",
+  "id": "layout",
   "version": "1.0.0",
-  "category": "UI",
-  "description": "Shared game UI helpers.",
-  "entry": "games/shared/ui.js",
+  "category": "Layout",
+  "description": "Shared game layout helpers.",
+  "entry": "systems/games/layout.js",
   "capabilities": [
     {
-      "id": "ui",
-      "name": "UI",
+      "id": "layout",
+      "name": "Layout",
       "integration": "review-required"
     }
   ],

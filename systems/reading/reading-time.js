@@ -1,4 +1,4 @@
-import { readingTimeFromHtml, readingTimeMarkup } from '/content/reading-time.mjs';
+import { readingTimeFromHtml, readingTimeMarkup } from '/systems/reading/reading-time.mjs';
 
 // Also loaded by the canonical Studio story template; no bundled app change needed.
 const prose = document.querySelector('.story-content');

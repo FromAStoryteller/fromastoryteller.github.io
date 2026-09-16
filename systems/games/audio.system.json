@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "category": "Audio",
   "description": "Shared sound playback and volume settings.",
-  "entry": "games/shared/audio.js",
+  "entry": "systems/games/audio.js",
   "capabilities": [
     {
       "id": "sound",

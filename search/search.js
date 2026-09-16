@@ -2,7 +2,7 @@ import {
     getAllPublishedContent,
     searchPublishedContent,
     renderContentGrid
-} from "/content/content-system.js"
+} from "/systems/content/content-system.js"
 
 const form = document.querySelector(".search-page-form")
 const input = document.querySelector("#search-page-input")

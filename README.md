@@ -4,7 +4,7 @@ From A Storyteller - hand-coded portfolio and experiments. Learning as I go
 
 ## Website styles
 
-Every full HTML page and `_template/page-template.html` loads these files once,
+Every full HTML page and `_templates/page-template.html` loads these files once,
 in order: `css/foundations.css`, `css/layout.css`, `css/components.css`,
 `css/utilities.css`. Feature styles follow them, then the Font Awesome vendor
 styles. Do not add a second global stylesheet or a CSS import for content cards.
@@ -20,7 +20,7 @@ name, From A Storyteller. Written brand references retain that formal name.
 `games/shared/menu/menu.css` contains the game menu, sliders and result screens.
 The three stylesheets under `assets/fontawesome/css/` belong to the icon library.
 
-`scripts/theme.js` currently cycles Light and Dark only. Saved Auto (device preference) is migrated to its effective light/dark appearance; new visits also start with a saved device-resolved choice. Set `AUTO_MODE_ENABLED` to `true` to restore the retained Auto cycle and OS listener. The control uses a sun for Light, a moon for Dark, and a monitor with an A for Auto.
+`systems/themes/theme.js` currently cycles Light and Dark only. Saved Auto (device preference) is migrated to its effective light/dark appearance; new visits also start with a saved device-resolved choice. Set `AUTO_MODE_ENABLED` to `true` to restore the retained Auto cycle and OS listener. The control uses a sun for Light, a moon for Dark, and a monitor with an A for Auto.
 Time-of-day interpolation is not yet implemented; automatic-period tokens remain
 available and the shell fade inherits the active surface automatically.
 
@@ -68,7 +68,7 @@ geometry remains deferred until the real Guiding Quill is supplied.
 
 ## Escape focus and carousel controls — 11 September 2026
 
-`scripts/focus.js` exports `restoreFocus(element, {silent})`. The shared shell uses
+`systems/core/focus.js` exports `restoreFocus(element, {silent})`. The shared shell uses
 silent restoration only when Escape dismisses menu/search. The destination remains
 focused; its temporary marker clears on blur, pointer input, or the next trusted
 non-modifier/non-Escape key. Shared focus selectors exclude this marker while
@@ -97,3 +97,7 @@ acceptance was not performed. No Git publication was requested or performed.
 Shared focus state now suppresses Escape on the already-focused element, clears on real keyboard/pointer input or focus change, and preserves normal Tab rings. Featured autoplay uses one deadline timeout with a 7000ms dwell, manual/Play resets, preserved remaining time during hover, visibility, shell and keyboard interruptions, and pointer-aware focus. The pause button retains its touch target with a smaller 24px translucent visual. Desktop footer uses equal outer grid tracks. Studio consumes the canonical assets at runtime; no bundled copy needs updating.
 
 Verification: Chrome Escape/Tab checks on six control groups at 1440, 1024, 768, 390 and 320px in both themes; desktop footer midpoint and overflow checks; controlled-clock 7s cycles, mouse navigation, pause/play, hover, reduced motion, keyboard and shell checks; simulated document visibility transitions; search/menu Escape dismissal. Site generator passed for 14 items; 13 Studio tests passed. Native background-tab throttling and every game/dialog were not exhaustively exercised. No Git commit or push performed.
+
+## Architecture and checks
+
+See `docs/architecture.md` for shared-system ownership and canonical Studio templates. Run `npm test` and `npm run validate:references`; `npm run validate` regenerates indexes and marked HTML regions.

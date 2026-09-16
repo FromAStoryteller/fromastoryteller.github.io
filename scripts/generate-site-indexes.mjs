@@ -1,9 +1,9 @@
-import { readingTimeFromHtml, storyBodyHtml, readingTimeMarkup } from "../content/reading-time.mjs";
+import { readingTimeFromHtml, storyBodyHtml, readingTimeMarkup } from "../systems/reading/reading-time.mjs";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup } from "../content/content-system.js";
+import { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup } from "../systems/content/content-system.js";
 
 const SITE_ORIGIN = "https://fromastoryteller.com";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -249,7 +249,7 @@ function generateStaticHtml(items) {
   }));
   const pagePaths = [
     ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/search/",
-    ...items.map(item => item.url), "/404.html", "/_template/page-template.html"
+    ...items.map(item => item.url), "/404.html", "/_templates/page-template.html"
   ];
   for (const urlPath of new Set(pagePaths)) {
     const path = urlPath.endsWith(".html") ? join(ROOT, urlPath.slice(1)) : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
@@ -408,7 +408,7 @@ function main() {
       const clean = body.replace(/\s*<span\b[^>]*data-story-reading-time[^>]*>[\s\S]*?<\/span>\s*/g, '\n');
       return open + (clean.includes('<time') ? clean.replace('<time', label + '\n<time') : clean + label) + close;
     });
-    if (!html.includes('/stories/reading-time.js')) html = html.replace('</head>', '<script type="module" src="/stories/reading-time.js"></script>\n</head>');
+    if (!html.includes('/systems/reading/reading-time.js')) html = html.replace('</head>', '<script type="module" src="/systems/reading/reading-time.js"></script>\n</head>');
     writeIfChanged(pagePath, html);
   }
   writeIfChanged(join(ROOT, "content/story-reading-times.json"), JSON.stringify(times, null, 2) + "\n");

@@ -60,7 +60,13 @@
     preference = event.newValue === 'light' || event.newValue === 'dark' || event.newValue === 'auto' ? event.newValue : null;
     apply();
   });
+  function syncThemeColour() {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = getComputedStyle(root).getPropertyValue('--colour-surface').trim();
+  }
+  new MutationObserver(syncThemeColour).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   function ready() {
+    syncThemeColour();
     syncButtons();
     new MutationObserver(records => {
       if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 && (node.matches('[data-theme-toggle]') || node.querySelector('[data-theme-toggle]'))))) syncButtons();

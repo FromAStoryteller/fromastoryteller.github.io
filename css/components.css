@@ -120,7 +120,7 @@
 .image-overlay h2, .image-overlay h3 { margin: 0; color: inherit; font-family: var(--font-family-heading); font-weight: var(--font-weight-semibold); line-height: 1.2; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--card-title-lines); overflow: hidden; }
 a.image-overlay { text-decoration: none; }
 a.image-overlay:hover { color: var(--colour-overlay-text); }
-a.image-overlay:focus-visible:not([data-restored-focus]):not([data-escape-focus]) { outline: 3px solid var(--colour-overlay-accent); outline-offset: -5px; }
+a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px solid var(--colour-overlay-accent); outline-offset: -5px; }
 .content-featured { position: relative; width: min(100%, var(--width-featured)); margin: 0 auto var(--space-3); min-width: 0; }
 .content-featured-viewport { position: relative; touch-action: pan-y pinch-zoom; border-radius: var(--card-radius); box-shadow: var(--surface-feature-shadow); }
 .content-featured-slide { display: block; }
@@ -149,7 +149,7 @@ a.image-overlay:focus-visible:not([data-restored-focus]):not([data-escape-focus]
 }
 .content-featured-pause[hidden] { display: none; }
 .content-featured-pause i { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; font-size: 0.7rem; border-radius: var(--radius-round); background: var(--colour-overlay-scrim); }
-.content-featured-pause:hover i, .content-featured-pause:focus-visible:not([data-restored-focus]):not([data-escape-focus]) i { background: var(--colour-overlay-scrim); }
+.content-featured-pause:hover i, .content-featured-pause:focus-visible:where(:not([data-restored-focus])) i { background: var(--colour-overlay-scrim); }
 .content-featured-segment span { width: var(--carousel-bar-size); height: var(--carousel-bar-thickness); border-radius: var(--radius-round); background: var(--colour-border-default); transition: width var(--duration-normal), background var(--duration-normal); }
 .content-featured-segment[aria-current] span { width: var(--carousel-bar-active-size); background: var(--colour-accent-primary); }
 .content-featured-controls button:hover:not(:disabled):not([aria-disabled="true"]) { background: var(--state-hover-background); color: var(--state-hover-colour); }
@@ -1070,7 +1070,7 @@ a.image-overlay:focus-visible:not([data-restored-focus]):not([data-escape-focus]
   color: var(--colour-text-primary);
 }
 
-.search-page-input:focus-visible:not([data-restored-focus]):not([data-escape-focus]) {
+.search-page-input:focus-visible:where(:not([data-restored-focus])) {
   border-color: var(--colour-control-border-focus);
 }
 
@@ -1545,10 +1545,10 @@ html, body, button, input, textarea, select,
 .site-search input { width: 100%; min-height: 44px; padding: 0.65rem 3rem 0.65rem 1rem; border: 1px solid var(--colour-control-border); border-radius: 0.5rem; background: var(--colour-control-background); color: var(--colour-control-text); font: inherit; }
 .site-search input::placeholder { color: var(--colour-control-placeholder); opacity: 1; }
 .site-search input:hover { border-color: var(--colour-control-border-hover); }
-.site-search input:focus-visible:not([data-restored-focus]):not([data-escape-focus]) { border-color: var(--colour-control-border-focus); }
+.site-search input:focus-visible:where(:not([data-restored-focus])) { border-color: var(--colour-control-border-focus); }
 /* A single inset indicator keeps keyboard focus visible without a double outer ring. */
 .header-search-panel .site-search input { box-sizing: border-box; height: calc(var(--size-header-height) - 12px); min-height: 0; padding: 0.25rem 2.75rem 0.25rem 0.75rem; border-color: var(--colour-divider); border-radius: 0.25rem; }
-.header-search-panel .site-search input:focus-visible:not([data-restored-focus]):not([data-escape-focus]) { outline: none; box-shadow: inset 0 -2px var(--colour-focus-ring); border-color: var(--colour-divider); }
+.header-search-panel .site-search input:focus-visible:where(:not([data-restored-focus])) { outline: none; box-shadow: inset 0 -2px var(--colour-focus-ring); border-color: var(--colour-divider); }
 .site-search .search-btn { position: absolute; right: 0; top: 0; }
 .header-search-panel .search-btn { top: 50%; transform: translateY(-50%); width: 40px; height: calc(var(--size-header-height) - 12px); min-height: 0; border-radius: 0.25rem; }
 .header-search-panel .search-btn:hover, .header-search-panel .search-btn:active { background: transparent; }

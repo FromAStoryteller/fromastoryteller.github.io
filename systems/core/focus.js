@@ -1,12 +1,12 @@
 // Focus restoration keeps its accessible destination without borrowing the
-// keyboard ring from the dismissed surface. The next real key restores styling.
+// keyboard ring from the dismissed surface. Tab or activation restores styling;
+// scrolling/game keys must not reveal a ring on the old destination.
 let restoredElement = null
 let keyboardInteraction = false
 export function isKeyboardInteraction() { return keyboardInteraction }
 
 function clearRestoredFocus() {
     restoredElement?.removeAttribute("data-restored-focus")
-    restoredElement?.removeAttribute("data-escape-focus")
     restoredElement = null
 }
 
@@ -17,12 +17,12 @@ globalThis.document?.addEventListener("keydown", event => {
         const active = document.activeElement
         if (active && active !== document.body && active !== document.documentElement) {
             restoredElement = active
-            active.setAttribute("data-escape-focus", "")
+            active.setAttribute("data-restored-focus", "")
         }
         return
     }
     keyboardInteraction = true
-    clearRestoredFocus()
+    if (["Tab", "Enter", " "].includes(event.key)) clearRestoredFocus()
     document.dispatchEvent(new Event("focusmodalitychange"))
 }, true)
 globalThis.document?.addEventListener("pointerdown", event => {
@@ -48,4 +48,3 @@ export function restoreFocus(element, {silent = false} = {}) {
     element.focus({preventScroll: true})
     if (document.activeElement !== element) clearRestoredFocus()
 }
-
