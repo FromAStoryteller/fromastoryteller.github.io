@@ -331,6 +331,8 @@ body.shell-open { overflow: hidden; }
 .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
 @media (max-width: 75rem) { .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 47.999rem) { .content-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 100rem) { .content-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 144rem) { .content-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .content-page-hero, .about-hero, .contact-hero, .privacy-hero, .terms-hero, .search-hero, .tool-hero, .game-hero, .story-header {
   margin-block: 0 var(--hero-after);
 }
@@ -355,5 +357,7 @@ body.shell-open { overflow: hidden; }
   .footer-brand .logo { font-size: var(--font-size-lg); }
 }
 @media (max-width: 24rem) {
-  .site-footer { column-gap: var(--space-1); padding-inline: var(--space-2); }
+  .site-footer { grid-template-columns: minmax(0, 1fr); column-gap: 0; padding-inline: var(--space-2); }
+  .site-footer > .footer-brand, .site-footer > .socials { grid-column: 1; }
+  .footer-legal { gap: var(--space-2) var(--space-4); }
 }

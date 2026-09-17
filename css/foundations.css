@@ -63,6 +63,7 @@
   --breakpoint-small-desktop: 75rem;
   --breakpoint-sidebar-overlay: 64rem;
   --breakpoint-wide-desktop: 100rem;
+  --breakpoint-ultrawide-desktop: 144rem;
   --breakpoint-short-screen-height: 40rem;
 
   --container-compact: 20rem;
@@ -890,6 +891,24 @@ main[tabindex="-1"]:focus-visible {
     --hero-after: var(--space-5);
 
     --font-size-page-title: clamp(2rem, 8vw, 2.75rem);
+  }
+}
+
+/* Discovery and interactive surfaces gain room on genuinely wide displays.
+   Editorial and reading measures intentionally remain unchanged. */
+@media (min-width: 100rem) {
+  :root {
+    --width-wide: 96rem;
+    --width-featured: 60rem;
+    --size-shell-gutter: clamp(2rem, 2.5vw, 3.5rem);
+  }
+}
+
+@media (min-width: 144rem) {
+  :root {
+    --width-wide: 120rem;
+    --width-featured: 68rem;
+    --size-shell-gutter: clamp(3rem, 3vw, 5rem);
   }
 }
 

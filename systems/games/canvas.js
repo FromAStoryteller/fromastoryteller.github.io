@@ -1,12 +1,15 @@
 // =======================================
 // FROM A STORYTELLER - CANVAS.JS
-// Version: 2.3
+// Version: 2.4
 // Shared canvas and immersive fullscreen helpers
 // =======================================
 
 const GAME_ASPECT_WIDTH = 16
 const GAME_ASPECT_HEIGHT = 9
 const GAME_ASPECT_RATIO = GAME_ASPECT_WIDTH / GAME_ASPECT_HEIGHT
+const MAX_EXPANDED_PIXEL_DENSITY = 3
+const MAX_EXPANDED_BACKING_WIDTH = 2560
+const MAX_EXPANDED_BACKING_HEIGHT = 1440
 
 export const CanvasManager = {
     managers: new Map(),
@@ -172,6 +175,123 @@ export const CanvasManager = {
         }
     },
 
+    getCanvasLogicalSize(container, renderDensity = 1) {
+        const canvas = container?.querySelector("canvas")
+
+        if (!canvas) {
+            return null
+        }
+
+        const inlineWidth = canvas.style.width?.trim() || ""
+        const inlineHeight = canvas.style.height?.trim() || ""
+        const parsedWidth = inlineWidth.endsWith("px")
+            ? Number.parseFloat(inlineWidth)
+            : NaN
+        const parsedHeight = inlineHeight.endsWith("px")
+            ? Number.parseFloat(inlineHeight)
+            : NaN
+        const safeDensity = Math.max(1, renderDensity || 1)
+
+        return {
+            width: Number.isFinite(parsedWidth) && parsedWidth > 0
+                ? parsedWidth
+                : Math.max(1, canvas.width / safeDensity),
+            height: Number.isFinite(parsedHeight) && parsedHeight > 0
+                ? parsedHeight
+                : Math.max(1, canvas.height / safeDensity)
+        }
+    },
+
+    getExpandedPixelDensity({
+        displayWidth,
+        displayHeight,
+        logicalWidth,
+        logicalHeight,
+        devicePixelRatio = 1,
+        embeddedDensity = 1
+    }) {
+        const safeLogicalWidth = Math.max(1, logicalWidth || 1)
+        const safeLogicalHeight = Math.max(1, logicalHeight || 1)
+        const safeDevicePixelRatio = Math.max(1, devicePixelRatio || 1)
+        const safeEmbeddedDensity = Math.max(1, embeddedDensity || 1)
+        const displayScale = Math.max(
+            Math.max(1, displayWidth || 1) / safeLogicalWidth,
+            Math.max(1, displayHeight || 1) / safeLogicalHeight
+        )
+        const desiredDensity = displayScale * safeDevicePixelRatio
+        const cappedDensity = Math.min(
+            MAX_EXPANDED_PIXEL_DENSITY,
+            MAX_EXPANDED_BACKING_WIDTH / safeLogicalWidth,
+            MAX_EXPANDED_BACKING_HEIGHT / safeLogicalHeight
+        )
+        const roundedDensity = Math.ceil(
+            Math.min(desiredDensity, cappedDensity) * 4
+        ) / 4
+
+        /* Never reduce an already sharper embedded canvas on expansion. */
+        return Math.max(safeEmbeddedDensity, roundedDensity)
+    },
+
+    getCurrentPixelDensity() {
+        if (typeof pixelDensity !== "function") {
+            return Math.max(1, window.devicePixelRatio || 1)
+        }
+
+        return Math.max(1, Number(pixelDensity()) || 1)
+    },
+
+    applyExpandedRenderDensity(container, display) {
+        const frame = this.getFrame(container)
+        const state = frame ? this.fullscreenState.get(frame) : null
+
+        if (!state || typeof pixelDensity !== "function") {
+            return
+        }
+
+        const embeddedDensity = state.embeddedRenderDensity
+        const logicalSize = this.getCanvasLogicalSize(
+            container,
+            embeddedDensity
+        )
+
+        if (!logicalSize) {
+            return
+        }
+
+        const expandedDensity = this.getExpandedPixelDensity({
+            displayWidth: display.width,
+            displayHeight: display.height,
+            logicalWidth: logicalSize.width,
+            logicalHeight: logicalSize.height,
+            devicePixelRatio: window.devicePixelRatio,
+            embeddedDensity
+        })
+
+        if (Math.abs(this.getCurrentPixelDensity() - expandedDensity) > 0.01) {
+            pixelDensity(expandedDensity)
+        }
+
+        state.expandedRenderDensity = expandedDensity
+    },
+
+    restoreEmbeddedRenderDensity(state) {
+        if (
+            !state ||
+            typeof pixelDensity !== "function" ||
+            !Number.isFinite(state.embeddedRenderDensity)
+        ) {
+            return
+        }
+
+        if (
+            Math.abs(
+                this.getCurrentPixelDensity() - state.embeddedRenderDensity
+            ) > 0.01
+        ) {
+            pixelDensity(state.embeddedRenderDensity)
+        }
+    },
+
     applyExpandedDisplaySize(containerOrId) {
         const container = this.resolveContainer(containerOrId)
 
@@ -193,6 +313,7 @@ export const CanvasManager = {
         */
         container.style.width = `${display.width}px`
         container.style.height = `${display.height}px`
+        this.applyExpandedRenderDensity(container, display)
     },
 
     isFullscreen(containerOrId) {
@@ -233,7 +354,9 @@ export const CanvasManager = {
                 scrollX: window.scrollX,
                 scrollY: window.scrollY,
                 containerInlineWidth: container.style.width,
-                containerInlineHeight: container.style.height
+                containerInlineHeight: container.style.height,
+                embeddedRenderDensity: this.getCurrentPixelDensity(),
+                expandedRenderDensity: null
             })
 
             frame.classList.add("is-game-fullscreen")
@@ -263,6 +386,7 @@ export const CanvasManager = {
 
             frame.classList.remove("is-game-fullscreen")
             document.body.classList.remove("game-fullscreen-active")
+            this.restoreEmbeddedRenderDensity(state)
             this.fullscreenState.delete(frame)
 
             if (state) {
