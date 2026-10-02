@@ -628,7 +628,7 @@
 html {
   font-family: var(--font-family-interface);
   color-scheme: var(--theme-colour-scheme);
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
   scroll-padding-top: var(--size-content-top);
 }
 
