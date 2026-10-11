@@ -18,12 +18,22 @@ const progressGlow = document.getElementById("countdown-progress-glow")
 const completeSound = new Audio("/assets/sounds/tools/countdown/countdown-complete.wav")
 completeSound.volume = 0.6
 completeSound.loop = false
+completeSound.preload = "auto"
 
 // === STATE ===
 let remainingSeconds = 0
 let initialSeconds = 0
 let countdownInterval = null
 let alarmIsPlaying = false
+let countdownState = "setup"
+let finishTime = null
+let pausedRemainingMs = 0
+let alarmHandled = false
+let audioContext = null
+let alarmBuffer = null
+let alarmBufferPromise = null
+let scheduledAlarm = null
+let alarmVersion = 0
 
 // === FUNCTIONS ===
 function getCountdownInputValues() {
@@ -110,56 +120,71 @@ function setupWholeNumberInput(input) {
 }
 
 function stopCountdown() {
-    if (countdownInterval) {
+    if (countdownInterval !== null) {
         clearInterval(countdownInterval)
         countdownInterval = null
     }
+    finishTime = null
+}
+
+function renderCountdown() {
+    resultElement.textContent = formatTime(remainingSeconds)
+    updateProgressRing(remainingSeconds)
+}
+
+function updateCountdown() {
+    if (countdownState !== "playing") return
+    const remainingMs = Math.max(0, finishTime - Date.now())
+    remainingSeconds = Math.ceil(remainingMs / 1000)
+    renderCountdown()
+    if (remainingMs === 0) completeCountdown()
+}
+
+function completeCountdown() {
+    if (countdownState !== "playing") return
+    stopCountdown()
+    countdownState = "complete"
+    pausedRemainingMs = 0
+    remainingSeconds = 0
+    renderCountdown()
+    setCountdownView("setup")
+    setInputsDisabled(false)
+    messageElement.textContent = "Countdown complete."
+    setAlarmCompleteState()
+    playCompleteSound()
 }
 
 function startCountdown(totalSeconds) {
+    const durationMs = countdownState === "paused"
+        ? pausedRemainingMs : totalSeconds * 1000
     stopCountdown()
     stopCompleteSound()
-
-    remainingSeconds = totalSeconds
-
-    if (initialSeconds === 0) {
-        initialSeconds = totalSeconds
-    }
-
-    resultElement.textContent = formatTime(remainingSeconds)
-
-    const nextVisualSecond = Math.max(remainingSeconds - 1, 0)
-    updateProgressRing(nextVisualSecond)
-
+    alarmHandled = false
+    countdownState = "playing"
+    finishTime = Date.now() + durationMs
+    pausedRemainingMs = 0
+    remainingSeconds = Math.ceil(durationMs / 1000)
+    if (initialSeconds === 0) initialSeconds = totalSeconds
+    renderCountdown()
     setCountdownView("active")
     setActionButtonsForState("playing")
-
     messageElement.textContent = "Countdown running."
     setInputsDisabled(true)
     stopButton.disabled = false
-
-    countdownInterval = setInterval(() => {
-        remainingSeconds--
-
-        resultElement.textContent = formatTime(remainingSeconds)
-        
-        const nextVisualSecond = Math.max(remainingSeconds - 1, 0)
-        updateProgressRing(nextVisualSecond)
-
-        if (remainingSeconds <= 0) {
-            stopCountdown()
-            setCountdownView("setup")
-            messageElement.textContent = "Countdown complete."
-            setInputsDisabled(false)
-            playCompleteSound()
-            setAlarmCompleteState()
-        }
-    }, 1000)
+    // Call from the Start/Resume click, before awaiting anything, to enable audio.
+    armAlarm()
+    countdownInterval = setInterval(updateCountdown, 250)
 }
 
 function pauseCountdown() {
+    updateCountdown()
+    if (countdownState !== "playing") return
+    pausedRemainingMs = Math.max(0, finishTime - Date.now())
+    remainingSeconds = Math.ceil(pausedRemainingMs / 1000)
     stopCountdown()
-
+    stopCompleteSound()
+    countdownState = "paused"
+    renderCountdown()
     setActionButtonsForState("paused")
     messageElement.textContent = "Countdown paused."
 }
@@ -169,6 +194,9 @@ function stopAndRestoreCountdown() {
     stopCompleteSound()
 
     remainingSeconds = 0
+    pausedRemainingMs = 0
+    countdownState = "setup"
+    alarmHandled = false
 
     resultElement.textContent = formatTime(initialSeconds)
     setTimeInputsFromSeconds(initialSeconds)
@@ -189,6 +217,9 @@ function resetCountdown() {
     stopCompleteSound()
 
     remainingSeconds = 0
+    pausedRemainingMs = 0
+    countdownState = "setup"
+    alarmHandled = false
 
     resultElement.textContent = "00:00:00"
 
@@ -218,20 +249,144 @@ function setInputsDisabled(isDisabled) {
     })
 }
 
-function playCompleteSound() {
+function cancelScheduledAlarm() {
+    alarmVersion++
+    if (!scheduledAlarm) return
+    const { source, gain } = scheduledAlarm
+    scheduledAlarm = null
+    source.onended = null
+    try { source.stop() } catch { /* Already stopped. */ }
+    source.disconnect()
+    gain.disconnect()
+}
+
+async function prepareAudio() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) throw new Error("Web Audio is unavailable")
+    if (!audioContext || audioContext.state === "closed") {
+        audioContext = new AudioContextClass()
+        alarmBuffer = null
+        alarmBufferPromise = null
+    }
+    // resume() is invoked synchronously during the user's click.
+    const resumePromise = audioContext.resume()
+    if (!alarmBufferPromise) {
+        alarmBufferPromise = fetch(completeSound.src)
+            .then(response => {
+                if (!response.ok) throw new Error("Alarm sound could not load")
+                return response.arrayBuffer()
+            })
+            .then(bytes => audioContext.decodeAudioData(bytes))
+            .then(buffer => { alarmBuffer = buffer; return buffer })
+            .catch(error => { alarmBufferPromise = null; throw error })
+    }
+    let resumeTimeout
+    const resumed = Promise.race([
+        resumePromise,
+        new Promise((_, reject) => {
+            resumeTimeout = setTimeout(() => reject(new Error("Audio permission is needed")), 2000)
+        })
+    ]).finally(() => clearTimeout(resumeTimeout))
+    await Promise.all([resumed, alarmBufferPromise])
+    if (audioContext.state !== "running") throw new Error("Audio is blocked")
+}
+
+function scheduleAlarm(delaySeconds) {
+    const source = audioContext.createBufferSource()
+    const gain = audioContext.createGain()
+    source.buffer = alarmBuffer
+    gain.gain.value = 0.6
+    source.connect(gain)
+    gain.connect(audioContext.destination)
+    const record = { source, gain, startsAt: audioContext.currentTime + delaySeconds }
+    scheduledAlarm = record
+    source.onended = () => {
+        if (scheduledAlarm !== record) return
+        scheduledAlarm = null
+        source.disconnect()
+        gain.disconnect()
+        alarmHandled = true
+        alarmIsPlaying = false
+        updateCountdown()
+    }
+    source.start(record.startsAt)
+}
+
+function showAudioFailure() {
+    if (countdownState === "playing") {
+        messageElement.textContent = "Countdown running. Sound is not ready; check your browser's sound permissions."
+        return
+    }
+    if (countdownState !== "complete") return
+    messageElement.textContent = "Countdown complete. Sound could not play. Select Play alarm to try again."
+    startButton.hidden = false
+    startButton.querySelector("i").className = "fa-solid fa-volume-high"
+    startButton.setAttribute("aria-label", "Play alarm")
+    startButton.setAttribute("title", "Play alarm")
+}
+
+function playFallbackAlarm(version) {
+    if (alarmHandled || countdownState !== "complete") return
     completeSound.currentTime = 0
     alarmIsPlaying = true
-
-    completeSound.play().catch(() => {
+    completeSound.play().then(() => {
+        if (version !== alarmVersion || countdownState !== "complete") return
+        alarmHandled = true
+        setAlarmCompleteState()
+        messageElement.textContent = "Countdown complete."
+    }).catch(() => {
+        if (version !== alarmVersion) return
         alarmIsPlaying = false
-        console.warn("Countdown complete sound could not play.")
+        showAudioFailure()
     })
 }
 
+function armAlarm() {
+    cancelScheduledAlarm()
+    const version = alarmVersion
+    prepareAudio().then(() => {
+        // A pause, reset, add-time action, or newer alarm invalidates this request.
+        if (version !== alarmVersion || alarmHandled) return
+        if (countdownState !== "playing" && countdownState !== "complete") return
+        const delay = countdownState === "playing"
+            ? Math.max(0, (finishTime - Date.now()) / 1000) : 0
+        scheduleAlarm(delay)
+        if (countdownState === "complete") {
+            alarmHandled = true
+            alarmIsPlaying = true
+            setAlarmCompleteState()
+            messageElement.textContent = "Countdown complete."
+        }
+    }).catch(() => {
+        if (version !== alarmVersion) return
+        if (countdownState === "complete") playFallbackAlarm(version)
+        else showAudioFailure()
+    })
+}
+
+function playCompleteSound() {
+    if (alarmHandled) return
+    if (scheduledAlarm && audioContext.state === "running" &&
+        audioContext.currentTime >= scheduledAlarm.startsAt) {
+        alarmHandled = true
+        alarmIsPlaying = true
+        return
+    }
+    // The audio clock may have paused during device sleep. Schedule immediately.
+    armAlarm()
+}
+
 function stopCompleteSound() {
+    cancelScheduledAlarm()
     completeSound.pause()
     completeSound.currentTime = 0
     alarmIsPlaying = false
+}
+
+function recoverCountdown() {
+    if (document.visibilityState === "hidden") return
+    updateCountdown()
+    if (countdownState === "playing") armAlarm()
 }
 
 function setStartButtonState(state) {
@@ -396,6 +551,13 @@ if (
     progressCircle &&
     progressGlow
 ) {
+    messageElement.setAttribute("role", "status")
+    completeSound.addEventListener("ended", () => { alarmIsPlaying = false })
+    document.addEventListener("visibilitychange", recoverCountdown)
+    window.addEventListener("pageshow", recoverCountdown)
+    window.addEventListener("focus", recoverCountdown)
+    document.addEventListener("resume", recoverCountdown)
+
     setupWholeNumberInput(hoursInput)
     setupWholeNumberInput(minutesInput)
     setupWholeNumberInput(secondsInput)
@@ -404,6 +566,9 @@ if (
 
     presetButtons.forEach((button) => {
         button.addEventListener("click", () => {
+            stopCompleteSound()
+            countdownState = "setup"
+            alarmHandled = false
             const totalSeconds = Number(button.dataset.seconds)
 
             setTimeInputsFromSeconds(totalSeconds)
@@ -418,30 +583,36 @@ if (
         })
     })
 
-    quickAddButtons.forEach((button) => {
+quickAddButtons.forEach((button) => {
         button.addEventListener("click", () => {
+            updateCountdown()
+            if (countdownState === "complete") return
             const secondsToAdd = Number(button.dataset.addSeconds)
-            const currentSeconds = getCurrentTotalSeconds()
-            const updatedSeconds = currentSeconds + secondsToAdd
-
-            remainingSeconds = updatedSeconds
-
-            if (initialSeconds > 0) {
-                initialSeconds += secondsToAdd
+            if (!Number.isFinite(secondsToAdd) || secondsToAdd <= 0) return
+            if (countdownState === "playing") {
+                finishTime += secondsToAdd * 1000
+                remainingSeconds = Math.ceil(Math.max(0, finishTime - Date.now()) / 1000)
+                armAlarm()
+            } else if (countdownState === "paused") {
+                pausedRemainingMs += secondsToAdd * 1000
+                remainingSeconds = Math.ceil(pausedRemainingMs / 1000)
+            } else {
+                remainingSeconds = getCurrentTotalSeconds() + secondsToAdd
             }
-
-            setTimeInputsFromSeconds(updatedSeconds)
-            resultElement.textContent = formatTime(updatedSeconds)
-            updateProgressRing()
-
+            if (initialSeconds > 0) initialSeconds += secondsToAdd
+            setTimeInputsFromSeconds(remainingSeconds)
+            renderCountdown()
             clearSelectedPreset()
-
             messageElement.textContent = `Added ${button.textContent.trim()}`
         })
     })
 
     startButton.addEventListener("click", () => {
-        if (countdownInterval) {
+        if (countdownState === "complete") {
+            armAlarm()
+            return
+        }
+        if (countdownState === "playing") {
             pauseCountdown()
             return
         }
@@ -468,8 +639,11 @@ if (
     })
 
     stopButton.addEventListener("click", () => {
-        if (alarmIsPlaying) {
+        if (countdownState === "complete") {
             stopCompleteSound()
+            countdownState = "setup"
+            alarmHandled = true
+            initialSeconds = 0
 
             setActionButtonsForState("setup")
             messageElement.textContent = "Countdown complete."
