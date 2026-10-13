@@ -5,9 +5,14 @@
     "dev": "vite",
     "validate": "node scripts/generate-site-indexes.mjs",
     "test": "node --test tests/*.test.mjs",
-    "validate:references": "node scripts/validate-references.mjs"
+    "validate:references": "node scripts/validate-references.mjs",
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "preview:cloudflare": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "deploy:cloudflare-preview": "wrangler deploy",
+    "verify:cloudflare": "node scripts/verify-cloudflare.mjs"
   },
   "devDependencies": {
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "wrangler": "4.149.0"
   }
 }

@@ -9,3 +9,10 @@ private-control/
 Studio Installer/
 .env*
 *.key
+
+# Cloudflare preview output and local tool state
+dist/
+.wrangler/
+cloudflare-manifest.json
+cloudflare-verification.json
+hosting-baseline.json
