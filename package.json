@@ -9,7 +9,10 @@
     "build:cloudflare": "node scripts/build-cloudflare.mjs",
     "preview:cloudflare": "wrangler dev --ip 127.0.0.1 --port 8787",
     "deploy:cloudflare-preview": "wrangler deploy",
-    "verify:cloudflare": "node scripts/verify-cloudflare.mjs"
+    "verify:cloudflare": "node scripts/verify-cloudflare.mjs",
+    "build:cloudflare-production": "node scripts/build-cloudflare.mjs --production",
+    "preview:cloudflare-production": "wrangler dev --config wrangler.production.jsonc --ip 127.0.0.1 --port 8788",
+    "deploy:cloudflare-production": "wrangler deploy --config wrangler.production.jsonc"
   },
   "devDependencies": {
     "vite": "^8.2.2",
