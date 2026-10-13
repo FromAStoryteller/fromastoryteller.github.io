@@ -1,0 +1,2 @@
+-- Intentionally empty. Create disposable users through local Supabase Auth.
+-- Never seed production users, passwords, published stories, or raw invite tokens.
