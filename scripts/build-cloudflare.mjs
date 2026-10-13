@@ -5,7 +5,8 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const output = path.join(root, 'dist');
+const production = process.argv.includes('--production');
+const output = path.join(root, production ? 'dist-production' : 'dist');
 const dirs = new Set(['about', 'assets', 'blog', 'components', 'contact', 'content', 'css', 'games', 'privacy', 'search', 'stories', 'systems', 'terms', 'tools', 'videos']);
 const files = new Set(['index.html', '404.html', 'home.js', 'favicon.ico', 'robots.txt', 'sitemap.xml', 'googlecae29814c1367461.html']);
 const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8', windowsHide: true }).split('\0').filter(Boolean);
@@ -25,8 +26,8 @@ for (const file of selected) {
   fs.writeFileSync(target, data);
   manifest.push({ path: file, bytes: data.length, sha256: createHash('sha256').update(data).digest('hex') });
 }
-// Preview-only headers. Production must use a separately reviewed configuration/build.
-fs.writeFileSync(path.join(output, '_headers'), '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n');
+// Production uses its own output directory; preview keeps its search exclusion.
+fs.writeFileSync(path.join(output, '_headers'), '/*\n' + (production ? '' : '  X-Robots-Tag: noindex, nofollow\n') + '  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n');
 // Keep audit information outside the served directory.
-fs.writeFileSync(path.join(root, 'cloudflare-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-console.log(`Prepared ${manifest.length} unchanged public files for preview; no domain routes configured.`);
+fs.writeFileSync(path.join(root, production ? 'cloudflare-production-manifest.json' : 'cloudflare-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+console.log(`Prepared ${manifest.length} unchanged public files for ${production ? 'production candidate' : 'preview'}; no domain routes configured.`);
