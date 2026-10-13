@@ -16,3 +16,6 @@ dist/
 cloudflare-manifest.json
 cloudflare-verification.json
 hosting-baseline.json
+dist-production/
+cloudflare-production-manifest.json
+cloudflare-production-verification.json
