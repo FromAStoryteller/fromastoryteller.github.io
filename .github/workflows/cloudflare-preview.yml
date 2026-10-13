@@ -1,0 +1,38 @@
+name: Cloudflare migration preview
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run validate:references
+      - run: npm run validate
+      - name: Require current generated content
+        run: git diff --exit-code -- content sitemap.xml '*.html'
+      - run: npm run build:cloudflare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fas-cloudflare-preview
+          path: |
+            dist/
+            cloudflare-manifest.json
+      # Manual dispatch only. No production hostname or DNS changes in this config.
+      - name: Deploy isolated workers.dev preview
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy:cloudflare-preview
