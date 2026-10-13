@@ -7,7 +7,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const base = new URL(process.argv[2] || 'http://127.0.0.1:8787');
 if (base.pathname !== '/' || !['http:', 'https:'].includes(base.protocol)) throw new Error('Use an origin URL');
 const baseline = process.argv.includes('--baseline');
-const manifest = JSON.parse(fs.readFileSync(path.join(root, 'cloudflare-manifest.json'), 'utf8'));
+const production = process.argv.includes('--production');
+if (baseline && production) throw new Error('Choose either baseline or production mode');
+const manifest = JSON.parse(fs.readFileSync(path.join(root, production ? 'cloudflare-production-manifest.json' : 'cloudflare-manifest.json'), 'utf8'));
 const results = [], errors = [];
 const hash = data => createHash('sha256').update(data).digest('hex');
 async function check(entry) {
@@ -18,7 +20,9 @@ async function check(entry) {
     const pass = response.status === 200 && hash(body) === entry.sha256;
     results.push({ path: urlPath, status: response.status, matches: hash(body) === entry.sha256 });
     if (!pass) errors.push(`${urlPath}: status/body differs`);
-    if (!baseline && !response.headers.get('x-robots-tag')?.includes('noindex')) errors.push(`${urlPath}: preview noindex missing`);
+    const robots = response.headers.get('x-robots-tag') || '';
+    if (!baseline && !production && !robots.includes('noindex')) errors.push(`${urlPath}: preview noindex missing`);
+    if (production && /noindex|nofollow|none/i.test(robots)) errors.push(`${urlPath}: production search exclusion present`);
   } catch (error) { errors.push(`${urlPath}: ${error.message}`); }
 }
 // Compare every public file, including all published content and binary assets.
@@ -39,7 +43,7 @@ if (!baseline) {
     results.push({ path: candidate, status: response.status });
   }
 }
-const report = { origin: base.origin, mode: baseline ? 'existing-host-baseline' : 'cloudflare-preview', checkedAt: new Date().toISOString(), results, errors };
-fs.writeFileSync(path.join(root, baseline ? 'hosting-baseline.json' : 'cloudflare-verification.json'), JSON.stringify(report, null, 2) + '\n');
+const report = { origin: base.origin, mode: baseline ? 'existing-host-baseline' : production ? 'cloudflare-production' : 'cloudflare-preview', checkedAt: new Date().toISOString(), results, errors };
+fs.writeFileSync(path.join(root, baseline ? 'hosting-baseline.json' : production ? 'cloudflare-production-verification.json' : 'cloudflare-verification.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(`${results.length} checks; ${errors.length} failures.`);
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
