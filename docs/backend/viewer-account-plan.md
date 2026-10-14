@@ -39,3 +39,11 @@ success/expired/error states will be implemented with Auth, not inferred from a 
 
 This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.
+
+The recovery form and recovery-email confirmation skeleton use the same conditional
+message for existing and missing accounts. They do not perform account lookups.
+The confirmation route is a design preview, not evidence of an email being sent.
+During Auth integration, use a consistent recovery response for known/unknown
+emails, and separately handle network/rate-limit errors without exposing account
+existence. Verify direct API responses as well as page text before launch.
+Reference: [OWASP Forgot Password guidance](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).
