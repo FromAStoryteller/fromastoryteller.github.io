@@ -5,6 +5,8 @@
     "dev": "vite",
     "validate": "node scripts/generate-site-indexes.mjs",
     "test": "node --test tests/*.test.mjs",
+    "test:security:api": "node scripts/test-fas-security-api.mjs",
+    "test:security:sql": "node --test tests/fas-security-database.test.mjs",
     "validate:references": "node scripts/validate-references.mjs",
     "build:cloudflare": "node scripts/build-cloudflare.mjs",
     "preview:cloudflare": "wrangler dev --ip 127.0.0.1 --port 8787",
@@ -15,6 +17,7 @@
     "deploy:cloudflare-production": "wrangler deploy --config wrangler.production.jsonc"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
     "vite": "^8.2.2",
     "wrangler": "4.149.0"
   }
