@@ -1,0 +1,27 @@
+# Viewer accounts: small review batches
+
+Ryan's working preference: create skeletons using the existing HTML structure,
+shared site shell and theme tokens, show each batch in the browser, then refine
+the personal design together. Artwork uses 16:9. Keep Play My Path separate.
+
+1. Sign-in page skeleton: local design preview, disabled controls, no Auth changes.
+2. Review the visual direction together; extend it to sign-up and recovery skeletons.
+3. Review Privacy and Terms against actual features, operator details, audience and
+   jurisdiction. Prepare accurate drafts for Ryan to review; resolve legal questions
+   before opening registration. Do not describe draft policies as legal approval.
+4. Implement verification, sign-in/out, session refresh/expiry and recovery in FAS
+   development, with success/error states and browser/email tests.
+5. Agree account settings/deletion behavior and implement the account lifecycle.
+6. Rename/rework the site About navigation and its icon separately from Ryan's
+   personal profile, retaining the existing route unless a redirect is needed.
+7. Once Ryan chooses the final account and username, plan explicit attribution of
+   existing stories/games to its stable account UUID. Preserve content, URLs and
+   backups; do not auto-import or assign content to temporary accounts. A username
+   is a display/search identifier, not the immutable ownership key.
+8. Add profile search only for intentionally public profile information. Protect
+   emails, account details, private profiles and drafts; review search indexing rules.
+9. Perform final end-to-end checks, legal review and deliberate production signup
+   enablement. Signup alone must never grant contributor privileges.
+
+This sequence records the requested work; only the first small batch has started.
+Later batches may change after Ryan reviews each skeleton.
