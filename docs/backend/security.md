@@ -59,8 +59,11 @@ must use a publishable/anon key and the user's session, and request protected
 downloads or short-lived signed URLs. Never put a service key in browser code.
 Approve images only after staff inspect them. MIME/extension/size checks are not
 image-content validation; server-side decoding/re-encoding is still a launch task.
-An already-issued signed URL can remain valid until it expires after archival;
-use a short lifetime (for example 60 seconds). Downloaded bytes cannot be recalled.
+An already fetched image URL can be served from hosted CDN cache after archival,
+even though a fresh origin request is denied. A short signed URL lifetime alone
+does not guarantee that its cached response stops being served at expiry. See
+[hosted-api-security.md](hosted-api-security.md) before production rollout.
+Downloaded bytes cannot be recalled.
 
 ## 3. Check the prepared change locally
 
@@ -100,12 +103,15 @@ Both must exit successfully; any ERROR is a failed test. Fixtures roll back.
 
 ## 4. Run the direct API tests
 
-The runner only targets `http://127.0.0.1:55321`. It checks the FAS project config
+By default the runner targets `http://127.0.0.1:55321`. It checks the FAS project config
 and needs explicit acknowledgement. It never reads `.env.local` or a hosted link.
 It creates random synthetic accounts, signs each in, assigns fixture roles using
 the LOCAL service key, then tests permissions using anon or individual user tokens.
 The service key is used only to create/clean fixtures, never for permission checks.
-The suite removes only its recorded accounts/stories/images/invites afterwards.
+The suite signs out its fixture sessions and removes only its recorded
+accounts/stories/images/invites afterwards. Hosted mode requires a separate exact
+development acknowledgement and accepts only the hardcoded FAS development
+reference; see [hosted-api-security.md](hosted-api-security.md).
 If the process is interrupted, inspect the local synthetic records before retrying.
 
 Load keys from the LOCAL CLI status into the current terminal, without displaying
@@ -126,7 +132,7 @@ finally {
 ```
 
 Expected: seven PASS groups and `full suite PASSED`, with fixture cleanup complete.
-Do not replace the keys with hosted keys; never save the status JSON. If a CLI
+Do not replace the local command's keys with hosted keys; never save the status JSON. If a CLI
 version uses different field names, check its documentation rather than printing
 its full key-bearing output. API failures suppress response bodies/credentials.
 Check the last successful PASS group, local service status and migration history.
@@ -151,8 +157,8 @@ prove future HTML rendering, SMTP, a finished UI, content validation or producti
    foundation it should list only `20261015000100_security_hardening.sql`. Apply
    that reviewed migration to dev and rerun the read-only audit. Follow the
    existing setup guide for project identity checks. Do not apply fixtures to a
-   hosted database. Hosted service tests require a separately reviewed dev-only
-   harness; this runner deliberately cannot target it.
+   hosted database. Use the explicit hosted-dev harness described in
+   [hosted-api-security.md](hosted-api-security.md) for hosted service checks.
 3. For dev images that should be public, sign in as admin/moderator in a trusted
    test client and call `approve_story_image` with the asset ID after inspection.
    The browser RPC derives the staff identity from the session. SQL Editor is a
@@ -189,8 +195,12 @@ anonymous execution is revoked. Their denial paths passed the local API suite.
 The Auth warning is separate from RLS: leaked-password protection requires Pro or
 above per [Supabase's password documentation](https://supabase.com/docs/guides/auth/password-security).
 No plan upgrade or Auth setting change was made. Review that warning before launch.
-Actual hosted end-to-end API tests, production review/backup/migration and server
-image-content validation remain outside the completed local/development checks.
+Hosted development API tests were subsequently run. All seven origin-permission
+groups passed, but cached image revocation failed: previously fetched URLs could
+return cached bytes after archival. The full suite correctly exits nonzero.
+Cleanup was verified and the one pre-existing development image was preserved.
+Production review/backup/migration and server image-content validation remain
+outside the completed checks. Do not treat the caching result as a launch sign-off.
 
 References: [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),
 [Storage bucket privacy](https://supabase.com/docs/guides/storage/buckets/fundamentals),

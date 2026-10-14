@@ -78,8 +78,9 @@ on visible stories; public readers additionally require explicit staff approval
 through `approve_story_image(target_asset)`. Changing alt text clears that approval.
 The bucket is private, including published images. The future
 frontend can request short-lived signed URLs for published files under the public
-read policy. Use a short expiry such as 60 seconds: an already-issued URL may
-continue working until expiry after archival. Authors/staff can read registered
+read policy. Short expiry is useful but does not guarantee CDN cache revocation:
+previously fetched URLs can serve cached bytes after archival. Follow the
+hosted security guide before launch. Authors/staff can read registered
 draft assets through their sessions. Files uploaded but not registered cannot be
 read by regular clients. No image storage has been copied from static stories.
 
