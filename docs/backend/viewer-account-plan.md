@@ -27,16 +27,18 @@ Keep Play My Path separate.
 
 The sign-in, sign-up and recovery pages use matching centred forms. Sign-in now
 works only through the deliberately enabled local FAS connection; see
-[local sign-in](local-sign-in.md). Signup/recovery submit actions remain disabled;
-public registration and live-site changes are not enabled.
+[local sign-in](local-sign-in.md). Signup and verification also work only locally;
+see [local signup](local-sign-up.md). Recovery remains disabled. Hosted public
+registration and live-site changes are not enabled.
 The recovery-request skeleton now links from sign-in and back again. It does not
 send email or identify whether an account exists. The new-password landing screen
 now shares live password/confirmation checks with sign-up. Hosted FAS password
 rules were verified in both projects; see [password preview](password-preview.md).
-Sign-up and new-password permit only sample password entry. The check-inbox and email-verification landing
-skeletons now share the same centred design. They explicitly say that no email is
-sent and no link is verified. Resending is disabled. Real callback validation and
-success/expired/error states will be implemented with Auth, not inferred from a URL.
+Normal/hosted signup and new-password pages permit only sample password entry.
+The local signup flow sends confirmation emails to the local test inbox, with
+resend throttling and verified success/invalid-link states. Verification requires
+a server-validated token and an explicit confirmation action; success is never
+inferred from URL parameters. Persistent sessions and recovery are later batches.
 
 This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.

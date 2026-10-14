@@ -2,7 +2,7 @@
 
 The sign-in page now connects to local FAS Supabase only when started deliberately
 with `npm run dev:accounts:local`. Normal previews and hosted builds retain disabled
-sign-in controls. Sign-up, recovery and verification remain design skeletons.
+sign-in controls. Local signup and verification now work in a separate batch; see [local signup](local-sign-up.md). Recovery remains a design skeleton.
 
 ## What works
 
@@ -68,9 +68,9 @@ finally {
 ```
 
 These test keys are process variables, never browser code or committed files.
-The local config still uses its foundation-era signup/password settings. Align
-those explicitly with the verified hosted rules before implementing signup/recovery;
-do not push local Auth configuration to hosted projects. Privacy/Terms review and
+The local configuration now matches the verified hosted password rules and
+requires email confirmation. The signup email flow is local only; do not push
+local Auth configuration to hosted projects. Privacy/Terms review and
 deliberate production registration enablement remain launch requirements.
 
 Official references: [password sign-in](https://supabase.com/docs/reference/javascript/auth-signinwithpassword),

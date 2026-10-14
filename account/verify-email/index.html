@@ -11,6 +11,7 @@
     <title>Confirm your email | From A Storyteller</title>
 
     <meta name="description" content="Confirm your From A Storyteller email verification link.">
+    <meta name="referrer" content="no-referrer">
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://fromastoryteller.com/account/verify-email/">
     <link rel="stylesheet" href="/account/account.css">
@@ -19,6 +20,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/verify-email.js"></script>
 
     <!-- FONT -->
 
@@ -151,12 +153,14 @@
           </header>
           <section class="account-panel" aria-labelledby="email-title">
             <h2 id="email-title">Email verification</h2>
-            <p class="account-preview-note">Design preview — this page does not verify email links yet.</p>
-            <p class="account-recovery-intro">When you follow the link in your verification email, we’ll check it here and let you know whether your email address has been confirmed.</p>
-            <p class="account-recovery-intro">If your link has expired or has already been used, you’ll be able to request a new verification email.</p>
+            <p class="account-preview-note" data-preview-note>Design preview — this page does not verify email links yet.</p>
+            <p class="account-auth-status" data-auth-status role="status" aria-live="polite" aria-atomic="true" hidden></p>
+            <p class="account-recovery-intro" data-verification-intro>When you follow the link in your verification email, we’ll check it here and let you know whether your email address has been confirmed.</p>
+            <p class="account-recovery-intro" data-verification-expiry>If your link has expired or has already been used, you’ll be able to request a new verification email.</p>
+            <button class="account-submit" data-confirm-email type="button" hidden disabled>Confirm email</button>
             <div class="account-register">
-              <p>Need help finding your verification email?</p>
-              <a class="account-secondary" href="/account/check-email/">Check your inbox instructions</a>
+              <p data-verification-help>Need help finding your verification email?</p>
+              <a class="account-secondary" data-verification-next href="/account/check-email/">Check your inbox instructions</a>
             </div>
             <p class="account-legal"><a href="/account/sign-in/">Back to sign in</a></p>
           </section>

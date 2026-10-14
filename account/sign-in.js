@@ -1,4 +1,4 @@
-import { loadLocalAuthConfig } from './auth-settings.mjs';
+import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { createSignInController } from './sign-in-controller.mjs';
 
 const form = document.querySelector('[data-sign-in-form]');
@@ -60,14 +60,10 @@ function render({ state, message, email }) {
   }
 }
 
-const config = await loadLocalAuthConfig(location.origin);
-if (config) {
-  try {
-    const { createClient } = await import('./vendor/supabase-client.js');
-    const client = createClient(config.url, config.key, {
-      auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'fas-local-account-preview' },
-      global: { fetch: (url, options = {}) => fetch(url, { ...options, redirect: 'error', signal: AbortSignal.any([...(options.signal ? [options.signal] : []), AbortSignal.timeout(15000)]) }) },
-    });
+try {
+  const local = await loadLocalAuthClient();
+  if (local) {
+    const { client } = local;
     controller = createSignInController(client.auth, render);
     client.auth.onAuthStateChange(event => {
       // No async Auth calls inside this callback (SDK lock). RLS remains authoritative.
@@ -76,7 +72,7 @@ if (config) {
     notice.textContent = 'Local test only — use a test account. Reloading this preview signs you out.';
     fieldset.disabled = false;
     eye.disabled = false;
-  } catch {
-    notice.textContent = 'Local sign-in is unavailable. Please restart the local preview and try again.';
   }
+} catch {
+  notice.textContent = 'Local sign-in is unavailable. Please restart the local preview and try again.';
 }

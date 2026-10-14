@@ -5,7 +5,7 @@ for (const form of document.querySelectorAll('[data-password-checks]')) {
   const confirmation = form.querySelector('[data-confirm-password]');
   const summary = form.querySelector('[data-password-summary]');
   const matchSummary = form.querySelector('[data-match-summary]');
-  // Design preview only: no submission, network requests, logging or storage.
+  // This feedback module never submits, logs or stores passwords. Auth has its own handler.
   form.addEventListener('submit', event => event.preventDefault());
   function update() {
     const checks = passwordChecks(password.value, confirmation.value);

@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/sign-up.js"></script>
     <script type="module" src="/account/password-visibility.js"></script>
     <script type="module" src="/account/password-checks.js"></script>
 
@@ -155,21 +156,22 @@
           <section class="account-panel" aria-labelledby="sign-up-title">
             <h2 id="sign-up-title">Create an account</h2>
             <p class="account-preview-note" id="account-preview-note">Design preview — try a sample password. Account creation is not enabled.</p>
-            <!-- Disabled until verification, policy review and Auth states are implemented. -->
-            <form class="account-form" data-password-checks aria-describedby="account-preview-note account-reader-note">
+            <p class="account-auth-status" data-auth-status role="status" aria-live="polite" aria-atomic="true" hidden></p>
+            <!-- Hosted signup stays disabled; local testing requires confirmation and matching password settings. -->
+            <form class="account-form" data-password-checks data-sign-up-form aria-describedby="account-preview-note account-reader-note">
               <fieldset>
                 <legend class="visually-hidden">New account details</legend>
                 <div class="account-field">
                   <label for="account-display-name">Display name</label>
-                  <input id="account-display-name" type="text" disabled name="display_name" autocomplete="nickname" maxlength="80" placeholder="How you'd like to be known">
+                  <input id="account-display-name" type="text" disabled required autocomplete="nickname" maxlength="80" placeholder="How you'd like to be known">
                 </div>
                 <div class="account-field">
                   <label for="account-email">Email address</label>
-                  <input id="account-email" type="email" disabled name="email" autocomplete="email" placeholder="you@example.com">
+                  <input id="account-email" type="email" disabled required maxlength="254" autocomplete="email" placeholder="you@example.com">
                 </div>
                 <div class="account-field">
                   <label for="account-password">Password</label>
-                  <div class="password-input-control" data-password-control><input id="account-password" type="password" data-new-password aria-describedby="password-guidance password-summary" autocomplete="new-password" placeholder="Choose a password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
+                  <div class="password-input-control" data-password-control><input id="account-password" type="password" required data-new-password aria-describedby="password-guidance password-summary" autocomplete="new-password" placeholder="Choose a password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   <p class="password-guidance" id="password-guidance">Include lowercase and uppercase letters, a number and a symbol.</p>
                   <ul class="password-rules" id="password-requirements"><li data-password-rule="length"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Length: 12 minimum</span><span class="visually-hidden" data-rule-status>Not met</span></li>
 <li data-password-rule="lowercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Lowercase (a–z)</span><span class="visually-hidden" data-rule-status>Not met</span></li>
@@ -180,7 +182,7 @@
                 </div>
                 <div class="account-field">
                   <label for="account-confirm-password">Confirm password</label>
-                  <div class="password-input-control" data-password-control><input id="account-confirm-password" type="password" data-confirm-password aria-describedby="confirmation-check" autocomplete="new-password" placeholder="Enter your password again"><button class="password-eye" data-password-toggle type="button" aria-controls="account-confirm-password" aria-label="Show confirm password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
+                  <div class="password-input-control" data-password-control><input id="account-confirm-password" type="password" required data-confirm-password aria-describedby="confirmation-check" autocomplete="new-password" placeholder="Enter your password again"><button class="password-eye" data-password-toggle type="button" aria-controls="account-confirm-password" aria-label="Show confirm password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   <p class="password-summary" id="confirmation-check" data-match-summary role="status" aria-live="polite"></p>
                 </div>
                 <button class="account-submit" type="submit" disabled>Create an account <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>

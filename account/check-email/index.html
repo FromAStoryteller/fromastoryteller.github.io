@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/check-email.js"></script>
 
     <!-- FONT -->
 
@@ -151,10 +152,17 @@
           </header>
           <section class="account-panel" aria-labelledby="email-title">
             <h2 id="email-title">Verify your email address</h2>
-            <p class="account-preview-note">Design preview — no email has been sent.</p>
-            <p class="account-recovery-intro">After you create an account, we’ll email you a verification link. Open that link to confirm your email address before signing in.</p>
+            <p class="account-preview-note" data-preview-note>Design preview — no email has been sent.</p>
+            <p class="account-auth-status" data-auth-status role="status" aria-live="polite" aria-atomic="true" hidden></p>
+            <p class="account-recovery-intro" data-inbox-intro>After you create an account, we’ll email you a verification link. Open that link to confirm your email address before signing in.</p>
             <p class="account-recovery-intro">Can’t find the email? Check your spam or junk folder and make sure you entered the correct address.</p>
-            <button class="account-submit" type="button" disabled>Resend verification email <i class="fa-solid fa-envelope" aria-hidden="true"></i></button>
+            <form class="account-form" data-resend-form>
+              <div class="account-field">
+                <label for="verification-email">Email address</label>
+                <input id="verification-email" type="email" required disabled maxlength="254" autocomplete="email" placeholder="you@example.com">
+              </div>
+              <button class="account-submit" type="submit" disabled>Resend verification email <i class="fa-solid fa-envelope" aria-hidden="true"></i></button>
+            </form>
             <div class="account-register">
               <p>Entered the wrong email address?</p>
               <a class="account-secondary" href="/account/sign-up/">Back to create an account</a>

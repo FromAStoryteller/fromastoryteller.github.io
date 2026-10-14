@@ -2,8 +2,8 @@
 
 Verified in both FAS hosted Email-provider panels on 15 October 2026:
 minimum length 12; lowercase, uppercase, digits and symbols required.
-No hosted Auth setting was changed. Local config still has foundation defaults
-(6, no required categories); align that deliberately before real local account-flow tests.
+No hosted Auth setting was changed. Local config now deliberately matches these
+password rules, with email confirmation enabled for the local signup batch.
 
 Sign-up and new-password previews share `account/password-policy.mjs` and the
 browser checklist in `account/password-checks.js`. Guidance shows all five rules,
@@ -24,15 +24,16 @@ rather than the site's gold outline. Eye-button focus stays inside its control.
 
 The matcher follows Supabase Auth's UTF-8 byte-length measurement and required
 ASCII character sets. Emoji/space do not replace a required symbol, and passwords
-are not trimmed. Server-side Auth remains authoritative when integration is added.
+are not trimmed. Server-side Auth remains authoritative; direct local API tests enforce these rules.
 References: [password guidance](https://supabase.com/docs/guides/auth/password-security),
 [Auth strength checker](https://github.com/supabase/auth/blob/master/internal/api/password.go).
 
-Only the two password fields are enabled to try synthetic sample input. Submit
-buttons remain disabled; preview form submission is prevented. Password inputs
-have no name attributes, so the HTML fallback cannot send them in a query string.
-The code performs no network request, logging, storage or Auth call. Display-name
-and email fields remain disabled. No account is created or password changed.
+Normal and hosted previews keep signup submissions disabled and permit only
+sample password checks. Explicitly enabled local signup now submits to local Auth;
+see [local signup](local-sign-up.md). The new-password page remains a skeleton and
+cannot change passwords. All password inputs have no name attributes, so an HTML
+fallback cannot send them in a query string. The checklist itself performs no
+network request, logging, storage or Auth call.
 
 Real reset use will require a verified recovery session and clear missing/expired
 link handling; visiting the preview URL is not authorization to change a password.

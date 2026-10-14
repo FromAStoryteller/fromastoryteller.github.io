@@ -1,7 +1,7 @@
 import { isLocalAuthConfig } from '../account/auth-settings.mjs';
 
 export function localAuthPlugin(env = process.env) {
-  const config = { url: 'http://127.0.0.1:55321', key: env.FAS_LOCAL_ANON_KEY };
+  const config = { url: 'http://127.0.0.1:55321', key: env.FAS_LOCAL_ANON_KEY, signup: env.FAS_LOCAL_SIGNUP_ENABLED === 'true' };
   return {
     name: 'fas-local-auth-only',
     configureServer(server) {
