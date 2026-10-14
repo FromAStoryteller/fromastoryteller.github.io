@@ -1,19 +1,22 @@
-// Real Auth, PostgREST and Storage requests. Disposable LOCAL FAS only.
+// Real Auth, PostgREST and Storage requests. LOCAL or explicitly named FAS dev only.
 import assert from 'node:assert/strict';
 import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { securityTarget, checkLegacyProjectKey } from './fas-security-target.mjs';
 
-const base = 'http://127.0.0.1:55321'; // Intentionally cannot target hosted projects.
+const target = securityTarget(process.argv.slice(2), process.env.FAS_TEST_CONFIRM);
+const base = target.base;
 const bucket = 'fas-story-images';
 const config = readFileSync(new URL('../supabase/config.toml', import.meta.url), 'utf8');
 assert.match(config, /^project_id = "fas-community-v1"$/m);
 assert.match(config, /^port = 55321$/m);
-if (process.env.FAS_TEST_CONFIRM !== 'fas-community-v1') {
-  throw new Error('Set FAS_TEST_CONFIRM=fas-community-v1 to authorize disposable local fixtures. See docs/backend/security.md.');
-}
 const anonKey = process.env.FAS_TEST_ANON_KEY;
 const serviceKey = process.env.FAS_TEST_SERVICE_KEY;
-assert.ok(anonKey && serviceKey, 'Supply LOCAL FAS keys via environment, never command arguments or committed files.');
+assert.ok(anonKey && serviceKey, 'Supply keys for the acknowledged FAS target via environment, never command arguments or committed files.');
+if (target.hosted) {
+  checkLegacyProjectKey(anonKey, 'anon');
+  checkLegacyProjectKey(serviceKey, 'service_role');
+}
 if (anonKey.split('.').length === 3) {
   const claims = JSON.parse(Buffer.from(anonKey.split('.')[1], 'base64url'));
   assert.equal(claims.role, 'anon', 'Client tests require anon, never service_role.');
@@ -34,9 +37,17 @@ async function request(path, { token, method = 'GET', body, bytes, privileged = 
   const text = await response.text();
   let data;
   try { data = JSON.parse(text); } catch { data = text; }
-  return { status: response.status, ok: response.ok, data };
+  return { status: response.status, ok: response.ok, data, cache: {
+    status: response.headers.get('cf-cache-status'),
+    age: response.headers.get('age'),
+    control: response.headers.get('cache-control'),
+  } };
 }
-function success(result, name) { assert.ok(result.ok, `${name}: HTTP ${result.status}`); return result.data; }
+function success(result, name) {
+  const code = result.data?.code ?? result.data?.error_code;
+  const safeCode = typeof code === 'string' && /^[a-z0-9_]+$/.test(code) ? ` (${code})` : '';
+  assert.ok(result.ok, `${name}: HTTP ${result.status}${safeCode}`); return result.data;
+}
 function rejected(result, name) {
   assert.ok([400, 401, 403, 404, 409, 413, 415].includes(result.status), `${name}: expected denial, got HTTP ${result.status}`);
 }
@@ -48,12 +59,14 @@ async function unchanged(path, token, body, name) {
 let passed = 0;
 function pass(name) { passed++; console.log(`PASS ${name}`); }
 const users = [], stories = [], objects = [], invites = [];
+const sessions = [];
+const assetIds = new Map();
 const run = randomUUID();
 const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aG1sAAAAASUVORK5CYII=', 'base64');
 const rest = '/rest/v1/';
 async function fixtureUser(label, role) {
   const email = `fas-security-${run}-${label}@example.invalid`;
-  const password = randomBytes(32).toString('base64url');
+  const password = 'Fas!9aA-' + randomBytes(32).toString('base64url');
   const user = success(await request('/auth/v1/admin/users', { privileged: true, method: 'POST',
     body: { email, password, email_confirm: true, user_metadata: { role: 'admin', is_admin: true } } }), 'Create fixture account');
   users.push(user.id);
@@ -61,6 +74,7 @@ async function fixtureUser(label, role) {
     body: { user_id: user.id, role } }), 'Assign fixture role');
   const session = success(await request('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } }), 'Sign in fixture');
   assert.ok(session.access_token, 'Missing fixture session');
+  sessions.push(session.access_token);
   return { id: user.id, email, token: session.access_token };
 }
 async function createStory(user, label) {
@@ -79,15 +93,21 @@ async function upload(user, story, register = true) {
   let asset;
   if (register) asset = success(await request(rest + 'story_assets', { token: user.token, method: 'POST',
     body: { story_id: story.id, object_path: path, alt_text: 'Synthetic image' }, headers: { Prefer: 'return=representation' } }), 'Register image')[0];
+  if (asset) assetIds.set(path, asset.id);
   return { path, asset };
 }
 const rpc = (name, user, body) => request(rest + `rpc/${name}`, { token: user?.token, method: 'POST', body });
 const getStory = (id, user) => request(rest + `stories?id=eq.${id}`, { token: user?.token });
-const download = (path, user) => request(`/storage/v1/object/authenticated/${bucket}/${path}`, { token: user?.token });
+const imageEndpoint = (path) => `/functions/v1/fas-story-image?asset_id=${assetIds.get(path) ?? '00000000-0000-0000-0000-000000000000'}`;
+const download = (path, user) => request(imageEndpoint(path), { token: user?.token });
+const rawDownload = (path, user) => request(`/storage/v1/object/authenticated/${bucket}/${path}`, { token: user?.token });
 const sign = (path, user) => request(`/storage/v1/object/sign/${bucket}/${path}`, { token: user?.token, method: 'POST', body: { expiresIn: 60 } });
 
 let failure = false;
+let originPassed = false;
+const cacheFindings = [];
 try {
+  console.log(`Target: ${target.name}. Production targets are forbidden.`);
   // Check reachability before creating anything; the fixed URL prevents production writes.
   success(await request('/auth/v1/health'), 'Local Auth health');
   const viewer = await fixtureUser('viewer');
@@ -120,6 +140,11 @@ try {
   assert.equal(success(await getStory(draft.id, admin), 'Admin draft read').length, 1);
   success(await download(draftImage.path, owner), 'Owner image download');
   success(await download(draftImage.path, admin), 'Admin image download');
+  for (const user of [undefined,viewer,owner,other,admin]) {
+    rejected(await rawDownload(draftImage.path,user),'Raw Storage bypass denied');
+    rejected(await sign(draftImage.path,user),'Raw signed URL bypass denied');
+  }
+  rejected(await request(imageEndpoint(draftImage.path),{token:'invalid-session'}),'Invalid image session');
   pass('Anonymous/viewer/other contributor cannot read private drafts or image bytes; owner/admin can');
 
   for (const user of [undefined, viewer]) rejected(await request(rest + 'stories', { token: user?.token, method: 'POST',
@@ -176,8 +201,11 @@ try {
     assert.equal(success(await getStory(published.id, user), 'Public published story').length, 1);
     const assets = success(await request(rest + `story_assets?story_id=eq.${published.id}`, { token: user?.token }), 'Public asset metadata');
     assert.deepEqual(assets.map(a => a.id), [approved.asset.id]);
-    success(await download(approved.path, user), 'Approved public image');
-    success(await sign(approved.path, user), 'Approved signed URL');
+    const delivered = await download(approved.path, user);
+    success(delivered, 'Approved public image');
+    assert.match(delivered.cache.control ?? '', /no-store/);
+    rejected(await rawDownload(approved.path,user),'Approved raw Storage bypass');
+    rejected(await sign(approved.path, user), 'Approved image signing bypass denied');
     rejected(await download(unapproved.path, user), 'Unapproved bytes');
     rejected(await sign(unapproved.path, user), 'Unapproved signed URL');
     rejected(await download(orphan.path, user), 'Orphan bytes');
@@ -199,12 +227,19 @@ try {
   success(await rpc('moderate_story', admin, { target_story: published.id, decision: 'archived', note: 'Synthetic archival' }), 'Archive');
   for (const user of [undefined, viewer, other]) {
     empty(await getStory(published.id, user), 'Archive hidden');
-    rejected(await download(approved.path, user), 'Archived bytes');
+    const archived = await download(approved.path, user);
+    if (archived.ok) {
+      cacheFindings.push(archived.cache);
+      console.log(`FAIL cached image revocation: HTTP ${archived.status}, cache=${JSON.stringify(archived.cache)}`);
+      const fresh = await request(imageEndpoint(approved.path)+`&cacheNonce=${randomUUID()}`, { token: user?.token });
+      console.log(`Fresh URL after archival: HTTP ${fresh.status}, cache=${JSON.stringify(fresh.cache)}`);
+      rejected(fresh, 'Fresh archived bytes');
+    } else rejected(archived, 'Archived bytes');
     rejected(await sign(approved.path, user), 'New signed URL after archival');
   }
   const audit = success(await request(rest + `moderation_log?story_id=eq.${published.id}`, { token: admin.token }), 'Audit read');
   assert.equal(audit.length, 2);
-  pass('Archival removes public access and moderation leaves an immutable client audit trail');
+  pass('Fresh requests after archival are denied; moderation leaves an immutable client audit trail');
 
   async function inviteFor(email) {
     const token = success(await rpc('create_invite', admin, { invitee_email: email, valid_days: 7 }), 'Admin create invite');
@@ -229,26 +264,34 @@ try {
   assert.equal(roles.length, 1);
   assert.equal(roles[0].role, 'member');
   pass('Only matching verified users accept active single-use invites; invites grant contributor, never admin');
+  originPassed = true;
 } catch (error) {
   failure = true;
-  console.error('FAIL: API security check or local service setup failed. Response bodies and credentials suppressed.');
+  console.error('FAIL: API security check or service setup failed. Response bodies and credentials suppressed.');
   console.error(`Last operation: ${lastRequest}`);
   if (error instanceof assert.AssertionError) console.error(error.message.split('\n')[0]);
 } finally {
   // Only random fixture IDs/paths recorded by this run; never reset the database.
+  const cleanupErrors = [];
+  async function clean(action, label) {
+    try { await action(); } catch { cleanupErrors.push(label); }
+  }
   try {
-    if (objects.length) success(await request(`/storage/v1/object/${bucket}`, { privileged: true, method: 'DELETE', body: { prefixes: objects } }), 'Cleanup fixture objects');
+    for (const token of sessions) await clean(async () => success(await request('/auth/v1/logout?scope=global', { token, method: 'POST' }), 'Sign out fixture'), 'fixture sign-out');
+    if (objects.length) await clean(async () => success(await request(`/storage/v1/object/${bucket}`, { privileged: true, method: 'DELETE', body: { prefixes: objects } }), 'Cleanup fixture objects'), 'fixture objects');
     for (const id of stories) {
-      success(await request(rest + `moderation_log?story_id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture audit');
-      success(await request(rest + `stories?id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture story');
+      await clean(async () => success(await request(rest + `moderation_log?story_id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture audit'), 'fixture audit');
+      await clean(async () => success(await request(rest + `stories?id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture story'), 'fixture story');
     }
-    for (const id of invites) success(await request(rest + `invites?id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture invite');
-    for (const id of users) success(await request(`/auth/v1/admin/users/${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture account');
+    for (const id of invites) await clean(async () => success(await request(rest + `invites?id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture invite'), 'fixture invite');
+    for (const id of users) await clean(async () => success(await request(`/auth/v1/admin/users/${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture account'), 'fixture account');
+    assert.equal(cleanupErrors.length, 0);
     console.log('Fixture cleanup complete.');
   } catch {
     failure = true;
-    console.error(`FAIL: fixture cleanup incomplete. Inspect LOCAL FAS records with run label ${run}.`);
+    console.error(`FAIL: fixture cleanup incomplete. Inspect ${target.name} records with run label ${run}. Failed categories: ${cleanupErrors.join(', ')}.`);
   }
 }
-console.log(`${passed} API security groups passed; full suite ${failure ? 'FAILED' : 'PASSED'}.`);
-process.exitCode = failure ? 1 : 0;
+console.log(`${passed} API security groups passed; full suite ${failure || cacheFindings.length ? 'FAILED' : 'PASSED'}.`);
+console.log(`Origin permission checks ${originPassed ? 'PASSED' : 'FAILED'}; cached image revocation ${cacheFindings.length ? 'FAILED' : 'PASSED'}.`);
+process.exitCode = failure || cacheFindings.length ? 1 : 0;
