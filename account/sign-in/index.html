@@ -20,6 +20,7 @@
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
     <script type="module" src="/account/password-visibility.js"></script>
+    <script type="module" src="/account/sign-in.js"></script>
 
     <!-- FONT -->
 
@@ -157,17 +158,22 @@
             <section class="account-panel" aria-labelledby="sign-in-title">
               <h2 id="sign-in-title">Sign in</h2>
               <p class="account-preview-note" id="account-preview-note">Design preview — account access is coming soon.</p>
-              <!-- Disabled until authentication and its states are implemented. -->
-              <form class="account-form" aria-describedby="account-preview-note">
+              <!-- Remains disabled unless the explicitly enabled local Auth connection is available. -->
+              <p class="account-auth-status" data-auth-status role="status" aria-live="polite" aria-atomic="true" hidden></p>
+              <div data-signed-in hidden>
+                <p class="account-recovery-intro">Signed in as <strong data-signed-in-email></strong></p>
+                <button class="account-secondary" data-sign-out type="button">Sign out</button>
+              </div>
+              <form class="account-form" data-sign-in-form aria-describedby="account-preview-note">
                 <fieldset disabled>
                   <legend class="visually-hidden">Sign-in details</legend>
                   <div class="account-field">
                     <label for="account-email">Email address</label>
-                    <input id="account-email" type="email" name="email" autocomplete="username" placeholder="you@example.com">
+                    <input id="account-email" type="email" autocomplete="username" required maxlength="254" placeholder="you@example.com">
                   </div>
                   <div class="account-field">
                     <label for="account-password">Password</label>
-                    <div class="password-input-control" data-password-control><input id="account-password" type="password" name="password" autocomplete="current-password" placeholder="Your password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
+                    <div class="password-input-control" data-password-control><input id="account-password" type="password" autocomplete="current-password" required placeholder="Your password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   </div>
                   <div class="account-form-options">
                     <a class="account-text-button" href="/account/recover/">Forgot your password?</a>

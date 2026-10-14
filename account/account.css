@@ -47,3 +47,8 @@
   .account-panel { padding: var(--space-6); }
   .account-heading { margin-bottom: var(--space-6); }
 }
+
+.account-auth-status { padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-5); border: 2px solid var(--colour-border-default); border-radius: var(--radius-md); overflow-wrap: anywhere; }
+.account-auth-status[data-state="error"] { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); }
+.account-auth-status[data-state="success"] { border-color: var(--password-valid-colour); color: var(--password-valid-colour); }
+[data-signed-in-email] { overflow-wrap: anywhere; }

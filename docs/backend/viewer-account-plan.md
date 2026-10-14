@@ -25,14 +25,15 @@ Keep Play My Path separate.
 9. Perform final end-to-end checks, legal review and deliberate production signup
    enablement. Signup alone must never grant contributor privileges.
 
-The sign-in layout was reviewed and simplified to a centred form. The next small
-batch adds the matching sign-up skeleton and navigation between the two previews.
-Submit actions remain disabled; public registration and live-site changes are not enabled.
+The sign-in, sign-up and recovery pages use matching centred forms. Sign-in now
+works only through the deliberately enabled local FAS connection; see
+[local sign-in](local-sign-in.md). Signup/recovery submit actions remain disabled;
+public registration and live-site changes are not enabled.
 The recovery-request skeleton now links from sign-in and back again. It does not
 send email or identify whether an account exists. The new-password landing screen
 now shares live password/confirmation checks with sign-up. Hosted FAS password
 rules were verified in both projects; see [password preview](password-preview.md).
-Only sample password entry is enabled. The check-inbox and email-verification landing
+Sign-up and new-password permit only sample password entry. The check-inbox and email-verification landing
 skeletons now share the same centred design. They explicitly say that no email is
 sent and no link is verified. Resending is disabled. Real callback validation and
 success/expired/error states will be implemented with Auth, not inferred from a URL.

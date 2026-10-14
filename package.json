@@ -14,11 +14,17 @@
     "verify:cloudflare": "node scripts/verify-cloudflare.mjs",
     "build:cloudflare-production": "node scripts/build-cloudflare.mjs --production",
     "preview:cloudflare-production": "wrangler dev --config wrangler.production.jsonc --ip 127.0.0.1 --port 8788",
-    "deploy:cloudflare-production": "wrangler deploy --config wrangler.production.jsonc"
+    "deploy:cloudflare-production": "wrangler deploy --config wrangler.production.jsonc",
+    "build:auth-client": "node scripts/build-fas-auth-client.mjs",
+    "dev:accounts:local": "node scripts/start-fas-account-local.mjs",
+    "test:auth:local": "node scripts/test-fas-auth-local.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",
     "vite": "^8.2.2",
     "wrangler": "4.149.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3"
   }
 }
