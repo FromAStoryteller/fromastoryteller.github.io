@@ -2,6 +2,8 @@
 
 Start with [setup.md](setup.md), then [backup-restore.md](backup-restore.md).
 For the additive security changes and direct API checks, follow [security.md](security.md).
+The **Enforce database and storage security** task is complete as of 15 October
+2026 in hosted FAS development and production. See [completion evidence](security-completion.md).
 This is the database foundation, not a deployed community interface. The current
 website still reads static files. Nothing here imports, edits or republishes the
 existing stories. Online games and optional community features remain later scope.
@@ -24,7 +26,9 @@ workflow difference before changing permissions. FAS has its own local project
 and separate hosted dev/prod projects.
 Never reuse a PMP project, database, key, user identity store, bucket or backup.
 
-The browser will use Supabase Auth, the Data API with a publishable key, and Storage.
+The browser will use Supabase Auth, the Data API with a publishable key, Storage
+for owned uploads, and `fas-story-image` for permitted image downloads. Direct
+client Storage reads and signed image URLs are blocked for the FAS image bucket.
 Row-level security (RLS) means the database checks each user's permission for every
 row. Browser code must still render user text safely (textContent, or an approved
 sanitizer if rich text is added). The backend is not an HTML sanitizer.

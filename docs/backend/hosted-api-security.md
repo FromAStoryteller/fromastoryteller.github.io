@@ -1,5 +1,10 @@
 # Hosted FAS development API security checks
 
+**Current status:** the security task is complete in hosted FAS development and
+production. The full development suite passed again after the approved production
+rollout. See [completion evidence](security-completion.md). The cache failure below
+is the original finding, followed by its tested fix.
+
 Target: **fas-community-dev**, `oqmmvjjycpyxvxipcyli`, only. Production and Play My
 Path cannot be selected by this harness. No schema, bucket, Auth setting, SMTP,
 DNS or production configuration is changed.
@@ -80,7 +85,9 @@ Gateway `verify_jwt=false` allows public anonymous images; custom authorization
 is enforced by the caller-scoped PostgREST/RLS queries. Invalid and invisible
 callers never reach privileged Storage. No caller-supplied Storage URL/path is used.
 
-Deployed to **FAS development only**. The full hosted suite now passes all seven
+Deployed to **FAS development and production** after backup, local recovery and
+migration rehearsal, and Ryan's explicit production approval. The full hosted
+development suite now passes all seven
 groups, including exact URL replay after archival, no-store headers, invalid
 sessions and direct Storage/signing bypass denial. Cleanup was verified: zero
 synthetic accounts/invites/stories/assets; one pre-existing image preserved.
@@ -107,9 +114,10 @@ time during cutover. Unique query strings alone are not a replay defense.
 Object removal/cache invalidation has its own propagation delay and must not
 destroy author drafts as a shortcut. Already downloaded content cannot be recalled.
 
-The fixed image architecture is deployed/tested in development only. It does not
-change the live website or certify production ready. Keep production migration
-separate until its inspection, backup, cutover review and approval are complete.
+The production cutover described above was completed with an empty production
+image inventory. Read-only production probes passed; populated permission and
+revocation fixtures remain development-only. Recheck the cutover conditions for
+future changes. These results do not certify the entire community UI ready to launch.
 
 References: [Storage CDN](https://supabase.com/docs/guides/storage/cdn/fundamentals),
 [Smart CDN and cached signed URLs](https://supabase.com/docs/guides/storage/cdn/smart-cdn),

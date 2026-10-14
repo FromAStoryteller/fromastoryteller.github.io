@@ -2,7 +2,10 @@
 
 Prepared 15 October 2026 against `FromAStoryteller/fromastoryteller.github.io`
 main commit `6b0aa72`. This is an additive change to the three existing migrations;
-none of those applied files are rewritten. Production has not been changed.
+none of those applied files are rewritten. The security task is now complete:
+the reviewed changes are deployed to FAS development and production. See
+[current completion evidence](security-completion.md). Preparation and initial
+verification notes below describe the earlier development rollout.
 Play My Path is outside this work: no shared project, bucket, accounts or keys.
 
 ## 1. Understand the permissions
@@ -53,7 +56,8 @@ removing a role stops contribution and staff actions immediately.
    Storage requests without going through the website.
 
 The application is currently a static website. It has no Supabase community
-client, server routes or Edge Functions to update. Existing file-based stories
+client or community server routes. Its backend now has the `fas-story-image`
+Edge Function. Existing file-based stories
 are not imported into the community database by this patch. The future client
 must use a publishable/anon key and the user's session, and request protected
 images through `fas-story-image`. The follow-up migration blocks direct Storage
@@ -104,6 +108,17 @@ Both must exit successfully; any ERROR is a failed test. Fixtures roll back.
 
 ## 4. Run the direct API tests
 
+The image endpoint must also be running for local API tests. In a second terminal
+in this LOCAL FAS repository, run the following and keep it running during the suite:
+
+```powershell
+npx.cmd --yes supabase@2.120.0 functions serve fas-story-image
+```
+
+The CLI supplies local credentials. The function's existing `verify_jwt=false`
+configuration permits anonymous published-image requests; its caller-scoped
+PostgREST/RLS checks enforce authorization. No new secret file is needed.
+
 By default the runner targets `http://127.0.0.1:55321`. It checks the FAS project config
 and needs explicit acknowledgement. It never reads `.env.local` or a hosted link.
 It creates random synthetic accounts, signs each in, assigns fixture roles using
@@ -145,7 +160,12 @@ description changes; overwrite/upsert/move/delete denial; published reads; archi
 and audit integrity; wrong-email, expired, revoked and reused invites. It cannot
 prove future HTML rendering, SMTP, a finished UI, content validation or production.
 
-## 5. What you must do in Supabase
+## 5. Original rollout sequence (completed)
+
+These deployment steps are historical; do not repeat them or reapply an existing
+migration. No manual Supabase setup remains for this security task. For future
+changes, retain the development-test, backup, review and explicit production-target
+sequence described here.
 
 1. After local tests pass, select **FAS development** in the Dashboard. Run the
    read-only `supabase/tests/audit-security.sql` in SQL Editor. Confirm all six
@@ -169,7 +189,7 @@ prove future HTML rendering, SMTP, a finished UI, content validation or producti
    Later, use the documented backup and deliberate production migration process.
    Recheck grants/policies and image approvals in that project separately.
 
-## Verification recorded for this preparation
+## Historical verification recorded for the initial preparation
 
 The normal test suite, including actual PostgreSQL migration/RLS tests, passed
 with 18 tests. Docker was subsequently restored: the new migration was applied
