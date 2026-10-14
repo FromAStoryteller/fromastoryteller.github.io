@@ -76,12 +76,11 @@ untrusted uploads in a live community.
 No client can overwrite or delete images. Authors/staff can read registered images
 on visible stories; public readers additionally require explicit staff approval
 through `approve_story_image(target_asset)`. Changing alt text clears that approval.
-The bucket is private, including published images. The future
-frontend can request short-lived signed URLs for published files under the public
-read policy. Short expiry is useful but does not guarantee CDN cache revocation:
-previously fetched URLs can serve cached bytes after archival. Follow the
-hosted security guide before launch. Authors/staff can read registered
-draft assets through their sessions. Files uploaded but not registered cannot be
+The bucket is private, including published images. All client image reads use
+`fas-story-image?asset_id=ASSET_UUID`, which checks current RLS and returns
+no-store bytes. Direct Storage reads/signing are blocked, even for authors/staff;
+private image requests send the user's session in the Auth header. Follow the
+hosted security guide for deployment and old-URL cutover. Files uploaded but not registered cannot be
 read by regular clients. No image storage has been copied from static stories.
 
 ## Environments and secrets

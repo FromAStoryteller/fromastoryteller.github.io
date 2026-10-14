@@ -98,7 +98,7 @@ select set_config('request.jwt.claim.sub','',true);
 do $$ begin
   if (select count(*) from public.stories where slug='test-draft') <> 1 then raise exception 'FAIL: published story hidden'; end if;
   if (select count(*) from public.story_assets) <> 1 then raise exception 'FAIL: published asset hidden'; end if;
-  if (select count(*) from storage.objects where bucket_id='fas-story-images') <> 1 then raise exception 'FAIL: published object hidden'; end if;
+  if exists(select 1 from storage.objects where bucket_id='fas-story-images') then raise exception 'FAIL: direct object read bypasses image server'; end if;
   begin
     select count(*) from public.invites;
     raise exception 'FAIL: invites exposed';

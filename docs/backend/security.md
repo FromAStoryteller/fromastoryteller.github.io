@@ -56,7 +56,8 @@ The application is currently a static website. It has no Supabase community
 client, server routes or Edge Functions to update. Existing file-based stories
 are not imported into the community database by this patch. The future client
 must use a publishable/anon key and the user's session, and request protected
-downloads or short-lived signed URLs. Never put a service key in browser code.
+images through `fas-story-image`. The follow-up migration blocks direct Storage
+downloads and signed URL creation. Never put a service key in browser code.
 Approve images only after staff inspect them. MIME/extension/size checks are not
 image-content validation; server-side decoding/re-encoding is still a launch task.
 An already fetched image URL can be served from hosted CDN cache after archival,
@@ -199,6 +200,10 @@ Hosted development API tests were subsequently run. All seven origin-permission
 groups passed, but cached image revocation failed: previously fetched URLs could
 return cached bytes after archival. The full suite correctly exits nonzero.
 Cleanup was verified and the one pre-existing development image was preserved.
+The server image-delivery follow-up was then deployed to development; the full
+hosted suite passed all seven groups, including exact URL replay after archival
+and raw Storage/signing bypass denial. See the hosted guide for implementation
+and the old-URL cutover required before production.
 Production review/backup/migration and server image-content validation remain
 outside the completed checks. Do not treat the caching result as a launch sign-off.
 

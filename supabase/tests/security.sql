@@ -61,7 +61,7 @@ select set_config('request.jwt.claim.sub','',true);
 do $$ declare n integer; begin
   if (select count(*) from public.stories)<>1 then raise exception 'FAIL published hidden'; end if;
   if (select count(*) from public.story_assets)<>1 then raise exception 'FAIL unapproved metadata leak'; end if;
-  if (select count(*) from storage.objects)<>1 then raise exception 'FAIL unapproved bytes leak'; end if;
+  if exists(select 1 from storage.objects) then raise exception 'FAIL direct Storage delivery bypass'; end if;
   update storage.objects set name='overwrite.png'; get diagnostics n=row_count;
   if n<>0 then raise exception 'FAIL broad policy overwrite'; end if;
   begin

@@ -60,26 +60,56 @@ All fixtures were cleaned up. Independent follow-up queries verified zero test
 accounts, stories and assets. Storage returned to the original one pre-existing
 image; that unrelated image was left alone.
 
-## Production gate
+## Implemented and tested fix
+
+The follow-up adds Edge Function `fas-story-image` and migration
+`20261015000200_uncached_image_delivery.sql`. Direct client Storage reads,
+listing and signed URL creation are blocked, including author/staff sessions.
+The function queries asset metadata using the caller's Auth header and the anon
+API key. PostgREST verifies the JWT and enforces the existing story/asset RLS;
+anonymous callers use the anon role. Only permitted asset paths are fetched with
+the server-only service key. After buffering the image, the function rechecks
+permission and returns bytes with browser/CDN no-store headers. It never gives
+clients a Storage URL or signed token. Only JPEG/PNG/WebP up to 5 MiB are served.
+
+GET `/functions/v1/fas-story-image?asset_id=ASSET_UUID` serves an image. Anonymous
+requests omit Authorization; signed-in clients send their session JWT as a Bearer
+header. Private image UIs fetch bytes with that header and render a temporary
+browser object URL. Never put user tokens or service keys into image query strings.
+Gateway `verify_jwt=false` allows public anonymous images; custom authorization
+is enforced by the caller-scoped PostgREST/RLS queries. Invalid and invisible
+callers never reach privileged Storage. No caller-supplied Storage URL/path is used.
+
+Deployed to **FAS development only**. The full hosted suite now passes all seven
+groups, including exact URL replay after archival, no-store headers, invalid
+sessions and direct Storage/signing bypass denial. Cleanup was verified: zero
+synthetic accounts/invites/stories/assets; one pre-existing image preserved.
+Repository tests: 26 passed. Local migration and lint passed.
+
+Deploy the function before applying the restrictive read migration. Switch any
+community image client to this endpoint before that migration affects real users.
+The existing static website has no community image client yet. For local API tests,
+run `npx.cmd --yes supabase@2.120.0 functions serve fas-story-image` in a separate
+terminal after applying migrations, and keep it running during the API suite.
+The CLI supplies local credentials; no new secret file is needed.
+
+## Production cutover gate
 
 Supabase documents private bucket caching and using a unique `cacheNonce` to
 fetch from origin. Its Smart CDN documentation also warns that cached signed-URL
 responses may outlive the token's expiry. Merely shortening URL expiry is not a
 complete immediate-revocation mechanism.
 
-Before a production community rollout, define and test the required archival
-behavior. If immediate permission revocation is required, prepare a server image
-delivery path that checks current story/approval permissions for every request
-and prevents caching, with direct Storage download/signing access restricted
-accordingly. Unique query strings can verify origin permissions, but are not a
-server-enforced solution against someone reusing a previously cached URL.
+Before production rollout, inventory any previously issued raw/signed Storage
+URLs. The new endpoint prevents new bypass URLs, but cannot retroactively erase
+old CDN responses. Retire/invalidate those old URLs and account for propagation
+time during cutover. Unique query strings alone are not a replay defense.
 Object removal/cache invalidation has its own propagation delay and must not
 destroy author drafts as a shortcut. Already downloaded content cannot be recalled.
 
-This change provides the reproducible hosted tests and records the discovered
-gap. It does not deploy that image-delivery architecture, change the live website
-or certify production ready. Keep production migration separate until the
-revocation behavior is resolved or explicitly accepted for launch.
+The fixed image architecture is deployed/tested in development only. It does not
+change the live website or certify production ready. Keep production migration
+separate until its inspection, backup, cutover review and approval are complete.
 
 References: [Storage CDN](https://supabase.com/docs/guides/storage/cdn/fundamentals),
 [Smart CDN and cached signed URLs](https://supabase.com/docs/guides/storage/cdn/smart-cdn),

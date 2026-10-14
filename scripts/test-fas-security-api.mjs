@@ -60,6 +60,7 @@ let passed = 0;
 function pass(name) { passed++; console.log(`PASS ${name}`); }
 const users = [], stories = [], objects = [], invites = [];
 const sessions = [];
+const assetIds = new Map();
 const run = randomUUID();
 const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aG1sAAAAASUVORK5CYII=', 'base64');
 const rest = '/rest/v1/';
@@ -92,11 +93,14 @@ async function upload(user, story, register = true) {
   let asset;
   if (register) asset = success(await request(rest + 'story_assets', { token: user.token, method: 'POST',
     body: { story_id: story.id, object_path: path, alt_text: 'Synthetic image' }, headers: { Prefer: 'return=representation' } }), 'Register image')[0];
+  if (asset) assetIds.set(path, asset.id);
   return { path, asset };
 }
 const rpc = (name, user, body) => request(rest + `rpc/${name}`, { token: user?.token, method: 'POST', body });
 const getStory = (id, user) => request(rest + `stories?id=eq.${id}`, { token: user?.token });
-const download = (path, user) => request(`/storage/v1/object/authenticated/${bucket}/${path}`, { token: user?.token });
+const imageEndpoint = (path) => `/functions/v1/fas-story-image?asset_id=${assetIds.get(path) ?? '00000000-0000-0000-0000-000000000000'}`;
+const download = (path, user) => request(imageEndpoint(path), { token: user?.token });
+const rawDownload = (path, user) => request(`/storage/v1/object/authenticated/${bucket}/${path}`, { token: user?.token });
 const sign = (path, user) => request(`/storage/v1/object/sign/${bucket}/${path}`, { token: user?.token, method: 'POST', body: { expiresIn: 60 } });
 
 let failure = false;
@@ -136,6 +140,11 @@ try {
   assert.equal(success(await getStory(draft.id, admin), 'Admin draft read').length, 1);
   success(await download(draftImage.path, owner), 'Owner image download');
   success(await download(draftImage.path, admin), 'Admin image download');
+  for (const user of [undefined,viewer,owner,other,admin]) {
+    rejected(await rawDownload(draftImage.path,user),'Raw Storage bypass denied');
+    rejected(await sign(draftImage.path,user),'Raw signed URL bypass denied');
+  }
+  rejected(await request(imageEndpoint(draftImage.path),{token:'invalid-session'}),'Invalid image session');
   pass('Anonymous/viewer/other contributor cannot read private drafts or image bytes; owner/admin can');
 
   for (const user of [undefined, viewer]) rejected(await request(rest + 'stories', { token: user?.token, method: 'POST',
@@ -192,8 +201,11 @@ try {
     assert.equal(success(await getStory(published.id, user), 'Public published story').length, 1);
     const assets = success(await request(rest + `story_assets?story_id=eq.${published.id}`, { token: user?.token }), 'Public asset metadata');
     assert.deepEqual(assets.map(a => a.id), [approved.asset.id]);
-    success(await download(approved.path, user), 'Approved public image');
-    success(await sign(approved.path, user), 'Approved signed URL');
+    const delivered = await download(approved.path, user);
+    success(delivered, 'Approved public image');
+    assert.match(delivered.cache.control ?? '', /no-store/);
+    rejected(await rawDownload(approved.path,user),'Approved raw Storage bypass');
+    rejected(await sign(approved.path, user), 'Approved image signing bypass denied');
     rejected(await download(unapproved.path, user), 'Unapproved bytes');
     rejected(await sign(unapproved.path, user), 'Unapproved signed URL');
     rejected(await download(orphan.path, user), 'Orphan bytes');
@@ -219,7 +231,7 @@ try {
     if (archived.ok) {
       cacheFindings.push(archived.cache);
       console.log(`FAIL cached image revocation: HTTP ${archived.status}, cache=${JSON.stringify(archived.cache)}`);
-      const fresh = await request(`/storage/v1/object/authenticated/${bucket}/${approved.path}?cacheNonce=${randomUUID()}`, { token: user?.token });
+      const fresh = await request(imageEndpoint(approved.path)+`&cacheNonce=${randomUUID()}`, { token: user?.token });
       console.log(`Fresh URL after archival: HTTP ${fresh.status}, cache=${JSON.stringify(fresh.cache)}`);
       rejected(fresh, 'Fresh archived bytes');
     } else rejected(archived, 'Archived bytes');
