@@ -25,5 +25,10 @@ Keep Play My Path separate.
 9. Perform final end-to-end checks, legal review and deliberate production signup
    enablement. Signup alone must never grant contributor privileges.
 
-This sequence records the requested work; only the first small batch has started.
+The sign-in layout was reviewed and simplified to a centred form. The next small
+batch adds the matching sign-up skeleton and navigation between the two previews.
+Forms remain disabled; public registration and live-site changes are not enabled.
+Recovery is the next skeleton after Ryan reviews this batch.
+
+This sequence records the requested work; only the first two small batches have started.
 Later batches may change after Ryan reviews each skeleton.
