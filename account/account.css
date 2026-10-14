@@ -1,16 +1,9 @@
 /* FAS account-page skeletons: use the existing site tokens and shell. */
-.account-page { max-width: 64rem; margin-inline: auto; padding-bottom: var(--space-10); }
-.account-heading { margin-bottom: var(--space-8); max-width: var(--width-editorial); }
+.account-page { max-width: var(--container-narrow); margin-inline: auto; padding-bottom: var(--space-10); }
+.account-heading { margin-bottom: var(--space-8); text-align: center; }
 .account-heading h1 { margin: 0 0 var(--space-3); }
 .account-heading > p:last-child { margin: 0; color: var(--colour-text-secondary); }
 .account-eyebrow { margin: 0 0 var(--space-2); color: var(--colour-accent-primary); font-size: .875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-.account-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: var(--space-9); }
-.account-introduction { min-width: 0; }
-.account-artwork { aspect-ratio: 16 / 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); border: var(--surface-standard-border); border-radius: var(--radius-lg); background: var(--surface-inset-background); color: var(--colour-accent-primary); }
-.account-artwork i { font-size: 2rem; }
-.account-artwork span { font-family: var(--font-family-brand); font-size: clamp(2rem, 3vw, 3rem); }
-.account-introduction h2 { margin: var(--space-6) 0 var(--space-2); font-size: 1.5rem; }
-.account-introduction p { margin: 0; color: var(--colour-text-secondary); }
 .account-panel { min-width: 0; padding: var(--space-7); background: var(--surface-standard-background); border: var(--surface-standard-border); border-radius: var(--radius-lg); box-shadow: var(--surface-standard-shadow); }
 .account-panel h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
 .account-preview-note { margin: 0 0 var(--space-6); color: var(--colour-text-muted); font-size: .875rem; }
@@ -30,7 +23,6 @@
 .account-register p { margin: 0 0 var(--space-3); color: var(--colour-text-secondary); }
 .account-legal { margin: var(--space-5) 0 0; color: var(--colour-text-muted); font-size: .875rem; }
 @media (max-width: 48rem) {
-  .account-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
   .account-panel { padding: var(--space-6); }
   .account-heading { margin-bottom: var(--space-6); }
 }

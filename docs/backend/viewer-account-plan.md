@@ -2,7 +2,9 @@
 
 Ryan's working preference: create skeletons using the existing HTML structure,
 shared site shell and theme tokens, show each batch in the browser, then refine
-the personal design together. Artwork uses 16:9. Keep Play My Path separate.
+the personal design together. Content artwork uses 16:9. Sign-in and sign-up use
+centred forms without decorative artwork or introductory side panels for now.
+Keep Play My Path separate.
 
 1. Sign-in page skeleton: local design preview, disabled controls, no Auth changes.
 2. Review the visual direction together; extend it to sign-up and recovery skeletons.
