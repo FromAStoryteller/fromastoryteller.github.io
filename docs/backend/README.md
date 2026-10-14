@@ -1,6 +1,7 @@
 # FAS Community V1 backend
 
 Start with [setup.md](setup.md), then [backup-restore.md](backup-restore.md).
+For the additive security changes and direct API checks, follow [security.md](security.md).
 This is the database foundation, not a deployed community interface. The current
 website still reads static files. Nothing here imports, edits or republishes the
 existing stories. Online games and optional community features remain later scope.
@@ -72,8 +73,10 @@ uploads with a trusted maintenance process. File extensions/MIME types do not
 prove safe contents; add server-side image validation/re-encoding before allowing
 untrusted uploads in a live community.
 
-No client can overwrite or delete images. Only registered files whose stories are
-visible can be read. The bucket is private, including published images. The future
+No client can overwrite or delete images. Authors/staff can read registered images
+on visible stories; public readers additionally require explicit staff approval
+through `approve_story_image(target_asset)`. Changing alt text clears that approval.
+The bucket is private, including published images. The future
 frontend can request short-lived signed URLs for published files under the public
 read policy. Use a short expiry such as 60 seconds: an already-issued URL may
 continue working until expiry after archival. Authors/staff can read registered

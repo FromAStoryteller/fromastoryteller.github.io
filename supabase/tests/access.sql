@@ -67,6 +67,7 @@ do $$ declare changed integer; begin
   exception when insufficient_privilege then null; end;
 end $$;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000003',true);
+select public.approve_story_image(id) from public.story_assets;
 select public.moderate_story(id,'published','Test approval') from public.stories where slug='test-draft';
 do $$ begin
   if (select count(*) from public.moderation_log) <> 1 then raise exception 'FAIL: missing audit'; end if;
@@ -75,7 +76,7 @@ do $$ begin
     raise exception 'FAIL: audit deletion';
   exception when insufficient_privilege then null; end;
 end $$;
-select set_config('fas.test_token', public.create_invite('new@example.invalid'), true);
+do $$ begin perform set_config('fas.test_token', public.create_invite('new@example.invalid'), true); end $$;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000002',true);
 do $$ begin
   begin
