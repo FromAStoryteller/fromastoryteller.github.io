@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/password-checks.js"></script>
 
     <!-- FONT -->
 
@@ -152,28 +153,36 @@
           </header>
           <section class="account-panel" aria-labelledby="sign-up-title">
             <h2 id="sign-up-title">Create an account</h2>
-            <p class="account-preview-note" id="account-preview-note">Design preview — account access is coming soon.</p>
+            <p class="account-preview-note" id="account-preview-note">Design preview — try a sample password. Account creation is not enabled.</p>
             <!-- Disabled until verification, policy review and Auth states are implemented. -->
-            <form class="account-form" aria-describedby="account-preview-note account-reader-note">
-              <fieldset disabled>
+            <form class="account-form" data-password-checks aria-describedby="account-preview-note account-reader-note">
+              <fieldset>
                 <legend class="visually-hidden">New account details</legend>
                 <div class="account-field">
                   <label for="account-display-name">Display name</label>
-                  <input id="account-display-name" type="text" name="display_name" autocomplete="nickname" maxlength="80" placeholder="How you'd like to be known">
+                  <input id="account-display-name" type="text" disabled name="display_name" autocomplete="nickname" maxlength="80" placeholder="How you'd like to be known">
                 </div>
                 <div class="account-field">
                   <label for="account-email">Email address</label>
-                  <input id="account-email" type="email" name="email" autocomplete="email" placeholder="you@example.com">
+                  <input id="account-email" type="email" disabled name="email" autocomplete="email" placeholder="you@example.com">
                 </div>
                 <div class="account-field">
                   <label for="account-password">Password</label>
-                  <input id="account-password" type="password" name="password" autocomplete="new-password" placeholder="Choose a password">
+                  <input id="account-password" type="password" data-new-password aria-describedby="password-guidance password-summary" autocomplete="new-password" placeholder="Choose a password">
+                  <p class="password-guidance" id="password-guidance">Include lowercase and uppercase letters, a number and a symbol.</p>
+                  <ul class="password-rules" id="password-requirements"><li data-password-rule="length"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Minimum length: 12</span><span class="password-rule-status" data-rule-status>Not met</span></li>
+<li data-password-rule="lowercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A lowercase letter (a–z)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
+<li data-password-rule="uppercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>An uppercase letter (A–Z)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
+<li data-password-rule="number"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A number (0–9)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
+<li data-password-rule="symbol"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A symbol (for example !, @ or #)</span><span class="password-rule-status" data-rule-status>Not met</span></li></ul>
+                  <p class="password-summary" id="password-summary" data-password-summary role="status" aria-live="polite">0 of 5 password requirements met.</p>
                 </div>
                 <div class="account-field">
                   <label for="account-confirm-password">Confirm password</label>
-                  <input id="account-confirm-password" type="password" name="confirm_password" autocomplete="new-password" placeholder="Enter your password again">
+                  <input id="account-confirm-password" type="password" data-confirm-password aria-describedby="confirmation-check" autocomplete="new-password" placeholder="Enter your password again">
+                  <ul class="password-rules" id="confirmation-check"><li data-password-rule="match"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Passwords match</span><span class="password-rule-status" data-rule-status>Not met</span></li></ul>
                 </div>
-                <button class="account-submit" type="submit">Create an account <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+                <button class="account-submit" type="submit" disabled>Create an account <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
               </fieldset>
             </form>
             <p class="account-reader-note" id="account-reader-note">New accounts are for readers. Publishing stories requires a separate contributor invitation.</p>

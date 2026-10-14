@@ -27,10 +27,12 @@ Keep Play My Path separate.
 
 The sign-in layout was reviewed and simplified to a centred form. The next small
 batch adds the matching sign-up skeleton and navigation between the two previews.
-Forms remain disabled; public registration and live-site changes are not enabled.
+Submit actions remain disabled; public registration and live-site changes are not enabled.
 The recovery-request skeleton now links from sign-in and back again. It does not
 send email or identify whether an account exists. The new-password landing screen
-and verification/success/error states remain later small batches.
+now shares live password/confirmation checks with sign-up. Hosted FAS password
+rules were verified in both projects; see [password preview](password-preview.md).
+Only sample password entry is enabled; verification/success/error states remain later batches.
 
-This sequence records the requested work; only the first three small batches have started.
+This sequence records the requested work; only the first four small batches have started.
 Later batches may change after Ryan reviews each skeleton.
