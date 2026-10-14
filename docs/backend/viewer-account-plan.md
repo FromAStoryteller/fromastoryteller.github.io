@@ -28,7 +28,9 @@ Keep Play My Path separate.
 The sign-in layout was reviewed and simplified to a centred form. The next small
 batch adds the matching sign-up skeleton and navigation between the two previews.
 Forms remain disabled; public registration and live-site changes are not enabled.
-Recovery is the next skeleton after Ryan reviews this batch.
+The recovery-request skeleton now links from sign-in and back again. It does not
+send email or identify whether an account exists. The new-password landing screen
+and verification/success/error states remain later small batches.
 
-This sequence records the requested work; only the first two small batches have started.
+This sequence records the requested work; only the first three small batches have started.
 Later batches may change after Ryan reviews each skeleton.
