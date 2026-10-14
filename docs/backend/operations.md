@@ -57,9 +57,12 @@ invitation delivery/acceptance, story submission/moderation and image handling
 still require implementation and end-to-end checks. Public signup remains disabled
 for now. An account alone must not grant contributor privileges.
 
-The next security task should exercise anonymous/viewer/contributor/admin API
-requests, draft isolation, ownership, role protection, invitation validation and
-private Storage access. It does not require finished profile pages. Reconcile the
+The database and storage security task is complete as of 15 October 2026. Actual
+anonymous/viewer/contributor/admin API tests passed, including draft isolation,
+ownership, role protection, invitation validation and private image access.
+See [completion evidence](security-completion.md) for the approved production
+rollout, backup recovery rehearsal and development/production permission parity.
+It did not require finished profile pages. Reconcile the
 historical immediate-publication proposal with the currently implemented review
 workflow before changing rules. Server image validation, safe text rendering and
 exact Auth redirect/recovery routes remain launch requirements.
