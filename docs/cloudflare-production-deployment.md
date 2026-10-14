@@ -1,5 +1,10 @@
 # Cloudflare production deployment
 
+Current hosting guide. The earlier [migration plan](cloudflare-migration.md) is
+historical. Local and hosted FAS database setup is complete; see
+[backend operations](backend/operations.md) for its separate status and remaining
+community implementation work.
+
 ## Live publishing configuration
 
 Worker: `fas-site-production`
@@ -33,4 +38,4 @@ The same verifier can check the live apex, where the configured managed robots.t
 
 Keep GitHub Pages, its custom-domain configuration and the original DNS values for rollback. To restore GitHub Pages hosting, detach the Worker custom domain and disable intercepting redirect rules, then restore these four apex A records as DNS-only: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`. Restore the www CNAME to `fromastoryteller.github.io` as DNS-only. A nameserver rollback is separate and is not required for a hosting rollback.
 
-Preview rollback was rehearsed successfully. Record successful production website versions for later rollback; the initial Hello World version is not a usable website rollback target. Supabase community accounts and data remain a separate planned implementation.
+Preview rollback was rehearsed successfully. Record successful production website versions for later rollback; the initial Hello World version is not a usable website rollback target. Supabase dev/prod databases and operator accounts are configured. The community interface, viewer registration and end-to-end account flows remain separate implementation work. Hosting rollback does not restore or roll back database data.

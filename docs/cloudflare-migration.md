@@ -1,6 +1,16 @@
 # FAS Community V1: Cloudflare migration
 
-Prepared 13 October 2026. Status: migration prepared and locally verified; cloud deployment and production cutover remain outstanding. Do not mark the task complete yet.
+Historical migration plan prepared 13 October 2026. The hosting cutover has since
+completed; the observations, proposed steps and acceptance status below describe
+the pre-cutover state, not the current deployment. For current hosting configuration
+and completed evidence, use [production deployment](cloudflare-production-deployment.md).
+For the completed database setup, use [backend operations](backend/operations.md).
+
+The contributor self-publishing proposal below differs from the implemented
+submission/moderation database workflow. Keep it as historical planning evidence;
+confirm publication/editing rules during the security task before changing permissions.
+Open viewer registration with invitation-only contributors remains the intended
+account model; public signup is disabled until the account flows are built and tested.
 
 ## Decision and how it works
 

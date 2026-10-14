@@ -5,13 +5,22 @@ This is the database foundation, not a deployed community interface. The current
 website still reads static files. Nothing here imports, edits or republishes the
 existing stories. Online games and optional community features remain later scope.
 
+Local, hosted dev and hosted prod setup is complete as of 14 October 2026.
+See [operations.md](operations.md) for verified checks and the current manual
+backup routine. This status does not mean the community UI is ready to launch.
+
 ## Decisions and boundaries
 
-The referenced architecture chat exposes user requests but its assistant messages
-are unavailable. These explicit implementation choices should be reviewed before
-launch: invite-only membership; member/moderator/admin roles; moderation before
-publication; plain-text story bodies; private image storage; archival rather than
-client deletion. FAS has its own local project and separate hosted dev/prod projects.
+The intended account model is open viewer registration with invitation-only
+contributors. A viewer has an Auth account/profile and no contributor role;
+`member` is the current database name for a contributor. Public signup is disabled
+during foundation setup and must be enabled deliberately when the account flows
+are built and tested. These implemented choices require security review before
+launch: member/moderator/admin roles, moderation before publication, plain-text
+story bodies, private image storage and archival rather than client deletion.
+An earlier hosting plan proposed immediate contributor publication; resolve that
+workflow difference before changing permissions. FAS has its own local project
+and separate hosted dev/prod projects.
 Never reuse a PMP project, database, key, user identity store, bucket or backup.
 
 The browser will use Supabase Auth, the Data API with a publishable key, and Storage.

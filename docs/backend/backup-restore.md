@@ -5,13 +5,22 @@ the reviewed repository/migrations, confidential database exports, and image fil
 with a checksum inventory. Hosted Auth/SMTP/redirect settings and secrets require
 a separate secure operational record; Git is not their backup.
 
-Suggested initial policy: daily database and image exports, plus an export before
-every production migration; encrypted off-site copies; 7 daily and 4 weekly sets;
-a monthly restore drill to a disposable FAS project. This is a proposed policy,
-not an installed scheduler. Choose a responsible operator and record each run.
-With daily snapshots the target is at most 24 hours of data loss; recovery time
-must be measured in a drill, not promised. Check your project's actual backup plan
-and retention in Database -> Backups. Free-tier projects need regular exports.
+Current operating choice (14 October 2026): Ryan runs backups manually. Export
+production weekly and before database changes; export development before significant
+changes. Export locally outside Dropbox, encrypt the complete set as a 7z archive
+with AES-256 and encrypted file names, test it with the saved password, then copy
+the dated archive into Dropbox's `02 From A Storyteller/02 Website/Backups/FAS-Backups`.
+Store the password separately. Remove unencrypted working exports only after
+verification and confirmation that the encrypted archive has synced.
+
+Dropbox sync does not create fresh database exports, and no backup scheduler is
+installed. A weekly schedule can lose up to a week's changes between snapshots;
+reassess frequency before real community use. Suggested retention is four weekly
+sets and one monthly set for six months; retention pruning is not automated and
+requires a deliberate review. Rehearse recovery periodically and before relying
+on a changed procedure; measure recovery time rather than promising it. Check
+the project's actual backup plan/retention in Database -> Backups. Free-tier
+projects need regular exports, including separate Storage bytes.
 
 ## 1. Freeze writes and identify the source
 

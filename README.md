@@ -9,6 +9,10 @@ FAS Community V1 database setup lives in `supabase/`. Start with
 [backup/restore](docs/backend/backup-restore.md). The existing website still uses
 its static stories; these files do not activate a community frontend.
 
+Local, hosted development and hosted production setup was completed on 14 October
+2026. See [current operations](docs/backend/operations.md) for the verified status,
+environment separation and manual backup routine.
+
 
 ## Website styles
 
@@ -62,7 +66,9 @@ applies to anchor navigation only and respects reduced motion.
 
 For a local browser preview, install Node.js 22.12+ (or a current supported Node
 release), run `npm ci`, then `npm run dev`. This is a development-only Vite server;
-GitHub Pages still serves the same plain HTML, CSS and JavaScript. `npm run validate`
+Cloudflare Workers Static Assets serves the plain HTML, CSS and JavaScript;
+see [live publishing configuration](docs/cloudflare-production-deployment.md).
+GitHub Pages is retained as a rollback option. `npm run validate`
 regenerates the published indexes and shared HTML. Commit regenerated pages too.
 
 Validation for the September 2026 shell pass covered narrow 280/320px, phone,

@@ -25,7 +25,7 @@ Content pages and per-item meta.json files are the content sources. scripts/gene
 
 Studio resolves the sibling website through the parent workspace.config.json. Its contracts path is _templates/studio/site-contract.json. Studio reads the page template, category fragment, metadata schema and styles from that contract at runtime. It discovers .system.json manifests from the website and generates imports using their entry paths. Preview revision tracking includes all systems/ files. Do not copy canonical templates or components into Studio.
 
-Studio source, installers, private-control, drafts and credentials remain outside the public repository. The checked-in workflow validates indexes on main; it does not deploy. Studio's publisher is an explicit publication path and is not run for this maintenance task. Preserve the existing publishing boundaries and review before any push.
+Studio source, installers, private-control, drafts and credentials remain outside the public repository. The checked-in workflow validates indexes on main; Cloudflare's connected production build publishes main using the explicit production configuration. See [production deployment](cloudflare-production-deployment.md) for the build/deploy commands and rollback boundary. Studio's publisher is an explicit Git publication path. Preserve the existing publishing boundaries and review before any push.
 
 ## Validation
 
