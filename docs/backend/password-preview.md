@@ -17,7 +17,10 @@ implemented. Controls remain disabled where the password field is disabled.
 Empty fields are neutral. Entered new passwords get a red or green border based
 on the requirements; confirmation borders reflect equality, with explicit match/
 mismatch text. Wider forms show two rule columns; narrow forms use one when needed.
-The border colours use the site's existing success/error theme tokens.
+Password validation uses stronger green/red colours scoped to account pages,
+with dark/light variants. Three-pixel borders remain visible while editing;
+the keyboard focus outline matches the validation colour (neutral when empty),
+rather than the site's gold outline. Eye-button focus stays inside its control.
 
 The matcher follows Supabase Auth's UTF-8 byte-length measurement and required
 ASCII character sets. Emoji/space do not replace a required symbol, and passwords

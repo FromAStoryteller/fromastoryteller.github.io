@@ -1,5 +1,6 @@
 /* FAS account-page skeletons: use the existing site tokens and shell. */
-.account-page { max-width: var(--container-narrow); margin-inline: auto; padding-bottom: var(--space-10); }
+.account-page { --password-valid-colour: #166534; --password-invalid-colour: #b91c1c; max-width: var(--container-narrow); margin-inline: auto; padding-bottom: var(--space-10); }
+[data-theme="dark"] .account-page { --password-valid-colour: #4ade80; --password-invalid-colour: #f87171; }
 .account-heading { margin-bottom: var(--space-8); text-align: center; }
 .account-heading h1 { margin: 0 0 var(--space-3); }
 .account-heading > p:last-child { margin: 0; color: var(--colour-text-secondary); }
@@ -20,14 +21,17 @@
 .password-guidance { margin: 0; font-size: .875rem; color: var(--colour-text-secondary); }
 .password-rules { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--space-2); font-size: .875rem; }
 .password-rules li { display: flex; align-items: baseline; gap: var(--space-2); color: var(--colour-text-secondary); }
-.password-rules li[data-met="true"] { color: var(--colour-success-text); }
+.password-rules li[data-met="true"] { color: var(--password-valid-colour); }
 .password-rules i { width: 1rem; flex-shrink: 0; }
 .password-input-control { position: relative; }
-.password-input-control input { padding-right: calc(var(--size-touch-target-minimum) + var(--space-3)); border-width: 2px; }
-.password-input-control input[data-validation="valid"] { border-color: var(--colour-success-text); }
-.password-input-control input[data-validation="invalid"] { border-color: var(--colour-error-text); }
+.password-input-control input { --password-state-colour: var(--colour-text-secondary); padding-right: calc(var(--size-touch-target-minimum) + var(--space-3)); border-width: 3px; }
+.password-input-control input[data-validation="valid"] { --password-state-colour: var(--password-valid-colour); border-color: var(--password-state-colour); }
+.password-input-control input[data-validation="invalid"] { --password-state-colour: var(--password-invalid-colour); border-color: var(--password-state-colour); }
+.password-input-control input[data-validation]:is(:hover, :focus-visible) { border-color: var(--password-state-colour); }
+.password-input-control input:focus-visible { outline: 2px solid var(--password-state-colour); outline-offset: 3px; box-shadow: none; }
 .password-eye { position: absolute; right: var(--space-1); top: 50%; transform: translateY(-50%); width: var(--size-touch-target-minimum); height: var(--size-touch-target-minimum); display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: var(--colour-text-secondary); border-radius: var(--radius-md); cursor: pointer; }
 .password-eye:hover:not(:disabled) { color: var(--colour-accent-primary); }
+.password-eye:focus-visible { outline: 2px solid var(--colour-text-primary); outline-offset: -4px; }
 .password-eye:disabled { cursor: not-allowed; opacity: .5; }
 .password-summary { margin: 0; font-size: .875rem; color: var(--colour-text-muted); }
 .account-submit, .account-secondary { display: flex; justify-content: center; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--size-touch-target-minimum); padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); font: inherit; font-weight: 600; }
