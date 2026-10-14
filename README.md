@@ -1,6 +1,14 @@
 # fromastoryteller.github.io
 From A Storyteller - hand-coded portfolio and experiments. Learning as I go
 
+## Community backend foundation
+
+FAS Community V1 database setup lives in `supabase/`. Start with
+[the Windows and hosted setup guide](docs/backend/setup.md); see
+[backend architecture](docs/backend/README.md) and
+[backup/restore](docs/backend/backup-restore.md). The existing website still uses
+its static stories; these files do not activate a community frontend.
+
 
 ## Website styles
 

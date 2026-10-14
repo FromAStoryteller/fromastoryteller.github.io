@@ -8,7 +8,14 @@ scheduled/
 private-control/
 Studio Installer/
 .env*
+!.env.example
 *.key
+
+# FAS backend local state and confidential exports
+supabase/.temp/
+supabase/.branches/
+supabase/backups/
+backend-backups/
 
 # Cloudflare preview output and local tool state
 dist/
