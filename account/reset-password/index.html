@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/password-visibility.js"></script>
     <script type="module" src="/account/password-checks.js"></script>
 
     <!-- FONT -->
@@ -160,19 +161,19 @@
                 <legend class="visually-hidden">New password details</legend>
                 <div class="account-field">
                   <label for="account-password">New password</label>
-                  <input id="account-password" type="password" autocomplete="new-password" data-new-password aria-describedby="password-guidance password-summary" placeholder="Choose a new password">
+                  <div class="password-input-control" data-password-control><input id="account-password" type="password" autocomplete="new-password" data-new-password aria-describedby="password-guidance password-summary" placeholder="Choose a new password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show new password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   <p class="password-guidance" id="password-guidance">Include lowercase and uppercase letters, a number and a symbol.</p>
-                  <ul class="password-rules" id="password-requirements"><li data-password-rule="length"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Minimum length: 12</span><span class="password-rule-status" data-rule-status>Not met</span></li>
-<li data-password-rule="lowercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A lowercase letter (a–z)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
-<li data-password-rule="uppercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>An uppercase letter (A–Z)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
-<li data-password-rule="number"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A number (0–9)</span><span class="password-rule-status" data-rule-status>Not met</span></li>
-<li data-password-rule="symbol"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>A symbol (for example !, @ or #)</span><span class="password-rule-status" data-rule-status>Not met</span></li></ul>
+                  <ul class="password-rules" id="password-requirements"><li data-password-rule="length"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Length: 12 minimum</span><span class="visually-hidden" data-rule-status>Not met</span></li>
+<li data-password-rule="lowercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Lowercase (a–z)</span><span class="visually-hidden" data-rule-status>Not met</span></li>
+<li data-password-rule="uppercase"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Uppercase (A–Z)</span><span class="visually-hidden" data-rule-status>Not met</span></li>
+<li data-password-rule="number"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Number (0–9)</span><span class="visually-hidden" data-rule-status>Not met</span></li>
+<li data-password-rule="symbol"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Symbol (!, @, #…)</span><span class="visually-hidden" data-rule-status>Not met</span></li></ul>
                   <p class="password-summary" id="password-summary" data-password-summary role="status" aria-live="polite">0 of 5 password requirements met.</p>
                 </div>
                 <div class="account-field">
                   <label for="account-confirm-password">Confirm new password</label>
-                  <input id="account-confirm-password" type="password" autocomplete="new-password" data-confirm-password aria-describedby="confirmation-check" placeholder="Enter your new password again">
-                  <ul class="password-rules" id="confirmation-check"><li data-password-rule="match"><i class="fa-solid fa-circle" aria-hidden="true"></i><span>Passwords match</span><span class="password-rule-status" data-rule-status>Not met</span></li></ul>
+                  <div class="password-input-control" data-password-control><input id="account-confirm-password" type="password" autocomplete="new-password" data-confirm-password aria-describedby="confirmation-check" placeholder="Enter your new password again"><button class="password-eye" data-password-toggle type="button" aria-controls="account-confirm-password" aria-label="Show confirm new password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
+                  <p class="password-summary" id="confirmation-check" data-match-summary role="status" aria-live="polite"></p>
                 </div>
                 <button class="account-submit" type="submit" disabled>Save new password <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
               </fieldset>

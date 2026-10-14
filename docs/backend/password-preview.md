@@ -7,8 +7,17 @@ No hosted Auth setting was changed. Local config still has foundation defaults
 
 Sign-up and new-password previews share `account/password-policy.mjs` and the
 browser checklist in `account/password-checks.js`. Guidance shows all five rules,
-live Met/Not met text and a confirmation-match check. Accessible status text reports
+compact responsive rule rows and a confirmation-match message. Met/Not met text
+is available to screen readers but visually hidden. Accessible status text reports
 the requirement count without echoing password contents.
+
+Every password field has an eye toggle with an accessible show/hide label and
+pressed state. Normal browser masking is unchanged; no custom brief reveal is
+implemented. Controls remain disabled where the password field is disabled.
+Empty fields are neutral. Entered new passwords get a red or green border based
+on the requirements; confirmation borders reflect equality, with explicit match/
+mismatch text. Wider forms show two rule columns; narrow forms use one when needed.
+The border colours use the site's existing success/error theme tokens.
 
 The matcher follows Supabase Auth's UTF-8 byte-length measurement and required
 ASCII character sets. Emoji/space do not replace a required symbol, and passwords

@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/password-visibility.js"></script>
 
     <!-- FONT -->
 
@@ -166,7 +167,7 @@
                   </div>
                   <div class="account-field">
                     <label for="account-password">Password</label>
-                    <input id="account-password" type="password" name="password" autocomplete="current-password" placeholder="Your password">
+                    <div class="password-input-control" data-password-control><input id="account-password" type="password" name="password" autocomplete="current-password" placeholder="Your password"><button class="password-eye" data-password-toggle type="button" aria-controls="account-password" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   </div>
                   <div class="account-form-options">
                     <a class="account-text-button" href="/account/recover/">Forgot your password?</a>
