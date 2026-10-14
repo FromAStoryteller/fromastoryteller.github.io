@@ -32,7 +32,10 @@ The recovery-request skeleton now links from sign-in and back again. It does not
 send email or identify whether an account exists. The new-password landing screen
 now shares live password/confirmation checks with sign-up. Hosted FAS password
 rules were verified in both projects; see [password preview](password-preview.md).
-Only sample password entry is enabled; verification/success/error states remain later batches.
+Only sample password entry is enabled. The check-inbox and email-verification landing
+skeletons now share the same centred design. They explicitly say that no email is
+sent and no link is verified. Resending is disabled. Real callback validation and
+success/expired/error states will be implemented with Auth, not inferred from a URL.
 
-This sequence records the requested work; only the first four small batches have started.
+This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.
