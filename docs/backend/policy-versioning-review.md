@@ -2,6 +2,30 @@
 
 ## Current batch
 
+16 October update: the prepared launch candidate is
+`account-launch-2026-10-16-v1`, with two checksummed copies under policy-history.
+Ryan requested **From A Storyteller** as the public-facing operator name instead
+of his personal name. The candidate, current review hub, registry operator label
+and signup collection notice now use that name and describe the site as personally
+operated in New Zealand. This does not imply incorporation or create a separate
+legal entity. Previously acknowledged notices and their original checksums remain
+unchanged. The change was made during candidate preparation, before its first
+commit or any agreement to it; both candidate checksums were recalculated.
+
+The candidate replaces DEV instructions with reader-facing account practices and
+explicit launch applicability. Its status is `publication-candidate`, and
+activePublishedVersion remains NULL. Even selecting it as active cannot satisfy
+the production build's published-status requirement. No server release, agreement,
+Auth setting, production page or service was changed. Wording review is distinct
+from approval to publish or activate live registration.
+
+The current review hub points to the candidate. The v2 review pages below remain
+earlier preparation material. At rollout, copy the approved content to the live
+Privacy/Terms routes as well as retaining the exact immutable version, verify the
+server release/version/hash values, and preserve old declaration records. Do not
+silently change draft acknowledgements or treat an operator wording review as a
+registrant's agreement.
+
 Update: Ryan reviewed the wording and asked work to continue. Prospective server
 agreement support and contribution gates are now installed but inactive in local
 FAS and DEV; see [implementation/evidence](published-policy-agreements.md).

@@ -3,10 +3,11 @@
   "activePublishedVersion": null,
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
-    "name": "Ryan Fearon",
+    "name": "From A Storyteller",
     "country": "New Zealand",
     "email": "fromastoryteller@gmail.com",
-    "contactMode": "email-only"
+    "contactMode": "email-only",
+    "operation": "personally-operated"
   },
   "versions": {
     "local-preview-2026-10-15-v1": {
@@ -37,7 +38,24 @@
           "path": "/account/terms-review/"
         }
       }
+    },
+    "account-launch-2026-10-16-v1": {
+      "status": "publication-candidate",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-16",
+      "effectiveFrom": "public-viewer-registration-launch",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/account-launch-2026-10-16-v1/privacy/index.html",
+          "sha256": "ebce6edbab0217a6eaee1f4ffb7b57efcdea288b26ed2e05266b4796627613bd"
+        },
+        "terms": {
+          "path": "/account/policy-history/account-launch-2026-10-16-v1/terms/index.html",
+          "sha256": "e99ebe4a36ea013f0bbb6216cf7f21e73f0d564e2c7f689beb449600b0124256"
+        }
+      }
     }
   },
-  "hashFormat": "sha256-utf8-lf"
+  "hashFormat": "sha256-utf8-lf",
+  "candidateVersion": "account-launch-2026-10-16-v1"
 }
