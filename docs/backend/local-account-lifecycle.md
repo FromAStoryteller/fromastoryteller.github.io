@@ -80,8 +80,7 @@ then replay cleanup of restored identities, content and original bytes. Never le
 an older backup overwrite the only copy of current deletion records. RLS keeps
 restored publications from closing accounts hidden while cleanup is reapplied.
 The SQL tests simulate this restoration and confirm that cleanup can be resumed.
-An end-to-end isolated restore rehearsal with real Storage bytes remains a hosted
-rollout gate. Do not describe the earlier pre-account backup test as proving this.
+A subsequent isolated local rehearsal with real Auth rows and Storage bytes passed; see [local restore rehearsal](local-restore-rehearsal.md). It does not validate a full hosted backup import or production cutover. Do not describe the earlier pre-account backup test as proving the account lifecycle.
 
 ## Verification and running locally
 

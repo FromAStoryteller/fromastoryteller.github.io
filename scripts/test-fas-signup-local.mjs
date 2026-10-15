@@ -26,7 +26,7 @@ async function emailLink(email,exclude){
       const message=await fetch(`${inbox}/api/v1/message/${item.ID}`).then(r=>r.json());
       const html=message.HTML??'';
       const href=html.match(/href="([^"]*\/account\/verify-email\/[^\"]+)"/)?.[1]?.replaceAll('&amp;','&');
-      if(href){const url=new URL(href);const token=url.searchParams.get('token_hash');if(token&&token!==exclude){requireCondition(url.origin==='http://127.0.0.1:55400'&&url.searchParams.get('type')==='email');return token;}}
+      if(href){const url=new URL(href);const params=new URLSearchParams(url.hash.slice(1));const token=params.get('token_hash');if(token&&token!==exclude){requireCondition(url.origin==='http://127.0.0.1:55400'&&!url.search&&params.get('type')==='email');return token;}}
     }
     await new Promise(resolve=>setTimeout(resolve,250));
   }

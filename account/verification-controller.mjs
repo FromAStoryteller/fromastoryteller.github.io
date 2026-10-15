@@ -1,8 +1,9 @@
 export function consumeVerificationLink(url, removeCredentials) {
-  const params = new URL(url).searchParams;
+  const parsed = new URL(url);
+  const params = new URLSearchParams(parsed.hash.slice(1));
   removeCredentials();
   const hash = params.get('token_hash');
-  if (params.getAll('token_hash').length !== 1 || params.getAll('type').length !== 1 || params.get('type') !== 'email' || !/^[A-Za-z0-9_-]{20,256}$/.test(hash ?? '')) return null;
+  if (parsed.search || params.getAll('token_hash').length !== 1 || params.getAll('type').length !== 1 || params.get('type') !== 'email' || !/^[A-Za-z0-9_-]{20,256}$/.test(hash ?? '')) return null;
   return hash;
 }
 

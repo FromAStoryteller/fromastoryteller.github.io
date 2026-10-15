@@ -52,13 +52,20 @@ test('Resend hides account membership, while connection/rate-limit failures rema
   assert.equal((await resendVerification({resend:async()=>{throw new Error('secret');}},'reader@example.invalid')).state,'error');
 });
 
-test('Verification strips URL credentials, refuses other token types and ignores redirect/success claims', () => {
+test('Verification accepts fragment-only credentials, scrubs the address and rejects query/mixed/duplicate credentials', () => {
   let scrubbed=0;
-  assert.equal(consumeVerificationLink(`http://127.0.0.1:55400/account/verify-email/?token_hash=${hash}&type=email&next=https://attacker.invalid`,()=>scrubbed++),hash);
-  assert.equal(consumeVerificationLink(`http://127.0.0.1:55400/account/verify-email/?token_hash=${hash}&type=recovery`,()=>scrubbed++),null);
-  assert.equal(consumeVerificationLink(`http://127.0.0.1:55400/account/verify-email/?verified=true#access_token=fake`,()=>scrubbed++),null);
-  assert.equal(consumeVerificationLink(`http://127.0.0.1:55400/account/verify-email/?token_hash=${hash}&token_hash=${hash}&type=email`,()=>scrubbed++),null);
-  assert.equal(scrubbed,4);
+  const scrub=()=>scrubbed++;
+  assert.equal(consumeVerificationLink(`http://127.0.0.1:55400/account/verify-email/#token_hash=${hash}&type=email&next=https://attacker.invalid`,scrub),hash);
+  for (const suffix of [
+    `?token_hash=${hash}&type=email`,
+    `?token_hash=${hash}#token_hash=${hash}&type=email`,
+    `#token_hash=${hash}&type=recovery`,
+    '?verified=true#access_token=fake',
+    `#token_hash=${hash}&token_hash=${hash}&type=email`,
+    `#token_hash=${hash}&type=email&type=email`,
+    '#token_hash=bad&type=email',
+  ]) assert.equal(consumeVerificationLink('http://127.0.0.1:55400/account/verify-email/'+suffix,scrub),null);
+  assert.equal(scrubbed,8);
 });
 
 test('Verification needs an explicit call and server confirmation; used links terminate while network errors allow retry', async () => {

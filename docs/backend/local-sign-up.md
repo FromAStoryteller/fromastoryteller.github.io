@@ -28,13 +28,11 @@ will be handled separately before launch.
 
 ## Link and browser handling
 
-The local email links to `/account/verify-email/` with a Supabase token hash and
-fixed type `email`. The page removes query parameters and fragments from the
+The local email links to `/account/verify-email/` with a Supabase token hash and fixed type `email` in the URL fragment (after #), rather than query parameters. The page removes query parameters and fragments from the
 address using `replaceState` before network requests, sets `no-referrer`, and keeps
 the link token only in page memory. Passwords and verification-link tokens are
 never logged or saved by application code. Auth session tokens now use SDK-managed
-tab storage; see [local sessions](local-sessions.md). As with any query-based confirmation link, hosting/request logs require
-review before a hosted implementation is enabled.
+tab storage; see [local sessions](local-sessions.md). Fragments are not sent in HTTP page requests. The page still scrubs the address immediately and requires explicit confirmation; tokens must not be logged, tracked or persisted. Old query-style links are rejected; request a new email. Hosted logging and email-link tracking still require review before launch.
 
 Opening the page does not consume the token. The person must select **Confirm
 email**, which calls Auth's verification API. This prevents an ordinary link
