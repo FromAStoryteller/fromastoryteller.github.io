@@ -7,6 +7,7 @@ import { accountDataArchive } from './account-data-download.mjs';
 const form = document.querySelector('[data-profile-form]');
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
+const signInPrompt = document.querySelector('[data-settings-sign-in]');
 const download = document.querySelector('[data-export-account]');
 const contentDownload = document.querySelector('[data-export-content]');
 const deleteStart = document.querySelector('[data-delete-start]');
@@ -120,6 +121,8 @@ confirmForm.addEventListener('submit', async event => {
     local.storage.clear(); clearPendingEmail(); prepared = null;
     for (const field of document.querySelectorAll('[data-account-settings] input, [data-account-settings] textarea')) field.value = '';
     panel.hidden = true;
+    signInPrompt.hidden = false;
+    document.querySelector('[data-settings-back]').hidden = true;
     show('Your local test account and its owned Community content were deleted. You’re signed out.');
     status.setAttribute('tabindex','-1'); status.focus();
   } catch (error) {
@@ -133,7 +136,15 @@ try {
   if (local) {
     document.querySelector('[data-preview-note]').textContent = 'Local test only — these settings apply to your local FAS account.';
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
-    if (session.state !== 'signed-in') show(session.message || 'Sign in to view your account settings.', true);
+    if (session.state !== 'signed-in') {
+      show(session.message || 'Sign in to view your account settings.', true);
+      signInPrompt.hidden = false;
+      document.querySelector('[data-settings-back]').hidden = true;
+    }
     else render(await loadAccount(local.client));
   }
-} catch { show('We couldn’t load your account settings. Sign in again or try later.', true); }
+} catch {
+  show('We couldn’t load your account settings. Sign in again or try later.', true);
+  signInPrompt.hidden = false;
+  document.querySelector('[data-settings-back]').hidden = true;
+}

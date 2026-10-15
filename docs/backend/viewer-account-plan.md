@@ -52,3 +52,9 @@ existence. Verify direct API responses as well as page text before launch.
 Reference: [OWASP Forgot Password guidance](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).
 
 Current additional work: [storage choices](storage-choices.md), [lifecycle decisions](account-lifecycle-decisions.md), and [future FAS game data](future-game-account-data.md). Account Privacy/Terms drafts are available at `/account/privacy-preview/` and `/account/terms-preview/`. They are marked as drafts and are not the live account policy.
+
+## Latest local verification
+
+The user completed the final browser deletion confirmation. The local Auth identity, owned story rows and Storage originals were verified absent; the deleted login was denied. Disposable fixture records were removed. Personal account-data downloads work for viewers and contributors, with a separate server-enforced contributor content download. All remain local-only.
+
+The About navigation now says About the site with a circle-info icon; its existing route, content and theme are preserved. The page heading identifies From A Storyteller. No personal profile or content attribution was invented.

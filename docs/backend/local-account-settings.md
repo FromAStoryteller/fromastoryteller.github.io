@@ -23,3 +23,5 @@ profile save and an actual downloaded archive with no credential fields.
 
 Run `npm run test:settings:local` with process-only local FAS test credentials and
 `FAS_TEST_CONFIRM=LOCAL-FAS-ONLY`, as for the other local Auth test scripts.
+
+Signed-out and expired-session settings provide a direct Sign in button beside the status message; the duplicate account-access link is hidden in this state. Browser navigation was verified.

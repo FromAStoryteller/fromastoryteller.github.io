@@ -91,9 +91,9 @@
         <span>Home</span>
       </a>
 
-      <a href="/about/" class="sidebar-item" aria-label="About Me" title="About Me">
-        <i class="fa-solid fa-user" aria-hidden="true"></i>
-        <span>About Me</span>
+      <a href="/about/" class="sidebar-item" aria-label="About the site" title="About the site">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        <span>About the site</span>
       </a>
 
       <a href="/contact/" class="sidebar-item" aria-label="Contact" title="Contact">
@@ -150,6 +150,7 @@
 <section class="account-panel" aria-labelledby="settings-title"><h2 id="settings-title">Your details</h2>
 <p class="account-preview-note" data-preview-note>Design preview — account settings are available in the local test only.</p>
 <p class="account-auth-status" data-auth-status role="status" aria-live="polite" hidden></p>
+<p data-settings-sign-in hidden><a class="account-secondary" href="/account/sign-in/">Sign in</a></p>
 <div data-account-settings hidden>
 <p>Email: <strong data-account-email></strong></p><p>Account access: <strong data-account-role></strong></p>
 <form class="account-form" data-profile-form><fieldset disabled><legend class="visually-hidden">Profile details</legend>
@@ -161,7 +162,7 @@
 <div class="account-register"><h2>Delete account</h2><p class="account-auth-status" data-deletion-status role="status" aria-live="polite" hidden></p><p>This permanently removes your account and its owned Community stories and images. Download your account data and any contributor content first if you want to keep a copy.</p><p>Restricted backup copies may remain for up to 30 days under the site’s backup process.</p><p data-deletion-unavailable>Deletion is available in the local test only. Staff accounts need a separate reviewed process.</p><button class="account-secondary account-danger" data-delete-start type="button" hidden>Delete account…</button>
 <form class="account-form" data-delete-password-form hidden><fieldset><legend class="visually-hidden">Confirm your current password</legend><div class="account-field"><label for="delete-password">Current password</label><div class="password-input-control" data-password-control><input id="delete-password" type="password" autocomplete="current-password" required maxlength="1024"><button class="password-eye" data-password-toggle type="button" aria-controls="delete-password" aria-label="Show current password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div></div><button class="account-secondary" type="submit">Review deletion</button><button class="account-text-button" data-delete-cancel type="button">Cancel</button></fieldset></form>
 <form class="account-form" data-delete-confirm-form hidden><fieldset><legend class="visually-hidden">Confirm permanent account deletion</legend><p data-delete-summary></p><p data-delete-confirm-info>You can cancel here. Confirming starts permanent removal and cannot be undone.</p><label class="account-check"><input data-delete-export-choice type="checkbox" required> <span data-delete-export-label>I understand my account will be permanently deleted.</span></label><div class="account-field"><label for="delete-confirmation">Type DELETE to confirm</label><input id="delete-confirmation" type="text" autocomplete="off" spellcheck="false" required pattern="DELETE"></div><button class="account-submit account-danger" type="submit">Permanently delete account</button><button class="account-text-button" data-delete-cancel type="button">Cancel</button></fieldset></form></div>
-</div><div class="account-register"><a class="account-secondary" href="/account/sign-in/">Back to account access</a></div>
+</div><div class="account-register" data-settings-back><a class="account-secondary" href="/account/sign-in/">Back to account access</a></div>
 <p class="account-legal">Read our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p></section></div></main>
 
     </div>

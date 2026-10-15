@@ -249,7 +249,11 @@ function generateStaticHtml(items) {
   }));
   const pagePaths = [
     ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/search/",
-    ...items.map(item => item.url), "/404.html", "/_templates/page-template.html"
+    ...items.map(item => item.url), "/404.html", "/_templates/page-template.html",
+    // Account previews share the shell, but remain outside public search/sitemaps.
+    ...readdirSync(join(ROOT, 'account'), { withFileTypes: true })
+      .filter(entry => entry.isDirectory() && existsSync(join(ROOT, 'account', entry.name, 'index.html')))
+      .map(entry => `/account/${entry.name}/`)
   ];
   for (const urlPath of new Set(pagePaths)) {
     const path = urlPath.endsWith(".html") ? join(ROOT, urlPath.slice(1)) : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
