@@ -59,6 +59,21 @@
         "reviewedOn": "2026-10-16",
         "publicFacingName": "From A Storyteller"
       }
+    },
+    "site-before-viewer-accounts-2026-10-16-v1": {
+      "status": "historical-site-notice",
+      "sourceGitCommit": "79a91d28f3f2de3fa49595a1de8c25601c5a7e7f",
+      "capturedOn": "2026-10-16",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/site-before-viewer-accounts-2026-10-16-v1/privacy/index.html",
+          "sha256": "a6efea4b11f3a78c0ef83cf7c168e8a5ef0611e3125f3ea30b090861406ced6b"
+        },
+        "terms": {
+          "path": "/account/policy-history/site-before-viewer-accounts-2026-10-16-v1/terms/index.html",
+          "sha256": "193d9e50af77b41dc34cb23eb47d722cc50fde3f9f082e58f8a3c6ab89aae1cb"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",

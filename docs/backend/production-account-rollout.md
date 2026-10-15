@@ -7,7 +7,11 @@ was sent, production template installed, credential changed or signup enabled.
 Latest: Ryan also approved the branded launch policy candidate wording. The
 [read-only production readiness review](production-readiness-2026-10-16.md)
 records the actual missing callbacks/hook/lifecycle/schedules, fresh backup and
-later rollout order. Backup encryption/test/sync is the next manual step.
+later rollout order. Ryan confirmed the encrypted archive was tested and synced.
+The exact exported SQL payload subsequently passed an isolated restore and all
+four pending migrations plus six rollback SQL suites. Raw exports and the
+disposable database were removed. The next approval is the concrete production
+rollout, after the remaining source/configuration preparation is reviewed.
 
 ## Prepared email settings
 

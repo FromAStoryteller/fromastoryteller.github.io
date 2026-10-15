@@ -47,17 +47,45 @@ migrations, safe operational notes, row counts and a verified-empty Storage
 inventory. All 13 payload checksums passed; source counts were rechecked unchanged.
 SMTP/API secrets were not exported. No backup contents are committed to Git.
 
-Ryan must encrypt with AES-256 and encrypted file names, test the 7z archive and
-confirm off-site sync. This confirms backup preparation only, not a rollout.
-The restricted raw copy remains until confirmation and required restore checks
-finish. Archive integrity and actual database restore are different checks.
+Ryan confirmed AES-256 encryption with encrypted file names, successful archive
+testing and Dropbox sync. This confirms the backup only, not a rollout. The
+checksum-verified raw payload from that export was restored into a separate
+disposable PostgreSQL container: network none, no published ports, no TCP
+listener, RAM-backed data directory and no Auth/mail service. The normal local
+database was not used because it publishes a host port on all interfaces.
 
-The normal local database publishes a host port on all interfaces. Do not load
-this personal production backup into that container for a rehearsal. An exact
-backup restore needs a separate target with no published ports/network exposure,
-no running Auth/mail service, verified cleanup and private output. The earlier
-successful nine-migration rehearsal used synthetic data only. Do not present it
-as verification of this new exact production archive.
+All 32 exported tables matched exactly before and after the four pending account
+migrations and six rollback SQL suites (access, security, lifecycle, registration,
+policy agreements and contribution gates). The original identity/profile/admin
+relationship survived; no declaration, release or agreement was invented, and
+the policy requirement remained NULL. Initial rehearsal setup was corrected to
+read SQL stdin explicitly and restore the managed Auth/Storage object privileges.
+These corrections affected only the disposable target.
+
+This is an SQL recovery rehearsal against compatible local managed schemas, not
+a hosted cutover, SMTP delivery or live Auth login test. The agent did not decrypt
+the user's archive; Ryan tested that archive, and the agent restored its original
+checksum-verified payload. After success, the exact labelled container and raw
+restricted export folder were removed with target/path checks. The encrypted
+archive remains with Ryan under the agreed backup retention process. A safe
+aggregate result is retained outside Git in outputs/PROD-ACCOUNT-BACKUP-RESTORE-RESULT.json.
+
+The production CLI dry run, with vault updates explicitly skipped, listed exactly
+the four reviewed account migrations and no seed or role imports. No migration
+was applied. Recheck this dry run immediately before a later approved rollout.
+
+## Proposed public policy routes
+
+The draft branch now prepares /privacy/ and /terms/ from the approved launch
+candidate. Only page title/canonical/indexing and the pre-launch fallback link
+differ from the frozen snapshots. The fallback points to exact copies of the
+previous root documents from origin/main commit
+79a91d28f3f2de3fa49595a1de8c25601c5a7e7f, preserved under
+/account/policy-history/site-before-viewer-accounts-2026-10-16-v1/ with checksums
+and Git provenance in the registry. This is source provenance, not proof of the
+currently deployed Cloudflare bytes. The frozen launch candidate and acknowledged
+drafts were not edited. activePublishedVersion remains NULL; these source changes
+do not publish a policy or enable signup.
 
 ## Order of the later approved rollout
 
