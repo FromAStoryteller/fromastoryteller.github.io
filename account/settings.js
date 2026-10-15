@@ -97,7 +97,7 @@ passwordForm.addEventListener('submit', async event => {
     prepared.started = summary.resume;
     confirmForm.querySelector('[data-delete-confirm-info]').textContent = summary.resume ? 'Removal has already started and cannot be undone. Confirm to finish the remaining cleanup.' : 'You can cancel here. Confirming starts permanent removal and cannot be undone.';
     confirmForm.querySelector('[data-delete-cancel]').textContent = summary.resume ? 'Close for now' : 'Cancel';
-    document.querySelector('[data-delete-summary]').textContent = `This removes your account, ${summary.stories} owned Community ${summary.stories === 1 ? 'story' : 'stories'} (${summary.published} published) and ${summary.images} uploaded ${summary.images === 1 ? 'image' : 'images'}.`;
+    document.querySelector('[data-delete-summary]').textContent = `Local test only: this removes your test account, ${summary.stories} owned Community ${summary.stories === 1 ? 'story' : 'stories'} (${summary.published} published) and ${summary.images} uploaded ${summary.images === 1 ? 'image' : 'images'}.`;
     passwordForm.hidden = true; confirmForm.hidden = false;
     showDeletion(summary.resume ? 'Removal has already started. Confirm to retry the remaining cleanup.' : 'Account confirmed. Review the details below before continuing.');
     confirmForm.querySelector('[data-delete-export-choice]').focus();
