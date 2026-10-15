@@ -1,4 +1,5 @@
 import {restoreFocus} from "/systems/core/focus.js"
+import { initStorageChoices } from '../privacy/storage-banner.js';
 
 // =======================================
 // FROM A STORYTELLER - SITE SHELL
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     syncHeaderSearchQuery();
     initHeaderSearch();
     initContentDetailEnhancements();
+    initStorageChoices();
   } catch (err) {
     console.error("Error loading components:", err);
   } 

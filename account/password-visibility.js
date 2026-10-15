@@ -2,7 +2,12 @@ for (const control of document.querySelectorAll('[data-password-control]')) {
   const input = control.querySelector('input');
   const button = control.querySelector('[data-password-toggle]');
   const label = document.querySelector(`label[for="${input.id}"]`).textContent.toLowerCase();
-  button.disabled = input.matches(':disabled');
+  const syncDisabled = () => { button.disabled = input.matches(':disabled'); };
+  syncDisabled();
+  const observer = new MutationObserver(syncDisabled);
+  observer.observe(input, { attributes: true, attributeFilter: ['disabled'] });
+  const fieldset = input.closest('fieldset');
+  if (fieldset) observer.observe(fieldset, { attributes: true, attributeFilter: ['disabled'] });
   button.addEventListener('click', () => {
     if (input.matches(':disabled')) return;
     const start = input.selectionStart;

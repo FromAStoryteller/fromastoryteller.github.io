@@ -1584,4 +1584,16 @@ html, body, button, input, textarea, select,
 .tool-button:hover { background: var(--state-hover-background); color: var(--state-hover-colour); border-color: var(--colour-control-border-hover); }
 .info-card h2, .tool-widget-title { font-size: var(--font-size-lg); }
 .footer-brand .logo { font-size: var(--font-size-2xl); }
+.storage-banner, .storage-dialog { padding: var(--space-5); border: var(--surface-standard-border); border-radius: var(--radius-lg); background: var(--surface-standard-background); color: var(--colour-text-primary); box-shadow: var(--surface-standard-shadow); }
+.storage-banner { position: fixed; z-index: 100; bottom: var(--space-3); left: var(--space-3); right: var(--space-3); max-width: 38rem; max-height: 65dvh; overflow: auto; }
+.storage-banner[hidden] { display: none; }
+.storage-banner h2, .storage-dialog h2 { margin-top: 0; font-size: 1.35rem; }
+.storage-banner p, .storage-dialog p { font-size: .95rem; }
+.storage-dialog { max-width: 36rem; max-height: 85dvh; width: calc(100% - 2rem); box-sizing: border-box; }
+.storage-dialog::backdrop { background: rgb(0 0 0 / .65); }
+.storage-dialog label { display: flex; align-items: center; gap: .75rem; padding-block: .75rem; }
+.storage-dialog input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--colour-accent-primary); }
+.storage-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.storage-actions button { flex: 1 1 10rem; min-height: var(--size-touch-target-minimum); padding: .6rem .8rem; border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); background: var(--colour-control-background); color: var(--colour-control-text); font: inherit; cursor: pointer; }
+.storage-settings-link { min-height: var(--size-touch-target-minimum); padding: .25rem 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 .footer-legal a:active, .socials a:active { background: var(--state-current-background); }

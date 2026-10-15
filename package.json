@@ -19,7 +19,9 @@
     "dev:accounts:local": "node scripts/start-fas-account-local.mjs",
     "test:auth:local": "node scripts/test-fas-auth-local.mjs",
     "test:signup:local": "node scripts/test-fas-signup-local.mjs",
-    "test:sessions:local": "node scripts/test-fas-sessions-local.mjs"
+    "test:sessions:local": "node scripts/test-fas-sessions-local.mjs",
+    "test:recovery:local": "node scripts/test-fas-recovery-local.mjs",
+    "test:settings:local": "node scripts/test-fas-settings-local.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",

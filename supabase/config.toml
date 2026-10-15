@@ -161,7 +161,7 @@ site_url = "http://127.0.0.1:55400"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://127.0.0.1:55400/account/verify-email/"]
+additional_redirect_urls = ["http://127.0.0.1:55400/account/verify-email/", "http://127.0.0.1:55400/account/reset-password/"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -237,6 +237,10 @@ otp_expiry = 3600
 [auth.email.template.confirmation]
 subject = "Verify your From A Storyteller email (local test)"
 content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your From A Storyteller password (local test)"
+content_path = "./supabase/templates/recovery.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]

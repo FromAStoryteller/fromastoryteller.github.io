@@ -28,19 +28,17 @@ Keep Play My Path separate.
 The sign-in, sign-up and recovery pages use matching centred forms. Sign-in now
 works only through the deliberately enabled local FAS connection; see
 [local sign-in](local-sign-in.md). Signup and verification also work only locally;
-see [local signup](local-sign-up.md). Recovery remains disabled. Hosted public
+see [local signup](local-sign-up.md). Recovery now works locally; see [local recovery](local-recovery.md). Hosted public
 registration and live-site changes are not enabled.
-The recovery-request skeleton now links from sign-in and back again. It does not
-send email or identify whether an account exists. The new-password landing screen
-now shares live password/confirmation checks with sign-up. Hosted FAS password
+The recovery-request form sends local test emails and uses conditional guidance without identifying whether an account exists. The new-password landing screen shares live password/confirmation checks with sign-up and unlocks only after a server-verified recovery link. Hosted FAS password
 rules were verified in both projects; see [password preview](password-preview.md).
-Normal/hosted signup and new-password pages permit only sample password entry.
+Hosted signup permits only sample password entry; hosted password recovery stays inactive.
 The local signup flow sends confirmation emails to the local test inbox, with
 resend throttling and verified success/invalid-link states. Verification requires
 a server-validated token and an explicit confirmation action; success is never
 inferred from URL parameters. Tab-scoped sessions now survive navigation/reloads
 with server verification, expiry feedback and retryable connection states; see
-[local sessions](local-sessions.md). Recovery remains the next integration batch.
+[local sessions](local-sessions.md). Profile editing and account-data export also work locally; see [account settings](local-account-settings.md). Complete contributor exports/deletion remain in preparation.
 
 This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.
@@ -52,3 +50,5 @@ During Auth integration, use a consistent recovery response for known/unknown
 emails, and separately handle network/rate-limit errors without exposing account
 existence. Verify direct API responses as well as page text before launch.
 Reference: [OWASP Forgot Password guidance](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).
+
+Current additional work: [storage choices](storage-choices.md), [lifecycle decisions](account-lifecycle-decisions.md), and [future FAS game data](future-game-account-data.md). Account Privacy/Terms drafts are available at `/account/privacy-preview/` and `/account/terms-preview/`. They are marked as drafts and are not the live account policy.

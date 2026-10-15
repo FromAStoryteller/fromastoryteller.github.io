@@ -19,6 +19,7 @@
 
     <!-- GLOBAL SCRIPT -->
     <script type="module" src="/systems/core/site-shell.js"></script>
+    <script type="module" src="/account/recover.js"></script>
 
     <!-- FONT -->
 
@@ -154,13 +155,13 @@
             <h2 id="recovery-title">Reset your password</h2>
             <p class="account-preview-note" id="account-preview-note">Design preview — account access is coming soon.</p>
             <p class="account-recovery-intro" id="account-recovery-intro">Enter the email address you used to create your account. If an account exists for that email, we’ll send a recovery link.</p>
-            <!-- Disabled until the recovery email and callback flow are implemented. -->
-            <form class="account-form" aria-describedby="account-preview-note account-recovery-intro">
+            <p class="account-auth-status" data-auth-status role="status" aria-live="polite" hidden></p>
+            <form class="account-form" data-recover-form aria-describedby="account-preview-note account-recovery-intro">
               <fieldset disabled>
                 <legend class="visually-hidden">Password recovery details</legend>
                 <div class="account-field">
                   <label for="account-email">Email address</label>
-                  <input id="account-email" type="email" name="email" autocomplete="email" placeholder="you@example.com">
+                  <input id="account-email" type="email" required autocomplete="email" placeholder="you@example.com">
                 </div>
                 <button class="account-submit" type="submit">Send recovery email <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
               </fieldset>

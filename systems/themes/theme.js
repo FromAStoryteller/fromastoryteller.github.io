@@ -15,9 +15,15 @@
   const root = document.documentElement;
   const system = window.matchMedia('(prefers-color-scheme: dark)');
   let preference = null;
-  try { const saved = localStorage.getItem(key); if (saved === 'light' || saved === 'dark' || saved === 'auto') preference = saved; } catch (_) {}
+  function allowed() {
+    if (window.fasOptionalStorageAllowed) return window.fasOptionalStorageAllowed(key);
+    // Synchronous first-paint gate, matching storage-choice.mjs.
+    try { const c = JSON.parse(localStorage.getItem('fas-site-storage-choice')); const now = Date.now(); return c?.version === 1 && c.preferences === true && typeof c.gameRecords === 'boolean' && Number.isFinite(c.expiresAt) && c.expiresAt > now && c.expiresAt <= now + 180 * 86400000; } catch { return false; }
+  }
+  try { if (allowed()) { const saved = localStorage.getItem(key); if (saved === 'light' || saved === 'dark' || saved === 'auto') preference = saved; } } catch (_) {}
   const effective = () => preference && preference !== 'auto' ? preference : (system.matches ? 'dark' : 'light');
   function save() {
+    if (!allowed()) return;
     try { localStorage.setItem(key, preference); } catch (_) { /* Remain usable when storage is blocked. */ }
   }
   function normalise() {
@@ -57,9 +63,10 @@
   system.addEventListener('change', () => { if (!preference || preference === 'auto') apply(); });
   window.addEventListener('storage', event => {
     if (event.key !== key && event.key !== null) return;
-    preference = event.newValue === 'light' || event.newValue === 'dark' || event.newValue === 'auto' ? event.newValue : null;
+    preference = allowed() && ['light', 'dark', 'auto'].includes(event.newValue) ? event.newValue : null;
     apply();
   });
+  window.addEventListener('fas-storage-choice', () => { if (allowed()) save(); });
   function syncThemeColour() {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = getComputedStyle(root).getPropertyValue('--colour-surface').trim();

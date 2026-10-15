@@ -13,6 +13,7 @@
 .account-field label { font-weight: 600; }
 .account-field input { width: 100%; box-sizing: border-box; min-height: var(--size-touch-target-minimum); padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-border-default); border-radius: var(--radius-md); background: var(--surface-inset-background); color: var(--colour-text-primary); font: inherit; }
 .account-field input::placeholder { color: var(--colour-text-muted); opacity: 1; }
+.account-field textarea { width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-border-default); border-radius: var(--radius-md); background: var(--surface-inset-background); color: var(--colour-text-primary); font: inherit; resize: vertical; }
 .account-field input:disabled { opacity: 1; cursor: not-allowed; }
 .account-form-options { display: flex; justify-content: flex-end; margin: var(--space-2) 0 var(--space-5); }
 .account-text-button { padding: 0; border: 0; background: transparent; color: var(--colour-accent-primary); font: inherit; font-size: .875rem; text-decoration: none; }

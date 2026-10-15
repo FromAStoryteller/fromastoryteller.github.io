@@ -12,6 +12,7 @@
 
     <meta name="description" content="Choose a new password for your From A Storyteller account.">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
     <link rel="canonical" href="https://fromastoryteller.com/account/reset-password/">
     <link rel="stylesheet" href="/account/account.css">
     <!-- STYLES -->
@@ -21,6 +22,7 @@
     <script type="module" src="/systems/core/site-shell.js"></script>
     <script type="module" src="/account/password-visibility.js"></script>
     <script type="module" src="/account/password-checks.js"></script>
+    <script type="module" src="/account/reset-password.js"></script>
 
     <!-- FONT -->
 
@@ -154,10 +156,11 @@
           </header>
           <section class="account-panel" aria-labelledby="new-password-title">
             <h2 id="new-password-title">New password</h2>
-            <p class="account-preview-note" id="account-preview-note">Design preview — try a sample password. Saving is not enabled.</p>
-            <!-- Real use requires a verified recovery session; this page only previews checks. -->
-            <form class="account-form" data-password-checks aria-describedby="account-preview-note">
-              <fieldset>
+            <p class="account-preview-note" id="account-preview-note">Design preview — password recovery is available in the local test only.</p>
+            <p class="account-auth-status" data-auth-status role="status" aria-live="polite" hidden></p>
+            <button class="account-submit" data-confirm-recovery type="button" disabled hidden>Continue</button>
+            <form class="account-form" data-reset-form data-password-checks aria-describedby="account-preview-note" hidden>
+              <fieldset disabled>
                 <legend class="visually-hidden">New password details</legend>
                 <div class="account-field">
                   <label for="account-password">New password</label>
@@ -175,11 +178,11 @@
                   <div class="password-input-control" data-password-control><input id="account-confirm-password" type="password" autocomplete="new-password" data-confirm-password aria-describedby="confirmation-check" placeholder="Enter your new password again"><button class="password-eye" data-password-toggle type="button" aria-controls="account-confirm-password" aria-label="Show confirm new password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div>
                   <p class="password-summary" id="confirmation-check" data-match-summary role="status" aria-live="polite"></p>
                 </div>
-                <button class="account-submit" type="submit" disabled>Save new password <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+                <button class="account-submit" type="submit">Save new password <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
               </fieldset>
             </form>
             <div class="account-register">
-              <a class="account-secondary" href="/account/recover/">Request a recovery email</a>
+              <a class="account-secondary" data-reset-next href="/account/recover/">Request a recovery email</a>
             </div>
             <p class="account-legal">Read our <a href="/privacy/">Privacy Policy</a> and <a href="/terms/">Terms</a>.</p>
           </section>
