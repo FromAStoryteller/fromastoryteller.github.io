@@ -1,5 +1,5 @@
 import { passwordChecks } from './password-policy.mjs';
-import { LOCAL_ACCOUNT_ORIGIN } from './auth-settings.mjs';
+import { LOCAL_ACCOUNT_ORIGIN, accountOrigin } from './auth-settings.mjs';
 import { registrationDeclaration } from './registration-declaration.mjs';
 
 export const EMAIL_REQUEST_MESSAGE = 'Check your inbox. If this email address can be registered, you’ll receive a verification link. Already have an account? You can sign in instead.';
@@ -13,7 +13,8 @@ export function emailRequestError(error) {
   return 'We couldn’t complete your request. Please try again.';
 }
 
-export function createSignupController(auth, onChange) {
+export function createSignupController(auth, onChange, origin = LOCAL_ACCOUNT_ORIGIN) {
+  const redirectOrigin = accountOrigin(origin);
   let busy = false;
   return {
     async signUp({ displayName, email, password, confirmation, ageConfirmed, policiesAcknowledged }) {
@@ -27,7 +28,7 @@ export function createSignupController(auth, onChange) {
       onChange({ state: 'pending', message: 'Requesting your verification email…' });
       try {
         const { data, error } = await auth.signUp({ email: email.trim(), password,
-          options: { data: { display_name: displayName.trim(), fas_registration: declaration }, emailRedirectTo: LOCAL_ACCOUNT_ORIGIN + '/account/verify-email/' } });
+          options: { data: { display_name: displayName.trim(), fas_registration: declaration }, emailRedirectTo: redirectOrigin + '/account/verify-email/' } });
         if (error && error.code !== 'user_already_exists' && error.code !== 'email_exists') return onChange({ state: 'error', message: emailRequestError(error) });
         if (data?.session) {
           await auth.signOut({ scope: 'local' });
@@ -40,9 +41,10 @@ export function createSignupController(auth, onChange) {
   };
 }
 
-export async function resendVerification(auth, email) {
+export async function resendVerification(auth, email, origin = LOCAL_ACCOUNT_ORIGIN) {
+  const redirectOrigin = accountOrigin(origin);
   try {
-    const { error } = await auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: LOCAL_ACCOUNT_ORIGIN + '/account/verify-email/' } });
+    const { error } = await auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: redirectOrigin + '/account/verify-email/' } });
     if (error && (error.status === 429 || !error.status || error.status >= 500)) return { state: 'error', message: emailRequestError(error) };
     return { state: 'requested', message: 'If a verification email is needed for this address, you’ll receive a new link. Check your inbox or sign in if your email is already verified.' };
   } catch { return { state: 'error', message: emailRequestError({}) }; }

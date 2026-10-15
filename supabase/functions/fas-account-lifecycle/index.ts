@@ -1,8 +1,8 @@
 import { makeLifecycleHandler } from './handler.mjs';
-// Deliberately local-only until the full workflow and retention schedule are reviewed.
+import { lifecycleEnvironment } from './environment.mjs';
 Deno.serve(makeLifecycleHandler({
   base: Deno.env.get('SUPABASE_URL'),
   anonKey: Deno.env.get('SUPABASE_ANON_KEY'),
   serviceKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-  enabled: Deno.env.get('SUPABASE_URL') === 'http://kong:8000',
+  ...lifecycleEnvironment(Deno.env.get('SUPABASE_URL'), Deno.env.get('FAS_DEV_LIFECYCLE_ENABLED')),
 }));

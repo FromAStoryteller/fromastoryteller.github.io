@@ -5,6 +5,7 @@ const form = document.querySelector('[data-recover-form]');
 const fieldset = form.querySelector('fieldset');
 const status = document.querySelector('[data-auth-status]');
 let auth;
+let accountOrigin;
 let busy = false;
 let nextRequest = 0;
 const button = form.querySelector('button');
@@ -22,7 +23,7 @@ form.addEventListener('submit', async event => {
   status.hidden = false;
   status.dataset.state = 'pending';
   status.textContent = 'Requesting your recovery email…';
-  const result = await requestRecovery(auth, form.querySelector('input').value);
+  const result = await requestRecovery(auth, form.querySelector('input').value, accountOrigin);
   nextRequest = Date.now() + 60000;
   busy = false;
   fieldset.disabled = false;
@@ -35,9 +36,10 @@ try {
   const local = await loadLocalAuthClient();
   if (local?.signupEnabled) {
     auth = local.client.auth;
+    accountOrigin = local.accountOrigin;
     fieldset.disabled = false;
     updateButton();
     setInterval(updateButton, 1000);
-    document.querySelector('#account-preview-note').textContent = 'Local test only — recovery emails go to the local test inbox.';
+    document.querySelector('#account-preview-note').textContent = local.mode === 'development' ? 'Development test only — emails go to your inbox.' : 'Local test only — recovery emails go to the local test inbox.';
   }
 } catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Local recovery is unavailable. Please restart the local preview and try again.'; }

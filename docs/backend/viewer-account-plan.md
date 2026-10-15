@@ -1,5 +1,11 @@
 # Viewer accounts: small review batches
 
+Current rollout: [FAS DEV account rehearsal](hosted-dev-accounts.md). The encrypted
+DEV backup is confirmed, the two account migrations/hook/lifecycle service and
+retention jobs are applied to DEV, and direct DEV API tests pass. A separate
+55410 loopback preview is ready for Ryan's real inbox test. Historical local-only
+batch notes below do not describe current DEV state. Production remains unchanged.
+
 Ryan's working preference: create skeletons using the existing HTML structure,
 shared site shell and theme tokens, show each batch in the browser, then refine
 the personal design together. Content artwork uses 16:9. Sign-in and sign-up use

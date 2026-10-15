@@ -1,6 +1,8 @@
 # Local age declaration and policy acknowledgement
 
-Local FAS only; hosted registration remains inactive and no hosted Auth hook was enabled.
+This records the original local implementation. The same draft-declaration hook
+is now enabled in FAS DEV for testing; see [current DEV status](hosted-dev-accounts.md).
+Public production registration remains inactive.
 
 The product proposal is 16+ accounts, with public reading available without an account. This is not a claim that New Zealand universally requires age 16. The form requires two unchecked boxes: 16+ self-declaration and acknowledgement of the local draft Terms/Privacy notice. It collects no birth date or identity document. This does not establish a person's real age, prove they read a notice, or grant any contributor/staff access.
 

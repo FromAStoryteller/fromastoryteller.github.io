@@ -92,7 +92,7 @@ try {
       // No async Auth calls inside this callback (SDK lock). RLS remains authoritative.
       if (event === 'SIGNED_OUT' && signedIn && !explicitSignOut) controller.sessionEnded();
     });
-    notice.textContent = local.storage.persistent ? 'Local test only — your session is stored in this tab. Sign out when finished.' : 'Local test only — browser storage is unavailable. Reloading this page signs you out.';
+    notice.textContent = (local.mode === 'development' ? 'Development test only — uses FAS DEV. ' : 'Local test only — ') + (local.storage.persistent ? 'Your session is stored in this tab. Sign out when finished.' : 'Browser storage is unavailable. Reloading this page signs you out.');
     await checkSession();
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && signedIn && Date.now() - lastChecked > 60000 && !explicitSignOut) void checkSession();

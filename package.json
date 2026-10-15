@@ -17,6 +17,8 @@
     "deploy:cloudflare-production": "wrangler deploy --config wrangler.production.jsonc",
     "build:auth-client": "node scripts/build-fas-auth-client.mjs",
     "dev:accounts:local": "node scripts/start-fas-account-local.mjs",
+    "dev:accounts:dev": "node scripts/start-fas-account-dev.mjs",
+    "test:accounts:dev": "node scripts/run-fas-dev-tests.mjs",
     "test:auth:local": "node scripts/test-fas-auth-local.mjs",
     "test:signup:local": "node scripts/test-fas-signup-local.mjs",
     "test:sessions:local": "node scripts/test-fas-sessions-local.mjs",

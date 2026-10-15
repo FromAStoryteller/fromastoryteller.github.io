@@ -102,7 +102,7 @@ passwordForm.addEventListener('submit', async event => {
     prepared.started = summary.resume;
     confirmForm.querySelector('[data-delete-confirm-info]').textContent = summary.resume ? 'Removal has already started and cannot be undone. Confirm to finish the remaining cleanup.' : 'You can cancel here. Confirming starts permanent removal and cannot be undone.';
     confirmForm.querySelector('[data-delete-cancel]').textContent = summary.resume ? 'Close for now' : 'Cancel';
-    document.querySelector('[data-delete-summary]').textContent = `Local test only: this removes your test account, ${summary.stories} owned Community ${summary.stories === 1 ? 'story' : 'stories'} (${summary.published} published) and ${summary.images} uploaded ${summary.images === 1 ? 'image' : 'images'}.`;
+    document.querySelector('[data-delete-summary]').textContent = `${local.mode === 'development' ? 'Development test only' : 'Local test only'}: this removes your test account, ${summary.stories} owned Community ${summary.stories === 1 ? 'story' : 'stories'} (${summary.published} published) and ${summary.images} uploaded ${summary.images === 1 ? 'image' : 'images'}.`;
     passwordForm.hidden = true; confirmForm.hidden = false;
     showDeletion(summary.resume ? 'Removal has already started. Confirm to retry the remaining cleanup.' : 'Account confirmed. Review the details below before continuing.');
     confirmForm.querySelector('[data-delete-export-choice]').focus();
@@ -123,7 +123,7 @@ confirmForm.addEventListener('submit', async event => {
     panel.hidden = true;
     signInPrompt.hidden = false;
     document.querySelector('[data-settings-back]').hidden = true;
-    show('Your local test account and its owned Community content were deleted. You’re signed out.');
+    show('Your test account and its owned Community content were deleted. You’re signed out.');
     status.setAttribute('tabindex','-1'); status.focus();
   } catch (error) {
     showDeletion((prepared?.started ? 'Removal has started and cannot be undone. ' : '') + friendlyError(error), true);
@@ -134,7 +134,7 @@ confirmForm.addEventListener('submit', async event => {
 try {
   local = await loadLocalAuthClient();
   if (local) {
-    document.querySelector('[data-preview-note]').textContent = 'Local test only — these settings apply to your local FAS account.';
+    document.querySelector('[data-preview-note]').textContent = local.mode === 'development' ? 'Development test only — these settings apply to your FAS DEV account.' : 'Local test only — these settings apply to your local FAS account.';
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
     if (session.state !== 'signed-in') {
       show(session.message || 'Sign in to view your account settings.', true);

@@ -1,8 +1,9 @@
 # Local content export and confirmed deletion
 
-This batch runs only against the isolated local FAS stack. The new Edge Function
-is explicitly disabled for hosted URLs. No development/production migration or
-function deployment is included. Keep Play My Path separate.
+This records the original isolated local FAS implementation and its tests.
+It has since been deployed to the explicitly allowed FAS DEV project; see
+[current DEV status](hosted-dev-accounts.md). Production remains disabled.
+Keep Play My Path separate.
 
 ## User flow
 

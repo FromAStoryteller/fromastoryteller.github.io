@@ -7,6 +7,7 @@ const input = form.querySelector('input');
 const button = form.querySelector('button');
 const status = document.querySelector('[data-auth-status]');
 let auth;
+let accountOrigin;
 let pending = false;
 let requestedAt = 0;
 form.addEventListener('submit', async event => {
@@ -17,7 +18,7 @@ form.addEventListener('submit', async event => {
   status.hidden = false;
   status.dataset.state = 'pending';
   status.textContent = 'Requesting another verification email…';
-  const result = await resendVerification(auth, input.value);
+  const result = await resendVerification(auth, input.value, accountOrigin);
   status.dataset.state = result.state === 'error' ? 'error' : 'success';
   status.textContent = result.message;
   requestedAt = Date.now();
@@ -34,10 +35,11 @@ try {
   const local = await loadLocalAuthClient();
   if (local?.signupEnabled) {
     auth = local.client.auth;
+    accountOrigin = local.accountOrigin;
     const previous = readPendingEmail();
     if (previous) { input.value = previous.email; requestedAt = previous.requestedAt; }
     input.disabled = false;
-    document.querySelector('[data-preview-note]').textContent = 'Local test only — emails go to the local test inbox.';
+    document.querySelector('[data-preview-note]').textContent = local.mode === 'development' ? 'Development test only — emails go to your inbox.' : 'Local test only — emails go to the local test inbox.';
     document.querySelector('[data-inbox-intro]').textContent = 'If this email address can be registered, you’ll receive a verification link. Open it to confirm your email before signing in. Already registered? You can sign in instead.';
     updateButton();
     setInterval(updateButton, 1000);

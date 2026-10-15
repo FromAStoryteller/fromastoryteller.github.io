@@ -32,7 +32,7 @@ function render({ state, message, retryable }) {
 try {
   const local = await loadLocalAuthClient();
   if (local?.signupEnabled) {
-    document.querySelector('[data-preview-note]').textContent = 'Local test only — this confirms a local FAS test account.';
+    document.querySelector('[data-preview-note]').textContent = local.mode === 'development' ? 'Development test only — this confirms your FAS DEV test account.' : 'Local test only — this confirms a local FAS test account.';
     intro.textContent = tokenHash ? 'Select Confirm email to finish verifying your email address.' : 'Open the verification link from your email to continue. If you need a new link, request another email below.';
     if (tokenHash) {
       verify = createVerificationController(local.client.auth, tokenHash, render);

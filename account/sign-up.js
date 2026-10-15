@@ -50,15 +50,15 @@ form.addEventListener('submit', async event => {
 try {
   const local = await loadLocalAuthClient();
   if (local?.signupEnabled) {
-    const settings = await fetch('http://127.0.0.1:55321/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
+    const settings = await fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
     if (settings?.mailer_autoconfirm === false && settings?.external?.email === true) {
-      controller = createSignupController(local.client.auth, show);
+      controller = createSignupController(local.client.auth, show, local.accountOrigin);
       displayName.disabled = false;
       email.disabled = false;
       submit.disabled = false;
       for (const input of form.querySelectorAll('[data-age-confirmed], [data-policies-acknowledged]')) input.disabled = false;
       submit.firstChild.textContent = 'Create test account ';
-      document.querySelector('#account-preview-note').textContent = 'Local test only — use a sample account. Emails go to the local test inbox.';
+      document.querySelector('#account-preview-note').textContent = local.mode === 'development' ? 'Development test only — uses FAS DEV. Verification emails go to your inbox.' : 'Local test only — use a sample account. Emails go to the local test inbox.';
     }
   }
 } catch { show({ state: 'error', message: 'Local account creation is unavailable. Please restart the local preview and try again.' }); }

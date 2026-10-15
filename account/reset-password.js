@@ -35,7 +35,7 @@ form.addEventListener('submit', async event => {
 try {
   const config = await loadLocalAuthConfig(location.origin);
   if (config?.signup) {
-    document.querySelector('#account-preview-note').textContent = 'Local test only — changes apply to local FAS test accounts.';
+    document.querySelector('#account-preview-note').textContent = config.mode === 'development' ? 'Development test only — changes apply to your FAS DEV account.' : 'Local test only — changes apply to local FAS test accounts.';
     if (hash) {
       const { createClient } = await import('./vendor/supabase-client.js');
       // Recovery credentials exist only in memory, never in the ordinary sign-in cache.

@@ -1,10 +1,11 @@
-import { LOCAL_ACCOUNT_ORIGIN } from './auth-settings.mjs';
+import { LOCAL_ACCOUNT_ORIGIN, accountOrigin } from './auth-settings.mjs';
 import { passwordChecks } from './password-policy.mjs';
 
 export const RECOVERY_MESSAGE = 'If an account exists for that email, we’ll send a recovery link. Check your inbox and spam or junk folder.';
-export async function requestRecovery(auth, email) {
+export async function requestRecovery(auth, email, origin = LOCAL_ACCOUNT_ORIGIN) {
+  const redirectOrigin = accountOrigin(origin);
   try {
-    const { error } = await auth.resetPasswordForEmail(email.trim(), { redirectTo: LOCAL_ACCOUNT_ORIGIN + '/account/reset-password/' });
+    const { error } = await auth.resetPasswordForEmail(email.trim(), { redirectTo: redirectOrigin + '/account/reset-password/' });
     if (error && (error.status === 429 || !error.status || error.status >= 500)) return { state: 'error', message: error.status === 429 ? 'Too many requests. Wait a few minutes, then try again.' : 'We couldn’t connect to account services. Please try again.' };
     // Never reveal whether an address belongs to an account.
     return { state: 'requested', message: RECOVERY_MESSAGE };

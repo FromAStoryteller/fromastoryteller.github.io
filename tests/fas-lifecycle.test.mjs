@@ -24,7 +24,7 @@ test('A forged JWT payload cannot reach a privileged RPC without Auth verificati
 });
 test('Receipt check can confirm completed deletion after the ordinary session is gone; pending never reports success', async () => {
   const original = globalThis.fetch;
-  const local = { lifecycleEnabled: true, client: { supabaseKey: 'local-anon', auth: { refreshSession: async () => ({ error: { status: 401 } }) } } };
+  const local = { lifecycleEnabled: true, accountOrigin: 'http://127.0.0.1:55400', client: { supabaseUrl: 'http://127.0.0.1:55321', supabaseKey: 'local-anon', auth: { refreshSession: async () => ({ error: { status: 401 } }) } } };
   const prepared = { userId: '30000000-0000-0000-0000-000000000001', confirmationToken: 'a'.repeat(64) };
   try {
     globalThis.fetch = async (_url, options) => {
