@@ -31,6 +31,6 @@ export function createSignInController(auth, onChange) {
       } catch { emit('sign-out-error', 'We couldn’t finish signing you out. Please try again.'); }
       finally { busy = false; }
     },
-    sessionEnded() { emit('signed-out', 'Your session has ended. Please sign in again.'); },
+    sessionEnded() { emit('session-ended', 'Your session has ended. Please sign in again.'); },
   };
 }

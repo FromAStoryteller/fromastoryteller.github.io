@@ -35,8 +35,9 @@ will be handled separately before launch.
 The local email links to `/account/verify-email/` with a Supabase token hash and
 fixed type `email`. The page removes query parameters and fragments from the
 address using `replaceState` before network requests, sets `no-referrer`, and keeps
-the token only in page memory. No token or password is logged or saved by application
-code. As with any query-based confirmation link, hosting/request logs require
+the link token only in page memory. Passwords and verification-link tokens are
+never logged or saved by application code. Auth session tokens now use SDK-managed
+tab storage; see [local sessions](local-sessions.md). As with any query-based confirmation link, hosting/request logs require
 review before a hosted implementation is enabled.
 
 Opening the page does not consume the token. The person must select **Confirm
@@ -46,8 +47,9 @@ URL claims such as `verified=true`, recovery/invite token types, duplicate token
 parameters and arbitrary redirect destinations cannot produce success.
 
 Expired/used/invalid links show a clear error and a route to request another email.
-Connection failures allow retry. Success leads to sign-in. Sessions are still in
-memory for this first integration; sessions across pages are a separate batch.
+Connection failures allow retry. Success leads to the sign-in page, which now
+restores the newly verified session after checking it with the server. Sessions
+survive navigation/reloads in the current tab; see [local sessions](local-sessions.md).
 
 To prefill the resend form, the local preview temporarily keeps only the entered
 email and request time in tab-scoped `sessionStorage`. It is ignored after an hour

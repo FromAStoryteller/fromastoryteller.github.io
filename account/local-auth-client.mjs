@@ -1,12 +1,22 @@
 import { loadLocalAuthConfig } from './auth-settings.mjs';
+import { createSessionStorage, SESSION_KEY } from './session-storage.mjs';
+
+let localClientPromise;
 
 export async function loadLocalAuthClient() {
+  if (!localClientPromise) localClientPromise = initializeClient().catch(error => { localClientPromise = null; throw error; });
+  return localClientPromise;
+}
+
+async function initializeClient() {
   const config = await loadLocalAuthConfig(location.origin);
   if (!config) return null;
   const { createClient } = await import('./vendor/supabase-client.js');
+  const storage = createSessionStorage();
+  const hadSession = storage.hasSession;
   const client = createClient(config.url, config.key, {
-    auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'fas-local-account-preview' },
+    auth: { persistSession: true, storage: storage.adapter, autoRefreshToken: true, detectSessionInUrl: false, storageKey: SESSION_KEY },
     global: { fetch: (url, options = {}) => fetch(url, { ...options, redirect: 'error', signal: AbortSignal.any([...(options.signal ? [options.signal] : []), AbortSignal.timeout(15000)]) }) },
   });
-  return { client, signupEnabled: config.signup === true };
+  return { client, signupEnabled: config.signup === true, storage, hadSession };
 }

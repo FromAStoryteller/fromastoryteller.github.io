@@ -38,7 +38,9 @@ Normal/hosted signup and new-password pages permit only sample password entry.
 The local signup flow sends confirmation emails to the local test inbox, with
 resend throttling and verified success/invalid-link states. Verification requires
 a server-validated token and an explicit confirmation action; success is never
-inferred from URL parameters. Persistent sessions and recovery are later batches.
+inferred from URL parameters. Tab-scoped sessions now survive navigation/reloads
+with server verification, expiry feedback and retryable connection states; see
+[local sessions](local-sessions.md). Recovery remains the next integration batch.
 
 This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.

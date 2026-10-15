@@ -13,9 +13,10 @@ sign-in controls. Local signup and verification now work in a separate batch; se
   by application code, and fields have no names that could enter a native GET URL.
 - Supabase SDK 2.117.3 is pinned in the lockfile and bundled locally with dependency
   licenses. Run `npm run build:auth-client` when deliberately updating it.
-- Refresh uses the SDK while the page is open. This first batch keeps sessions in
-  memory (`persistSession: false`); a reload or another page drops that browser's
-  copy. Persistent sessions and site-wide account controls remain a later batch.
+- Refresh uses the SDK while an account page is open. Sessions now survive page
+  changes and reloads in tab-scoped storage and are server-verified before the
+  signed-in view is restored; see [local sessions](local-sessions.md). Site-wide
+  account controls and the production persistence policy remain later work.
 
 Sign-out uses `scope: 'local'`, revoking this session's refresh token without signing
 out other devices. Existing access JWTs can remain valid until their expiry, per
@@ -42,7 +43,8 @@ not used, and sign-in does not enable password resetting or email verification.
 
 Six new contract tests cover target/key restrictions, configuration host checks,
 credential handling, safe messages, duplicate-request prevention and failed sign-out.
-All 36 repository tests passed, plus references/syntax, site indexes and preview build.
+The initial 36-test sign-in batch passed; subsequent signup and session batches
+expanded coverage. See the corresponding documents for their validation.
 Browser tests covered wrong-password feedback, show/hide, successful sign-in,
 sign-out, cleared fields, focus return and a narrow layout.
 
