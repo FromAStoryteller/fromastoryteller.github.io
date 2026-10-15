@@ -7,10 +7,10 @@ function deployment is included. Keep Play My Path separate.
 ## User flow
 
 1. Sign in and open Account settings.
-2. Download my content produces a ZIP containing account/profile details, all owned
+2. Contributors can use Download my content to produce a ZIP containing account/profile details, all owned
    Community story text (including drafts/published work), image metadata and original
    uploaded images, including owned uploads not registered to an asset yet. JSON
-   text-only export remains a separately labelled option.
+   metadata is kept separately from readable story text.
 3. Delete account opens a current-password check. Review deletion verifies that
    password and shows the number of owned stories, published stories and images.
 4. The user must acknowledge the offered export and type DELETE before the final
@@ -108,3 +108,9 @@ Before hosted rollout: review migration/function code, choose an explicit hosted
 enablement/configuration, apply the retention schedule in the selected FAS dev
 project, test real email and the full deletion/restore path there, finish age/Terms
 controls and policy/provider review, then seek deliberate production approval.
+
+## Download access and readable formats
+
+Every signed-in account can download personal account/profile data as a ZIP with My-account.txt and metadata/account.json. This export deliberately excludes story content and credentials. Contributor content is offered only for member/moderator/admin roles, with the same eligibility checked server-side from the database role. Viewers receive HTTP 403 for a direct content-export request.
+
+Content ZIPs include README.txt, readable stories/*.txt, original images/* and metadata/*.json for imports and image/story associations. Story text is preserved as entered, so formatting markup may remain visible. UUIDs keep filenames unique. No future save or multiplayer data is claimed.

@@ -3,6 +3,7 @@ import { restoreSession } from './session-controller.mjs';
 import { loadAccount, saveProfile, exportAccountData } from './settings-controller.mjs';
 import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecycle-client.mjs';
 import { clearPendingEmail } from './pending-email.mjs';
+import { accountDataArchive } from './account-data-download.mjs';
 const form = document.querySelector('[data-profile-form]');
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
@@ -27,7 +28,10 @@ function render(account) {
   panel.hidden = false;
   form.querySelector('fieldset').disabled = false;
   download.disabled = false;
-  contentDownload.disabled = !local.lifecycleEnabled;
+  const contributor = ['member', 'moderator', 'admin'].includes(account.role);
+  document.querySelector('[data-contributor-export]').hidden = !contributor;
+  contentDownload.disabled = !local.lifecycleEnabled || !contributor;
+  document.querySelector('[data-delete-export-label]').textContent = contributor ? 'I downloaded my content or choose to continue without a copy.' : 'I understand my account will be permanently deleted.';
   const staff = ['admin','moderator'].includes(account.role);
   deleteStart.hidden = !local.lifecycleEnabled || staff;
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
@@ -52,10 +56,10 @@ download.addEventListener('click', async () => {
   busy = true; download.disabled = true;
   try {
     const data = await exportAccountData(local.client);
-    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' }));
-    const link = document.createElement('a'); link.href = url; link.download = 'from-a-storyteller-account.json'; link.click();
+    const url = URL.createObjectURL(accountDataArchive(data));
+    const link = document.createElement('a'); link.href = url; link.download = 'from-a-storyteller-account.zip'; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    show('Your account-data export is ready. Keep it somewhere private. Image originals and unlinked static games are not included.');
+    show('Your account-data ZIP is ready. Open My-account.txt to read your details. Keep the download somewhere private.');
   } catch (error) { show(friendlyError(error), true); }
   finally { busy = false; download.disabled = false; }
 });

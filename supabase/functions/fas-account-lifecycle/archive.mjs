@@ -1,7 +1,7 @@
 // Bounded, uncompressed ZIP32. Names are generated from validated UUID paths.
 // Independent integration tests read the resulting archive using Python zipfile.
 export function zipFiles(files) {
-  if (files.length > 1000) throw new Error('Export has too many files');
+  if (files.length > 2000) throw new Error('Export has too many files');
   const parts = []; const directory = []; const seen = new Set(); let offset = 0; let total = 0;
   const encoder = new TextEncoder();
   for (const { name, bytes } of files) {

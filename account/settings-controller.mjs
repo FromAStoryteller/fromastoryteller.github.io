@@ -27,7 +27,5 @@ export async function saveProfile(client, { displayName, bio }) {
 
 export async function exportAccountData(client) {
   const account = await loadAccount(client);
-  const stories = await client.from('stories').select('id,slug,title,summary,body,status,created_at,updated_at,published_at').eq('author_id', account.user.id);
-  if (stories.error) throw new Error('We couldn’t prepare your export. Please try again.');
-  return { format: 'fas-account-data-v1', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role', 'Owned story text'], excludes: ['Passwords and session credentials', 'Image originals', 'Static games and stories not linked to this account'], account, stories: stories.data };
+  return { format: 'fas-account-data-v2', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role'], excludes: ['Passwords and session credentials', 'Contributor content (available separately)', 'Future game saves and multiplayer data (not implemented)'], account };
 }

@@ -17,11 +17,11 @@ function request(token, body, origin = 'http://127.0.0.1:55400') { return new Re
 const send = (user, body, origin) => fetch(request(user.token, body, origin));
 function sql(text) { execFileSync('docker', ['exec', 'supabase_db_fas-community-v1', 'psql', '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-c', text], { stdio: 'ignore', windowsHide: true }); }
 try {
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const email = `fas-lifecycle-${randomUUID()}@example.invalid`; const password = 'LocalOnly9!' + randomBytes(24).toString('base64url');
     const made = await admin.auth.admin.createUser({ email, password, email_confirm: true }); check(!made.error);
     const user = { id: made.data.user.id, email, password }; users.push(user);
-    check(!(await admin.from('user_roles').insert({ user_id: user.id, role: i === 2 ? 'admin' : 'member' })).error);
+    if (i < 3) check(!(await admin.from('user_roles').insert({ user_id: user.id, role: i === 2 ? 'admin' : 'member' })).error);
     const client = createClient(base, key, { auth: { persistSession: false, autoRefreshToken: false, storageKey: randomUUID() } }); clients.push(client);
     const signed = await client.auth.signInWithPassword({ email, password }); check(!signed.error); user.token = signed.data.session.access_token; user.refresh = signed.data.session.refresh_token;
   }
@@ -40,7 +40,8 @@ try {
   check((await clients[0].rpc('fas_account_snapshot', { target_user: users[0].id, target_session: sessionId })).error);
   check((await send(users[0], { action: 'prepare-delete', password: 'wrong' })).status === 403);
   check((await send(users[2], { action: 'prepare-delete', password: users[2].password })).status === 403);
-  console.log('PASS anonymous/cross-origin callers, direct privileged RPCs, wrong passwords and staff self-deletion are denied');
+  check((await send(users[3], { action: 'export' })).status === 403);
+  console.log('PASS viewer content download, anonymous/cross-origin callers, direct privileged RPCs, wrong passwords and staff self-deletion are denied');
   stage = 'complete owned content archive';
   const exported = await send(users[0], { action: 'export', target_user: users[1].id });
   if (!exported.ok) { const failure = await exported.json(); console.error('Export HTTP status: ' + exported.status + '; ' + failure.message); }
@@ -49,7 +50,7 @@ try {
   const file = new URL('../../lifecycle-test-export.zip', import.meta.url); writeFileSync(file, new Uint8Array(await exported.arrayBuffer()));
   const python = process.env.FAS_TEST_PYTHON;
   if (!python) throw new Error('Set FAS_TEST_PYTHON to a trusted Python interpreter for independent ZIP verification');
-  const program = `import sys,json,zipfile\nz=zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None\na=json.loads(z.read('account.json')); m=json.loads(z.read('manifest.json'))\nassert a['id']==sys.argv[2] and m['stories']==2 and m['images']==1\nassert z.read('images/'+sys.argv[4])==bytes.fromhex(sys.argv[5])\nassert not any(sys.argv[3] in n for n in z.namelist())\nassert not any(k in z.read('account.json').decode() for k in ['access_token','refresh_token','encrypted_password'])\nassert any(json.loads(z.read(n)).get('body')=='Private original body 0' for n in z.namelist() if n.startswith('stories/'))\nprint('PASS independent ZIP reader verifies owned draft/published text and exact original image bytes; no other account or credentials')`;
+  const program = `import sys,json,zipfile\nz=zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None\na=json.loads(z.read('metadata/account.json')); m=json.loads(z.read('metadata/manifest.json'))\nassert a['id']==sys.argv[2] and m['stories']==2 and m['images']==1\nassert z.read('images/'+sys.argv[4])==bytes.fromhex(sys.argv[5])\nassert not any(sys.argv[3] in n for n in z.namelist())\nassert not any(k in z.read('metadata/account.json').decode() for k in ['access_token','refresh_token','encrypted_password'])\nassert any(json.loads(z.read(n)).get('body')=='Private original body 0' for n in z.namelist() if n.startswith('metadata/stories/'))\nassert any('Private original body 0' in z.read(n).decode() for n in z.namelist() if n.startswith('stories/') and n.endswith('.txt'))\nassert 'README.txt' in z.namelist()\nprint('PASS independent ZIP reader verifies owned draft/published text and exact original image bytes; no other account or credentials')`;
   execFileSync(python, ['-c', program, fileURLToPath(file), users[0].id, users[1].id, paths[0], Buffer.from(png).toString('hex')], { stdio: 'inherit', windowsHide: true }); rmSync(file);
   stage = 'missing originals fail clearly';
   check(!(await admin.storage.from('fas-story-images').remove([paths[0]])).error);
