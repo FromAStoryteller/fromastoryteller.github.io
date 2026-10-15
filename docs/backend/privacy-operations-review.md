@@ -4,6 +4,12 @@ Ryan approved the draft wording as reflecting his intentions, conditional on leg
 
 ## Collection notice
 
+Current review update: Ryan expressly chose no postal address at launch. The new
+review uses his name, New Zealand and the public email only. See
+[policy versioning/contact rationale](policy-versioning-review.md) for the OPC
+IPP3/IPP3A distinction; the earlier note below is not a demand to obtain or publish
+a postal/home address. Final notice suitability still needs assessment for the service.
+
 The registration form now explains why email, password and display name are required, that a bio is optional, and that public reading remains available without registration. It names Ryan Fearon as the responsible operator and links the detailed notice. A pseudonymous display name is sufficient. Provider locations, recipients, account exports and correction/contact routes are covered in the draft. Final published notices must accurately identify the collecting/holding agency and its address/contact details; confirm the appropriate public contact/address presentation for the eventual service rather than publishing a home address by default. [NZ OPC principle 3](https://www.privacy.org.nz/privacy-principles/3/).
 
 ## Responsibility, requests and incidents

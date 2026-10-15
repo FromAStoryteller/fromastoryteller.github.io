@@ -5,6 +5,7 @@
     "dev": "vite",
     "validate": "node scripts/generate-site-indexes.mjs",
     "test": "node --test tests/*.test.mjs",
+    "check:account-policies": "node scripts/check-fas-policy-history.mjs",
     "test:security:api": "node scripts/test-fas-security-api.mjs",
     "test:security:sql": "node --test tests/fas-security-database.test.mjs",
     "validate:references": "node scripts/validate-references.mjs",

@@ -1,5 +1,8 @@
 # Viewer accounts: small review batches
 
+Policy review: [preserved versions and email-only contact](policy-versioning-review.md).
+The review pages are ready separately from unchanged DEV draft acknowledgements.
+
 Current rollout: [FAS DEV account rehearsal](hosted-dev-accounts.md). The encrypted
 DEV backup is confirmed, the two account migrations/hook/lifecycle service and
 retention jobs are applied to DEV, and direct DEV API tests pass. A separate

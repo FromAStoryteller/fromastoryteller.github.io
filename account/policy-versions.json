@@ -1,0 +1,43 @@
+{
+  "format": "fas-policy-history-v1",
+  "activePublishedVersion": null,
+  "reviewVersion": "account-review-2026-10-15-v2",
+  "operator": {
+    "name": "Ryan Fearon",
+    "country": "New Zealand",
+    "email": "fromastoryteller@gmail.com",
+    "contactMode": "email-only"
+  },
+  "versions": {
+    "local-preview-2026-10-15-v1": {
+      "status": "test-draft",
+      "acknowledgementKind": "local_draft_review",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/local-preview-2026-10-15-v1/privacy/index.html",
+          "sha256": "4a247960e8222f27a8e30df99e798ed8d2da965a55951d3bd79977e105556cfa",
+          "source": "/account/privacy-preview/index.html",
+          "mainSha256": "37ec2530999569635995104c7c0949a23d92ff4103fd34530dfe664dbe73668c"
+        },
+        "terms": {
+          "path": "/account/policy-history/local-preview-2026-10-15-v1/terms/index.html",
+          "sha256": "1ee6c539dbf777f5301c81958a3de2a947cb17679f236dca8fca53dfd1c07fa0",
+          "source": "/account/terms-preview/index.html",
+          "mainSha256": "62830fa2a72a2924092837eb4c31fcf1c3b7fac6d036d1cf1556186259b92ac2"
+        }
+      }
+    },
+    "account-review-2026-10-15-v2": {
+      "status": "review",
+      "documents": {
+        "privacy": {
+          "path": "/account/privacy-review/"
+        },
+        "terms": {
+          "path": "/account/terms-review/"
+        }
+      }
+    }
+  },
+  "hashFormat": "sha256-utf8-lf"
+}
