@@ -1,5 +1,10 @@
 # FAS development account rehearsal — 15 October 2026
 
+Current policy batch: [prospective agreement controls](published-policy-agreements.md)
+and [provider/retention review](provider-operations-review.md). DEV now has nine
+migrations. Its policy catalog is empty and its requirement remains NULL;
+the two existing accounts and original test acknowledgement were preserved.
+
 This is a DEV rehearsal, not a public launch. Production and Play My Path were not changed. PR #7 remains draft. The static public/Cloudflare account pages remain disconnected.
 
 ## Changes applied

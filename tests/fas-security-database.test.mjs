@@ -25,7 +25,7 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     for (const file of readdirSync(migrations).filter(f => f.endsWith('.sql')).sort()) {
       await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
     }
-    for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql']) {
+    for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql', 'policy-agreements.sql', 'policy-contributions.sql']) {
       await db.exec(readFileSync(new URL(`../supabase/tests/${file}`, import.meta.url), 'utf8'));
     }
   } finally { await db.close(); }

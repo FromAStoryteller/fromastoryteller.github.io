@@ -25,6 +25,7 @@
     "test:sessions:local": "node scripts/test-fas-sessions-local.mjs",
     "test:recovery:local": "node scripts/test-fas-recovery-local.mjs",
     "test:settings:local": "node scripts/test-fas-settings-local.mjs",
+    "test:policies:local": "node scripts/test-fas-policies-local.mjs",
     "test:lifecycle:local": "node scripts/test-fas-lifecycle-local.mjs",
     "test:restore:local": "node scripts/test-fas-restore-local.mjs"
   },

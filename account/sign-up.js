@@ -2,6 +2,7 @@ import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { createSignupController } from './signup-controller.mjs';
 import { passwordChecks } from './password-policy.mjs';
 import { savePendingEmail } from './pending-email.mjs';
+import { currentPolicyRequirement } from './published-policies.mjs';
 
 const form = document.querySelector('[data-sign-up-form]');
 const fieldset = form.querySelector('fieldset');
@@ -33,7 +34,9 @@ form.addEventListener('submit', async event => {
   }
   const credentials = { displayName: displayName.value, email: email.value, password: password.value, confirmation: confirmation.value,
     ageConfirmed: form.querySelector('[data-age-confirmed]').checked,
-    policiesAcknowledged: form.querySelector('[data-policies-acknowledged]').checked };
+    policiesAcknowledged: form.querySelector('[data-policies-acknowledged]').checked,
+    termsAgreed: form.querySelector('[data-terms-agreed]').checked,
+    privacyNoticeSeen: form.querySelector('[data-privacy-seen]').checked };
   for (const input of [password, confirmation]) {
     input.value = '';
     input.type = 'password';
@@ -52,11 +55,23 @@ try {
   if (local?.signupEnabled) {
     const settings = await fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
     if (settings?.mailer_autoconfirm === false && settings?.external?.email === true) {
-      controller = createSignupController(local.client.auth, show, local.accountOrigin);
+      const requirement = await currentPolicyRequirement(local.client);
+      controller = createSignupController(local.client.auth, show, local.accountOrigin, requirement);
       displayName.disabled = false;
       email.disabled = false;
       submit.disabled = false;
       for (const input of form.querySelectorAll('[data-age-confirmed], [data-policies-acknowledged]')) input.disabled = false;
+      if (requirement) {
+        const draft=form.querySelector('[data-policies-acknowledged]');
+        draft.disabled=true; draft.required=false; draft.closest('label').hidden=true;
+        document.querySelector('#registration-policy-note').textContent='Accounts are for people aged 16 and over. Public reading does not need an account. Review the published policies below. Optional storage choices are separate.';
+        for (const kind of ['terms','privacy']) {
+          const link=form.querySelector('[data-published-'+kind+']');
+          link.href=requirement[kind+'_path'];
+          link.textContent=(kind==='terms'?'Terms':'Privacy notice')+' — '+requirement[kind+'_version'];
+        }
+        for (const input of form.querySelectorAll('[data-terms-agreed], [data-privacy-seen]')) { input.disabled=false; input.closest('label').hidden=false; }
+      }
       submit.firstChild.textContent = 'Create test account ';
       document.querySelector('#account-preview-note').textContent = local.mode === 'development' ? 'Development test only — uses FAS DEV. Verification emails go to your inbox.' : 'Local test only — use a sample account. Emails go to the local test inbox.';
     }

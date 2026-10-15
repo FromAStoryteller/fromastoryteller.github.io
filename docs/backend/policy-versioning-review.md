@@ -2,6 +2,12 @@
 
 ## Current batch
 
+Update: Ryan reviewed the wording and asked work to continue. Prospective server
+agreement support and contribution gates are now installed but inactive in local
+FAS and DEV; see [implementation/evidence](published-policy-agreements.md).
+The original review-stage plan below is historical preparation, not current
+implementation status. No published agreement has been activated.
+
 The operator review starts at `/account/policy-review/`, with separate `/account/privacy-review/` and `/account/terms-review/` pages. They use the existing theme and carry review version `account-review-2026-10-15-v2`. They remain noindex and outside site search/sitemaps. The proposed signup controls are disabled, collect nothing and do not accept a contract. Live registration is unchanged.
 
 Ryan explicitly chose launch without a postal address. The review uses Ryan Fearon, New Zealand and fromastoryteller@gmail.com, with email contact. No home-address field, postal placeholder or invented service address was added. No postal-address purchase or appointment is required by this implementation.

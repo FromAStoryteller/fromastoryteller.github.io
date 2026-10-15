@@ -22,6 +22,9 @@ Terms version: ${data.account.registration.terms_version}
 Privacy notice version: ${data.account.registration.privacy_version}
 Recorded: ${data.account.registration.recorded_at}` : 'No registration declaration was recorded for this older or administratively created test account.'}
 
+Published policy agreements:
+${data.account.policy_agreements?.length ? data.account.policy_agreements.map(item=>`Terms: ${item.terms_version}\nPrivacy notice: ${item.privacy_version}\nRecorded: ${item.recorded_at}\nTerms SHA-256: ${item.terms_sha256}\nPrivacy SHA-256: ${item.privacy_sha256}`).join('\n\n') : 'No published policy agreement has been recorded. A test draft acknowledgement is not a published agreement.'}
+
 This file contains your current account and profile details. Passwords and session
 credentials are excluded. Contributors can download stories and images separately.
 Future game saves and multiplayer data are not implemented in this preview.

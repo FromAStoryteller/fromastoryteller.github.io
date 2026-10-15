@@ -39,6 +39,9 @@ try {
   }
   stage='viewer permissions and personal export';
   const exported=await exportAccountData(clients[0]);check(exported.account.role==='viewer');check(!JSON.stringify(exported).includes(fixtures[1].id));
+  check(Array.isArray(exported.account.policy_agreements) && exported.account.policy_agreements.length===0);
+  check((await clients[0].rpc('fas_current_policy_requirement')).data===null);
+  check(!!(await clients[0].rpc('fas_accept_current_policies',{target_release:'not-published',terms_agreed:true,privacy_notice_seen:true,age_16_or_over:true})).error);
   const role=await clients[0].from('user_roles').insert({user_id:fixtures[0].id,role:'admin'});check(!!role.error);
   const other=await clients[0].from('profiles').update({display_name:'Tampered'}).eq('id',fixtures[1].id).select('id');check(other.error || other.data.length===0);
   check((await send(fixtures[0].token,{action:'export'})).status===403);
