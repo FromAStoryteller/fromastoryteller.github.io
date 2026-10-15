@@ -1,0 +1,22 @@
+{
+  "status": "prepared-not-installed",
+  "projectRef": "vzdicnufhidelaoeqbza",
+  "siteURL": "https://fromastoryteller.com",
+  "otpExpirySeconds": 3600,
+  "subjects": {
+    "confirmation": "Verify your From A Storyteller email",
+    "recovery": "Reset your From A Storyteller password"
+  },
+  "templates": {
+    "confirmation": "confirmation-production.html",
+    "recovery": "recovery-production.html"
+  },
+  "callbacks": [
+    "https://fromastoryteller.com/account/verify-email/",
+    "https://fromastoryteller.com/account/reset-password/"
+  ],
+  "tracking": {
+    "open": false,
+    "click": false
+  }
+}
