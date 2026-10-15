@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { currentPolicyRequirement, acceptCurrentPolicies } from './published-policies.mjs';
 import { restoreSession } from './session-controller.mjs';
@@ -26,7 +27,7 @@ form.addEventListener('submit',async event=>{
 try {
   local=await loadLocalAuthClient();
   if(local) {
-    document.querySelector('[data-preview-note]').textContent=local.mode==='development'?'Development test only — uses FAS DEV.':'Local test only — uses the isolated FAS test stack.';
+    document.querySelector('[data-preview-note]').textContent=accountEnvironmentNote(local.mode, 'Local test only — uses the isolated FAS test stack.', 'Development test only — uses FAS DEV.', 'Review the published versions and your agreement history.');
     requirement=await currentPolicyRequirement(local.client);
     const restored=await restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear());
     if(restored.state!=='signed-in') {

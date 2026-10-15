@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { readPendingEmail, savePendingEmail } from './pending-email.mjs';
 import { resendVerification } from './signup-controller.mjs';
@@ -39,9 +40,9 @@ try {
     const previous = readPendingEmail();
     if (previous) { input.value = previous.email; requestedAt = previous.requestedAt; }
     input.disabled = false;
-    document.querySelector('[data-preview-note]').textContent = local.mode === 'development' ? 'Development test only — emails go to your inbox.' : 'Local test only — emails go to the local test inbox.';
+    document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — emails go to the local test inbox.', 'Development test only — emails go to your inbox.', 'Verification emails go to your inbox.');
     document.querySelector('[data-inbox-intro]').textContent = 'If this email address can be registered, you’ll receive a verification link. Open it to confirm your email before signing in. Already registered? You can sign in instead.';
     updateButton();
     setInterval(updateButton, 1000);
   }
-} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Local email requests are unavailable. Please try again.'; }
+} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Email requests are unavailable. Please try again later.'; }

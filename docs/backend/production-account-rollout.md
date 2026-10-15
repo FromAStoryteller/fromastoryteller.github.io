@@ -36,18 +36,21 @@ Inspect an actual delivered message during the later controlled smoke test.
 
 ## Concrete work still required before rollout approval
 
-1. **Production adapter.** `account/auth-settings.mjs` currently permits only the
-   two fixed loopback origins, and `loadLocalAuthConfig` only obtains configuration
-   from the local preview middleware. No production frontend connection exists.
-   Add an explicit opt-in for the exact live origin/backend, accepting only a
-   nonprivileged public key. Keep absent/malformed configuration closed, reject
-   preview/foreign origins and privileged keys, and preserve existing DEV isolation.
-   Update account-page test labels only in that verified production mode.
-2. **Lifecycle adapter.** Both `account/lifecycle-client.mjs` and
-   `supabase/functions/fas-account-lifecycle/environment.mjs` currently refuse
-   production. Implement and test a separate explicit production switch and exact
-   CORS origin. Personal/content export and deletion must work before opening
-   registration; do not remove the allowlist as a shortcut.
+1. **Production adapter — implemented, inactive.** The exact HTTPS live origin can
+   now load generated account/runtime-config.json. Missing, redirected, malformed,
+   wrong-project or privileged-key configuration stays closed. DEV/local origins
+   continue using their separate middleware; workers.dev and foreign origins cannot
+   load the production adapter. Signup requires a current published server release
+   matching the build's policyRelease. No runtime configuration is tracked or emitted
+   by ordinary builds. Verified production mode uses viewer-facing wording instead
+   of DEV/test labels. Existing draft acknowledgements remain separate.
+2. **Lifecycle adapter — implemented, inactive.** The browser and Edge Function
+   now support only the exact production backend/origin, with a distinct server
+   FAS_PRODUCTION_LIFECYCLE_ENABLED switch. The DEV switch cannot enable it.
+   Invalid browser destinations are rejected before session refresh or transmission.
+   Server identity/session/ownership/role checks are unchanged. The production
+   function has not been deployed or enabled; actual production lifecycle testing
+   remains a rollout prerequisite.
 3. **Final policy release.** Prepare final published wording/snapshots, preserve
    the reviewed and acknowledged drafts, verify hashes and create the deliberate
    release record. Keep the requirement NULL until the matching documents and
@@ -89,3 +92,36 @@ the new production files are not referenced by it. Actual production delivery an
 other email clients remain untested. No legal compliance certification is implied.
 
 Reference: [Supabase email templates and supported variables](https://supabase.com/docs/guides/auth/auth-email-templates).
+
+## Disabled-by-default adapter verification
+
+79 automated tests passed, including the fixed production configuration, privileged
+key rejection, HTML/404/network response handling, exact callbacks, independent
+lifecycle switch/CORS and identity verification, plus refusal to submit signup
+without published agreement controls. Real DEV account/security API tests passed
+with disposable fixtures cleaned up. 724 references and 113 JavaScript syntax
+checks passed. Preview and production-candidate builds each contain 189 public
+files and no runtime config with their normal settings. An explicit production
+opt-in was also tested and refused the current unpublished policy registry. No
+production key was read and no hosted function/settings were changed in this batch.
+
+For the later approved release, the production build requires exact string true
+for FAS_PRODUCTION_ACCOUNTS_ENABLED and FAS_PRODUCTION_LIFECYCLE_ENABLED, plus
+FAS_PRODUCTION_PUBLIC_KEY containing a nonprivileged public key. The public value
+is emitted only to the generated runtime config; server credentials never belong
+in these inputs. The backend function's lifecycle flag is a separate deployment
+setting and must be verified independently of build variables. An active published
+registry entry, exact frozen snapshot paths and matching file hashes are mandatory.
+Do not set any of these production flags during preparation.
+
+Cloudflare branch builds identified by WORKERS_CI_BRANCH other than main, and
+GitHub pull-request builds, omit production runtime configuration even when
+inheriting enabled build variables. Preview builds without branch metadata reject
+an explicit production opt-in. The runtime config has Cache-Control: no-store;
+readers also request it without caching. Never deploy after a failed build or reuse
+a prior build artifact as evidence of readiness. Public keys identify the app;
+server-side RLS and verified user sessions still enforce permissions. Publishable
+keys are opaque, so their actual project association must also be checked at rollout.
+
+References: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys),
+[Cloudflare build branch variables](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/#environment-variables).

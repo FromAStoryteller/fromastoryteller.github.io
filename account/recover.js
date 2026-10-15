@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { requestRecovery } from './recovery-controller.mjs';
 
@@ -40,6 +41,6 @@ try {
     fieldset.disabled = false;
     updateButton();
     setInterval(updateButton, 1000);
-    document.querySelector('#account-preview-note').textContent = local.mode === 'development' ? 'Development test only — emails go to your inbox.' : 'Local test only — recovery emails go to the local test inbox.';
+    document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(local.mode, 'Local test only — recovery emails go to the local test inbox.', 'Development test only — emails go to your inbox.', 'Use the email address for your account.');
   }
-} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Local recovery is unavailable. Please restart the local preview and try again.'; }
+} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Password recovery is unavailable. Please try again later.'; }

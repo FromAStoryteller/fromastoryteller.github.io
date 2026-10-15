@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { createSignInController } from './sign-in-controller.mjs';
 import { restoreSession } from './session-controller.mjs';
@@ -92,7 +93,7 @@ try {
       // No async Auth calls inside this callback (SDK lock). RLS remains authoritative.
       if (event === 'SIGNED_OUT' && signedIn && !explicitSignOut) controller.sessionEnded();
     });
-    notice.textContent = (local.mode === 'development' ? 'Development test only — uses FAS DEV. ' : 'Local test only — ') + (local.storage.persistent ? 'Your session is stored in this tab. Sign out when finished.' : 'Browser storage is unavailable. Reloading this page signs you out.');
+    notice.textContent = (accountEnvironmentNote(local.mode, 'Local test only — ', 'Development test only — uses FAS DEV. ')) + (local.storage.persistent ? 'Your session is stored in this tab. Sign out when finished.' : 'Browser storage is unavailable. Reloading this page signs you out.');
     await checkSession();
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && signedIn && Date.now() - lastChecked > 60000 && !explicitSignOut) void checkSession();
@@ -100,5 +101,5 @@ try {
     window.addEventListener('pageshow', event => { if (event.persisted) void checkSession(); });
   }
 } catch {
-  notice.textContent = 'Local sign-in is unavailable. Please restart the local preview and try again.';
+  notice.textContent = 'Sign-in is unavailable. Please try again later.';
 }

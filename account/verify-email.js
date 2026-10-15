@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { consumeVerificationLink, createVerificationController } from './verification-controller.mjs';
 import { clearPendingEmail } from './pending-email.mjs';
@@ -32,7 +33,7 @@ function render({ state, message, retryable }) {
 try {
   const local = await loadLocalAuthClient();
   if (local?.signupEnabled) {
-    document.querySelector('[data-preview-note]').textContent = local.mode === 'development' ? 'Development test only — this confirms your FAS DEV test account.' : 'Local test only — this confirms a local FAS test account.';
+    document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — this confirms a local FAS test account.', 'Development test only — this confirms your FAS DEV test account.', 'Confirm your email address to finish setting up your account.');
     intro.textContent = tokenHash ? 'Select Confirm email to finish verifying your email address.' : 'Open the verification link from your email to continue. If you need a new link, request another email below.';
     if (tokenHash) {
       verify = createVerificationController(local.client.auth, tokenHash, render);
@@ -40,4 +41,4 @@ try {
       button.disabled = false;
     }
   }
-} catch { render({ state: 'error', retryable: false, message: 'Local email verification is unavailable. Please reopen your email link after restarting the local preview.' }); }
+} catch { render({ state: 'error', retryable: false, message: 'Email verification is unavailable. Please reopen your email link and try again later.' }); }

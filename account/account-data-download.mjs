@@ -20,7 +20,7 @@ ${data.account.registration ? `Type: Local draft acknowledgement (not a live acc
 Minimum age self-declared: ${data.account.registration.minimum_age}
 Terms version: ${data.account.registration.terms_version}
 Privacy notice version: ${data.account.registration.privacy_version}
-Recorded: ${data.account.registration.recorded_at}` : 'No registration declaration was recorded for this older or administratively created test account.'}
+Recorded: ${data.account.registration.recorded_at}` : 'No registration declaration was recorded for this account.'}
 
 Published policy agreements:
 ${data.account.policy_agreements?.length ? data.account.policy_agreements.map(item=>`Terms: ${item.terms_version}\nPrivacy notice: ${item.privacy_version}\nRecorded: ${item.recorded_at}\nTerms SHA-256: ${item.terms_sha256}\nPrivacy SHA-256: ${item.privacy_sha256}`).join('\n\n') : 'No published policy agreement has been recorded. A test draft acknowledgement is not a published agreement.'}

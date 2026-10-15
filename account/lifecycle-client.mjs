@@ -1,13 +1,19 @@
-import { LOCAL_AUTH_URL, DEV_AUTH_URL, LOCAL_ACCOUNT_ORIGIN, DEV_ACCOUNT_ORIGIN } from './auth-settings.mjs';
+import { LOCAL_AUTH_URL, DEV_AUTH_URL, LOCAL_ACCOUNT_ORIGIN, DEV_ACCOUNT_ORIGIN, PRODUCTION_AUTH_URL, PRODUCTION_ACCOUNT_ORIGIN, isProductionPublicKey } from './auth-settings.mjs';
 async function accessToken(local) {
+  lifecycleBase(local);
   const renewed = await local.client.auth.refreshSession();
   if (renewed.error || !renewed.data?.session) throw new Error('Your session has ended. Please sign in again.');
   return renewed.data.session.access_token;
 }
-async function perform(local, body, token) {
+function lifecycleBase(local) {
   const base = local.client.supabaseUrl;
   if (!((base === LOCAL_AUTH_URL && local.accountOrigin === LOCAL_ACCOUNT_ORIGIN) ||
-      (base === DEV_AUTH_URL && local.accountOrigin === DEV_ACCOUNT_ORIGIN && local.mode === 'development'))) throw new Error('Account service is not enabled for this preview.');
+      (base === DEV_AUTH_URL && local.accountOrigin === DEV_ACCOUNT_ORIGIN && local.mode === 'development') ||
+      (base === PRODUCTION_AUTH_URL && local.accountOrigin === PRODUCTION_ACCOUNT_ORIGIN && local.mode === 'production' && isProductionPublicKey(local.client.supabaseKey)))) throw new Error('Account service is not enabled here.');
+  return base;
+}
+async function perform(local, body, token) {
+  const base = lifecycleBase(local);
   return fetch(base + '/functions/v1/fas-account-lifecycle', {
     method: 'POST', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(60000),
     headers: { apikey: local.client.supabaseKey, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(body),

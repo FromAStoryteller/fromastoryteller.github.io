@@ -1,4 +1,5 @@
-import { loadLocalAuthConfig } from './auth-settings.mjs';
+import { accountEnvironmentNote } from './environment-copy.mjs';
+import { loadAccountAuthConfig } from './auth-settings.mjs';
 import { consumeRecoveryLink, createRecoveryController } from './recovery-controller.mjs';
 
 const hash = consumeRecoveryLink(location.href, () => history.replaceState(null, '', '/account/reset-password/'));
@@ -33,9 +34,9 @@ form.addEventListener('submit', async event => {
   await controller.save(password.value, confirmation.value);
 });
 try {
-  const config = await loadLocalAuthConfig(location.origin);
+  const config = await loadAccountAuthConfig(location.origin);
   if (config?.signup) {
-    document.querySelector('#account-preview-note').textContent = config.mode === 'development' ? 'Development test only — changes apply to your FAS DEV account.' : 'Local test only — changes apply to local FAS test accounts.';
+    document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(config.mode, 'Local test only — changes apply to local FAS test accounts.', 'Development test only — changes apply to your FAS DEV account.', 'Choose a new password using the recovery link from your email.');
     if (hash) {
       const { createClient } = await import('./vendor/supabase-client.js');
       // Recovery credentials exist only in memory, never in the ordinary sign-in cache.
@@ -47,4 +48,4 @@ try {
       status.textContent = 'You’ve opened the link from your password recovery email. Select Continue to password reset to check the link and choose a new password.';
     } else render({ state: 'invalid', message: 'Open the recovery link from your email to choose a new password.' });
   }
-} catch { render({ state: 'invalid', message: 'Local recovery is unavailable. Reopen your email link after restarting the local preview.' }); }
+} catch { render({ state: 'invalid', message: 'Password recovery is unavailable. Reopen your email link and try again later.' }); }

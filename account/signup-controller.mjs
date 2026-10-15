@@ -1,5 +1,5 @@
 import { passwordChecks } from './password-policy.mjs';
-import { LOCAL_ACCOUNT_ORIGIN, accountOrigin } from './auth-settings.mjs';
+import { LOCAL_ACCOUNT_ORIGIN, PRODUCTION_ACCOUNT_ORIGIN, accountOrigin } from './auth-settings.mjs';
 import { registrationDeclaration } from './registration-declaration.mjs';
 import { publishedPolicyDeclaration } from './published-policies.mjs';
 
@@ -17,6 +17,7 @@ export function emailRequestError(error) {
 
 export function createSignupController(auth, onChange, origin = LOCAL_ACCOUNT_ORIGIN, requirement = null) {
   const redirectOrigin = accountOrigin(origin);
+  if (origin === PRODUCTION_ACCOUNT_ORIGIN && !requirement) throw new Error('Published account policies are not ready.');
   let busy = false;
   return {
     async signUp({ displayName, email, password, confirmation, ageConfirmed, policiesAcknowledged, termsAgreed, privacyNoticeSeen }) {

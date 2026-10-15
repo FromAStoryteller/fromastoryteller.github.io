@@ -1,5 +1,11 @@
 # Viewer accounts: small review batches
 
+Latest preparation (16 October): production frontend/lifecycle adapters are implemented
+and tested but disabled. Ordinary builds emit no production account configuration;
+final policy publication and deliberate rollout remain. See
+[production rollout preparation](production-account-rollout.md). The historical
+local-only milestones below record earlier batches, not current launch readiness.
+
 Policy review: [preserved versions and email-only contact](policy-versioning-review.md).
 The review pages are ready separately from unchanged DEV draft acknowledgements.
 

@@ -1,3 +1,4 @@
+import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { createSignupController } from './signup-controller.mjs';
 import { passwordChecks } from './password-policy.mjs';
@@ -56,6 +57,7 @@ try {
     const settings = await fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
     if (settings?.mailer_autoconfirm === false && settings?.external?.email === true) {
       const requirement = await currentPolicyRequirement(local.client);
+      if (local.mode === 'production' && (!requirement || requirement.release_id !== local.policyRelease)) throw new Error('Published account policies are not ready.');
       controller = createSignupController(local.client.auth, show, local.accountOrigin, requirement);
       displayName.disabled = false;
       email.disabled = false;
@@ -72,8 +74,8 @@ try {
         }
         for (const input of form.querySelectorAll('[data-terms-agreed], [data-privacy-seen]')) { input.disabled=false; input.closest('label').hidden=false; }
       }
-      submit.firstChild.textContent = 'Create test account ';
-      document.querySelector('#account-preview-note').textContent = local.mode === 'development' ? 'Development test only — uses FAS DEV. Verification emails go to your inbox.' : 'Local test only — use a sample account. Emails go to the local test inbox.';
+      submit.firstChild.textContent = local.mode === 'production' ? 'Create account ' : 'Create test account ';
+      document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(local.mode, 'Local test only — use a sample account. Emails go to the local test inbox.', 'Development test only — uses FAS DEV. Verification emails go to your inbox.', 'Create a viewer account. We’ll email you a verification link.');
     }
   }
-} catch { show({ state: 'error', message: 'Local account creation is unavailable. Please restart the local preview and try again.' }); }
+} catch { show({ state: 'error', message: 'Account creation is unavailable. Please try again later.' }); }
