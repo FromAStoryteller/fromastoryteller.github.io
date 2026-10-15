@@ -53,6 +53,11 @@
           "path": "/account/policy-history/account-launch-2026-10-16-v1/terms/index.html",
           "sha256": "e99ebe4a36ea013f0bbb6216cf7f21e73f0d564e2c7f689beb449600b0124256"
         }
+      },
+      "operatorWordingReview": {
+        "status": "approved-for-preparation",
+        "reviewedOn": "2026-10-16",
+        "publicFacingName": "From A Storyteller"
       }
     }
   },

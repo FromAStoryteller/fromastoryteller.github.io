@@ -4,6 +4,11 @@ Status: prepared work only; not a production rollout. Ryan approved the producti
 verification/recovery email wording in the local viewer on 16 October. No message
 was sent, production template installed, credential changed or signup enabled.
 
+Latest: Ryan also approved the branded launch policy candidate wording. The
+[read-only production readiness review](production-readiness-2026-10-16.md)
+records the actual missing callbacks/hook/lifecycle/schedules, fresh backup and
+later rollout order. Backup encryption/test/sync is the next manual step.
+
 ## Prepared email settings
 
 The source of the intended values is
@@ -80,7 +85,10 @@ Inspect an actual delivered message during the later controlled smoke test.
    Use a controlled real-inbox test with Ryan completing password entry, email
    confirmation and any actual Terms agreement. Confirm viewer-only access,
    sign-out/session expiry, recovery, personal export and confirmed deletion.
-   Open registration only after the approved checks pass. No test account should
+   Public signup itself requires an explicitly approved initial registration
+   window; other people can register during that window. Use the detailed
+   readiness sequence rather than describing that smoke test as private.
+   No test account should
    inherit Ryan's existing stories/games or contributor/admin access.
 
 ## Verification of this preparation batch

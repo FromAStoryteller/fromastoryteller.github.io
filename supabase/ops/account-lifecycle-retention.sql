@@ -1,5 +1,6 @@
--- Run only on an explicitly selected FAS development/local project after review.
--- Hosted deployment is a separate step. This never removes uploaded content.
+-- Local/DEV use requires an explicitly selected reviewed FAS target.
+-- Production use requires the separate approved rollout, a verified current
+-- backup and exact project selection. This never removes uploaded content.
 begin;
 do $$ begin
   if to_regprocedure('public.fas_purge_account_deletion_records()') is null
