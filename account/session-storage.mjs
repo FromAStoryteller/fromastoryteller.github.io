@@ -28,10 +28,25 @@ export function createSessionStorage(candidate) {
       if (persistent) { try { storage.removeItem(key); } catch { persistent = false; } }
     },
   };
+  // Supabase broadcasts events by storageKey. Independent sessionStorage tabs
+  // need independent channel names; duplicated tabs may retain the same session.
+  const tabKey = SESSION_KEY + '-tab-id';
+  let tabId = adapter.getItem(tabKey);
+  if (!/^[0-9a-f-]{36}$/.test(tabId ?? '')) {
+    tabId = globalThis.crypto.randomUUID();
+    adapter.setItem(tabKey, tabId);
+  }
+  const key = SESSION_KEY + '-' + tabId;
+  const previous = adapter.getItem(SESSION_KEY);
+  if (previous && !adapter.getItem(key)) {
+    adapter.setItem(key, previous);
+    for (const suffix of ['', '-user', '-code-verifier']) adapter.removeItem(SESSION_KEY + suffix);
+  }
   return {
     adapter,
+    key,
     get persistent() { return persistent; },
-    get hasSession() { return Boolean(adapter.getItem(SESSION_KEY)); },
-    clear() { for (const key of [SESSION_KEY, SESSION_KEY + '-user', SESSION_KEY + '-code-verifier']) adapter.removeItem(key); },
+    get hasSession() { return Boolean(adapter.getItem(key)); },
+    clear() { for (const suffix of ['', '-user', '-code-verifier']) adapter.removeItem(key + suffix); },
   };
 }

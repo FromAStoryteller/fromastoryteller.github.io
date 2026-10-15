@@ -1,7 +1,7 @@
 import { randomUUID, randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createClient } from '@supabase/supabase-js';
-import { createSessionStorage, SESSION_KEY } from '../account/session-storage.mjs';
+import { createSessionStorage } from '../account/session-storage.mjs';
 import { restoreSession } from '../account/session-controller.mjs';
 
 const base='http://127.0.0.1:55321';
@@ -13,7 +13,7 @@ const password='LocalOnly9!'+randomBytes(24).toString('base64url');
 const backing=new Map();
 const storage=createSessionStorage({getItem:key=>backing.get(key)??null,setItem:(key,value)=>backing.set(key,value),removeItem:key=>backing.delete(key)});
 const clients=[];
-const client=()=>{const result=createClient(base,key,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,storage:storage.adapter,storageKey:SESSION_KEY}});clients.push(result);return result;};
+const client=()=>{const result=createClient(base,key,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,storage:storage.adapter,storageKey:storage.key}});clients.push(result);return result;};
 const requireCondition=value=>{if(!value)throw new Error('Session contract failed');};
 let id;
 let stage='create fixture';
@@ -28,8 +28,8 @@ try{
   requireCondition(restored.state==='signed-in'&&restored.email===email);
   console.log('PASS a new client restores and server-verifies the stored session');
   stage='cached expiry with a usable refresh token';
-  const cached=JSON.parse(storage.adapter.getItem(SESSION_KEY));cached.expires_at=1;
-  storage.adapter.setItem(SESSION_KEY,JSON.stringify(cached));
+  const cached=JSON.parse(storage.adapter.getItem(storage.key));cached.expires_at=1;
+  storage.adapter.setItem(storage.key,JSON.stringify(cached));
   requireCondition((await restoreSession(client().auth,true,()=>storage.clear())).state==='signed-in');
   console.log('PASS SDK refresh restores an expired cache when the server session is valid');
   stage='server-side session expiry';

@@ -11,11 +11,12 @@ function fakeStorage() {
 test('Tab storage survives a new adapter and clears only owned Auth keys', () => {
   const backing=fakeStorage();
   const first=createSessionStorage(backing);
-  first.adapter.setItem(SESSION_KEY,'synthetic SDK session');
-  first.adapter.setItem(SESSION_KEY+'-user','synthetic user');
+  first.adapter.setItem(first.key,'synthetic SDK session');
+  first.adapter.setItem(first.key+'-user','synthetic user');
   const next=createSessionStorage(backing);
   assert.equal(next.persistent,true);assert.equal(next.hasSession,true);
-  assert.equal(next.adapter.getItem(SESSION_KEY),'synthetic SDK session');
+  assert.equal(next.adapter.getItem(next.key),'synthetic SDK session');
+  assert.equal(next.key,first.key);
   next.clear();assert.equal(next.hasSession,false);
   assert.equal(backing.getItem('unrelated-theme'),'dark');
 });
@@ -24,13 +25,23 @@ test('Unavailable or later-blocked storage falls back to page memory without thr
   const blocked={setItem(){throw new Error('blocked');}};
   const session=createSessionStorage(blocked);
   assert.equal(session.persistent,false);
-  session.adapter.setItem(SESSION_KEY,'synthetic session');
+  session.adapter.setItem(session.key,'synthetic session');
   assert.equal(session.hasSession,true);
   session.clear();assert.equal(session.hasSession,false);
   const backing=fakeStorage();const runtime=createSessionStorage(backing);
   backing.setItem=()=>{throw new Error('quota');};
-  assert.doesNotThrow(()=>runtime.adapter.setItem(SESSION_KEY,'synthetic session'));
+  assert.doesNotThrow(()=>runtime.adapter.setItem(runtime.key,'synthetic session'));
   assert.equal(runtime.persistent,false);assert.equal(runtime.hasSession,true);
+});
+
+test('Independent tabs use separate SDK event channels and old local cache migrates within its tab', () => {
+  const firstBacking=fakeStorage();firstBacking.setItem(SESSION_KEY,'synthetic legacy session');
+  const first=createSessionStorage(firstBacking);
+  const other=createSessionStorage(fakeStorage());
+  assert.notEqual(first.key,other.key);
+  assert.equal(first.adapter.getItem(first.key),'synthetic legacy session');
+  assert.equal(firstBacking.getItem(SESSION_KEY),null);
+  assert.equal(createSessionStorage(firstBacking).key,first.key);
 });
 
 test('Restoration refreshes and verifies with the server, ignoring cached identity/roles', async () => {

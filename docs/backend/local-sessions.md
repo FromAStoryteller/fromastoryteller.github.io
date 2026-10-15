@@ -6,6 +6,9 @@ the session. Passwords are not stored. The existing loopback-only configuration
 guards still keep hosted authentication disabled.
 
 This is a local testing choice, not the final production remember-me policy.
+Independent tabs use different SDK event-channel keys so a different tab's
+sign-out event cannot clear this tab's credentials. The temporary tab ID stays
+stable across navigation; a duplicated/restored tab can inherit its session.
 Tab storage normally ends with the tab, but browser tab/session restoration can
 preserve it. Sign out when finished. The SDK handles token rotation/refresh; no
 custom JWT authentication or role assignment is introduced.
@@ -42,7 +45,8 @@ production enablement. Privileged/service keys never enter the browser.
 
 ## Validation
 
-Seven contract tests cover storage persistence/scoped cleanup, blocked storage,
+Eight contract tests cover storage persistence/scoped cleanup, independent-tab
+event keys and migration of the earlier local cache, blocked storage,
 server identity validation rather than cached identity, rejected/expired sessions,
 connection/rate-limit behavior, guest versus ended-session feedback, and user
 rejection after refresh.
@@ -56,7 +60,9 @@ state. No server timeouts or hosted policies were changed.
 The browser signed in a disposable viewer, visited Home, returned and reloaded
 without signing in again. Expiring only its local server session then returning
 produced the expiry message and cleared fields/cache. Signing in again, signing
-out and reloading left it signed out. Both API/browser fixture accounts were removed.
+out and reloading left it signed out. A two-tab browser check verified that signing
+out in the first independent tab left the second signed in, including after its
+reload. Both API/browser fixture accounts were removed.
 
 Run `npm run test:sessions:local` with the local-only process environment from
 [local sign-in](local-sign-in.md), substituting this test command in the `try`
