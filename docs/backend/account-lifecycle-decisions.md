@@ -49,3 +49,5 @@ Primary sources for age review:
 [NZ Parliament bill](https://bills.parliament.nz/v/6/ba928141-d337-493a-01d5-08df0193ecfa),
 [NZ Privacy Commissioner children’s privacy](https://www.privacy.org.nz/resources-and-learning/a-z-topics/protecting-children-and-young-peoples-privacy/),
 [FTC COPPA FAQ, including overseas sites](https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions).
+
+Local registration now enforces a 16+ self-declaration and records a versioned draft-policy acknowledgement. It does not collect identity documents or a birth date, verify actual age, or record acceptance of a future published agreement. Hosted policy review and final agreement controls remain required before launch.

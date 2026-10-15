@@ -15,6 +15,13 @@ Access: ${({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', ad
 Account state: ${data.account.state}
 Profile created: ${profile.created_at}
 
+Registration declaration:
+${data.account.registration ? `Type: Local draft acknowledgement (not a live account agreement)
+Minimum age self-declared: ${data.account.registration.minimum_age}
+Terms version: ${data.account.registration.terms_version}
+Privacy notice version: ${data.account.registration.privacy_version}
+Recorded: ${data.account.registration.recorded_at}` : 'No registration declaration was recorded for this older or administratively created test account.'}
+
 This file contains your current account and profile details. Passwords and session
 credentials are excluded. Contributors can download stories and images separately.
 Future game saves and multiplayer data are not implemented in this preview.

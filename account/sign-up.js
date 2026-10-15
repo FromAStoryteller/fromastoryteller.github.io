@@ -31,7 +31,9 @@ form.addEventListener('submit', async event => {
     show({ state: 'error', message: 'Enter a display name and make sure both passwords meet the requirements and match.' });
     return;
   }
-  const credentials = { displayName: displayName.value, email: email.value, password: password.value, confirmation: confirmation.value };
+  const credentials = { displayName: displayName.value, email: email.value, password: password.value, confirmation: confirmation.value,
+    ageConfirmed: form.querySelector('[data-age-confirmed]').checked,
+    policiesAcknowledged: form.querySelector('[data-policies-acknowledged]').checked };
   for (const input of [password, confirmation]) {
     input.value = '';
     input.type = 'password';
@@ -54,6 +56,8 @@ try {
       displayName.disabled = false;
       email.disabled = false;
       submit.disabled = false;
+      for (const input of form.querySelectorAll('[data-age-confirmed], [data-policies-acknowledged]')) input.disabled = false;
+      submit.firstChild.textContent = 'Create test account ';
       document.querySelector('#account-preview-note').textContent = 'Local test only — use a sample account. Emails go to the local test inbox.';
     }
   }

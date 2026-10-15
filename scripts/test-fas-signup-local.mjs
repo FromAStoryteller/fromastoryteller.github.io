@@ -1,5 +1,7 @@
 import { randomUUID, randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { exportAccountData } from '../account/settings-controller.mjs';
+import { registrationDeclaration } from '../account/registration-declaration.mjs';
 import { createClient } from '@supabase/supabase-js';
 const base='http://127.0.0.1:55321';
 const inbox='http://127.0.0.1:55324';
@@ -8,6 +10,7 @@ const adminKey=process.env.FAS_TEST_SERVICE_KEY;
 if(process.env.FAS_TEST_CONFIRM!=='LOCAL-FAS-ONLY'||!key||!adminKey){console.error('Supply local FAS keys and acknowledge LOCAL-FAS-ONLY in the process environment.');process.exit(1);}
 const client=createClient(base,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 const emails=new Set();
+const declaration=registrationDeclaration({ageConfirmed:true,policiesAcknowledged:true});
 let stage='local settings';
 const requireCondition=value=>{if(!value)throw new Error('Contract failed');};
 async function admin(path,method='GET',body){
@@ -40,9 +43,20 @@ try{
   const weakEmail=fixtureEmail();
   for(const password of ['short9!Aa','Abcdefghijk1','abcdefghij1!']) requireCondition((await client.auth.signUp({email:weakEmail,password})).error?.code==='weak_password');
   console.log('PASS server rejects short passwords and missing character categories');
+  stage='server registration declarations';
+  const deniedEmail=fixtureEmail();const deniedPassword='LocalOnly9!'+randomBytes(24).toString('base64url');
+  for (const data of [{},{fas_registration:{...declaration,age_16_or_over:false}},{fas_registration:{...declaration,age_16_or_over:'true'}},{fas_registration:{...declaration,terms_acknowledged:false}},{fas_registration:{...declaration,privacy_notice_seen:false}},{fas_registration:{...declaration,terms_version:'old'}},{fas_registration:{...declaration,privacy_version:'old'}},{fas_registration:{...declaration,mode:'published_agreement'}}]) {
+    const denied=await client.auth.signUp({email:deniedEmail,password:deniedPassword,options:{data}});
+    requireCondition(denied.error?.status===400&&denied.error.message==='Confirm you are 16 or older and acknowledge the current draft Terms and Privacy notice.');
+  }
+  const deniedList=await admin('/auth/v1/admin/users?page=1&per_page=1000');
+  requireCondition(!deniedList.users.some(user=>user.email===deniedEmail));
+  const deniedMail=await fetch(`${inbox}/api/v1/search?query=${encodeURIComponent('to:'+deniedEmail)}`).then(r=>r.json());
+  requireCondition(deniedMail.messages.length===0);
+  console.log('PASS direct signup rejects missing/false/string/stale declarations before creating an identity or email');
   stage='local signup and unverified sign-in';
   const email=fixtureEmail();const password='LocalOnly9!'+randomBytes(24).toString('base64url');
-  const signed=await client.auth.signUp({email,password,options:{data:{display_name:'Synthetic signup reader',role:'admin',is_admin:true},emailRedirectTo:'http://127.0.0.1:55400/account/verify-email/'}});
+  const signed=await client.auth.signUp({email,password,options:{data:{display_name:'Synthetic signup reader',fas_registration:declaration,role:'admin',is_admin:true},emailRedirectTo:'http://127.0.0.1:55400/account/verify-email/'}});
   if(signed.error) console.error('Local signup API code: '+(/^[a-z_]+$/.test(signed.error.code??'')?signed.error.code:'unavailable'));
   requireCondition(!signed.error&&signed.data.user?.id&&!signed.data.session);
   const id=signed.data.user.id;
@@ -67,13 +81,24 @@ try{
   requireCondition(!profile.error&&profile.data.display_name==='Synthetic signup reader');
   requireCondition((await client.from('user_roles').insert({user_id:id,role:'admin'})).error);
   requireCondition((await client.from('stories').insert({author_id:id,slug:`fas-signup-${randomUUID()}`,title:'Denied viewer draft',body:'Synthetic only'})).error);
+  const record=await client.rpc('fas_my_registration_declaration');
+  requireCondition(!record.error&&record.data.minimum_age===16&&record.data.terms_version===declaration.terms_version&&record.data.recorded_at&&record.data.acknowledgement_kind==='local_draft_review');
+  const savedRecord=JSON.stringify(record.data);
+  requireCondition(!(await client.auth.updateUser({data:{fas_registration:{mode:'tampered',terms_version:'tampered'},role:'admin'}})).error);
+  requireCondition(JSON.stringify((await client.rpc('fas_my_registration_declaration')).data)===savedRecord);
+  const exported=await exportAccountData(client);
+  requireCondition(JSON.stringify(exported.account.registration)===savedRecord);
+  const unauthenticated=createClient(base,key,{auth:{persistSession:false,autoRefreshToken:false}});
+  requireCondition((await unauthenticated.rpc('fas_before_user_created',{event:{}})).error);
+  requireCondition((await unauthenticated.rpc('fas_my_registration_declaration')).error);
+  console.log('PASS registration record is immutable through metadata edits, readable only by its owner and included in personal exports');
   await client.auth.signOut({scope:'local'});
   requireCondition(!(await client.auth.signInWithPassword({email,password})).error);
   requireCondition((await client.auth.verifyOtp({token_hash:replacement,type:'email'})).error);
   console.log('PASS verified account can sign in but remains a viewer; links are single use');
   stage='expired verification link';
   const expiredEmail=fixtureEmail();
-  const expired=await client.auth.signUp({email:expiredEmail,password});
+  const expired=await client.auth.signUp({email:expiredEmail,password,options:{data:{fas_registration:declaration}}});
   requireCondition(!expired.error&&expired.data.user?.id);
   const expiredToken=await emailLink(expiredEmail);
   ageConfirmation(expired.data.user.id,true);

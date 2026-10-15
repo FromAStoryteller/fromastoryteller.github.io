@@ -1,8 +1,7 @@
 # Local signup and email verification
 
 This batch adds working signup, check-inbox/resend and email confirmation to the
-explicit local account preview. Hosted registration remains closed. Recovery,
-password changing, persistent sessions and account lifecycle are later batches.
+explicit local account preview. Hosted registration remains closed. Recovery, tab-scoped sessions, account settings, content export and confirmed deletion now also work locally; see the matching local account guides.
 
 ## What changed
 
@@ -15,12 +14,9 @@ password changing, persistent sessions and account lifecycle are later batches.
   The local hourly email allowance is 30 for disposable test flows; no hosted limit
   was changed and this is not a production rate-limit recommendation.
 - The starter enables signup only when its local configuration matches the required
-  URL, password rules and confirmation setting. The signup page also checks the
+  URL, password rules, confirmation setting and registration-hook URI. The signup page also checks the
   running Auth server requires confirmation before enabling account creation.
-- Signup submits only email, the exact password, and cosmetic `display_name`
-  metadata. It neither assigns roles nor accepts contributor/admin choices. Display
-  name is retained in Auth metadata; public profile editing/initialization remains
-  a later batch (the existing profile trigger still uses its default display name).
+- Signup submits email, the exact password, cosmetic `display_name` and the versioned local draft acknowledgement. The local Auth before-user-created hook rejects missing, false, malformed or stale declarations. This is 16+ self-declaration, not independent age verification. No contributor/admin role is assigned from metadata. The profile trigger initialises a bounded cosmetic display name; the original declaration is saved privately and cannot be rewritten through later metadata edits. See [local registration](local-registration-declaration.md).
 - Missing/registered email cases get conditional inbox guidance. Network and rate
   failures have useful messages. Resend likewise avoids account-existence feedback.
 

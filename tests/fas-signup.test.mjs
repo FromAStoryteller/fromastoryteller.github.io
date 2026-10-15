@@ -6,25 +6,28 @@ import { createSignupController, EMAIL_REQUEST_MESSAGE, resendVerification } fro
 import { consumeVerificationLink, createVerificationController } from '../account/verification-controller.mjs';
 import { savePendingEmail, readPendingEmail, clearPendingEmail } from '../account/pending-email.mjs';
 
-const details = { displayName: ' Local reader ', email: ' reader@example.invalid ', password: 'SampleOnly9!', confirmation: 'SampleOnly9!' };
+const details = { displayName: ' Local reader ', email: ' reader@example.invalid ', password: 'SampleOnly9!', confirmation: 'SampleOnly9!', ageConfirmed: true, policiesAcknowledged: true };
 const hash = 'a'.repeat(56);
 
 test('Local signup requires the correct local URL, server password rules and email confirmation', () => {
   const config=readFileSync(new URL('../supabase/config.toml',import.meta.url),'utf8');
   assert.equal(localSignupReady(config),true);
-  for (const [before,after] of [['minimum_password_length = 12','minimum_password_length = 6'],['password_requirements = "lower_upper_letters_digits_symbols"','password_requirements = ""'],['enable_confirmations = true','enable_confirmations = false'],['site_url = "http://127.0.0.1:55400"','site_url = "https://fromastoryteller.com"']]) assert.equal(localSignupReady(config.replace(before,after)),false);
+  for (const [before,after] of [['minimum_password_length = 12','minimum_password_length = 6'],['password_requirements = "lower_upper_letters_digits_symbols"','password_requirements = ""'],['enable_confirmations = true','enable_confirmations = false'],['pg-functions://postgres/public/fas_before_user_created','pg-functions://postgres/public/wrong_hook'],['[auth.hook.before_user_created]','[auth.hook.before_user_created_disabled]'],['site_url = "http://127.0.0.1:55400"','site_url = "https://fromastoryteller.com"']]) assert.equal(localSignupReady(config.replace(before,after)),false);
 });
 
-test('Invalid password/name never submits; signup sends only the cosmetic display name', async () => {
+test('Invalid password/name never submits; signup requires declarations and sends cosmetic name with versioned local acknowledgement', async () => {
   let calls=0;
   const states=[];
   const controller=createSignupController({signUp:async request=>{
     calls++;
-    assert.deepEqual(request,{email:'reader@example.invalid',password:'SampleOnly9!',options:{data:{display_name:'Local reader'},emailRedirectTo:'http://127.0.0.1:55400/account/verify-email/'}});
+    assert.deepEqual(request,{email:'reader@example.invalid',password:'SampleOnly9!',options:{data:{display_name:'Local reader',fas_registration:{mode:'local_draft_review',terms_version:'local-preview-2026-10-15-v1',privacy_version:'local-preview-2026-10-15-v1',age_16_or_over:true,terms_acknowledged:true,privacy_notice_seen:true}},emailRedirectTo:'http://127.0.0.1:55400/account/verify-email/'}});
     return {data:{user:{id:'fixture'},session:null}};
   }},state=>states.push(state));
   await controller.signUp({...details,confirmation:'MismatchOnly9!'});
   await controller.signUp({...details,displayName:'   '});
+  await controller.signUp({...details,ageConfirmed:false});
+  await controller.signUp({...details,policiesAcknowledged:false});
+  await controller.signUp({...details,ageConfirmed:'true'});
   assert.equal(calls,0);
   await controller.signUp(details);
   assert.equal(calls,1);

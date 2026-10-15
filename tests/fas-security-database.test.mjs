@@ -8,7 +8,7 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     // Real PostgreSQL engine with minimal Supabase-managed schema stand-ins.
     // This verifies SQL/RLS, not Auth sessions, Storage bytes or HTTP behavior.
     await db.exec(`
-      create role anon; create role authenticated; create role service_role bypassrls;
+      create role supabase_auth_admin; create role anon; create role authenticated; create role service_role bypassrls;
       create schema auth; create schema storage;
       create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);
       create table auth.sessions(id uuid primary key, user_id uuid references auth.users(id) on delete cascade, not_after timestamptz);
@@ -25,7 +25,7 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     for (const file of readdirSync(migrations).filter(f => f.endsWith('.sql')).sort()) {
       await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
     }
-    for (const file of ['access.sql', 'security.sql', 'lifecycle.sql']) {
+    for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql']) {
       await db.exec(readFileSync(new URL(`../supabase/tests/${file}`, import.meta.url), 'utf8'));
     }
   } finally { await db.close(); }
