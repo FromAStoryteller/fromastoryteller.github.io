@@ -15,9 +15,10 @@ verification and confirmation that the encrypted archive has synced.
 
 Dropbox sync does not create fresh database exports, and no backup scheduler is
 installed. A weekly schedule can lose up to a week's changes between snapshots;
-reassess frequency before real community use. Suggested retention is four weekly
-sets and one monthly set for six months; retention pruning is not automated and
-requires a deliberate review. Rehearse recovery periodically and before relying
+reassess frequency before real community use. The updated account policy limits
+deleted personal data in restricted backups to 30 days. Ryan will remove or replace
+manual archives within that limit; do not retain older monthly sets containing
+deleted data. Retention pruning is not automated. Rehearse recovery periodically and before relying
 on a changed procedure; measure recovery time rather than promising it. Check
 the project's actual backup plan/retention in Database -> Backups. Free-tier
 projects need regular exports, including separate Storage bytes.
@@ -96,6 +97,18 @@ and record the results privately. Encrypt/copy the whole set off-site, then resu
 writes. An untested export is not evidence that recovery will work.
 
 ## 3. Restore drill into a new disposable FAS project
+
+**Account-enabled backups require an adapted import plan.** The generic single-file
+import below describes the earlier security baseline, not a rehearsed import of
+all account tables. New migrations seed singleton configuration rows, so importing
+their saved rows blindly can conflict. Preserve the newest deletion ledger outside
+the older backup and install/replay it before reopening access. Include original
+registration declarations, policy releases, agreements, their times/checksums and
+published document snapshots. Keep the policy requirement NULL during Auth import,
+restore original agreement rows without inventing acceptance, then restore the
+reviewed requirement last. Resolve seeded singleton rows explicitly. The successful
+local rehearsal uses ordered inserts and real Storage APIs; it does not certify a
+full hosted SQL dump import. See local-restore-rehearsal.md before preparing one.
 
 Never overwrite production as a rehearsal. Create `fas-community-restore-test`
 in Supabase. Keep signups disabled and SMTP delivery off so restored users receive
