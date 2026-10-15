@@ -44,7 +44,7 @@ try {
       verify.hidden = false;
       verify.disabled = false;
       status.hidden = false;
-      status.textContent = 'Select Continue to check your recovery link.';
+      status.textContent = 'You’ve opened the link from your password recovery email. Select Continue to password reset to check the link and choose a new password.';
     } else render({ state: 'invalid', message: 'Open the recovery link from your email to choose a new password.' });
   }
 } catch { render({ state: 'invalid', message: 'Local recovery is unavailable. Reopen your email link after restarting the local preview.' }); }
