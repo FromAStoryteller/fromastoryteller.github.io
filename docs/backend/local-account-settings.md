@@ -12,12 +12,8 @@ the Account settings link. Hosted settings stay inactive. No production data cha
 - Download account data produces a JSON file with minimal account details, profile,
   role and owned story text. It excludes passwords, tokens, image originals and
   unlinked static content. The page/file explicitly describe those exclusions.
-- This is **not** the complete contributor-content export required before deletion.
-  Contributor deletion must include images and future account-owned games. Existing
-  static stories/games are not imported or assigned to test identities.
-- Account deletion is displayed as preparation, with no enabled destructive button.
-  The trusted server workflow is specified in [lifecycle decisions](account-lifecycle-decisions.md).
-  No browser delete grants or privileged keys were introduced.
+- A separate complete Community content ZIP now includes originals; confirmed deletion runs only locally. See [local lifecycle](local-account-lifecycle.md). Existing static games/stories are not assigned to test identities, and future game data needs a versioned extension before launch.
+- No browser delete grants or privileged keys were introduced.
 
 The local API test creates two disposable accounts, verifies own-profile editing and
 cross-user denial, confirms viewers have no role, then adds temporary contributor

@@ -11,8 +11,9 @@ export async function loadAccount(client) {
   const user = await verifiedIdentity(client);
   const profile = await client.from('profiles').select('id,display_name,bio,created_at').eq('id', user.id).single();
   const roles = await client.from('user_roles').select('role').eq('user_id', user.id);
-  if (profile.error || roles.error) throw new Error('We couldn’t load your account. Please try again.');
-  return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, role: roles.data[0]?.role ?? 'viewer' };
+  const state = await client.rpc('fas_my_account_state');
+  if (profile.error || roles.error || state.error) throw new Error('We couldn’t load your account. Please try again.');
+  return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, role: roles.data[0]?.role ?? 'viewer', state: state.data };
 }
 
 export async function saveProfile(client, { displayName, bio }) {

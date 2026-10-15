@@ -18,5 +18,5 @@ async function initializeClient() {
     auth: { persistSession: true, storage: storage.adapter, autoRefreshToken: true, detectSessionInUrl: false, storageKey: storage.key },
     global: { fetch: (url, options = {}) => fetch(url, { ...options, redirect: 'error', signal: AbortSignal.any([...(options.signal ? [options.signal] : []), AbortSignal.timeout(15000)]) }) },
   });
-  return { client, signupEnabled: config.signup === true, storage, hadSession };
+  return { client, signupEnabled: config.signup === true, lifecycleEnabled: config.lifecycle === true, storage, hadSession };
 }

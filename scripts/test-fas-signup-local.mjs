@@ -63,6 +63,8 @@ try{
   requireCondition(!verified.error&&verified.data.user.email_confirmed_at&&verified.data.session);
   const roles=await client.from('user_roles').select('role').eq('user_id',id);
   requireCondition(!roles.error&&roles.data.length===0);
+  const profile=await client.from('profiles').select('display_name').eq('id',id).single();
+  requireCondition(!profile.error&&profile.data.display_name==='Synthetic signup reader');
   requireCondition((await client.from('user_roles').insert({user_id:id,role:'admin'})).error);
   requireCondition((await client.from('stories').insert({author_id:id,slug:`fas-signup-${randomUUID()}`,title:'Denied viewer draft',body:'Synthetic only'})).error);
   await client.auth.signOut({scope:'local'});

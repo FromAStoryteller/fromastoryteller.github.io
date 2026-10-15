@@ -38,7 +38,7 @@ resend throttling and verified success/invalid-link states. Verification require
 a server-validated token and an explicit confirmation action; success is never
 inferred from URL parameters. Tab-scoped sessions now survive navigation/reloads
 with server verification, expiry feedback and retryable connection states; see
-[local sessions](local-sessions.md). Profile editing and account-data export also work locally; see [account settings](local-account-settings.md). Complete contributor exports/deletion remain in preparation.
+[local sessions](local-sessions.md). Profile editing and account-data export also work locally; see [account settings](local-account-settings.md). Complete owned Community story/image exports and confirmed deletion now work locally; see [local lifecycle](local-account-lifecycle.md). Future game types and hosted rollout remain separate.
 
 This sequence records the requested work; the account skeleton batches are in progress.
 Later batches may change after Ryan reviews each skeleton.

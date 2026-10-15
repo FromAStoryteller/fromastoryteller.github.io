@@ -53,3 +53,7 @@
 .account-auth-status[data-state="error"] { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); }
 .account-auth-status[data-state="success"] { border-color: var(--password-valid-colour); color: var(--password-valid-colour); }
 [data-signed-in-email] { overflow-wrap: anywhere; }
+.account-check { display: flex; align-items: flex-start; gap: var(--space-3); margin-block: var(--space-5); }
+.account-check input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--colour-accent-primary); }
+.account-danger { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); background: transparent; }
+[data-delete-cancel] { min-height: var(--size-touch-target-minimum); margin-top: var(--space-3); }
