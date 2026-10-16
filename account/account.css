@@ -65,7 +65,7 @@
 .account-navigation .account-secondary[aria-current="page"] { background: var(--colour-accent-primary); color: var(--colour-text-inverse); border-color: var(--colour-accent-primary); }
 .account-navigation .account-secondary:focus-visible, .account-secondary:focus-visible, .account-submit:focus-visible { outline: 2px solid var(--colour-accent-primary); outline-offset: 4px; }
 .account-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--colour-accent-primary) 8%, transparent); }
-.account-submit:not(.account-danger):hover:not(:disabled), .account-navigation .account-secondary[aria-current="page"]:hover { background: var(--colour-accent-primary-hover); color: var(--colour-text-primary); border-color: var(--colour-accent-primary-hover); }
+.account-submit:not(.account-danger):hover:not(:disabled), .account-navigation .account-secondary[aria-current="page"]:hover { background: var(--colour-accent-primary-hover); color: var(--colour-text-inverse); border-color: var(--colour-accent-primary-hover); }
 .account-danger-zone { padding: 1.5rem; border: 1px solid var(--colour-error-text); border-radius: var(--radius-md); background: var(--colour-error-background); }
 .account-danger-zone h2 { color: var(--colour-error-text); }
 .account-danger-zone .account-danger { color: var(--colour-error-text); border-color: var(--colour-error-text); background: transparent; }
