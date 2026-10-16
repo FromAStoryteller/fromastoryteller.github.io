@@ -55,9 +55,9 @@ multiple roles; the archive retains a scalar role field for existing consumers.
 
 ## Verification / rollout
 
-The staged SQL is supabase/ops/separate-admin-tools.sql until its DEV migration
-version is generated. Validate the complete migration chain in GitHub CI, then
-apply it to DEV and save the exact native version in migrations. Re-run legacy
+Migration 20261016214432_separate_admin_tools.sql is installed in DEV. Production
+is unchanged. The initial full GitHub validation passed, including independent
+roles, last-admin, invitation and moderation workflow tests. Re-run legacy
 account/contributor APIs plus scripts/test-fas-admin-api.mjs through the guarded
 node scripts/run-fas-dev-tests.mjs entry point. It forbids production targets.
 
@@ -77,3 +77,11 @@ the interface before required integration and UI checks pass.
 Support scope is intentionally limited to account lookup, role management and
 content moderation. It does not reveal passwords, impersonate users, rewrite
 authors' work or delete another person's account through the browser.
+
+Hosted DEV role/session/invitation transaction checks passed and rolled back all
+fixtures. Independent counts verified zero synthetic accounts, invitations and
+audit rows. Advisors show no ERROR-level findings; the private audit table
+intentionally denies direct client access and checked admin RPCs intentionally
+use SECURITY DEFINER: https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+The pre-existing leaked-password-protection notice remains separate:
+https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
