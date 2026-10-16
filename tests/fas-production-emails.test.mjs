@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const settings = JSON.parse(read('supabase/templates/production-email-settings.json'));
 
-test('Prepared production emails keep private credentials in the fragment and avoid redirect metadata', () => {
-  assert.equal(settings.status, 'prepared-not-installed');
+test('Production email sources keep private credentials in the fragment and avoid redirect metadata', () => {
+  assert.equal(settings.status, 'installed-verified-no-delivery-test');
   assert.equal(settings.projectRef, 'vzdicnufhidelaoeqbza');
   assert.equal(settings.siteURL, 'https://fromastoryteller.com');
   assert.equal(settings.otpExpirySeconds, 3600);
@@ -37,7 +37,7 @@ test('Emails have accessible structure and the launch preview cannot navigate or
   const preview = read('account/email-review/index.html');
   assert.equal((preview.match(/sandbox=""/g) || []).length, 2);
   assert.doesNotMatch(preview, /\.TokenHash|token_hash=|&lt;a href=/);
-  assert.match(preview, /not installed in production/);
+  assert.match(preview, /installed in production; registration remains closed/);
   assert.match(read('supabase/config.toml'), /templates\/confirmation\.html/);
   assert.doesNotMatch(read('supabase/config.toml'), /production\.html/);
 });
