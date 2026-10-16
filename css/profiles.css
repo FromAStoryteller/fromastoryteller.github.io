@@ -1,4 +1,5 @@
 .profile-page { max-width: 76rem; margin: 1rem auto 4rem; }
+.profile-sign-in { width: fit-content; min-width: 10rem; margin-top: 1.5rem; }
 .profile-workspace { display: grid; grid-template-columns: minmax(11rem,.8fr) minmax(20rem,1.5fr) minmax(14rem,1fr); gap: clamp(1.25rem,3vw,3rem); align-items: start; }
 .profile-workspace--viewer { grid-template-columns: minmax(11rem,1fr) minmax(18rem,1.5fr); max-width: 52rem; margin-inline: auto; }
 .profile-eyebrow { color: var(--colour-accent-primary); text-transform: uppercase; letter-spacing: .13em; font-size: .75rem; font-weight: 600; margin: 0 0 1rem; }

@@ -1,6 +1,6 @@
 import { loadLocalAuthClient } from '/account/local-auth-client.mjs';
 import { restoreSession } from '/account/session-controller.mjs';
-import { loadAccount } from '/account/settings-controller.mjs';
+import { loadProfileAccount } from '/account/settings-controller.mjs';
 import { watchSessionEnd } from '/account/session-events.mjs';
 import { mountProfileEditor } from './profile-editor.mjs';
 import { createProfileService } from './profiles.mjs';
@@ -15,7 +15,7 @@ function message(title, detail, signIn = false) {
   const h = document.createElement('h1'); h.textContent = title;
   const p = document.createElement('p'); p.textContent = detail; p.setAttribute('role','status');
   root.append(h,p);
-  if (signIn) { const link = document.createElement('a');link.href='/account/sign-in/';link.textContent='Sign in';root.append(link); }
+  if (signIn) { const link = document.createElement('a');link.className='account-secondary profile-sign-in';link.href='/account/sign-in/';link.textContent='Sign in';root.append(link); }
 }
 try {
   const local = await loadLocalAuthClient();
@@ -31,13 +31,13 @@ try {
     const session = await restoreSession(local.client.auth,local.hadSession,() => local.storage.clear());
     if (session.state !== 'signed-in') message('Your profile is private',session.message || 'Sign in to make this space your own.',true);
     else {
-      const account = await loadAccount(local.client);
+      const account = await loadProfileAccount(local.client);
       userId = account.user.id;
       if (!ended) {
         if (account.state !== 'active') message('Account removal is in progress','Profile editing is unavailable while your account is being removed.');
         else {
-          const publicProfile = await service.readPublic(account.profile.public_id);
-          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor:!!publicProfile,viewer:!publicProfile});
+          const contributor = ['member','moderator','admin'].includes(account.role);
+          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor,viewer:!contributor,initialProfile:account.profile,ownerId:account.user.id});
         }
       }
     }

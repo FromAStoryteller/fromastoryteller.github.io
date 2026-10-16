@@ -64,6 +64,13 @@ test('an account switch cannot save the previous account form into the next acco
   assert.equal(client.calls.filter(call => call[0] === 'update').length, 0);
 });
 
+test('preloaded profile ownership is still reverified before saving', async () => {
+  const client = fakeClient({ user: { id: 'different-user' } });
+  const service = createProfileService(client, { expectedOwnerId: 'original-owner' });
+  await assert.rejects(service.saveOwn({ display_name: 'Original profile' }), /account changed/);
+  assert.equal(client.calls.length, 0);
+});
+
 test('zero-row and database errors do not report a saved profile or reveal raw errors', async () => {
   for (const response of [{ data: null }, { error: { message: 'sensitive database details' } }]) {
     await assert.rejects(createProfileService(fakeClient(response)).saveOwn({ display_name: 'Alex', bio: '' }), /could not be saved/);

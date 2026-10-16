@@ -1,8 +1,8 @@
 import { createProfileService } from './profiles.mjs';
 import { accountNavigation } from './account-navigation.mjs';
 
-export function mountProfileEditor(root, client, { contributor = false, viewer = !contributor } = {}) {
-  const service = createProfileService(client);
+export function mountProfileEditor(root, client, { contributor = false, viewer = !contributor, initialProfile, ownerId } = {}) {
+  const service = createProfileService(client, { expectedOwnerId: ownerId });
   let disposed = false;
   let busy = false;
   root.innerHTML = `<nav class="account-navigation" aria-label="Your profile and account"><a class="account-secondary" href="/account/profile/" aria-current="page">Edit my profile</a><a class="account-secondary" href="/account/settings/">Account settings</a></nav><div class="profile-workspace${viewer ? ' profile-workspace--viewer' : ''}">
@@ -58,7 +58,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
     root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : viewer ? 'Only you can see your viewer profile.' : 'Your saved private profile text.';
   }
   void (async () => { try {
-    const profile = await service.readOwn();
+    const profile = initialProfile && ownerId ? initialProfile : await service.readOwn();
     if (!disposed) { fill(profile); fieldset.disabled = false; status.textContent = ''; }
   } catch (error) { if (!disposed) status.textContent = error.message; } })();
   return dispose;
