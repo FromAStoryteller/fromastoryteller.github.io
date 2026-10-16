@@ -36,7 +36,7 @@
 .password-eye:disabled { cursor: not-allowed; opacity: .5; }
 .password-summary { margin: 0; font-size: .875rem; color: var(--colour-text-muted); }
 .account-submit, .account-secondary { display: flex; justify-content: center; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--size-touch-target-minimum); padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); font: inherit; font-weight: 600; }
-.account-submit { background: var(--colour-accent-primary); color: var(--colour-text-primary); border-width: 2px; }
+.account-submit { background: var(--colour-accent-primary); color: var(--colour-text-inverse); border-width: 2px; }
 .account-secondary { box-sizing: border-box; background: transparent; color: var(--colour-text-primary); text-decoration: none; }
 .account-secondary[href]:hover { border-color: var(--colour-accent-primary-hover); color: var(--colour-accent-primary-hover); }
 .account-reader-note { margin: var(--space-4) 0 0; font-size: .875rem; color: var(--colour-text-secondary); }
@@ -62,7 +62,7 @@
 .account-navigation { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .75rem; width: 100%; max-width: 44rem; box-sizing: border-box; margin: 0 auto 2rem; padding: 0 0 1.5rem; border-bottom: 1px solid var(--colour-border-default); text-align: center; }
 .account-heading [data-account-navigation] { margin-top: 1.5rem; }
 .account-navigation .account-secondary { width: 100%; min-height: 3.25rem; margin: 0; padding: .7rem .75rem; font-size: .9rem; line-height: 1.4; text-decoration: none; }
-.account-navigation .account-secondary[aria-current="page"] { background: var(--colour-accent-primary); color: var(--colour-text-primary); border-color: var(--colour-accent-primary); }
+.account-navigation .account-secondary[aria-current="page"] { background: var(--colour-accent-primary); color: var(--colour-text-inverse); border-color: var(--colour-accent-primary); }
 .account-navigation .account-secondary:focus-visible, .account-secondary:focus-visible, .account-submit:focus-visible { outline: 2px solid var(--colour-accent-primary); outline-offset: 4px; }
 .account-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--colour-accent-primary) 8%, transparent); }
 .account-submit:not(.account-danger):hover:not(:disabled), .account-navigation .account-secondary[aria-current="page"]:hover { background: var(--colour-accent-primary-hover); color: var(--colour-text-inverse); border-color: var(--colour-accent-primary-hover); }
