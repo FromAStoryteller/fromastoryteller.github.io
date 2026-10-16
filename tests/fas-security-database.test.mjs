@@ -53,6 +53,9 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     assert.equal((await db.query('select release_id from private.account_policy_requirement')).rows[0].release_id,version);
     await db.exec(transition);assert.deepEqual(await state(),transitioned);
     assert.equal((await db.query('select count(*)::int as n from private.account_policy_agreements')).rows[0].n,0);
+    const previousHash=registry.versions[registry.candidateVersion].documents.privacy.sha256;
+    await assert.rejects(db.exec(transition.replaceAll(previousHash,'d'.repeat(64))),/Published predecessor does not match/);
+    await db.exec('rollback');
     await db.exec(`update private.account_policy_requirement set release_id='${registry.candidateVersion}';`);
     const newHash=registry.versions[version].documents.privacy.sha256;
     await assert.rejects(db.exec(transition.replaceAll(newHash,'e'.repeat(64))),/Stored release differs/);
