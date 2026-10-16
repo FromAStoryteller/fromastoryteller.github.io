@@ -1,6 +1,6 @@
 # Remembered sign-in update
 
-Status: prepared and locally tested; not yet deployed. The live task previously
+Release authorized on 16 October 2026; PR #8 records publication checks. The task previously
 passed its tab-only session acceptance tests. Ryan then requested persistence
 across new tabs and browser visits.
 
@@ -27,7 +27,7 @@ handles browsers without BroadcastChannel. Tab-only sessions remain independent.
 Blocked localStorage falls back to sessionStorage, then memory. Only owned Auth
 keys are removed; unrelated settings and game records are preserved.
 
-The new policy candidate account-sessions-2026-10-16-v2 explains the storage
+The new policy release account-sessions-2026-10-16-v2 explains the storage
 change. The v1 documents and hashes are untouched; existing agreement records are
 not rewritten. Terms substance is unchanged; its version/header and Privacy links
 are paired with the new notice. The tested transition SQL is preparation only:

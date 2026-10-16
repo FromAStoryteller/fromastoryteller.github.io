@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "account-launch-2026-10-16-v1",
+  "activePublishedVersion": "account-sessions-2026-10-16-v2",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -80,7 +80,7 @@
       }
     },
     "account-sessions-2026-10-16-v2": {
-      "status": "publication-candidate",
+      "status": "published",
       "acknowledgementKind": "published_terms_agreement",
       "preparedOn": "2026-10-16",
       "previousVersion": "account-launch-2026-10-16-v1",
@@ -94,6 +94,10 @@
           "path": "/account/policy-history/account-sessions-2026-10-16-v2/terms/index.html",
           "sha256": "ef073fb0cec368be3e4a3458aa388eac86c2ab88ee3e3cc36238792ce65c3129"
         }
+      },
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-16",
+        "scope": "remembered-sign-in-and-matching-policy-transition"
       }
     }
   },
