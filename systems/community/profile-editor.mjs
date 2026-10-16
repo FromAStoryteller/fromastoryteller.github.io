@@ -24,6 +24,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   const name = form.elements.namedItem('display_name');
   const bio = form.elements.namedItem('bio');
   const welcome = form.elements.namedItem('welcome_line');
+  root.querySelector('#preview-title').textContent = contributor ? 'A glimpse for your readers' : 'Your profile preview';
   root.querySelector('[data-visibility]').textContent = contributor
     ? 'These words are public on your storyteller page. Your email and account settings stay private.'
     : viewer ? 'Your viewer profile is private. These words can become public if you later become a contributor.' : 'Your profile is private until you publish work. Your email and account settings stay private.';
@@ -49,7 +50,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   function fill(profile) {
     name.value = profile.display_name; bio.value = profile.bio; welcome.value = profile.welcome_line;
     preview(); status.dataset.state = '';
-    root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : 'Only you can see your viewer profile.';
+    root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : viewer ? 'Only you can see your viewer profile.' : 'Your saved private profile text.';
     const url = publicProfileUrl(profile.public_id);
     const link = root.querySelector('[data-public-link]');
     if (contributor && url) { link.href = url; link.hidden = false; }
