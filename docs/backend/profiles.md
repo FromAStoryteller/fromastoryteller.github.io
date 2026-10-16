@@ -1,6 +1,6 @@
 # Viewer and contributor profiles
 
-Status: implemented in an isolated checkout based on main `f72798166ff5ab2889c6710dabef9d3ac365ca6d`. Migrations `20261016190453_viewer_contributor_profiles.sql` and `20261016192529_profile_story_covers.sql` are applied to FAS development only. Signed-in saving/reloading passed on 17 October; the temporary display name was restored. Production deployment remains pending. Do not mark the workbook task complete yet.
+Status: merged in PR #12 at `504840fc053cc70824e2eb18d113574e91d0c3fa` and deployed on 16 October 2026 UTC. Both profile migrations are installed in development and production. Final signed-in production acceptance remains; do not mark the workbook task complete yet.
 
 ## Behaviour
 
@@ -23,12 +23,12 @@ Server-side constraints and existing ownership/lifecycle RLS enforce changes, in
 
 The full Node suite and PostgreSQL profile tests cover cross-user reads/edits, protected public ID, Unicode limits, blank names, long welcome lines, published-only pagination, current bylines, approved cover projection, cross-story cover denial and account removal. `supabase/tests/profiles-hosted.sql` passed against development under anon/authenticated database roles with all fixtures rolled back. Signed-in development browser checks verified saving, persistence after reload and restoration of the original name. The simplified name-only form also saved successfully.
 
-Browser checks verified the actual development API's anonymous public profile, published story and linked byline using a disposable fictional contributor. The fictional local preview verified save feedback and live text updates. Reference and syntax validation and both Cloudflare builds passed. No production schema or deployment changed.
+Browser checks verified the actual development API's anonymous public profile, published story and linked byline using a disposable fictional contributor. The fictional local preview verified save feedback and live text updates. Reference and syntax validation and both Cloudflare builds passed. Production migration SQL hashes, function definitions, execution grants, profile RLS and canonical migration versions match development. Auth, existing profile text and role fingerprints are identical before/after rollout. Anonymous unknown profile/story checks return null. Live unknown profile/story pages show unavailable states.
 
 ## Preview and release
 
 `node scripts/profile-preview-server.mjs` serves the fictional component preview at `http://127.0.0.1:55420/tests/profile-preview/`. Contributor, Viewer and Public page links switch views. The preview directory is excluded from deployed builds. Optional `--dev` uses an ignored `.preview-dev-config.json` containing only the development publishable key and serves the existing development adapter on port 55410. Prefer the normal `npm run dev:accounts:dev` when CLI access is available.
 
-Before release, apply both exact migrations to production, verify privacy/permission parity, then merge/deploy the matching UI. The production schema must precede the UI because account export/loading selects the new columns. Do not expose fictional test pages or local public-key configuration. Repeat the SQL suite and direct public API checks after deployment.
+Both exact migrations were applied to production before merging/deploying the matching UI. The connector-generated migration ledger versions were normalized to the committed versions only after guarded exact SQL hash checks. The production schema must precede the UI because account export/loading selects the new columns. Do not expose fictional test pages or local public-key configuration. Repeat the SQL suite and direct public API checks after deployment.
 
 The source database still uses reviewed publication. Independent contributor publishing remains a separate known workflow mismatch; this change does not modify story publication, invitations, moderation, account deletion or image approval.
