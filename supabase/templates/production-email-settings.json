@@ -1,5 +1,5 @@
 {
-  "status": "prepared-not-installed",
+  "status": "installed-verified-no-delivery-test",
   "projectRef": "vzdicnufhidelaoeqbza",
   "siteURL": "https://fromastoryteller.com",
   "otpExpirySeconds": 3600,
@@ -18,5 +18,6 @@
   "tracking": {
     "open": false,
     "click": false
-  }
+  },
+  "installedOn": "2026-10-16"
 }
