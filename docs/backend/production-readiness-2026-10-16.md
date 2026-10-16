@@ -1,5 +1,7 @@
 # Production readiness — read-only review, 16 October 2026
 
+**Latest configuration:** Production signup validation and lifecycle retention schedules are now installed and verified; signup remains OFF. Lifecycle function deployment is blocked pending explicit approval of its custom authentication configuration. See [configuration result](production-hook-retention-2026-10-16.md). Earlier observations below are historical.
+
 **Current status:** The four production database migrations are now installed after explicit database-only approval. Signup remains OFF. See [installation evidence](production-account-database-installation-2026-10-16.md). The observations below record the earlier preparation baseline; they do not describe the post-installation migration count.
 
 Ryan approved the launch candidate wording after requesting From A Storyteller as
