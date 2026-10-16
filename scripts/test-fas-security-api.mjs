@@ -58,7 +58,7 @@ async function unchanged(path, token, body, name) {
 }
 let passed = 0;
 function pass(name) { passed++; console.log(`PASS ${name}`); }
-const users = [], stories = [], objects = [], invites = [];
+const users = [], stories = [], objects = [], invites = [], auditIds = [];
 const sessions = [];
 const assetIds = new Map();
 const run = randomUUID();
@@ -154,7 +154,8 @@ try {
   await unchanged(rest + `stories?id=eq.${otherDraft.id}`, owner.token, { body: 'Tampered' }, 'Other author update denied');
   await unchanged(rest + `stories?id=eq.${otherDraft.id}`, admin.token, { body: 'Tampered' }, 'Admin direct rewrite denied');
   rejected(await request(rest + `stories?id=eq.${draft.id}`, { token: owner.token, method: 'PATCH', body: { author_id: other.id } }), 'Ownership transfer');
-  rejected(await request(rest + `stories?id=eq.${draft.id}`, { token: owner.token, method: 'DELETE' }), 'Story deletion');
+  await unchanged(rest + `stories?id=eq.${otherDraft.id}`, owner.token, { status: 'published' }, 'Other author publication denied');
+  empty(await request(rest + `stories?id=eq.${otherDraft.id}`, { token: owner.token, method: 'DELETE', headers: { Prefer: 'return=representation' } }), 'Other author deletion denied');
   assert.equal(success(await getStory(otherDraft.id, other), 'Verify victim story')[0].body, 'Synthetic test text');
   pass('Only contributors create their own drafts; ownership and another author’s work are protected');
 
@@ -193,10 +194,19 @@ try {
   success(await rpc('approve_story_image', moderator, { target_asset: approved.asset.id }), 'Moderator approve revised image');
   pass('Image ownership, MIME/size limits, private bucket and separate staff approval enforced');
 
-  rejected(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'published' } }), 'Direct author publication');
-  success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'submitted' } }), 'Submit story');
-  await unchanged(rest + `stories?id=eq.${published.id}`, owner.token, { body: 'Changed under review' }, 'Submitted story frozen');
-  success(await rpc('moderate_story', admin, { target_story: published.id, decision: 'published', note: 'Synthetic approval' }), 'Publish');
+  success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'published' } }), 'Contributor publishes without staff approval');
+  const firstPublication=success(await getStory(published.id, owner), 'Read publication timestamp')[0].published_at;
+  assert.ok(firstPublication);
+  success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { body: 'Immediate live edit' } }), 'Contributor edits live story');
+  const liveEdit=success(await getStory(published.id), 'Public live edit')[0];
+  assert.equal(liveEdit.body,'Immediate live edit');
+  assert.equal(liveEdit.published_at,firstPublication);
+  rejected(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { published_at: '2000-01-01T00:00:00Z' } }), 'Forged publication timestamp');
+  rejected(await rpc('moderate_story', admin, { target_story: published.id, decision: 'published', note: 'Staff cannot publish for author' }), 'Staff publishing denied');
+  success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'draft' } }), 'Contributor unpublishes');
+  empty(await getStory(published.id), 'Unpublished story hidden');
+  rejected(await download(approved.path), 'Unpublished cover hidden');
+  success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'published' } }), 'Contributor republishes');
   for (const user of [undefined, viewer, other]) {
     assert.equal(success(await getStory(published.id, user), 'Public published story').length, 1);
     const assets = success(await request(rest + `story_assets?story_id=eq.${published.id}`, { token: user?.token }), 'Public asset metadata');
@@ -210,7 +220,8 @@ try {
     rejected(await sign(unapproved.path, user), 'Unapproved signed URL');
     rejected(await download(orphan.path, user), 'Orphan bytes');
   }
-  await unchanged(rest + `stories?id=eq.${published.id}`, owner.token, { body: 'Changed after publication' }, 'Published story frozen');
+  const newPublishedImage=await upload(owner,published);
+  rejected(await download(newPublishedImage.path), 'New published-story image still requires safety approval');
   for (const user of [owner, other, admin]) {
     rejected(await request(`/storage/v1/object/${bucket}/${approved.path}`, { token: user.token, method: 'PUT', bytes: image, headers: { 'Content-Type': 'image/png' } }), 'Image overwrite');
     rejected(await request(`/storage/v1/object/${bucket}/${approved.path}`, { token: user.token, method: 'POST', bytes: image, headers: { 'Content-Type': 'image/png', 'x-upsert': 'true' } }), 'Image upsert');
@@ -220,7 +231,7 @@ try {
     if (deleted.ok) empty(deleted, 'Image delete returned zero objects'); else rejected(deleted, 'Image delete');
     success(await download(approved.path), 'Verify image survived');
   }
-  pass('Public readers see published text and approved images only; reviewed content cannot be replaced');
+  pass('Contributors publish/edit/unpublish their own stories; public readers see current text and safety-approved images only');
 
   rejected(await request(rest + 'moderation_log', { token: owner.token, method: 'POST', body: {} }), 'Forged moderation log');
   rejected(await request(rest + 'moderation_log', { token: admin.token, method: 'DELETE' }), 'Audit deletion');
@@ -238,8 +249,20 @@ try {
     rejected(await sign(approved.path, user), 'New signed URL after archival');
   }
   const audit = success(await request(rest + `moderation_log?story_id=eq.${published.id}`, { token: admin.token }), 'Audit read');
-  assert.equal(audit.length, 2);
-  pass('Fresh requests after archival are denied; moderation leaves an immutable client audit trail');
+  auditIds.push(...audit.map(row=>row.id));
+  assert.equal(audit.length, 1);
+  await unchanged(rest + `stories?id=eq.${published.id}`, owner.token, { status: 'published' }, 'Moderation republication bypass denied');
+  await unchanged(rest + `stories?id=eq.${published.id}`, owner.token, { body: 'Bypass' }, 'Moderated story edit denied');
+  rejected(await request(`/storage/v1/object/${bucket}/${owner.id}/${published.id}/${randomUUID()}.png`,
+    { token: owner.token, method: 'POST', bytes: image, headers: { 'Content-Type': 'image/png' } }), 'Moderated story upload denied');
+  const removed=success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'DELETE', headers:{Prefer:'return=representation'} }), 'Contributor deletes own moderated story');
+  assert.equal(removed.length,1);
+  empty(await getStory(published.id,owner),'Deleted story removed');
+  empty(await request(rest+`story_assets?story_id=eq.${published.id}`,{token:owner.token}),'Deleted metadata removed');
+  rejected(await download(approved.path,owner),'Deleted image no longer accessible');
+  const retainedAudit=success(await request(rest+'moderation_log?reason=eq.Synthetic%20archival',{token:admin.token}),'Audit survives deletion');
+  assert.equal(retainedAudit.length,1);assert.equal(retainedAudit[0].story_id,null);
+  pass('Moderation cannot be bypassed; authors can delete their own stories without erasing staff audit history');
 
   async function inviteFor(email) {
     const token = success(await rpc('create_invite', admin, { invitee_email: email, valid_days: 7 }), 'Admin create invite');
@@ -279,6 +302,7 @@ try {
   try {
     for (const token of sessions) await clean(async () => success(await request('/auth/v1/logout?scope=global', { token, method: 'POST' }), 'Sign out fixture'), 'fixture sign-out');
     if (objects.length) await clean(async () => success(await request(`/storage/v1/object/${bucket}`, { privileged: true, method: 'DELETE', body: { prefixes: objects } }), 'Cleanup fixture objects'), 'fixture objects');
+    for (const id of auditIds) await clean(async () => success(await request(rest+`moderation_log?id=eq.${id}`,{privileged:true,method:'DELETE'}),'Cleanup retained fixture audit'),'retained fixture audit');
     for (const id of stories) {
       await clean(async () => success(await request(rest + `moderation_log?story_id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture audit'), 'fixture audit');
       await clean(async () => success(await request(rest + `stories?id=eq.${id}`, { privileged: true, method: 'DELETE' }), 'Cleanup fixture story'), 'fixture story');
