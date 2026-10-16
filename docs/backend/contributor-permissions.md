@@ -106,3 +106,13 @@ Production rollout and catalog parity checks are complete. Future permission
 changes must repeat the guarded DEV API suite before production installation.
 Do not run fixture-writing tests in production. Existing static stories remain
 file-backed and untouched.
+
+## Final regression review
+
+The final DEV transaction deliberately adds broad permissive story, asset and
+Storage policies, then repeats contributor ownership, moderation-lock and role
+revocation assertions. It also requires a fresh policy release and verifies that
+publication, text changes, contribution deletion and image uploads are denied
+without acceptance. All assertions passed and all temporary rules/data rolled
+back. These scenarios are retained in the automated PostgreSQL suite. No production
+permission changes were needed after this review.
