@@ -35,6 +35,7 @@ form.addEventListener('submit', async event => {
 });
 try {
   const config = await loadAccountAuthConfig(location.origin);
+  if (!config?.signup) throw new Error('Password recovery unavailable');
   if (config?.signup) {
     document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(config.mode, 'Local test only — changes apply to local FAS test accounts.', 'Development test only — changes apply to your FAS DEV account.', 'Choose a new password using the recovery link from your email.');
     if (hash) {
@@ -48,4 +49,4 @@ try {
       status.textContent = 'You’ve opened the link from your password recovery email. Select Continue to password reset to check the link and choose a new password.';
     } else render({ state: 'invalid', message: 'Open the recovery link from your email to choose a new password.' });
   }
-} catch { render({ state: 'invalid', message: 'Password recovery is unavailable. Reopen your email link and try again later.' }); }
+} catch { document.querySelector('#account-preview-note').textContent = 'Password recovery is currently unavailable.'; render({ state: 'invalid', message: 'Password recovery is unavailable. Reopen your email link and try again later.' }); }

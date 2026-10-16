@@ -34,6 +34,7 @@ function updateButton() {
 }
 try {
   const local = await loadLocalAuthClient();
+  if (!local?.signupEnabled) throw new Error('Email requests unavailable');
   if (local?.signupEnabled) {
     auth = local.client.auth;
     accountOrigin = local.accountOrigin;
@@ -45,4 +46,4 @@ try {
     updateButton();
     setInterval(updateButton, 1000);
   }
-} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Email requests are unavailable. Please try again later.'; }
+} catch { document.querySelector('[data-preview-note]').textContent = 'Email requests are currently unavailable.'; status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Email requests are unavailable. Please try again later.'; }
