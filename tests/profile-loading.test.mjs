@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadProfileAccount } from '../account/settings-controller.mjs';
+import { loadAccount, loadProfileAccount } from '../account/settings-controller.mjs';
 import { restoreSession, takeRestoredIdentity } from '../account/session-controller.mjs';
 
 test('profile loading runs independent requests together and skips unrelated account history',async()=>{
@@ -38,4 +38,15 @@ test('server-verified restoration can be consumed once and a later failed restor
   revoked=true;
   assert.equal((await restoreSession(auth,true)).state,'session-ended');
   assert.equal(takeRestoredIdentity(auth),null);
+});
+
+test('settings skips unused policy history while full account/export loading keeps it',async()=>{
+  for (const includePolicyHistory of [false,true]) {
+    const calls=[];
+    const client={auth:{refreshSession:async()=>({data:{session:{}}}),getUser:async()=>({data:{user:{id:'owner'}}})},
+      from(table){const query={select(){return query;},eq(){return query;},single:async()=>({data:{display_name:'Alex'}}),then(resolve,reject){return Promise.resolve({data:[{role:'member'}]}).then(resolve,reject);}};return query;},
+      rpc:async name=>{calls.push(name);return {data:name==='fas_my_policy_agreements'?[]:name==='fas_my_account_state'?'active':null};}};
+    await loadAccount(client,includePolicyHistory?{}:{includePolicyHistory:false});
+    assert.equal(calls.includes('fas_my_policy_agreements'),includePolicyHistory);
+  }
 });

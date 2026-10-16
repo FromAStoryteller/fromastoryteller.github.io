@@ -6,7 +6,6 @@ import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecy
 import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
 import { watchSessionEnd } from './session-events.mjs';
-import { createProfileService } from '../systems/community/profiles.mjs';
 import { accountNavigation } from '../systems/community/account-navigation.mjs';
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
@@ -32,11 +31,8 @@ function render(account) {
   document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
   panel.hidden = false;
   const nav = document.querySelector('[data-account-navigation]');
-  nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth }));
-  void createProfileService(local.client).readPublic(account.profile.public_id).then(profile => {
-    if (sessionEnded || account.state !== 'active' || !profile) return;
-    nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId: profile.public_id }));
-  }).catch(() => {});
+  const publicId = account.state === 'active' && ['member','moderator','admin'].includes(account.role) ? account.profile.public_id : null;
+  nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId }));
   download.disabled = false;
   const contributor = ['member', 'moderator', 'admin'].includes(account.role);
   document.querySelector('[data-contributor-export]').hidden = !contributor;
@@ -146,12 +142,14 @@ try {
     document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your account access, personal data and account choices.');
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
     if (session.state !== 'signed-in') {
+      document.querySelector('[data-account-navigation]').replaceChildren(accountNavigation(document, { current: 'settings' }));
       show(session.message || 'Sign in to view your account settings.', session.state === 'session-unavailable');
       signInPrompt.hidden = false;
     }
-    else render(await loadAccount(local.client,{useRestoredSession:true}));
+    else render(await loadAccount(local.client,{useRestoredSession:true,includePolicyHistory:false}));
   }
 } catch {
+  document.querySelector('[data-account-navigation]').replaceChildren(accountNavigation(document, { current: 'settings' }));
   document.querySelector('[data-preview-note]').textContent = 'Account services are currently unavailable.';
   show('We couldn’t load your account settings. Sign in again or try later.', true);
   signInPrompt.hidden = false;
