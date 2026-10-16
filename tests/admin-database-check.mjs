@@ -6,7 +6,7 @@ export async function verifyAdminDatabase(PGlite){
  try {
   await db.exec("\n      create role supabase_auth_admin; create role anon; create role authenticated; create role service_role bypassrls;\n      create schema auth; create schema storage;\n      create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);\n      create table auth.sessions(id uuid primary key, user_id uuid references auth.users(id) on delete cascade, not_after timestamptz);\n      create function auth.uid() returns uuid language sql stable as\n      $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;\n      grant usage on schema auth, storage to anon, authenticated, service_role;\n      grant execute on function auth.uid() to anon, authenticated, service_role;\n      create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);\n      create table storage.objects(id uuid default gen_random_uuid() primary key, bucket_id text references storage.buckets(id), name text, metadata jsonb default '{}'::jsonb, updated_at timestamptz default now());\n      alter table storage.objects enable row level security;\n      grant select,insert,update,delete on storage.objects to anon,authenticated;\n    ");
   const migrations=new URL('../supabase/migrations/',import.meta.url);
-  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')&&!f.endsWith('_admin_image_session_guard.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
   const a='71000000-0000-0000-0000-000000000001',b='71000000-0000-0000-0000-000000000002',v='71000000-0000-0000-0000-000000000003',u='71000000-0000-0000-0000-000000000004';
   const sa='72000000-0000-0000-0000-000000000001',sb='72000000-0000-0000-0000-000000000002',sv='72000000-0000-0000-0000-000000000003';
   await db.exec(`insert into auth.users(id,email,email_confirmed_at) values ('${a}','admin-a@example.invalid',now()),('${b}','admin-b@example.invalid',now()),('${v}','viewer@example.invalid',now()),('${u}','unverified@example.invalid',null);
@@ -14,6 +14,7 @@ export async function verifyAdminDatabase(PGlite){
    insert into public.user_roles values('${a}','admin'),('${b}','member');`);
   const next=readdirSync(migrations).find(f=>f.endsWith('_separate_admin_tools.sql'));
   await db.exec(readFileSync(next?new URL(next,migrations):new URL('../supabase/ops/separate-admin-tools.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/migrations/20261016214904_admin_image_session_guard.sql',import.meta.url),'utf8'));
   const as=async(id,session,sql)=>{await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);select set_config('request.jwt.claims','${JSON.stringify({session_id:session})}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
   const value=async(id,session,sql)=>(await as(id,session,sql)).rows[0]?.value;
   assert.deepEqual((await db.query(`select role::text from public.user_roles where user_id='${a}' order by role::text`)).rows.map(r=>r.role),['admin','member'],'existing administrator keeps contributor access');
@@ -60,5 +61,6 @@ export async function verifyAdminDatabase(PGlite){
   const snapshot=(await db.query(`select public.fas_account_snapshot('${a}','${sa}') value`)).rows[0].value;assert.equal(snapshot.data.role,'member','multi-role export remains scalar-compatible');
   await db.exec(`delete from auth.sessions where id='${sb}';`);
   await assert.rejects(value(b,sb,'select public.fas_admin_overview() value'),/Active account session/);
+  await assert.rejects(value(b,sb,`select public.approve_story_image('00000000-0000-0000-0000-000000000000') value`),/Active account session/);
  } finally {await db.close();}
 }

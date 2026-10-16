@@ -50,5 +50,6 @@ select set_config('request.jwt.claims','{"session_id":"92000000-0000-0000-0000-0
 do $$ begin
  begin perform public.fas_admin_overview();raise exception 'FAIL revoked session admin';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
 end $$;
+do $$ begin begin perform public.approve_story_image('00000000-0000-0000-0000-000000000000');raise exception 'FAIL revoked session image approval';exception when raise_exception then if SQLERRM <> 'Active account session required' then raise;end if;end;end $$;
 rollback;
 select 'PASS hosted admin role/session/invitation checks; fixtures rolled back' result;

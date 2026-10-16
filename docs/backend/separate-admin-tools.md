@@ -85,3 +85,9 @@ intentionally denies direct client access and checked admin RPCs intentionally
 use SECURITY DEFINER: https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
 The pre-existing leaked-password-protection notice remains separate:
 https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+Follow-up migration 20261016214904_admin_image_session_guard.sql is also installed
+in DEV. Existing image approval now requires the same live verified session and
+records an audit action. Hosted stale-session approval denial passed. The legacy
+security harness prints its synthetic subject IDs as well, because its invitation,
+moderation and image actions now generate protected admin-audit records.

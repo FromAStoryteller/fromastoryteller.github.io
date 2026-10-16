@@ -296,6 +296,7 @@ try {
 } finally {
   // Only random fixture IDs/paths recorded by this run; never reset the database.
   const cleanupErrors = [];
+  console.log('Security synthetic subject IDs for independent admin-audit cleanup: '+JSON.stringify([...users,...stories,...invites,...assetIds.values()]));
   async function clean(action, label) {
     try { await action(); } catch { cleanupErrors.push(label); }
   }
