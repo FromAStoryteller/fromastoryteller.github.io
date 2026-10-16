@@ -1,13 +1,12 @@
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { restoreSession } from './session-controller.mjs';
-import { loadAccount, saveProfile, exportAccountData } from './settings-controller.mjs';
+import { loadAccount, exportAccountData } from './settings-controller.mjs';
 import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecycle-client.mjs';
 import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
 import { watchSessionEnd } from './session-events.mjs';
 import { createProfileService, publicProfileUrl } from '../systems/community/profiles.mjs';
-const form = document.querySelector('[data-profile-form]');
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
 const signInPrompt = document.querySelector('[data-settings-sign-in]');
@@ -30,10 +29,6 @@ function render(account) {
   document.querySelector('[data-account-email]').textContent = account.user.email;
   document.querySelector('[data-account-role]').textContent = ({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[account.role] ?? 'Viewer';
   document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
-  form.querySelector('[data-display-name]').value = account.profile.display_name;
-  form.querySelector('[data-bio]').value = account.profile.bio;
-  form.querySelector('[data-bio]').closest('.account-field').hidden = account.role === 'viewer';
-  document.querySelector('#profile-visibility').textContent = account.role === 'viewer' ? 'Your display name identifies you around the site. Your email and account details stay private.' : 'This is your profile name, not a unique username. Your name and bio may appear with published work.';
   panel.hidden = false;
   const publicLink = document.querySelector('[data-settings-public-profile]');
   publicLink.hidden = true;
@@ -42,7 +37,6 @@ function render(account) {
     publicLink.href = publicProfileUrl(profile.public_id);
     publicLink.hidden = false;
   }).catch(() => {});
-  form.querySelector('fieldset').disabled = false;
   download.disabled = false;
   const contributor = ['member', 'moderator', 'admin'].includes(account.role);
   document.querySelector('[data-contributor-export]').hidden = !contributor;
@@ -53,21 +47,11 @@ function render(account) {
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
   document.querySelector('[data-deletion-unavailable]').textContent = staff ? 'Administrator and moderator accounts need a separate reviewed deletion process. Contact fromastoryteller@gmail.com for help.' : 'Account deletion is currently unavailable. Please try again later.';
   if (account.state === 'closing') {
-    form.querySelector('fieldset').disabled = true; download.disabled = true; contentDownload.disabled = true;
+    download.disabled = true; contentDownload.disabled = true;
     deleteStart.textContent = 'Finish account removal…';
     showDeletion('Removal has started. Profile editing and exports are disabled. Confirm your password to finish the remaining cleanup.', true);
   }
 }
-form.addEventListener('submit', async event => {
-  event.preventDefault();
-  if (!local || busy || !form.reportValidity()) return;
-  busy = true; form.querySelector('fieldset').disabled = true;
-  try {
-    await saveProfile(local.client, { displayName: form.querySelector('[data-display-name]').value, bio: form.querySelector('[data-bio]').value });
-    show('Your profile was saved.');
-  } catch (error) { show(friendlyError(error), true); }
-  finally { busy = false; form.querySelector('fieldset').disabled = false; }
-});
 download.addEventListener('click', async () => {
   if (!local || busy) return;
   busy = true; download.disabled = true;
@@ -153,14 +137,15 @@ try {
   if (local) {
     watchSessionEnd(local, () => {
       sessionEnded = true; prepared = null;
-      panel.hidden = true; form.reset(); passwordForm.reset(); confirmForm.reset();
+      panel.hidden = true; passwordForm.reset(); confirmForm.reset();
+      document.querySelector('[data-settings-public-profile]').hidden = true;
       document.querySelector('[data-account-email]').textContent = '';
       document.querySelector('[data-account-role]').textContent = '';
       signInPrompt.hidden = false;
       document.querySelector('[data-settings-back]').hidden = true;
       show('Your session has ended. Sign in to view your account settings.', true);
     });
-    document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your profile, personal data and account.');
+    document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your account access, personal data and account choices.');
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
     if (session.state !== 'signed-in') {
       show(session.message || 'Sign in to view your account settings.', true);

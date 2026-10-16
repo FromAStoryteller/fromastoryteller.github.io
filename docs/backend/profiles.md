@@ -1,6 +1,6 @@
 # Viewer and contributor profiles
 
-Status: merged in PR #12 at `504840fc053cc70824e2eb18d113574e91d0c3fa` and deployed on 16 October 2026 UTC. Both profile migrations are installed in development and production. Final signed-in production acceptance remains; do not mark the workbook task complete yet.
+Status: merged in PR #12 at `504840fc053cc70824e2eb18d113574e91d0c3fa` and deployed on 16 October 2026 UTC. Both profile migrations are installed in development and production. Signed-in production save/reload and public-page acceptance passed.
 
 ## Behaviour
 
@@ -34,3 +34,5 @@ Both exact migrations were applied to production before merging/deploying the ma
 The source database still uses reviewed publication. Independent contributor publishing remains a separate known workflow mismatch; this change does not modify story publication, invitations, moderation, account deletion or image approval.
 
 Staff-profile follow-up: migration 20261016194500_staff_storyteller_profiles.sql corrects staff author-page eligibility before the first database story. Account settings separates Edit my profile from View public profile. Regression tests compare new and established contributor projections and check staff pages without stories while viewers remain private.
+
+Account settings cleanup: display name, welcome line and bio are edited only at /account/profile/. Account settings contains account details, policy history, exports and removal controls. The two profile navigation actions have separate button outlines and a wrapping layout with a 1rem gap.
