@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateProfile, createProfileService, renderAuthorAttribution } from '../systems/community/profiles.mjs';
+import { validateProfile, createProfileService, renderAuthorAttribution, publicCoverUrl } from '../systems/community/profiles.mjs';
+import { profileStoryCard } from '../systems/community/public-profile.mjs';
 
 function fakeClient({ user = { id: 'current-user' }, data = { display_name: 'Alex', bio: '' }, error = null } = {}) {
   const calls = [];
@@ -29,6 +30,29 @@ test('signed-out requests never query profile data', async () => {
   const client = fakeClient({ user: null });
   await assert.rejects(createProfileService(client).readOwn(), /Sign in/);
   assert.equal(client.calls.length, 0);
+});
+
+test('viewer name-only updates preserve fields that are not on the viewer page', async () => {
+  const client=fakeClient();
+  await createProfileService(client).saveOwn({display_name:' New name '});
+  assert.deepEqual(client.calls.find(call=>call[0]==='update')[1],{display_name:'New name'});
+});
+
+test('public cards reuse the shared artwork frame and never accept arbitrary cover hosts', () => {
+  const asset_id='82000000-0000-0000-0000-000000000001';
+  const base='https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-story-image';
+  assert.equal(publicCoverUrl({asset_id},base),base+'?asset_id='+asset_id);
+  assert.equal(publicCoverUrl({asset_id},'https://attacker.invalid/functions/v1/fas-story-image'),'');
+  assert.equal(publicCoverUrl({asset_id},base+'?token=private'),'');
+  assert.equal(publicCoverUrl({asset_id:'not-an-id'},base),'');
+  const markup=profileStoryCard({slug:'a-story',title:'<img src=x>',summary:'A summary',cover:{asset_id,alt:'A coastline'}},{imageBase:base});
+  assert.match(markup,/content-grid-card-link image-overlay/);
+  assert.match(markup,/asset_id=82000000/);
+  assert.match(markup,/alt="A coastline"/);
+  assert.match(markup,/&lt;img src=x&gt;/);
+  const missing=profileStoryCard({slug:'a-story',title:'A story',summary:'',preview_image:'/assets/images/stories/a-place-left-behind.jpg'});
+  assert.match(missing,/content-grid-card-placeholder/);
+  assert.doesNotMatch(missing,/<img /);
 });
 
 test('an account switch cannot save the previous account form into the next account', async () => {

@@ -17,6 +17,13 @@ select set_config('fas.profile_public_key',(select public_id::text from public.p
 insert into public.stories(author_id,slug,title,body,status,published_at) values
   (current_setting('fas.profile_owner')::uuid,'profile-fixture-'||current_setting('fas.profile_owner'),'Published fixture','Public prose','published',now()),
   (current_setting('fas.profile_owner')::uuid,'profile-draft-'||current_setting('fas.profile_owner'),'Private fixture','PRIVATE DRAFT','draft',null);
+select set_config('fas.profile_cover',gen_random_uuid()::text,true),
+  set_config('fas.profile_story',(select id::text from public.stories where slug='profile-fixture-'||current_setting('fas.profile_owner')),true);
+insert into public.story_assets(id,story_id,object_path,alt_text,approved_at,approved_by) values
+  (current_setting('fas.profile_cover')::uuid,current_setting('fas.profile_story')::uuid,
+   current_setting('fas.profile_owner')||'/'||current_setting('fas.profile_story')||'/'||current_setting('fas.profile_cover')||'.png',
+   'Cover description',now(),current_setting('fas.profile_owner')::uuid);
+update public.stories set cover_asset_id=current_setting('fas.profile_cover')::uuid where id=current_setting('fas.profile_story')::uuid;
 
 set local role anon;
 do $$ declare payload jsonb; begin
@@ -26,11 +33,21 @@ do $$ declare payload jsonb; begin
   if exists(select 1 from public.profiles) then raise exception 'Raw account profiles exposed'; end if;
   if public.fas_public_profile(current_setting('fas.profile_viewer_key')::uuid) is not null then raise exception 'Viewer profile exposed'; end if;
   if public.fas_public_story('profile-draft-'||current_setting('fas.profile_owner')) is not null then raise exception 'Draft exposed'; end if;
+  if payload#>>'{stories,0,cover,asset_id}'<>current_setting('fas.profile_cover') or payload#>>'{stories,0,cover,alt}'<>'Cover description'
+    or (payload#>'{stories,0,cover}') ? 'object_path' then raise exception 'Cover projection failure'; end if;
+end $$;
+reset role;
+update public.story_assets set approved_at=null,approved_by=null where id=current_setting('fas.profile_cover')::uuid;
+set local role anon;
+do $$ begin
+  if public.fas_public_profile(current_setting('fas.profile_public_key')::uuid)#>'{stories,0,cover}'<>'null'::jsonb then raise exception 'Unapproved cover exposed'; end if;
 end $$;
 reset role;
 select set_config('request.jwt.claim.sub',current_setting('fas.profile_other'),true);
 set local role authenticated;
 do $$ begin
+  update public.stories set cover_asset_id=current_setting('fas.profile_cover')::uuid where slug='profile-draft-'||current_setting('fas.profile_owner');
+  if found then raise exception 'Other author cover changed'; end if;
   if exists(select 1 from public.profiles where id=current_setting('fas.profile_owner')::uuid) then raise exception 'Other private profile exposed'; end if;
   update public.profiles set bio='Tampered' where id=current_setting('fas.profile_owner')::uuid;
   if found then raise exception 'Other profile changed'; end if;
@@ -40,6 +57,10 @@ select set_config('request.jwt.claim.sub',current_setting('fas.profile_owner'),t
 set local role authenticated;
 update public.profiles set display_name='New fixture pen name',welcome_line='New welcome' where id=current_setting('fas.profile_owner')::uuid;
 do $$ begin
+  begin
+    update public.stories set cover_asset_id=current_setting('fas.profile_cover')::uuid where slug='profile-draft-'||current_setting('fas.profile_owner');
+    raise exception 'Cross-story cover allowed';
+  exception when raise_exception then if SQLERRM<>'Choose a cover image belonging to this story' then raise; end if; end;
   begin
     update public.profiles set public_id=gen_random_uuid() where id=current_setting('fas.profile_owner')::uuid;
     raise exception 'Public identity changed';
@@ -60,4 +81,4 @@ do $$ begin
 end $$;
 reset role;
 rollback;
-select 'Passed: anonymous projections, viewer privacy, cross-user isolation, protected identity/roles, current bylines, draft exclusion and closing-account hiding. All fixtures rolled back.' as profile_test_result;
+select 'Passed: anonymous projections, viewer privacy, cross-user isolation, protected identity/roles, approved-only cover metadata and cross-story cover denial, current bylines, draft exclusion and closing-account hiding. All fixtures rolled back.' as profile_test_result;

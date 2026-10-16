@@ -1,5 +1,6 @@
 import { initials } from './profile-editor.mjs';
-import { publicProfileUrl } from './profiles.mjs';
+import { publicProfileUrl, publicCoverUrl } from './profiles.mjs';
+import { createCardMarkup } from '../content/content-system.js';
 
 const node = (document, tag, className, text) => {
   const element = document.createElement(tag);
@@ -8,7 +9,7 @@ const node = (document, tag, className, text) => {
   return element;
 };
 
-export function renderPublicProfile(root, profile) {
+export function renderPublicProfile(root, profile, { imageBase, preview = false } = {}) {
   const d = root.ownerDocument;
   root.replaceChildren();
   if (!profile) { root.append(node(d, 'h1', '', 'Storyteller page unavailable'), node(d, 'p', 'profile-muted', 'This page may no longer be public.')); return; }
@@ -21,16 +22,23 @@ export function renderPublicProfile(root, profile) {
   const list = node(d, 'div', 'profile-story-list');
   for (const story of profile.stories ?? []) {
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(story.slug ?? '')) continue;
-    const article = node(d, 'article', 'profile-story');
-    const title = node(d, 'h3');
-    const link = node(d, 'a', '', story.title);
-    link.href = `/read/?story=${encodeURIComponent(story.slug)}`;
-    title.append(link); article.append(title, node(d, 'p', '', story.summary));
-    const read = node(d, 'a', '', 'Read story →'); read.href = link.href; article.append(read); list.append(article);
+    const frame = node(d, 'template');
+    frame.innerHTML = profileStoryCard(story, { imageBase, preview });
+    list.append(frame.content);
   }
+  for (const image of list.querySelectorAll('img')) image.addEventListener('error', () => {
+    const fallback=node(d,'span','content-grid-card-placeholder','From, A Storyteller');
+    fallback.setAttribute('aria-hidden','true');image.replaceWith(fallback);
+  },{once:true});
   if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'A quiet corner, waiting for its first story.'));
   else section.append(list);
   root.append(header, section);
+}
+
+export function profileStoryCard(story, { imageBase, preview = false } = {}) {
+  const localImage = preview && /^\/assets\/images\/stories\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(story.preview_image ?? '') ? story.preview_image : '';
+  return createCardMarkup({ category:'stories',title:story.title,url:`/read/?story=${encodeURIComponent(story.slug)}`,
+    card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 
 export function renderPublicStory(root, story) {

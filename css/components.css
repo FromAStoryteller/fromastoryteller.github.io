@@ -159,6 +159,7 @@ a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px 
 .content-filter.active, .content-filter[aria-pressed="true"] { background: var(--state-selected-background); color: var(--state-selected-colour); border-color: var(--state-selected-background); font-weight: var(--font-weight-semibold); }
 .content-filter.active:hover { background: var(--colour-accent-primary-hover); }
 .content-grid-card { min-width: 0; }
+.content-grid-card-placeholder { display: grid; place-items: start center; width: 100%; height: 100%; padding: 8% 1rem; box-sizing: border-box; background: linear-gradient(135deg,var(--colour-midnight),var(--colour-wine-dark)); color: var(--colour-gold); font: 400 clamp(1.5rem,4vw,2.5rem) var(--font-family-brand); }
 .content-grid-card-link { width: 100%; box-shadow: var(--surface-standard-shadow); }
 .content-grid-card-body { display: flex; flex-direction: column; gap: var(--space-2); }
 .content-grid-card-body h3 { font-size: clamp(1.1rem, 1.65vw, 1.4rem); }

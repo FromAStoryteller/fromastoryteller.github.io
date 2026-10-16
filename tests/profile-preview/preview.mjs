@@ -9,7 +9,7 @@ const mode = new URLSearchParams(location.search).get('mode') ?? 'contributor';
 document.querySelector('[data-preview-mode]').textContent = mode === 'story' ? 'Published story' : mode === 'public' ? 'Public storyteller page' : mode === 'viewer' ? 'Private viewer profile' : 'Contributor profile editor';
 let dispose;
 if (mode === 'public') {
-  root.className = 'storyteller-home'; renderPublicProfile(root, { ...profile, stories });
+  root.className = 'storyteller-home'; renderPublicProfile(root, { ...profile, stories:stories.map((story,index)=>({...story,preview_image:index===0?'/assets/images/stories/sunset-at-the-lighthouse.png':'/assets/images/stories/a-place-left-behind.jpg',preview_alt:index===0?'A lighthouse overlooking the coast':'A quiet landscape'})) },{preview:true});
   for (const link of root.querySelectorAll('a')) {
     const slug=new URL(link.href).searchParams.get('story');
     if (slug) link.href=`?mode=story&story=${encodeURIComponent(slug)}`;

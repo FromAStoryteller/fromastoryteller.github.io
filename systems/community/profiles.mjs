@@ -8,18 +8,19 @@ export function validateProfile(input) {
       Object.keys(input).some(key => !['display_name', 'bio', 'welcome_line'].includes(key))) {
     throw new Error('Only your profile text can be edited here.');
   }
-  if (typeof input.display_name !== 'string' || typeof input.bio !== 'string') {
+  if (typeof input.display_name !== 'string' || (input.bio !== undefined && typeof input.bio !== 'string')) {
     throw new Error('Enter a display name and about me as text.');
   }
   const display_name = input.display_name.trim();
-  const bio = input.bio.trim();
+  const bio = input.bio?.trim();
   if (length(display_name) < 1 || length(display_name) > 80) {
     throw new Error('Use a display name between 1 and 80 characters.');
   }
-  if (length(bio) > 1000) throw new Error('Keep about me to 1,000 characters.');
+  if (bio !== undefined && length(bio) > 1000) throw new Error('Keep about me to 1,000 characters.');
   const welcome_line = input.welcome_line ?? '';
   if (typeof welcome_line !== 'string' || length(welcome_line.trim()) > 160) throw new Error('Keep your welcome line to 160 characters.');
-  return { display_name, bio, welcome_line: welcome_line.trim() };
+  if (bio === undefined && input.welcome_line === undefined) return { display_name };
+  return { display_name, ...(bio !== undefined ? { bio } : {}), welcome_line: welcome_line.trim() };
 }
 
 function publicFields(row) {
@@ -82,6 +83,17 @@ export function isPublicId(value) {
 
 export function publicProfileUrl(publicId) {
   return isPublicId(publicId) ? `/storytellers/?author=${encodeURIComponent(publicId)}` : null;
+}
+
+export function publicCoverUrl(cover, imageBase) {
+  if (!isPublicId(cover?.asset_id) || typeof imageBase !== 'string') return '';
+  try {
+    const url = new URL(imageBase);
+    if (!['https://oqmmvjjycpyxvxipcyli.supabase.co','https://vzdicnufhidelaoeqbza.supabase.co','http://127.0.0.1:55321'].includes(url.origin) ||
+        url.pathname !== '/functions/v1/fas-story-image' || url.search || url.hash || url.username || url.password) return '';
+    url.searchParams.set('asset_id', cover.asset_id);
+    return url.href;
+  } catch { return ''; }
 }
 
 export function renderAuthorAttribution(element, profile) {

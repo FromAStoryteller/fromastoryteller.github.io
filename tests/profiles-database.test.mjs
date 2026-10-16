@@ -32,6 +32,15 @@ test('profile ownership, public projection, attribution, pagination and account 
     const profile=await read();
     assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','next_offset','public_id','stories','welcome_line']);
     assert.equal(profile.stories.length,12);assert.equal(profile.next_offset,12);
+    const publishedId=(await db.query("select id from public.stories where slug='profile-story-1'")).rows[0].id;
+    const draftId=(await db.query("select id from public.stories where slug='profile-private-draft'")).rows[0].id;
+    const asset='82000000-0000-0000-0000-000000000001';
+    await db.exec(`insert into public.story_assets(id,story_id,object_path,alt_text,approved_at,approved_by) values('${asset}','${publishedId}','${owner}/${publishedId}/${asset}.png','Cover alt text',now(),'${owner}');update public.stories set cover_asset_id='${asset}' where id='${publishedId}';`);
+    assert.deepEqual((await read()).stories[0].cover,{asset_id:asset,alt:'Cover alt text'});
+    assert.equal(JSON.stringify(await read()).includes('object_path'),false);
+    await assert.rejects(as('authenticated',owner,`update public.stories set cover_asset_id='${asset}' where id='${draftId}'`),/belonging to this story/);
+    await db.exec(`update public.story_assets set approved_at=null,approved_by=null where id='${asset}';`);
+    assert.equal((await read()).stories[0].cover,null);
     assert.equal(JSON.stringify(profile).includes('SECRET'),false);assert.equal(JSON.stringify(profile).includes(owner),false);assert.equal(JSON.stringify(profile).includes('@'),false);
     assert.equal((await as('anon','',`select public.fas_public_profile('${key}',12) as value`)).rows[0].value.stories.length,1);
     assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);

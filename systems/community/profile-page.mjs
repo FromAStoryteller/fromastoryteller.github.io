@@ -36,7 +36,7 @@ try {
         if (account.state !== 'active') message('Account removal is in progress','Profile editing is unavailable while your account is being removed.');
         else {
           const publicProfile = await service.readPublic(account.profile.public_id);
-          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor:!!publicProfile,viewer:account.role==='viewer'});
+          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor:!!publicProfile,viewer:!publicProfile});
         }
       }
     }
@@ -45,7 +45,7 @@ try {
     const id = new URLSearchParams(location.search).get('author');
     let current = await service.readPublic(id);
     function render() {
-      renderPublicProfile(root,current);
+      renderPublicProfile(root,current,{imageBase:local.publicImageBase});
       if (current?.next_offset != null) {
         const more = document.createElement('button');more.className='account-secondary';more.textContent='More stories';
         more.addEventListener('click',async () => {
