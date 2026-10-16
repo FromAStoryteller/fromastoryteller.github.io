@@ -6,6 +6,7 @@ import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecy
 import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
 import { watchSessionEnd } from './session-events.mjs';
+import { createProfileService, publicProfileUrl } from '../systems/community/profiles.mjs';
 const form = document.querySelector('[data-profile-form]');
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
@@ -34,6 +35,13 @@ function render(account) {
   form.querySelector('[data-bio]').closest('.account-field').hidden = account.role === 'viewer';
   document.querySelector('#profile-visibility').textContent = account.role === 'viewer' ? 'Your display name identifies you around the site. Your email and account details stay private.' : 'This is your profile name, not a unique username. Your name and bio may appear with published work.';
   panel.hidden = false;
+  const publicLink = document.querySelector('[data-settings-public-profile]');
+  publicLink.hidden = true;
+  void createProfileService(local.client).readPublic(account.profile.public_id).then(profile => {
+    if (sessionEnded || account.state !== 'active' || !profile) return;
+    publicLink.href = publicProfileUrl(profile.public_id);
+    publicLink.hidden = false;
+  }).catch(() => {});
   form.querySelector('fieldset').disabled = false;
   download.disabled = false;
   const contributor = ['member', 'moderator', 'admin'].includes(account.role);

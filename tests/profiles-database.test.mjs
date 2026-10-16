@@ -30,6 +30,11 @@ test('profile ownership, public projection, attribution, pagination and account 
     const as=async(role,id='',sql)=>{await db.exec(`set role ${role};select set_config('request.jwt.claim.sub','${id}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
     const read=async()=> (await as('anon','',`select public.fas_public_profile('${key}') as value`)).rows[0].value;
     const profile=await read();
+    const newContributorKey=(await db.query(`select public_id from public.profiles where id='${other}'`)).rows[0].public_id;
+    const newContributor=(await as('anon','',`select public.fas_public_profile('${newContributorKey}') as value`)).rows[0].value;
+    assert.deepEqual(Object.keys(newContributor).sort(),Object.keys(profile).sort());
+    assert.deepEqual(newContributor.stories,[]);
+    assert.equal(newContributor.next_offset,null);
     assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','next_offset','public_id','stories','welcome_line']);
     assert.equal(profile.stories.length,12);assert.equal(profile.next_offset,12);
     const publishedId=(await db.query("select id from public.stories where slug='profile-story-1'")).rows[0].id;
@@ -44,6 +49,16 @@ test('profile ownership, public projection, attribution, pagination and account 
     assert.equal(JSON.stringify(profile).includes('SECRET'),false);assert.equal(JSON.stringify(profile).includes(owner),false);assert.equal(JSON.stringify(profile).includes('@'),false);
     assert.equal((await as('anon','',`select public.fas_public_profile('${key}',12) as value`)).rows[0].value.stories.length,1);
     assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
+    // Staff author pages exist before database stories, including file-based site owners.
+    for (const role of ['admin','moderator']) {
+      await db.exec(`insert into public.user_roles(user_id,role) values('${viewer}','${role}');`);
+      const staffProfile=(await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value;
+      assert.equal(staffProfile.public_id,viewerKey);
+      assert.deepEqual(staffProfile.stories,[]);
+      assert.equal(JSON.stringify(staffProfile).includes(role),false);
+      await db.exec(`delete from public.user_roles where user_id='${viewer}' and role='${role}';`);
+      assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
+    }
     assert.equal((await as('anon','',`select * from public.profiles`)).rows.length,0);
     assert.equal((await as('authenticated',other,`select * from public.profiles where id='${owner}'`)).rows.length,0);
     assert.equal((await as('authenticated',other,`update public.profiles set bio='Tampered' where id='${owner}' returning id`)).rows.length,0);
