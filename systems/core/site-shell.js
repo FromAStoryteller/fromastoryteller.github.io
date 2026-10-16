@@ -12,9 +12,11 @@ import { syncHeaderSearchQuery, initHeaderSearch } from "../search/header-search
 // Load components, then wire up global page behaviour
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await loadComponent("/components/header.html", "header-placeholder");
-    await loadComponent("/components/sidebar.html", "sidebar-placeholder");
-    await loadComponent("/components/footer.html", "footer-placeholder");
+    await Promise.all([
+      loadComponent("/components/header.html", "header-placeholder"),
+      loadComponent("/components/sidebar.html", "sidebar-placeholder"),
+      loadComponent("/components/footer.html", "footer-placeholder"),
+    ]);
 
     initSidebarToggle();
     setActiveSidebarLink();

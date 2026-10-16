@@ -91,6 +91,7 @@ function render({ state, message, email }) {
   form.hidden = signedIn;
   signedInPanel.hidden = !signedIn || state === 'checking';
   registerPanel.hidden = signedIn;
+  document.querySelector('#sign-in-title').textContent = signedIn ? 'Your account' : 'Sign in';
   fieldset.disabled = busy || state === 'session-unavailable';
   eye.disabled = fieldset.disabled;
   signOutButton.disabled = busy;
@@ -98,7 +99,7 @@ function render({ state, message, email }) {
   form.setAttribute('aria-busy', String(busy));
   if (state === 'signed-in') {
     signedInEmail.textContent = email;
-    signOutButton.focus();
+    document.querySelector('[data-signed-in-home]').focus({ preventScroll: true });
   }
   if (state === 'signed-out' || state === 'session-ended' || state === 'session-unavailable') {
     signedInEmail.textContent = '';
