@@ -26,11 +26,17 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     `);
     const migrations = new URL('../supabase/migrations/', import.meta.url);
     for (const file of readdirSync(migrations).filter(f => f.endsWith('.sql')).sort()) {
+      if (file.endsWith('_contributor_permissions.sql')) continue;
       await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
     }
     for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql', 'policy-agreements.sql', 'policy-contributions.sql']) {
       await db.exec(readFileSync(new URL(`../supabase/tests/${file}`, import.meta.url), 'utf8'));
     }
+    // Rehearse the old installed workflow, then verify the additive self-publishing upgrade.
+    const contributorMigration = readdirSync(migrations).find(f => f.endsWith('_contributor_permissions.sql'));
+    assert.ok(contributorMigration, 'Contributor permissions migration must be committed');
+    await db.exec(readFileSync(new URL(contributorMigration, migrations), 'utf8'));
+    await db.exec(readFileSync(new URL('../supabase/tests/contributor-permissions.sql', import.meta.url), 'utf8'));
     const registry=JSON.parse(readFileSync(new URL('../account/policy-versions.json',import.meta.url),'utf8'));
     const sql=policyReleasePlan(fileURLToPath(new URL('../',import.meta.url)),registry);
     assert.equal(readFileSync(new URL(`../supabase/ops/${registry.candidateVersion}.sql`,import.meta.url),'utf8').replace(/\r\n/g,'\n'),sql);
