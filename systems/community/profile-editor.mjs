@@ -4,10 +4,9 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   const service = createProfileService(client);
   let disposed = false;
   let busy = false;
-  root.innerHTML = `<div class="profile-workspace${viewer ? ' profile-workspace--viewer' : ''}">
-    <aside class="profile-intro"><p class="profile-eyebrow">Your own small corner</p><h1>Make yourself <br>at home.</h1><p>The name, words and little welcome that make this space yours.</p><a href="/account/settings/">Account &amp; security ↗</a></aside>
+  root.innerHTML = `<nav class="profile-navigation" aria-label="Profile navigation"><a class="account-secondary" href="/account/settings/">Account settings</a>${viewer ? '' : '<a class="account-secondary" data-public-link hidden>View public profile</a>'}</nav><div class="profile-workspace${viewer ? ' profile-workspace--viewer' : ''}">
+    <aside class="profile-intro"><p class="profile-eyebrow">Your own small corner</p><h1>Make yourself <br>at home.</h1><p>The name, words and little welcome that make this space yours.</p></aside>
     <section class="profile-form-panel" aria-labelledby="profile-title">
-      <div class="profile-tabs"><span aria-current="page">${viewer ? 'Profile' : 'About me'}</span><a href="/account/settings/">Account &amp; security</a></div>
       <h2 id="profile-title">My corner</h2><p class="profile-muted" data-visibility></p>
       <form class="profile-editor account-form"><fieldset disabled><legend class="visually-hidden">Your profile</legend>
         <div class="account-field"><label for="profile-display-name">Display name</label><input id="profile-display-name" name="display_name" required autocomplete="nickname" aria-describedby="profile-name-help"><p id="profile-name-help" class="password-guidance">Your name or pen name. Up to 80 characters.</p></div>
@@ -16,7 +15,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
         <button class="account-submit" type="submit">Save profile</button>
       </fieldset><p class="profile-status" role="status" aria-live="polite" data-status>Loading your profile…</p></form>
     </section>
-    ${viewer ? '' : `<aside class="profile-preview" aria-labelledby="preview-title"><p class="profile-eyebrow" id="preview-title">A glimpse for your readers</p><div class="profile-monogram" aria-hidden="true" data-monogram>—</div><h2 data-preview-name>Your name</h2><p class="profile-welcome" data-preview-welcome></p><p class="profile-bio" data-preview-bio></p><p class="profile-muted" data-preview-note>Preview of your profile text.</p><a data-public-link hidden>View my public page ↗</a></aside>`}
+    ${viewer ? '' : `<aside class="profile-preview" aria-labelledby="preview-title"><p class="profile-eyebrow" id="preview-title">A glimpse for your readers</p><div class="profile-monogram" aria-hidden="true" data-monogram>—</div><h2 data-preview-name>Your name</h2><p class="profile-welcome" data-preview-welcome></p><p class="profile-bio" data-preview-bio></p><p class="profile-muted" data-preview-note>Preview of your profile text.</p></aside>`}
   </div>`;
   const form = root.querySelector('form');
   const fieldset = root.querySelector('fieldset');
