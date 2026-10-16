@@ -98,3 +98,6 @@
 .account-register .account-legal + .account-legal { margin-top: .75rem; }
 .account-page--wide { max-width: 76rem; margin: 1rem auto 4rem; }
 .account-page--wide > .account-panel { max-width: 40rem; margin-inline: auto; box-sizing: border-box; }
+
+.account-navigation--admin { grid-template-columns:repeat(5,minmax(0,1fr));max-width:55rem; }
+@media(max-width:48rem){.account-navigation--admin{grid-template-columns:repeat(2,minmax(0,1fr));}}

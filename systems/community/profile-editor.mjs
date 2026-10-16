@@ -1,7 +1,7 @@
 import { createProfileService } from './profiles.mjs';
 import { accountNavigation } from './account-navigation.mjs';
 
-export function mountProfileEditor(root, client, { contributor = false, viewer = !contributor, initialProfile, ownerId } = {}) {
+export function mountProfileEditor(root, client, { contributor = false, viewer = !contributor, initialProfile, ownerId, admin = false } = {}) {
   const service = createProfileService(client, { expectedOwnerId: ownerId });
   let disposed = false;
   let busy = false;
@@ -51,7 +51,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   });
   function fill(profile) {
     name.value = profile.display_name;
-    root.querySelector('nav').replaceWith(accountNavigation(root.ownerDocument, { current: 'profile', auth: client.auth, publicId: contributor ? profile.public_id : null }));
+    root.querySelector('nav').replaceWith(accountNavigation(root.ownerDocument, { current: 'profile', auth: client.auth, publicId: contributor ? profile.public_id : null, admin }));
     if (!viewer) { bio.value = profile.bio; welcome.value = profile.welcome_line; }
     preview(); status.dataset.state = '';
     if (viewer) return;

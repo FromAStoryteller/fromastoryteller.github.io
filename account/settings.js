@@ -1,3 +1,4 @@
+import { roleLabel } from './roles.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { restoreSession } from './session-controller.mjs';
@@ -27,18 +28,18 @@ const showDeletion = (message, error = false, pending = false) => show(message, 
 function render(account) {
   if (sessionEnded) return;
   document.querySelector('[data-account-email]').textContent = account.user.email;
-  document.querySelector('[data-account-role]').textContent = ({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[account.role] ?? 'Viewer';
+  document.querySelector('[data-account-role]').textContent = roleLabel(account.roles);
   document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
   panel.hidden = false;
   const nav = document.querySelector('[data-account-navigation]');
-  const publicId = account.state === 'active' && ['member','moderator','admin'].includes(account.role) ? account.profile.public_id : null;
-  nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId }));
+  const publicId = account.state === 'active' && account.contributor ? account.profile.public_id : null;
+  nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId, admin:account.admin }));
   download.disabled = false;
-  const contributor = ['member', 'moderator', 'admin'].includes(account.role);
+  const contributor = account.contributor;
   document.querySelector('[data-contributor-export]').hidden = !contributor;
   contentDownload.disabled = !local.lifecycleEnabled || !contributor;
   document.querySelector('[data-delete-export-label]').textContent = contributor ? 'I downloaded my content or choose to continue without a copy.' : 'I understand my account will be permanently deleted.';
-  const staff = ['admin','moderator'].includes(account.role);
+  const staff = account.staff;
   deleteStart.hidden = !local.lifecycleEnabled || staff;
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
   document.querySelector('[data-deletion-unavailable]').textContent = staff ? 'Administrator and moderator accounts need a separate reviewed deletion process. Contact fromastoryteller@gmail.com for help.' : 'Account deletion is currently unavailable. Please try again later.';

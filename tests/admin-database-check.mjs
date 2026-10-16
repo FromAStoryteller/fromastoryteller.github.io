@@ -1,0 +1,54 @@
+import assert from 'node:assert/strict';
+import {readFileSync,readdirSync} from 'node:fs';
+
+export async function verifyAdminDatabase(PGlite){
+ const db=new PGlite();
+ try {
+  await db.exec("\n      create role supabase_auth_admin; create role anon; create role authenticated; create role service_role bypassrls;\n      create schema auth; create schema storage;\n      create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);\n      create table auth.sessions(id uuid primary key, user_id uuid references auth.users(id) on delete cascade, not_after timestamptz);\n      create function auth.uid() returns uuid language sql stable as\n      $ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $;\n      grant usage on schema auth, storage to anon, authenticated, service_role;\n      grant execute on function auth.uid() to anon, authenticated, service_role;\n      create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);\n      create table storage.objects(id uuid default gen_random_uuid() primary key, bucket_id text references storage.buckets(id), name text, metadata jsonb default '{}'::jsonb, updated_at timestamptz default now());\n      alter table storage.objects enable row level security;\n      grant select,insert,update,delete on storage.objects to anon,authenticated;\n    ");
+  const migrations=new URL('../supabase/migrations/',import.meta.url);
+  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+  const a='71000000-0000-0000-0000-000000000001',b='71000000-0000-0000-0000-000000000002',v='71000000-0000-0000-0000-000000000003',u='71000000-0000-0000-0000-000000000004';
+  const sa='72000000-0000-0000-0000-000000000001',sb='72000000-0000-0000-0000-000000000002',sv='72000000-0000-0000-0000-000000000003';
+  await db.exec(`insert into auth.users(id,email,email_confirmed_at) values ('${a}','admin-a@example.invalid',now()),('${b}','admin-b@example.invalid',now()),('${v}','viewer@example.invalid',now()),('${u}','unverified@example.invalid',null);
+   insert into auth.sessions(id,user_id) values('${sa}','${a}'),('${sb}','${b}'),('${sv}','${v}');
+   insert into public.user_roles values('${a}','admin'),('${b}','member');`);
+  const next=readdirSync(migrations).find(f=>f.endsWith('_separate_admin_tools.sql'));
+  await db.exec(readFileSync(next?new URL(next,migrations):new URL('../supabase/ops/separate-admin-tools.sql',import.meta.url),'utf8'));
+  const as=async(id,session,sql)=>{await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);select set_config('request.jwt.claims','${JSON.stringify({session_id:session})}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
+  const value=async(id,session,sql)=>(await as(id,session,sql)).rows[0]?.value;
+  assert.deepEqual((await db.query(`select role::text from public.user_roles where user_id='${a}' order by role::text`)).rows.map(r=>r.role),['admin','member'],'existing administrator keeps contributor access');
+  await assert.rejects(value(v,sv,'select public.fas_admin_overview() value'),/Administrator access/);
+  await assert.rejects(value(a,sv,'select public.fas_admin_overview() value'),/Active account session/);
+  await assert.rejects(value(a,'00000000-0000-0000-0000-000000000000','select public.fas_admin_overview() value'),/Active account session/);
+  await assert.rejects(value(a,sa,`select public.fas_admin_set_role('${a}','admin',false,'admin-a@example.invalid','Leave') value`),/at least one/);
+  await assert.rejects(value(a,sa,`select public.fas_admin_set_role('${b}','admin',true,'wrong@example.invalid','Grant') value`),/Confirm the target/);
+  await assert.rejects(value(a,sa,`select public.fas_admin_set_role('${u}','admin',true,'unverified@example.invalid','Grant') value`),/Verified active target/);
+  await value(a,sa,`select public.fas_admin_set_role('${b}','admin',true,'admin-b@example.invalid','Writer volunteers to help') value`);
+  await value(b,sb,`select public.fas_admin_set_role('${b}','admin',false,'admin-b@example.invalid','Step back from admin') value`);
+  assert.equal((await as(b,sb,'select private.is_member() value')).rows[0].value,true,'relinquish admin retains contributor');
+  await assert.rejects(value(b,sb,'select public.fas_admin_overview() value'),/Administrator access/);
+  await value(a,sa,`select public.fas_admin_set_role('${b}','admin',true,'admin-b@example.invalid','Admin again') value`);
+  await value(a,sa,`select public.fas_admin_set_role('${b}','member',false,'admin-b@example.invalid','Separate contributor access') value`);
+  assert.equal(await value(b,sb,'select private.is_member() value'),false,'admin alone cannot contribute');
+  assert.ok(await value(b,sb,'select public.fas_admin_overview() value'));
+  await assert.rejects(as(b,sb,`insert into public.stories(author_id,slug,title) values('${b}','admin-only-denied','Denied')`),/row-level security/);
+  const token=await value(a,sa,`select public.create_invite('viewer@example.invalid',7) value`);
+  assert.equal(token.length,72);
+  await assert.rejects(value(a,sa,`select public.create_invite('viewer@example.invalid',7) value`),/active invitation/);
+  await assert.rejects(value(b,sb,`select public.accept_invite('${token}') value`),/Invite unavailable/);
+  const invites=await value(a,sa,'select public.fas_admin_invites() value');
+  assert.equal(JSON.stringify(invites).includes(token),false);assert.equal(JSON.stringify(invites).includes('token_hash'),false);
+  await value(v,sv,`select public.accept_invite('${token}') value`);
+  await assert.rejects(value(v,sv,`select public.accept_invite('${token}') value`),/Invite unavailable/);
+  assert.equal(await value(v,sv,'select private.is_member() value'),true);
+  await assert.rejects(value(v,sv,'select public.fas_admin_activity() value'),/Administrator access/);
+  await assert.rejects(as(v,sv,`insert into public.user_roles values('${v}','admin')`),/permission denied/);
+  await assert.rejects(as(a,sa,'select * from private.admin_audit'),/permission denied/);
+  const audit=await value(a,sa,'select public.fas_admin_activity() value');assert.ok(audit.length>=6);assert.equal(JSON.stringify(audit).includes(token),false);
+  const account=await value(a,sa,`select public.fas_admin_find_account('VIEWER@example.invalid') value`);assert.deepEqual(account.roles,['member']);assert.equal(account.email,'viewer@example.invalid');
+  assert.equal(await value(a,sa,`select public.fas_admin_find_account('missing@example.invalid') value`),null);
+  const snapshot=(await db.query(`select public.fas_account_snapshot('${a}','${sa}') value`)).rows[0].value;assert.equal(snapshot.data.role,'member','multi-role export remains scalar-compatible');
+  await db.exec(`delete from auth.sessions where id='${sb}';`);
+  await assert.rejects(value(b,sb,'select public.fas_admin_overview() value'),/Active account session/);
+ } finally {await db.close();}
+}
