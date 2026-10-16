@@ -29,3 +29,5 @@ cloudflare-production-verification.json
 
 # Generated only for a deliberately enabled production account build
 /account/runtime-config.json
+/.preview-cache/
+/.preview-dev-config.json
