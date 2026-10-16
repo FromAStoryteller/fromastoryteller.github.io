@@ -6,6 +6,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="modulepreload" href="/account/vendor/supabase-client.js">
 
     <!-- PAGE TITLE -->
     <title>Sign in | From A Storyteller</title>
@@ -168,8 +169,12 @@
               <button class="account-secondary" data-session-retry type="button" hidden>Try again</button>
               <div data-signed-in hidden>
                 <p class="account-recovery-intro">Signed in as <strong data-signed-in-email></strong></p>
-                <button class="account-secondary" data-sign-out type="button">Sign out</button>
-                  <p><a class="account-secondary" href="/account/settings/">Account settings</a></p>
+                <nav class="account-signed-in-actions" aria-label="Continue after signing in">
+                  <a class="account-submit" data-signed-in-home href="/">Home</a>
+                  <a class="account-secondary" href="/account/profile/">Edit my profile</a>
+                  <a class="account-secondary" href="/account/settings/">Account settings</a>
+                </nav>
+                <div class="account-sign-out"><button class="account-secondary" data-sign-out type="button">Sign out</button></div>
               </div>
               <form class="account-form" data-sign-in-form aria-describedby="account-preview-note">
                 <fieldset disabled>

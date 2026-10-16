@@ -90,5 +90,8 @@
 [data-policy-version], [data-agreement-history] { overflow-wrap: anywhere; line-height: 1.7; }
 [data-agreement-history] > p { padding-block: 1rem; border-bottom: 1px solid var(--colour-border-default); }
 .account-contact-address { user-select: all; overflow-wrap: anywhere; }
+.account-signed-in-actions { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.account-submit[href] { box-sizing: border-box; text-decoration: none; }
+.account-sign-out { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--colour-border-default); }
 .account-page--wide { max-width: 76rem; margin: 1rem auto 4rem; }
 .account-page--wide > .account-panel { max-width: 40rem; margin-inline: auto; box-sizing: border-box; }

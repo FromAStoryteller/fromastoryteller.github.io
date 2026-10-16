@@ -55,9 +55,11 @@ try {
   const local = await loadLocalAuthClient();
   if (!local?.signupEnabled) throw new Error('Account creation unavailable');
   if (local?.signupEnabled) {
-    const settings = await fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
+    const [settings, requirement] = await Promise.all([
+      fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null),
+      currentPolicyRequirement(local.client),
+    ]);
     if (settings?.mailer_autoconfirm === false && settings?.external?.email === true) {
-      const requirement = await currentPolicyRequirement(local.client);
       if (local.mode === 'production' && (!requirement || requirement.release_id !== local.policyRelease)) throw new Error('Published account policies are not ready.');
       controller = createSignupController(local.client.auth, show, local.accountOrigin, requirement);
       displayName.disabled = false;
