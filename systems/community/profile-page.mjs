@@ -31,7 +31,7 @@ try {
     const session = await restoreSession(local.client.auth,local.hadSession,() => local.storage.clear());
     if (session.state !== 'signed-in') message('Your profile is private',session.message || 'Sign in to make this space your own.',true);
     else {
-      const account = await loadProfileAccount(local.client);
+      const account = await loadProfileAccount(local.client,{useRestoredSession:true});
       userId = account.user.id;
       if (!ended) {
         if (account.state !== 'active') message('Account removal is in progress','Profile editing is unavailable while your account is being removed.');

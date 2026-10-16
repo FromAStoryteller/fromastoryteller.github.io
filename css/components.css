@@ -1598,3 +1598,4 @@ html, body, button, input, textarea, select,
 .storage-actions button { flex: 1 1 10rem; min-height: var(--size-touch-target-minimum); padding: .6rem .8rem; border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); background: var(--colour-control-background); color: var(--colour-control-text); font: inherit; cursor: pointer; }
 .storage-settings-link { min-height: var(--size-touch-target-minimum); padding: .25rem 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 .footer-legal a:active, .socials a:active { background: var(--state-current-background); }
+#contact-email { scroll-margin-top: 6rem; }

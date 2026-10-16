@@ -149,7 +149,7 @@ try {
       show(session.message || 'Sign in to view your account settings.', session.state === 'session-unavailable');
       signInPrompt.hidden = false;
     }
-    else render(await loadAccount(local.client));
+    else render(await loadAccount(local.client,{useRestoredSession:true}));
   }
 } catch {
   document.querySelector('[data-preview-note]').textContent = 'Account services are currently unavailable.';
