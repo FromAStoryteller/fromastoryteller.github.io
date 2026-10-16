@@ -44,9 +44,17 @@ try {
     addEventListener('pagehide',() => { dispose?.(); subscription.unsubscribe(); stopWatching(); },{once:true});
   } else if (mode === 'public') {
     const id = new URLSearchParams(location.search).get('author');
-    let current = await service.readPublic(id);
     let ownsPage = false;
     let ownerSessionEnded = false;
+    // Verify ownership alongside public content, rather than starting afterwards.
+    const stopOwnerWatch = watchSessionEnd(local, () => { ownerSessionEnded = true; ownsPage = false; root.querySelector('.account-navigation')?.remove(); });
+    addEventListener('pagehide', stopOwnerWatch, { once: true });
+    const ownProfile = (async () => {
+      const session = await local.client.auth.getSession();
+      if (!session.data?.session) return null;
+      return service.readOwn();
+    })().catch(() => null);
+    let current = await service.readPublic(id);
     function render() {
       renderPublicProfile(root,current,{imageBase:local.publicImageBase});
       if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth }));
@@ -65,12 +73,9 @@ try {
     render();
     if (current) document.title=`${current.display_name} | From A Storyteller`;
     // Owner controls never form part of the anonymous public projection.
-    const stopOwnerWatch = watchSessionEnd(local, () => { ownerSessionEnded = true; ownsPage = false; root.querySelector('.account-navigation')?.remove(); });
-    addEventListener('pagehide', stopOwnerWatch, { once: true });
     void (async () => {
-      const session = await local.client.auth.getSession();
-      if (!session.data?.session || !current) return;
-      const own = await service.readOwn();
+      const own = await ownProfile;
+      if (!own || !current) return;
       ownsPage = !ownerSessionEnded && own.public_id === id;
       if (ownsPage) render();
     })().catch(() => {});
