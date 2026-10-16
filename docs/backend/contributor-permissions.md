@@ -1,19 +1,33 @@
 # Contributor permissions
 
-Implementation prepared 17 October 2026 (New Zealand).
+Implemented and deployed 17 October 2026 (New Zealand).
 
 ## Scope and current rollout
 
 This implements the database/API permissions, not the story editor or upload UI.
-Migration `20261016211439_contributor_permissions.sql` is installed in FAS DEV
-(`oqmmvjjycpyxvxipcyli`). Production is unchanged pending the real Auth/Data API/
-Storage regression run. Do not mark this task complete until that run and the
-production deployment/parity checks pass.
+Migration `20261016211439_contributor_permissions.sql` is installed in both FAS DEV
+(`oqmmvjjycpyxvxipcyli`) and PROD (`vzdicnufhidelaoeqbza`).
 
-The local PostgreSQL test and hosted DEV transaction passed. The API runner could
-not start because private Supabase CLI access is unavailable in this workspace;
-no API fixture accounts were created by that attempt. Hosted SQL fixtures rolled
-back. SQL role tests do not replace real JWT, PostgREST and Storage verification.
+All 104 local tests, reference validation, the production build and GitHub CI passed.
+The hosted DEV SQL transaction passed and rolled back its fixtures. Ryan then ran
+`node scripts/run-fas-dev-tests.mjs` locally: the account lifecycle checks and all
+seven Auth/PostgREST/Storage security groups passed, including cached-image
+revocation and fixture cleanup. Independent database queries confirmed zero
+synthetic accounts, stories and retained fixture audit records.
+
+Production received the identical SQL after those API checks. DEV/PROD catalog
+fingerprints match for application policies, function definitions/execution ACLs,
+client column grants, and the moderation audit foreign key. Stored migration SQL
+hashes match (`628bb66e69032a072e301e387a205210`). The native production timestamp
+was reconciled to the repository version only after that hash check.
+No production test accounts/content were created. Both environments currently have
+zero database-backed stories; existing static stories remain untouched.
+
+Security advisors report no ERROR-level findings. Existing intentional protected
+tables/public projection and checked workflow notices remain reviewed exceptions:
+[workflow advisor](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+The pre-existing leaked-password protection notice remains a separate Auth/plan
+decision: [password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
 ## Permission matrix
 
@@ -88,8 +102,7 @@ chat or commit a credential file. It creates disposable DEV identities/content,
 runs the checks, signs out and cleans up exact recorded IDs/paths. It sends no mail.
 Verify no synthetic accounts/stories/assets/audit remain after the run.
 
-After a successful full run, apply the identical migration to PROD
-(`vzdicnufhidelaoeqbza`), reconcile the native migration version only after checking
-exact SQL hashes, compare policies/function definitions/grants with DEV, check
-advisors, and run read-only production probes. Do not run fixture-writing tests in
-production. Existing static stories remain file-backed and untouched.
+Production rollout and catalog parity checks are complete. Future permission
+changes must repeat the guarded DEV API suite before production installation.
+Do not run fixture-writing tests in production. Existing static stories remain
+file-backed and untouched.
