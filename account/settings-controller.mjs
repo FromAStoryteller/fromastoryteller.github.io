@@ -9,7 +9,7 @@ async function verifiedIdentity(client) {
 
 export async function loadAccount(client) {
   const user = await verifiedIdentity(client);
-  const profile = await client.from('profiles').select('id,display_name,bio,created_at').eq('id', user.id).single();
+  const profile = await client.from('profiles').select('id,display_name,bio,welcome_line,public_id,created_at').eq('id', user.id).single();
   const roles = await client.from('user_roles').select('role').eq('user_id', user.id);
   const state = await client.rpc('fas_my_account_state');
   const declaration = await client.rpc('fas_my_registration_declaration');

@@ -10,7 +10,9 @@ Account ID: ${user.id}
 Account created: ${user.created_at}
 Email verified: ${user.email_confirmed_at ?? 'Not verified'}
 Display name: ${profile.display_name}
+Welcome line: ${profile.welcome_line || '(empty)'}
 Bio: ${profile.bio || '(empty)'}
+Public profile ID: ${profile.public_id || '(not assigned)'}
 Access: ${({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[role] ?? role}
 Account state: ${data.account.state}
 Profile created: ${profile.created_at}

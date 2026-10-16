@@ -330,7 +330,7 @@ function createCardMarkup(item, variant = "standard") {
         <article class="content-grid-card content-card--${cardVariant}">
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">
+                    ${item.card.image ? `<img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">` : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">${escapeHtml(cardTypeLabel(item))}</span>
