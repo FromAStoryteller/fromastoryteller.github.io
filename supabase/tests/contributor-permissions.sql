@@ -1,5 +1,9 @@
 -- Disposable fixture transaction. Run only in the SQL test engine or FAS DEV.
 begin;
+-- Accidental broad permissive rules must not defeat restrictive ownership gates.
+create policy contributor_test_broad_stories on public.stories for all to anon,authenticated using(true) with check(true);
+create policy contributor_test_broad_assets on public.story_assets for all to anon,authenticated using(true) with check(true);
+create policy contributor_test_broad_storage on storage.objects for all to anon,authenticated using(true) with check(true);
 insert into auth.users(id,email,email_confirmed_at) values
 ('61000000-0000-0000-0000-000000000001','permission-owner@example.invalid',now()),
 ('61000000-0000-0000-0000-000000000002','permission-other@example.invalid',now()),
@@ -97,4 +101,26 @@ do $$ begin
   if exists(select 1 from public.stories where slug='permission-story') or exists(select 1 from public.story_assets where story_id='62000000-0000-0000-0000-000000000001') then raise exception 'FAIL own delete'; end if;
   if not exists(select 1 from public.moderation_log where story_id is null and reason='Moderation test') then raise exception 'FAIL audit lost on delete'; end if;
 end $$;
+-- Required policy changes block all contribution writes, even with a broad rule.
+insert into public.user_roles values('61000000-0000-0000-0000-000000000001','member');
+insert into private.account_policy_releases(release_id,status,published_at,terms_version,privacy_version,terms_sha256,privacy_sha256,terms_path,privacy_path)
+values('permission-final-review','published',now(),'review-terms','review-privacy',repeat('a',64),repeat('b',64),'/account/policy-history/permission-final-review/terms/','/account/policy-history/permission-final-review/privacy/');
+update private.account_policy_requirement set release_id='permission-final-review';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','61000000-0000-0000-0000-000000000001',true);
+do $$ declare n integer; begin
+  if private.is_member() then raise exception 'FAIL stale policy authorizes contribution'; end if;
+  update public.stories set status='published' where slug='permission-created'; get diagnostics n=row_count;
+  if n<>0 then raise exception 'FAIL stale policy publish'; end if;
+  update public.stories set body='Stale policy edit' where slug='permission-created'; get diagnostics n=row_count;
+  if n<>0 then raise exception 'FAIL stale policy edit'; end if;
+  delete from public.stories where slug='permission-created'; get diagnostics n=row_count;
+  if n<>0 then raise exception 'FAIL stale policy contribution delete'; end if;
+  begin
+    insert into storage.objects(bucket_id,name)
+    select 'fas-story-images',author_id::text||'/'||id::text||'/333.png' from public.stories where slug='permission-created';
+    raise exception 'FAIL stale policy upload';
+  exception when insufficient_privilege then null; end;
+end $$;
+reset role;
 rollback;
