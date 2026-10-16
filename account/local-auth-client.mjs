@@ -1,18 +1,27 @@
 import { loadAccountAuthConfig } from './auth-settings.mjs';
-import { createSessionStorage } from './session-storage.mjs';
+import { createBrowserSessionStorage } from './session-storage.mjs';
 
 let localClientPromise;
 
-export async function loadLocalAuthClient() {
-  if (!localClientPromise) localClientPromise = initializeClient().catch(error => { localClientPromise = null; throw error; });
+export async function loadLocalAuthClient({ remember } = {}) {
+  if (localClientPromise && typeof remember === 'boolean') {
+    const previous = await localClientPromise;
+    if (previous && previous.storage.requestedRemember !== remember) {
+      // No live session is moved. The sign-in form selects persistence before
+      // submitting credentials, and disposes the unused client's event channel.
+      await previous.client.auth.dispose();
+      localClientPromise = null;
+    }
+  }
+  if (!localClientPromise) localClientPromise = initializeClient(remember).catch(error => { localClientPromise = null; throw error; });
   return localClientPromise;
 }
 
-async function initializeClient() {
+async function initializeClient(remember) {
   const config = await loadAccountAuthConfig(location.origin);
   if (!config) return null;
   const { createClient } = await import('./vendor/supabase-client.js');
-  const storage = createSessionStorage();
+  const storage = createBrowserSessionStorage({ namespace: new URL(config.url).host.replace(/[^a-z0-9-]/gi, '-'), remember });
   const hadSession = storage.hasSession;
   const client = createClient(config.url, config.key, {
     auth: { persistSession: true, storage: storage.adapter, autoRefreshToken: true, detectSessionInUrl: false, storageKey: storage.key },

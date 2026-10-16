@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
-import { policyReleasePlan } from '../scripts/fas-policy-release-plan.mjs';
+import { policyReleasePlan, policyTransitionPlan } from '../scripts/fas-policy-release-plan.mjs';
 
 test('FAS migrations enforce SQL permissions, workflows and image approval', async () => {
   const db = new PGlite();
@@ -45,7 +45,26 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     await assert.rejects(db.exec(sql.replaceAll(hash,'f'.repeat(64))),/Stored release differs/);
     await db.exec('rollback');
     assert.deepEqual(await state(),first);
-    await db.exec(`insert into private.account_policy_releases select 'other-reviewed-release',status,published_at,terms_version,privacy_version,terms_sha256,privacy_sha256,terms_path,privacy_path,minimum_age from private.account_policy_releases;
+    const version=registry.sessionUpdateVersion;
+    const transition=policyTransitionPlan(fileURLToPath(new URL('../',import.meta.url)),registry,version,registry.candidateVersion);
+    assert.equal(readFileSync(new URL(`../supabase/ops/${version}.sql`,import.meta.url),'utf8').replace(/\r\n/g,'\n'),transition);
+    await db.exec(transition);
+    const transitioned=await state();assert.equal(transitioned.length,2);
+    assert.equal((await db.query('select release_id from private.account_policy_requirement')).rows[0].release_id,version);
+    await db.exec(transition);assert.deepEqual(await state(),transitioned);
+    assert.equal((await db.query('select count(*)::int as n from private.account_policy_agreements')).rows[0].n,0);
+    const previousHash=registry.versions[registry.candidateVersion].documents.privacy.sha256;
+    await assert.rejects(db.exec(transition.replaceAll(previousHash,'d'.repeat(64))),/Published predecessor does not match/);
+    await db.exec('rollback');
+    await db.exec(`update private.account_policy_requirement set release_id='${registry.candidateVersion}';`);
+    const newHash=registry.versions[version].documents.privacy.sha256;
+    await assert.rejects(db.exec(transition.replaceAll(newHash,'e'.repeat(64))),/Stored release differs/);
+    await db.exec('rollback');
+    await db.exec('update private.account_policy_requirement set release_id=null;');
+    await assert.rejects(db.exec(transition),/Another policy release/);
+    await db.exec('rollback');
+    await db.exec(`update private.account_policy_requirement set release_id='${registry.candidateVersion}';`);
+    await db.exec(`insert into private.account_policy_releases select 'other-reviewed-release',status,published_at,terms_version,privacy_version,terms_sha256,privacy_sha256,terms_path,privacy_path,minimum_age from private.account_policy_releases where release_id='${registry.candidateVersion}';
       update private.account_policy_requirement set release_id='other-reviewed-release';`);
     await assert.rejects(db.exec(sql),/Another policy release/);
     await db.exec('rollback');

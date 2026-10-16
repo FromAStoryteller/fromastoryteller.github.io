@@ -55,6 +55,25 @@ commit;
 `;
 }
 
+// A later release must name and verify the exact predecessor. This cannot be
+// used as a bootstrap, skip another release, rewrite history or invent consent.
+export function policyTransitionPlan(root, registry, version, previousVersion) {
+  if (version === previousVersion || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(previousVersion ?? '')) throw Error('A distinct reviewed predecessor is required.');
+  const previous = registry.versions[previousVersion];
+  if (previous?.status !== 'published' || registry.versions[version]?.previousVersion !== previousVersion) throw Error('The published predecessor must match the candidate.');
+  const sql = policyReleasePlan(root, { ...registry, candidateVersion: version });
+  const guard = `  if current_required is not null and current_required <> '${version}' then`;
+  const replacement = `  if current_required is null or current_required not in ('${previousVersion}','${version}') then`;
+  const verifyPrevious = `  if not exists(select 1 from private.account_policy_releases where release_id='${previousVersion}'
+    and status='published' and published_at<=now()
+    and terms_sha256='${previous.documents.terms.sha256}'
+    and privacy_sha256='${previous.documents.privacy.sha256}') then
+    raise exception 'Published predecessor does not match the reviewed history';
+  end if;
+`;
+  return sql.replace(guard,replacement).replace(`  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`,verifyPrevious + `  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`);
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.length !== 3 || process.argv[2] !== '--write') throw Error('Use --write to prepare SQL only.');
   const root = fileURLToPath(new URL('../', import.meta.url));

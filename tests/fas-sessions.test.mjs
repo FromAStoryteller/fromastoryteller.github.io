@@ -1,12 +1,76 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSessionStorage, SESSION_KEY } from '../account/session-storage.mjs';
+import { createSessionStorage, createBrowserSessionStorage, SESSION_KEY } from '../account/session-storage.mjs';
+import { watchSessionEnd } from '../account/session-events.mjs';
 import { restoreSession } from '../account/session-controller.mjs';
 
 function fakeStorage() {
   const data = new Map([['unrelated-theme', 'dark']]);
   return { data, getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value), removeItem: key => data.delete(key) };
 }
+
+test('Remembered sign-in is shared by new tabs and survives a fresh browser context', () => {
+  const sharedStorage=fakeStorage();
+  const first=createBrowserSessionStorage({namespace:'prod',sharedStorage,tabStorage:fakeStorage()});
+  assert.equal(first.remembered,true);
+  first.adapter.setItem(first.key,'synthetic remembered session');
+  const next=createBrowserSessionStorage({namespace:'prod',sharedStorage,tabStorage:fakeStorage()});
+  assert.equal(next.key,first.key);assert.equal(next.hasSession,true);
+  assert.equal(next.adapter.getItem(next.key),'synthetic remembered session');
+  next.clear();assert.equal(first.hasSession,false);
+  assert.equal(sharedStorage.getItem('unrelated-theme'),'dark');
+});
+
+test('Unchecking persistence isolates the tab and never writes credentials to local storage', () => {
+  const sharedStorage=fakeStorage(),tabStorage=fakeStorage();
+  const first=createBrowserSessionStorage({namespace:'prod',remember:false,sharedStorage,tabStorage});
+  first.adapter.setItem(first.key,'synthetic private tab session');
+  const reload=createBrowserSessionStorage({namespace:'prod',sharedStorage,tabStorage});
+  assert.equal(reload.key,first.key);assert.equal(reload.hasSession,true);assert.equal(reload.remembered,false);
+  const next=createBrowserSessionStorage({namespace:'prod',sharedStorage,tabStorage:fakeStorage()});
+  assert.equal(next.hasSession,false);assert.notEqual(next.key,first.key);
+  assert.ok(![...sharedStorage.data.values()].includes('synthetic private tab session'));
+});
+
+test('Existing tab sessions migrate without silently becoming remembered or crossing projects', () => {
+  const sharedStorage=fakeStorage(),tabStorage=fakeStorage();
+  const old=createSessionStorage(tabStorage);old.adapter.setItem(old.key,'synthetic old session');
+  const migrated=createBrowserSessionStorage({namespace:'prod',sharedStorage,tabStorage});
+  assert.equal(migrated.hasSession,true);assert.equal(migrated.remembered,false);
+  assert.equal(old.hasSession,false);
+  assert.equal(createBrowserSessionStorage({namespace:'dev',sharedStorage,tabStorage:fakeStorage()}).hasSession,false);
+  assert.ok(![...sharedStorage.data.values()].includes('synthetic old session'));
+});
+
+test('Unavailable persistent storage falls back to tab storage, then memory if both are blocked', () => {
+  const blocked={setItem(){throw Error('blocked');}},tabStorage=fakeStorage();
+  const tab=createBrowserSessionStorage({namespace:'prod',sharedStorage:blocked,tabStorage});
+  assert.equal(tab.remembered,false);assert.equal(tab.persistent,true);
+  tab.adapter.setItem(tab.key,'synthetic fallback');
+  assert.equal(createBrowserSessionStorage({namespace:'prod',sharedStorage:blocked,tabStorage}).hasSession,true);
+  const memory=createBrowserSessionStorage({namespace:'prod',sharedStorage:blocked,tabStorage:blocked});
+  assert.equal(memory.persistent,false);memory.adapter.setItem(memory.key,'synthetic memory');assert.equal(memory.hasSession,true);
+});
+
+test('A removed shared credential is not resurrected from a stale in-memory fallback', () => {
+  const backing=fakeStorage(),first=createSessionStorage(backing,{shared:true}),other=createSessionStorage(backing,{shared:true});
+  first.adapter.setItem(first.key,'synthetic session');assert.equal(other.hasSession,true);
+  first.clear();assert.equal(other.hasSession,false);
+  backing.getItem=()=>{throw Error('blocked');};assert.equal(other.hasSession,false);
+});
+
+test('Cross-tab logout clears private UI via Auth or storage events, without touching unrelated keys', () => {
+  const events=new EventTarget();let authListener,cleared=0,unsubscribed=false;
+  const local={storage:{remembered:true,key:'fixture-auth'},client:{auth:{onAuthStateChange:fn=>{authListener=fn;return{data:{subscription:{unsubscribe(){unsubscribed=true;}}}};}}}};
+  const dispose=watchSessionEnd(local,()=>cleared++,events);
+  const storageEvent=(key,newValue)=>{const e=new Event('storage');Object.assign(e,{key,newValue});events.dispatchEvent(e);};
+  storageEvent('theme',null);storageEvent('fixture-auth','synthetic refresh');assert.equal(cleared,0);
+  storageEvent('fixture-auth',null);assert.equal(cleared,1);
+  authListener('SIGNED_OUT');assert.equal(cleared,2);
+  storageEvent(null,null);assert.equal(cleared,3);
+  local.storage.remembered=false;storageEvent('fixture-auth',null);assert.equal(cleared,3);
+  dispose();assert.equal(unsubscribed,true);
+});
 
 test('Tab storage survives a new adapter and clears only owned Auth keys', () => {
   const backing=fakeStorage();

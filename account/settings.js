@@ -5,6 +5,7 @@ import { loadAccount, saveProfile, exportAccountData } from './settings-controll
 import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecycle-client.mjs';
 import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
+import { watchSessionEnd } from './session-events.mjs';
 const form = document.querySelector('[data-profile-form]');
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
@@ -19,10 +20,12 @@ const deletionStatus = document.querySelector('[data-deletion-status]');
 let local;
 let busy = false;
 let prepared = null;
+let sessionEnded = false;
 const friendlyError = error => error?.name === 'TimeoutError' || error?.name === 'AbortError' ? 'The request took too long. Please try again.' : error instanceof TypeError ? 'We couldn’t connect to account services. Please try again.' : error.message;
 function show(message, error = false, pending = false, target = status) { target.hidden = false; target.textContent = message; target.dataset.state = error ? 'error' : pending ? 'pending' : 'success'; }
 const showDeletion = (message, error = false, pending = false) => show(message, error, pending, deletionStatus);
 function render(account) {
+  if (sessionEnded) return;
   document.querySelector('[data-account-email]').textContent = account.user.email;
   document.querySelector('[data-account-role]').textContent = ({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[account.role] ?? 'Viewer';
   form.querySelector('[data-display-name]').value = account.profile.display_name;
@@ -135,6 +138,15 @@ confirmForm.addEventListener('submit', async event => {
 try {
   local = await loadLocalAuthClient();
   if (local) {
+    watchSessionEnd(local, () => {
+      sessionEnded = true; prepared = null;
+      panel.hidden = true; form.reset(); passwordForm.reset(); confirmForm.reset();
+      document.querySelector('[data-account-email]').textContent = '';
+      document.querySelector('[data-account-role]').textContent = '';
+      signInPrompt.hidden = false;
+      document.querySelector('[data-settings-back]').hidden = true;
+      show('Your session has ended. Sign in to view your account settings.', true);
+    });
     document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your profile, personal data and account.');
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
     if (session.state !== 'signed-in') {

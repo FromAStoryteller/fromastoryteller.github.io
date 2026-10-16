@@ -16,25 +16,51 @@ const signOutButton = document.querySelector('[data-sign-out]');
 const eye = form.querySelector('[data-password-toggle]');
 const registerPanel = document.querySelector('.account-register');
 const retryButton = document.querySelector('[data-session-retry]');
+const rememberInput = form.querySelector('[data-remember-session]');
 let local;
 let checking = false;
 let controller;
 let signedIn = false;
 let explicitSignOut = false;
 let lastChecked = 0;
+let authSubscription;
+let sessionGeneration = 0;
 
 // Prevent native submissions even if client initialization fails.
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (!controller || !form.reportValidity()) return;
   const password = passwordInput.value;
+  const remember = rememberInput.checked;
   passwordInput.value = '';
   passwordInput.type = 'password';
   eye.setAttribute('aria-pressed', 'false');
   eye.setAttribute('aria-label', 'Show password');
   eye.querySelector('i').className = 'fa-solid fa-eye';
-  await controller.signIn(emailInput.value, password);
+  fieldset.disabled = true;
+  try {
+    local = await loadLocalAuthClient({ remember });
+    bindController();
+    await controller.signIn(emailInput.value, password);
+  } catch { render({ state: 'error', message: 'Sign-in is unavailable. Please try again.' }); }
 });
+
+function bindController() {
+  authSubscription?.unsubscribe();
+  controller = createSignInController(local.client.auth, render);
+  authSubscription = local.client.auth.onAuthStateChange(event => {
+    // Defer Auth work until the SDK callback has released its refresh lock.
+    if (event === 'SIGNED_OUT') {
+      sessionGeneration++;
+      if (signedIn && !explicitSignOut) controller.sessionEnded();
+    }
+    if (event === 'SIGNED_IN' && !signedIn && !checking) setTimeout(() => { if (!signedIn) void checkSession(); }, 0);
+  }).data.subscription;
+  notice.textContent = accountEnvironmentNote(local.mode, 'Local test only — ', 'Development test only — uses FAS DEV. ') +
+    (!local.storage.persistent ? 'Browser storage is unavailable. Reloading this page signs you out.' :
+      local.storage.remembered ? 'Stay signed in across tabs and browser restarts on this device. Sign out when finished on a shared device.' :
+        'This sign-in stays in this tab. Browser tab restoration may retain it; sign out when finished.');
+}
 signOutButton.addEventListener('click', async () => {
   if (!controller) return;
   explicitSignOut = true;
@@ -46,10 +72,12 @@ retryButton.addEventListener('click', () => checkSession());
 async function checkSession() {
   if (!local || checking) return;
   checking = true;
+  const generation = sessionGeneration;
   lastChecked = Date.now();
   render({ state: 'checking', message: 'Checking your session…' });
   const restored = await restoreSession(local.client.auth, local.hadSession || signedIn, () => local.storage.clear());
-  render(restored);
+  if (generation === sessionGeneration) render(restored);
+  else render({ state: 'session-ended', message: 'Your session has ended. Please sign in again.' });
   checking = false;
 }
 
@@ -87,18 +115,19 @@ function render({ state, message, email }) {
 try {
   local = await loadLocalAuthClient();
   if (local) {
-    const { client } = local;
-    controller = createSignInController(client.auth, render);
-    client.auth.onAuthStateChange(event => {
-      // No async Auth calls inside this callback (SDK lock). RLS remains authoritative.
-      if (event === 'SIGNED_OUT' && signedIn && !explicitSignOut) controller.sessionEnded();
-    });
-    notice.textContent = (accountEnvironmentNote(local.mode, 'Local test only — ', 'Development test only — uses FAS DEV. ')) + (local.storage.persistent ? 'Your session is stored in this tab. Sign out when finished.' : 'Browser storage is unavailable. Reloading this page signs you out.');
+    bindController();
+    rememberInput.checked = local.storage.requestedRemember;
     await checkSession();
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && signedIn && Date.now() - lastChecked > 60000 && !explicitSignOut) void checkSession();
     });
     window.addEventListener('pageshow', event => { if (event.persisted) void checkSession(); });
+    window.addEventListener('storage', event => {
+      if (local.storage.remembered && (event.key === local.storage.key || event.key === null) && event.newValue === null) {
+        sessionGeneration++;
+        if (signedIn && !explicitSignOut) controller.sessionEnded();
+      }
+    });
   }
 } catch {
   notice.textContent = 'Sign-in is unavailable. Please try again later.';

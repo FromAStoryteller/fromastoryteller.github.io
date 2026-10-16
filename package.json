@@ -23,6 +23,7 @@
     "test:auth:local": "node scripts/test-fas-auth-local.mjs",
     "test:signup:local": "node scripts/test-fas-signup-local.mjs",
     "test:sessions:local": "node scripts/test-fas-sessions-local.mjs",
+    "test:sessions:remembered:local": "node scripts/test-fas-remembered-sessions-local.mjs",
     "test:recovery:local": "node scripts/test-fas-recovery-local.mjs",
     "test:settings:local": "node scripts/test-fas-settings-local.mjs",
     "test:policies:local": "node scripts/test-fas-policies-local.mjs",

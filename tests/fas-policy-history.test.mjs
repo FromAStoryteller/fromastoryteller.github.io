@@ -6,6 +6,18 @@ import { verifyPolicyHistory, publishedAgreement, policyDigest } from '../script
 import { REGISTRATION_VERSION } from '../account/registration-declaration.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const registry = JSON.parse(readFileSync(new URL('../account/policy-versions.json', import.meta.url), 'utf8'));
+
+test('Remembered sign-in update preserves the live policy and freezes its new storage disclosure separately',()=>{
+  const update=registry.versions[registry.sessionUpdateVersion];
+  assert.equal(update.previousVersion,'account-launch-2026-10-16-v1');
+  assert.ok(['publication-candidate','published'].includes(update.status));
+  assert.equal(registry.activePublishedVersion,update.status==='published'?registry.sessionUpdateVersion:update.previousVersion);
+  const privacy=readFileSync(new URL('..'+update.documents.privacy.path,import.meta.url),'utf8');
+  assert.match(privacy,/Keep me signed in on this device, selected by default/);
+  assert.match(privacy,/Uncheck the option for a tab-only session/);
+  assert.match(privacy,/Remembered tabs share the same sign-in and sign-out/);
+  assert.equal(registry.versions[update.previousVersion].documents.privacy.sha256,'ebce6edbab0217a6eaee1f4ffb7b57efcdea288b26ed2e05266b4796627613bd');
+});
 test('Acknowledged draft remains preserved while revised wording is reviewed separately', () => {
   assert.doesNotThrow(() => verifyPolicyHistory(root, registry));
   assert.equal(registry.versions[REGISTRATION_VERSION].acknowledgementKind, 'local_draft_review');
@@ -38,7 +50,7 @@ test('Frozen launch wording stays immutable; only published status can pass read
   assert.ok(['publication-candidate','published'].includes(candidate.status));
   assert.equal(candidate.acknowledgementKind,'published_terms_agreement');
   if(candidate.status==='publication-candidate') assert.equal(registry.activePublishedVersion,null);
-  else assert.equal(registry.activePublishedVersion,version);
+  else assert.equal(registry.versions[registry.activePublishedVersion].status,'published');
   for(const kind of ['privacy','terms']) {
     const document=candidate.documents[kind];
     assert.equal(document.path,`/account/policy-history/${version}/${kind}/index.html`);
