@@ -146,7 +146,7 @@ try {
     document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your account access, personal data and account choices.');
     const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
     if (session.state !== 'signed-in') {
-      show(session.message || 'Sign in to view your account settings.', true);
+      show(session.message || 'Sign in to view your account settings.', session.state === 'session-unavailable');
       signInPrompt.hidden = false;
     }
     else render(await loadAccount(local.client));

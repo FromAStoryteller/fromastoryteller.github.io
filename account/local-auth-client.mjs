@@ -18,9 +18,11 @@ export async function loadLocalAuthClient({ remember } = {}) {
 }
 
 async function initializeClient(remember) {
-  const config = await loadAccountAuthConfig(location.origin);
+  const [config, { createClient }] = await Promise.all([
+    loadAccountAuthConfig(location.origin),
+    import('./vendor/supabase-client.js'),
+  ]);
   if (!config) return null;
-  const { createClient } = await import('./vendor/supabase-client.js');
   const storage = createBrowserSessionStorage({ namespace: new URL(config.url).host.replace(/[^a-z0-9-]/gi, '-'), remember });
   const hadSession = storage.hasSession;
   const client = createClient(config.url, config.key, {

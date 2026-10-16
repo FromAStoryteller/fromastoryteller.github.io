@@ -27,8 +27,8 @@ function publicFields(row) {
   return { display_name: row.display_name, bio: row.bio, welcome_line: row.welcome_line ?? '', public_id: row.public_id ?? null };
 }
 
-export function createProfileService(client) {
-  let ownerId;
+export function createProfileService(client, { expectedOwnerId } = {}) {
+  let ownerId = expectedOwnerId;
   async function currentUser() {
     if (client.auth.refreshSession) {
       const refreshed = await client.auth.refreshSession();
