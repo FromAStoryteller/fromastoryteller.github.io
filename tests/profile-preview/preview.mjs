@@ -30,6 +30,6 @@ else {
     const link = root.querySelector('[data-public-link]');
     if (link && !link.hidden && !link.href.includes('mode=public')) link.href = '?mode=public';
   });
-  observer.observe(root,{subtree:true,attributes:true,attributeFilter:['hidden','href']});
+  observer.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','href']});
   addEventListener('pagehide', () => { observer.disconnect(); dispose?.(); });
 }

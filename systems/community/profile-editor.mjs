@@ -1,10 +1,11 @@
-import { createProfileService, publicProfileUrl } from './profiles.mjs';
+import { createProfileService } from './profiles.mjs';
+import { accountNavigation } from './account-navigation.mjs';
 
 export function mountProfileEditor(root, client, { contributor = false, viewer = !contributor } = {}) {
   const service = createProfileService(client);
   let disposed = false;
   let busy = false;
-  root.innerHTML = `<nav class="profile-navigation" aria-label="Profile navigation"><a class="account-secondary" href="/account/settings/">Account settings</a>${viewer ? '' : '<a class="account-secondary" data-public-link hidden>View public profile</a>'}</nav><div class="profile-workspace${viewer ? ' profile-workspace--viewer' : ''}">
+  root.innerHTML = `<nav class="account-navigation" aria-label="Your profile and account"><a class="account-secondary" href="/account/profile/" aria-current="page">Edit my profile</a><a class="account-secondary" href="/account/settings/">Account settings</a></nav><div class="profile-workspace${viewer ? ' profile-workspace--viewer' : ''}">
     <aside class="profile-intro"><p class="profile-eyebrow">Your own small corner</p><h1>Make yourself <br>at home.</h1><p>The name, words and little welcome that make this space yours.</p></aside>
     <section class="profile-form-panel" aria-labelledby="profile-title">
       <h2 id="profile-title">My corner</h2><p class="profile-muted" data-visibility></p>
@@ -50,13 +51,11 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   });
   function fill(profile) {
     name.value = profile.display_name;
+    root.querySelector('nav').replaceWith(accountNavigation(root.ownerDocument, { current: 'profile', publicId: contributor ? profile.public_id : null }));
     if (!viewer) { bio.value = profile.bio; welcome.value = profile.welcome_line; }
     preview(); status.dataset.state = '';
     if (viewer) return;
     root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : viewer ? 'Only you can see your viewer profile.' : 'Your saved private profile text.';
-    const url = publicProfileUrl(profile.public_id);
-    const link = root.querySelector('[data-public-link]');
-    if (contributor && url) { link.href = url; link.textContent = 'View public profile'; link.hidden = false; }
   }
   void (async () => { try {
     const profile = await service.readOwn();

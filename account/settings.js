@@ -6,7 +6,8 @@ import { downloadOwnedContent, prepareDeletion, confirmDeletion } from './lifecy
 import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
 import { watchSessionEnd } from './session-events.mjs';
-import { createProfileService, publicProfileUrl } from '../systems/community/profiles.mjs';
+import { createProfileService } from '../systems/community/profiles.mjs';
+import { accountNavigation } from '../systems/community/account-navigation.mjs';
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
 const signInPrompt = document.querySelector('[data-settings-sign-in]');
@@ -30,12 +31,11 @@ function render(account) {
   document.querySelector('[data-account-role]').textContent = ({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[account.role] ?? 'Viewer';
   document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
   panel.hidden = false;
-  const publicLink = document.querySelector('[data-settings-public-profile]');
-  publicLink.hidden = true;
+  const nav = document.querySelector('[data-account-navigation]');
+  nav.replaceChildren(accountNavigation(document, { current: 'settings' }));
   void createProfileService(local.client).readPublic(account.profile.public_id).then(profile => {
     if (sessionEnded || account.state !== 'active' || !profile) return;
-    publicLink.href = publicProfileUrl(profile.public_id);
-    publicLink.hidden = false;
+    nav.replaceChildren(accountNavigation(document, { current: 'settings', publicId: profile.public_id }));
   }).catch(() => {});
   download.disabled = false;
   const contributor = ['member', 'moderator', 'admin'].includes(account.role);
@@ -122,7 +122,6 @@ confirmForm.addEventListener('submit', async event => {
     for (const field of document.querySelectorAll('[data-account-settings] input, [data-account-settings] textarea')) field.value = '';
     panel.hidden = true;
     signInPrompt.hidden = false;
-    document.querySelector('[data-settings-back]').hidden = true;
     show(local.mode === 'production' ? 'Your account and its owned Community content were deleted. You’re signed out.' : 'Your test account and its owned Community content were deleted. You’re signed out.');
     status.setAttribute('tabindex','-1'); status.focus();
   } catch (error) {
@@ -138,11 +137,10 @@ try {
     watchSessionEnd(local, () => {
       sessionEnded = true; prepared = null;
       panel.hidden = true; passwordForm.reset(); confirmForm.reset();
-      document.querySelector('[data-settings-public-profile]').hidden = true;
+      document.querySelector('[data-account-navigation]').replaceChildren(accountNavigation(document, { current: 'settings' }));
       document.querySelector('[data-account-email]').textContent = '';
       document.querySelector('[data-account-role]').textContent = '';
       signInPrompt.hidden = false;
-      document.querySelector('[data-settings-back]').hidden = true;
       show('Your session has ended. Sign in to view your account settings.', true);
     });
     document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — these settings apply to your local FAS account.', 'Development test only — these settings apply to your FAS DEV account.', 'Manage your account access, personal data and account choices.');
@@ -150,7 +148,6 @@ try {
     if (session.state !== 'signed-in') {
       show(session.message || 'Sign in to view your account settings.', true);
       signInPrompt.hidden = false;
-      document.querySelector('[data-settings-back]').hidden = true;
     }
     else render(await loadAccount(local.client));
   }
@@ -158,5 +155,4 @@ try {
   document.querySelector('[data-preview-note]').textContent = 'Account services are currently unavailable.';
   show('We couldn’t load your account settings. Sign in again or try later.', true);
   signInPrompt.hidden = false;
-  document.querySelector('[data-settings-back]').hidden = true;
 }
