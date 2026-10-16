@@ -1,5 +1,7 @@
 # Production account rollout preparation — 16 October 2026
 
+**Latest:** The specifically approved lifecycle deployment is complete, with its production switch false and six HTTP checks proving it remains unavailable. The prior approval block is resolved. Signup is still OFF. See [deployment evidence](production-lifecycle-deployment-2026-10-16.md). Earlier observations below are historical.
+
 **Latest configuration:** Production signup validation and lifecycle retention schedules are now installed and verified; signup remains OFF. Lifecycle function deployment is blocked pending explicit approval of its custom authentication configuration. See [configuration result](production-hook-retention-2026-10-16.md). Earlier observations below are historical.
 
 **Current status:** The four production database migrations are now installed after explicit database-only approval. Signup remains OFF. See [installation evidence](production-account-database-installation-2026-10-16.md). The observations below record the earlier preparation baseline; they do not describe the post-installation migration count.

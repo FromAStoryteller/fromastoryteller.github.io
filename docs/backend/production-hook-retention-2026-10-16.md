@@ -1,5 +1,7 @@
 # Production signup validation and retention — 16 October 2026
 
+**Latest:** The specifically approved lifecycle deployment is complete, with its production switch false and six HTTP checks proving it remains unavailable. The prior approval block is resolved. Signup is still OFF. See [deployment evidence](production-lifecycle-deployment-2026-10-16.md). Earlier observations below are historical.
+
 Following Ryan's instruction to proceed with the account-service configuration,
 production now has the enabled Before User Created Postgres hook:
 public.fas_before_user_created. The dashboard applied only the displayed hook
