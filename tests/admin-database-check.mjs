@@ -47,6 +47,16 @@ export async function verifyAdminDatabase(PGlite){
   const audit=await value(a,sa,'select public.fas_admin_activity() value');assert.ok(audit.length>=6);assert.equal(JSON.stringify(audit).includes(token),false);
   const account=await value(a,sa,`select public.fas_admin_find_account('VIEWER@example.invalid') value`);assert.deepEqual(account.roles,['member']);assert.equal(account.email,'viewer@example.invalid');
   assert.equal(await value(a,sa,`select public.fas_admin_find_account('missing@example.invalid') value`),null);
+  await db.exec(`insert into public.stories(id,author_id,slug,title,status,published_at) values('73000000-0000-0000-0000-000000000001','${v}','admin-review-story','Review story','published',now());`);
+  await value(a,sa,`select public.moderate_story('73000000-0000-0000-0000-000000000001','archived','Moderation reason') value`);
+  await assert.rejects(value(v,sv,`select public.fas_admin_restore_story('73000000-0000-0000-0000-000000000001','admin-review-story','Bypass') value`),/Administrator access/);
+  await assert.rejects(value(a,sa,`select public.fas_admin_restore_story('73000000-0000-0000-0000-000000000001','wrong','Restore') value`),/Confirm the story/);
+  await value(a,sa,`select public.fas_admin_restore_story('73000000-0000-0000-0000-000000000001','admin-review-story','Reviewed and restored') value`);
+  assert.equal((await db.query(`select status::text from public.stories where slug='admin-review-story'`)).rows[0].status,'draft');
+  const secondToken=await value(a,sa,`select public.create_invite('admin-b@example.invalid',7) value`);
+  const secondInvite=(await value(a,sa,'select public.fas_admin_invites() value')).find(i=>i.email==='admin-b@example.invalid');
+  await value(a,sa,`select public.revoke_invite('${secondInvite.id}') value`);
+  await assert.rejects(value(b,sb,`select public.accept_invite('${secondToken}') value`),/Invite unavailable/);
   const snapshot=(await db.query(`select public.fas_account_snapshot('${a}','${sa}') value`)).rows[0].value;assert.equal(snapshot.data.role,'member','multi-role export remains scalar-compatible');
   await db.exec(`delete from auth.sessions where id='${sb}';`);
   await assert.rejects(value(b,sb,'select public.fas_admin_overview() value'),/Active account session/);

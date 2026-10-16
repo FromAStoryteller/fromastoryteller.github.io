@@ -203,4 +203,19 @@ begin
   insert into private.admin_audit(actor_id,action,subject_id,details,reason) values(auth.uid(),'story_archived',target_story,jsonb_build_object('previous_status',previous),btrim(note));
 end; $$;
 
+create function public.fas_admin_restore_story(target_story uuid,confirmation_slug text,note text) returns void language plpgsql security definer set search_path='' as $$
+declare caller uuid; story public.stories;
+begin
+ caller:=private.require_admin();
+ if note is null or char_length(btrim(note)) not between 1 and 2000 then raise exception 'Reason required'; end if;
+ select * into story from public.stories where id=target_story for update;
+ if not found or story.status<>'archived' then raise exception 'Archived story required'; end if;
+ if confirmation_slug is distinct from story.slug then raise exception 'Confirm the story reference'; end if;
+ if not private.account_active(story.author_id) then raise exception 'Author account is unavailable'; end if;
+ update public.stories set status='draft',published_at=null where id=target_story;
+ insert into public.moderation_log(story_id,actor_id,from_status,to_status,reason) values(target_story,caller,'archived','draft',btrim(note));
+ insert into private.admin_audit(actor_id,action,subject_id,reason) values(caller,'story_restored',target_story,btrim(note));
+end; $$;
+revoke all on function public.fas_admin_restore_story(uuid,text,text) from public,anon,authenticated;
+grant execute on function public.fas_admin_restore_story(uuid,text,text) to authenticated;
 commit;

@@ -11,7 +11,7 @@ const env={...process.env,FAS_TEST_CONFIRM:'fas-community-dev:oqmmvjjycpyxvxipcy
 keys=null;
 if(!env.FAS_TEST_ANON_KEY || !env.FAS_TEST_SERVICE_KEY)throw new Error('Expected DEV process-only test credentials.');
 try {
-  for(const [file,args] of [['test-fas-accounts-dev.mjs',[]],['test-fas-security-api.mjs',['--hosted-dev']]]) {
+  for(const [file,args] of [['test-fas-accounts-dev.mjs',[]],['test-fas-security-api.mjs',['--hosted-dev']],['test-fas-admin-api.mjs',[]]]) {
     const child=spawnSync(process.execPath,['scripts/'+file,...args],{cwd:root,env,stdio:'inherit',windowsHide:true});
     if(child.status!==0){process.exitCode=1;break;}
   }

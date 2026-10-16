@@ -1,0 +1,36 @@
+// Disposable FAS DEV fixtures only. No email is sent. Credentials stay in memory.
+import assert from 'node:assert/strict';
+import {randomUUID,randomBytes} from 'node:crypto';
+import {createClient} from '@supabase/supabase-js';
+import {securityTarget,checkLegacyProjectKey} from './fas-security-target.mjs';
+const {base}=securityTarget(['--hosted-dev'],process.env.FAS_TEST_CONFIRM);
+const key=process.env.FAS_TEST_ANON_KEY,secret=process.env.FAS_TEST_SERVICE_KEY;
+assert.ok(key&&secret,'Process-only DEV credentials required');checkLegacyProjectKey(key,'anon');checkLegacyProjectKey(secret,'service_role');
+const options={auth:{persistSession:false,autoRefreshToken:false}};const setup=createClient(base,secret,options);const run=randomUUID();
+const users=[],clients=[],storyIds=[],inviteIds=[],auditIds=new Set();let stage='fixture setup',failure=false;const names=new Set();
+const good=result=>{assert.ok(!result.error,'Admin API check failed at '+stage);return result.data;};
+const deny=result=>assert.ok(result.error,'Expected denial at '+stage);
+async function user(label,roles=[]){const email=`fas-admin-${run}-${label}@example.invalid`,password='AdminTest9!'+randomBytes(32).toString('base64url');const name=`Admin check ${run} ${label}`;names.add(name);const made=good(await setup.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{display_name:name,role:'admin'}}));const record={id:made.user.id,email};users.push(record);if(roles.length)good(await setup.from('user_roles').insert(roles.map(role=>({user_id:record.id,role}))));const client=createClient(base,key,options);clients.push(client);good(await client.auth.signInWithPassword({email,password}));return {...record,client};}
+try{
+ const a=await user('admin-a',['member','admin']),b=await user('contributor',['member']),viewer=await user('viewer');
+ stage='authorization';deny(await viewer.client.rpc('fas_admin_overview'));deny(await b.client.rpc('fas_admin_find_account',{account_email:a.email}));deny(await viewer.client.from('user_roles').insert({user_id:viewer.id,role:'admin'}));good(await a.client.rpc('fas_admin_overview'));
+ stage='independent roles';const change=async(actor,target,role,enabled)=>actor.client.rpc('fas_admin_set_role',{target_user:target.id,target_role:role,enabled,confirmation_email:target.email,note:'Synthetic admin API '+run});
+ deny(await a.client.rpc('fas_admin_set_role',{target_user:b.id,target_role:'admin',enabled:true,confirmation_email:'wrong@example.invalid',note:'Denied'}));good(await change(a,b,'admin',true));good(await change(b,b,'admin',false));let roles=good(await b.client.from('user_roles').select('role').eq('user_id',b.id));assert.deepEqual(roles.map(r=>r.role),['member']);deny(await b.client.rpc('fas_admin_overview'));good(await change(a,b,'admin',true));good(await change(a,b,'member',false));good(await b.client.rpc('fas_admin_overview'));deny(await b.client.from('stories').insert({author_id:b.id,slug:'admin-only-'+run,title:'Denied'}));
+ stage='invitation';const token=good(await a.client.rpc('create_invite',{invitee_email:viewer.email,valid_days:7}));let invites=good(await a.client.rpc('fas_admin_invites'));const invite=invites.find(i=>i.email===viewer.email);assert.ok(invite);inviteIds.push(invite.id);assert.equal(JSON.stringify(invites).includes(token),false);assert.equal(JSON.stringify(invites).includes('token_hash'),false);deny(await b.client.rpc('accept_invite',{invite_token:token}));good(await viewer.client.rpc('accept_invite',{invite_token:token}));deny(await viewer.client.rpc('accept_invite',{invite_token:token}));roles=good(await viewer.client.from('user_roles').select('role').eq('user_id',viewer.id));assert.deepEqual(roles.map(r=>r.role),['member']);deny(await viewer.client.rpc('fas_admin_activity'));
+ stage='moderation';const story=good(await a.client.from('stories').insert({author_id:a.id,slug:'fas-admin-story-'+run,title:'Synthetic admin story',body:'Original author words'}).select('id').single());storyIds.push(story.id);good(await a.client.from('stories').update({status:'published'}).eq('id',story.id));good(await b.client.rpc('moderate_story',{target_story:story.id,decision:'archived',note:'Synthetic moderation '+run}));deny(await viewer.client.rpc('fas_admin_restore_story',{target_story:story.id,confirmation_slug:'fas-admin-story-'+run,note:'Denied'}));good(await a.client.rpc('fas_admin_restore_story',{target_story:story.id,confirmation_slug:'fas-admin-story-'+run,note:'Synthetic restoration '+run}));const restored=good(await a.client.from('stories').select('body,status,published_at').eq('id',story.id).single());assert.equal(restored.body,'Original author words');assert.equal(restored.status,'draft');assert.equal(restored.published_at,null);
+ stage='revoked live session';const staleToken=good(await b.client.auth.getSession()).session.access_token;good(await b.client.auth.signOut({scope:'global'}));const stale=createClient(base,key,{...options,global:{headers:{Authorization:'Bearer '+staleToken}}});deny(await stale.rpc('fas_admin_overview'));
+ stage='audit';for(let offset=0;offset<10000;offset+=25){const rows=good(await a.client.rpc('fas_admin_activity',{page_offset:offset}));for(const row of rows)if(names.has(row.actor_name))auditIds.add(row.id);if(rows.length<25)break;}assert.ok(auditIds.size>=7);console.log('PASS DEV admin authorization, independent grant/relinquish, invitation acceptance/privacy, moderation restoration and revoked-session checks');
+}catch{failure=true;console.error('FAIL DEV admin API checks at '+stage+'; credentials and response bodies suppressed.');}
+finally{
+ for(const client of clients)await client.auth.signOut({scope:'global'}).catch(()=>{});
+ for(const id of storyIds){const r=await setup.from('moderation_log').delete().eq('story_id',id);if(r.error)failure=true;const s=await setup.from('stories').delete().eq('id',id);if(s.error)failure=true;}
+ for(const id of inviteIds){const r=await setup.from('invites').delete().eq('id',id);if(r.error)failure=true;}
+ // Preserve the immutable admin audit until its exact synthetic IDs are independently
+ // verified/removed by the connected database operator. No client audit-delete API.
+ // Collect any remaining fixture invitations and audit IDs before deleting users.
+ const actorIds=users.map(u=>u.id);if(actorIds.length){const rows=await setup.from('invites').select('id').in('created_by',actorIds);for(const row of rows.data??[]){if(!inviteIds.includes(row.id))inviteIds.push(row.id);await setup.from('invites').delete().eq('id',row.id);}}
+ for(const user of users){const r=await setup.auth.admin.deleteUser(user.id);if(r.error)failure=true;}
+ console.log('Synthetic admin audit IDs for independent cleanup: '+JSON.stringify([...auditIds]));console.log('Synthetic actor IDs for independent cleanup: '+JSON.stringify(actorIds));console.log('Synthetic subject IDs for independent cleanup: '+JSON.stringify([...actorIds,...storyIds,...inviteIds]));
+ console.log(failure?'Admin API suite FAILED; inspect DEV fixtures.':'Admin API suite PASSED; account/content cleanup finished, independent audit cleanup remains.');
+}
+process.exitCode=failure?1:0;

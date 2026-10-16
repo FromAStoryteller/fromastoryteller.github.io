@@ -11,7 +11,8 @@ export function createAdminService(client,{ownerId}={}){
   setRole:(id,role,enabled,email,note)=>call('fas_admin_set_role',{target_user:id,target_role:role,enabled,confirmation_email:email,note},true),
   issueInvite:(email,days)=>call('create_invite',{invitee_email:email,valid_days:days},true),revokeInvite:id=>call('revoke_invite',{invite_id:id},true),
   stories:(state,offset)=>call('fas_admin_stories',{state_filter:state,page_offset:offset}),
-  async story(id){const verified=await client.auth.getUser();if(verified.error||verified.data?.user?.id!==ownerId)throw new Error('Sign in again to continue.');const result=await client.from('stories').select('id,title,body,summary,status').eq('id',id).single();if(result.error||!result.data)throw new Error('This story is unavailable.');return result.data;},
+  async story(id){const verified=await client.auth.getUser();if(verified.error||verified.data?.user?.id!==ownerId)throw new Error('Sign in again to continue.');const result=await client.from('stories').select('id,slug,title,body,summary,status').eq('id',id).single();if(result.error||!result.data)throw new Error('This story is unavailable.');return result.data;},
   archive:(id,note)=>call('moderate_story',{target_story:id,decision:'archived',note},true),
+  restore:(id,slug,note)=>call('fas_admin_restore_story',{target_story:id,confirmation_slug:slug,note},true),
   acceptInvite:token=>call('accept_invite',{invite_token:token},true)};
 }
