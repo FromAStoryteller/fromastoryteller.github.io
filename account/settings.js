@@ -32,10 +32,10 @@ function render(account) {
   document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
   panel.hidden = false;
   const nav = document.querySelector('[data-account-navigation]');
-  nav.replaceChildren(accountNavigation(document, { current: 'settings' }));
+  nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth }));
   void createProfileService(local.client).readPublic(account.profile.public_id).then(profile => {
     if (sessionEnded || account.state !== 'active' || !profile) return;
-    nav.replaceChildren(accountNavigation(document, { current: 'settings', publicId: profile.public_id }));
+    nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId: profile.public_id }));
   }).catch(() => {});
   download.disabled = false;
   const contributor = ['member', 'moderator', 'admin'].includes(account.role);

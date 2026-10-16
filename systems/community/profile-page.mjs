@@ -49,7 +49,7 @@ try {
     let ownerSessionEnded = false;
     function render() {
       renderPublicProfile(root,current,{imageBase:local.publicImageBase});
-      if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id }));
+      if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth }));
       if (current?.next_offset != null) {
         const more = document.createElement('button');more.className='account-secondary';more.textContent='More stories';
         more.addEventListener('click',async () => {
