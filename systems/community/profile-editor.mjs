@@ -57,7 +57,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
     root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : viewer ? 'Only you can see your viewer profile.' : 'Your saved private profile text.';
     const url = publicProfileUrl(profile.public_id);
     const link = root.querySelector('[data-public-link]');
-    if (contributor && url) { link.href = url; link.hidden = false; }
+    if (contributor && url) { link.href = url; link.textContent = 'View public profile'; link.hidden = false; }
   }
   void (async () => { try {
     const profile = await service.readOwn();
