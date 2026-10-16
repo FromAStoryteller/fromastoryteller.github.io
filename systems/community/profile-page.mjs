@@ -5,6 +5,7 @@ import { watchSessionEnd } from '/account/session-events.mjs';
 import { mountProfileEditor } from './profile-editor.mjs';
 import { createProfileService } from './profiles.mjs';
 import { renderPublicProfile, renderPublicStory } from './public-profile.mjs';
+import { accountNavigation } from './account-navigation.mjs';
 const root = document.querySelector('[data-profile-root]');
 const mode = document.querySelector('[data-profile-mode]').dataset.profileMode;
 let dispose;
@@ -44,8 +45,11 @@ try {
   } else if (mode === 'public') {
     const id = new URLSearchParams(location.search).get('author');
     let current = await service.readPublic(id);
+    let ownsPage = false;
+    let ownerSessionEnded = false;
     function render() {
       renderPublicProfile(root,current,{imageBase:local.publicImageBase});
+      if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth }));
       if (current?.next_offset != null) {
         const more = document.createElement('button');more.className='account-secondary';more.textContent='More stories';
         more.addEventListener('click',async () => {
@@ -60,6 +64,16 @@ try {
     }
     render();
     if (current) document.title=`${current.display_name} | From A Storyteller`;
+    // Owner controls never form part of the anonymous public projection.
+    const stopOwnerWatch = watchSessionEnd(local, () => { ownerSessionEnded = true; ownsPage = false; root.querySelector('.account-navigation')?.remove(); });
+    addEventListener('pagehide', stopOwnerWatch, { once: true });
+    void (async () => {
+      const session = await local.client.auth.getSession();
+      if (!session.data?.session || !current) return;
+      const own = await service.readOwn();
+      ownsPage = !ownerSessionEnded && own.public_id === id;
+      if (ownsPage) render();
+    })().catch(() => {});
   } else {
     const story = await service.readStory(new URLSearchParams(location.search).get('story'));
     renderPublicStory(root,story);

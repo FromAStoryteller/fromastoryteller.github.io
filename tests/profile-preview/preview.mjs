@@ -21,7 +21,7 @@ if (mode === 'public') {
   const byline=root.querySelector('a');if(byline)byline.href='?mode=public';
 }
 else {
-  const client = { auth: { getUser: async () => ({ data: { user: { id: 'preview-only' } } }) }, from: () => {
+  const client = { auth: { signOut: async () => ({error:null}), getUser: async () => ({ data: { user: { id: 'preview-only' } } }) }, from: () => {
     const query = {select: () => query,eq: () => query,update: changes => { profile = {...profile,...changes}; return query; },single: async () => ({data:profile,error:null})}; return query;
   }};
   dispose = mountProfileEditor(root, client, { contributor: mode !== 'viewer' });
@@ -30,6 +30,6 @@ else {
     const link = root.querySelector('[data-public-link]');
     if (link && !link.hidden && !link.href.includes('mode=public')) link.href = '?mode=public';
   });
-  observer.observe(root,{subtree:true,attributes:true,attributeFilter:['hidden','href']});
+  observer.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','href']});
   addEventListener('pagehide', () => { observer.disconnect(); dispose?.(); });
 }
