@@ -35,6 +35,7 @@ form.addEventListener('submit', async event => {
 });
 try {
   const local = await loadLocalAuthClient();
+  if (!local?.signupEnabled) throw new Error('Password recovery unavailable');
   if (local?.signupEnabled) {
     auth = local.client.auth;
     accountOrigin = local.accountOrigin;
@@ -43,4 +44,4 @@ try {
     setInterval(updateButton, 1000);
     document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(local.mode, 'Local test only — recovery emails go to the local test inbox.', 'Development test only — emails go to your inbox.', 'Use the email address for your account.');
   }
-} catch { status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Password recovery is unavailable. Please try again later.'; }
+} catch { document.querySelector('#account-preview-note').textContent = 'Password recovery is currently unavailable.'; status.hidden = false; status.dataset.state = 'error'; status.textContent = 'Password recovery is unavailable. Please try again later.'; }

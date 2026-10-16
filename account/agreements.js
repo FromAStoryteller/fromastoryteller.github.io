@@ -29,6 +29,7 @@ form.addEventListener('submit',async event=>{
 });
 try {
   local=await loadLocalAuthClient();
+  if(!local)throw new Error('Account services are currently unavailable. Please try again later.');
   if(local) {
     watchSessionEnd(local,()=>{
       sessionEnded=true;form.hidden=true;form.reset();history([]);
@@ -46,7 +47,7 @@ try {
       if(records.error || !Array.isArray(records.data))throw new Error('We couldn’t load your policy history. Please try again.');
       history(records.data);
       if(sessionEnded) { /* The sign-out handler already cleared private UI. */ }
-      else if(!requirement)show('No published Terms currently need your agreement. Earlier test acknowledgements remain unchanged.');
+      else if(!requirement)show('No published Terms currently need your agreement.');
       else if(records.data.some(record=>record.release_id===requirement.release_id))show('You have already agreed to the current Terms and seen the Privacy notice.');
       else {
         document.querySelector('[data-policy-version]').textContent=`Terms ${requirement.terms_version}; Privacy notice ${requirement.privacy_version}. Published ${new Date(requirement.published_at).toLocaleDateString()}.`;
@@ -55,5 +56,5 @@ try {
         show('Review the linked policy versions before choosing whether to agree.');form.hidden=false;
       }
     }
-  } else show('Published account policies are not enabled in this preview.');
-} catch(error){show(error.message,true);}
+  }
+} catch(error){document.querySelector('[data-preview-note]').textContent='Account services are currently unavailable.';show(error.message,true);}

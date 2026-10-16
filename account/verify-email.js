@@ -32,6 +32,7 @@ function render({ state, message, retryable }) {
 }
 try {
   const local = await loadLocalAuthClient();
+  if (!local?.signupEnabled) throw new Error('Email verification unavailable');
   if (local?.signupEnabled) {
     document.querySelector('[data-preview-note]').textContent = accountEnvironmentNote(local.mode, 'Local test only — this confirms a local FAS test account.', 'Development test only — this confirms your FAS DEV test account.', 'Confirm your email address to finish setting up your account.');
     intro.textContent = tokenHash ? 'Select Confirm email to finish verifying your email address.' : 'Open the verification link from your email to continue. If you need a new link, request another email below.';
@@ -41,4 +42,4 @@ try {
       button.disabled = false;
     }
   }
-} catch { render({ state: 'error', retryable: false, message: 'Email verification is unavailable. Please reopen your email link and try again later.' }); }
+} catch { document.querySelector('[data-preview-note]').textContent = 'Email verification is currently unavailable.'; render({ state: 'error', retryable: false, message: 'Email verification is unavailable. Please reopen your email link and try again later.' }); }

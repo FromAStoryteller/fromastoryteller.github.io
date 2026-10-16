@@ -53,6 +53,7 @@ form.addEventListener('submit', async event => {
 
 try {
   const local = await loadLocalAuthClient();
+  if (!local?.signupEnabled) throw new Error('Account creation unavailable');
   if (local?.signupEnabled) {
     const settings = await fetch(local.client.supabaseUrl + '/auth/v1/settings', { headers: { apikey: local.client.supabaseKey }, signal: AbortSignal.timeout(5000) }).then(response => response.ok ? response.json() : null);
     if (settings?.mailer_autoconfirm === false && settings?.external?.email === true) {
@@ -76,6 +77,6 @@ try {
       }
       submit.firstChild.textContent = local.mode === 'production' ? 'Create account ' : 'Create test account ';
       document.querySelector('#account-preview-note').textContent = accountEnvironmentNote(local.mode, 'Local test only — use a sample account. Emails go to the local test inbox.', 'Development test only — uses FAS DEV. Verification emails go to your inbox.', 'Create a viewer account. We’ll email you a verification link.');
-    }
+    } else throw new Error('Account creation unavailable');
   }
-} catch { show({ state: 'error', message: 'Account creation is unavailable. Please try again later.' }); }
+} catch { document.querySelector('#account-preview-note').textContent = 'Account creation is currently unavailable.'; show({ state: 'error', message: 'Account creation is unavailable. Please try again later.' }); }

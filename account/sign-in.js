@@ -114,6 +114,7 @@ function render({ state, message, email }) {
 
 try {
   local = await loadLocalAuthClient();
+  if (!local) throw new Error('Account services unavailable');
   if (local) {
     bindController();
     rememberInput.checked = local.storage.requestedRemember;

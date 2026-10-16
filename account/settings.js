@@ -28,6 +28,7 @@ function render(account) {
   if (sessionEnded) return;
   document.querySelector('[data-account-email]').textContent = account.user.email;
   document.querySelector('[data-account-role]').textContent = ({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[account.role] ?? 'Viewer';
+  document.querySelector('[data-test-declaration-note]').hidden = !account.registration;
   form.querySelector('[data-display-name]').value = account.profile.display_name;
   form.querySelector('[data-bio]').value = account.profile.bio;
   panel.hidden = false;
@@ -40,6 +41,7 @@ function render(account) {
   const staff = ['admin','moderator'].includes(account.role);
   deleteStart.hidden = !local.lifecycleEnabled || staff;
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
+  document.querySelector('[data-deletion-unavailable]').textContent = staff ? 'Administrator and moderator accounts need a separate reviewed deletion process. Contact fromastoryteller@gmail.com for help.' : 'Account deletion is currently unavailable. Please try again later.';
   if (account.state === 'closing') {
     form.querySelector('fieldset').disabled = true; download.disabled = true; contentDownload.disabled = true;
     deleteStart.textContent = 'Finish account removal…';
@@ -137,6 +139,7 @@ confirmForm.addEventListener('submit', async event => {
 });
 try {
   local = await loadLocalAuthClient();
+  if (!local) throw new Error('Account services unavailable');
   if (local) {
     watchSessionEnd(local, () => {
       sessionEnded = true; prepared = null;
@@ -157,6 +160,7 @@ try {
     else render(await loadAccount(local.client));
   }
 } catch {
+  document.querySelector('[data-preview-note]').textContent = 'Account services are currently unavailable.';
   show('We couldn’t load your account settings. Sign in again or try later.', true);
   signInPrompt.hidden = false;
   document.querySelector('[data-settings-back]').hidden = true;
