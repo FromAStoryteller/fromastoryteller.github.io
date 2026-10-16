@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const skip = new Set(['.git', 'node_modules', 'dist', '.sites-runtime']);
+const skip = new Set(['.git', 'node_modules', 'dist', 'dist-production', '.sites-runtime']);
 function walk(dir, base = '') {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     if (skip.has(entry.name)) return [];

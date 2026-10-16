@@ -1,0 +1,85 @@
+{
+  "format": "fas-policy-history-v1",
+  "activePublishedVersion": "account-launch-2026-10-16-v1",
+  "reviewVersion": "account-review-2026-10-15-v2",
+  "operator": {
+    "name": "From A Storyteller",
+    "country": "New Zealand",
+    "email": "fromastoryteller@gmail.com",
+    "contactMode": "email-only",
+    "operation": "personally-operated"
+  },
+  "versions": {
+    "local-preview-2026-10-15-v1": {
+      "status": "test-draft",
+      "acknowledgementKind": "local_draft_review",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/local-preview-2026-10-15-v1/privacy/index.html",
+          "sha256": "4a247960e8222f27a8e30df99e798ed8d2da965a55951d3bd79977e105556cfa",
+          "source": "/account/privacy-preview/index.html",
+          "mainSha256": "37ec2530999569635995104c7c0949a23d92ff4103fd34530dfe664dbe73668c"
+        },
+        "terms": {
+          "path": "/account/policy-history/local-preview-2026-10-15-v1/terms/index.html",
+          "sha256": "1ee6c539dbf777f5301c81958a3de2a947cb17679f236dca8fca53dfd1c07fa0",
+          "source": "/account/terms-preview/index.html",
+          "mainSha256": "62830fa2a72a2924092837eb4c31fcf1c3b7fac6d036d1cf1556186259b92ac2"
+        }
+      }
+    },
+    "account-review-2026-10-15-v2": {
+      "status": "review",
+      "documents": {
+        "privacy": {
+          "path": "/account/privacy-review/"
+        },
+        "terms": {
+          "path": "/account/terms-review/"
+        }
+      }
+    },
+    "account-launch-2026-10-16-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-16",
+      "effectiveFrom": "public-viewer-registration-launch",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/account-launch-2026-10-16-v1/privacy/index.html",
+          "sha256": "ebce6edbab0217a6eaee1f4ffb7b57efcdea288b26ed2e05266b4796627613bd"
+        },
+        "terms": {
+          "path": "/account/policy-history/account-launch-2026-10-16-v1/terms/index.html",
+          "sha256": "e99ebe4a36ea013f0bbb6216cf7f21e73f0d564e2c7f689beb449600b0124256"
+        }
+      },
+      "operatorWordingReview": {
+        "status": "approved-for-preparation",
+        "reviewedOn": "2026-10-16",
+        "publicFacingName": "From A Storyteller"
+      },
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-16",
+        "scope": "staged-website-and-protected-services-signup-off"
+      }
+    },
+    "site-before-viewer-accounts-2026-10-16-v1": {
+      "status": "historical-site-notice",
+      "sourceGitCommit": "79a91d28f3f2de3fa49595a1de8c25601c5a7e7f",
+      "capturedOn": "2026-10-16",
+      "documents": {
+        "privacy": {
+          "path": "/account/policy-history/site-before-viewer-accounts-2026-10-16-v1/privacy/index.html",
+          "sha256": "a6efea4b11f3a78c0ef83cf7c168e8a5ef0611e3125f3ea30b090861406ced6b"
+        },
+        "terms": {
+          "path": "/account/policy-history/site-before-viewer-accounts-2026-10-16-v1/terms/index.html",
+          "sha256": "193d9e50af77b41dc34cb23eb47d722cc50fde3f9f082e58f8a3c6ab89aae1cb"
+        }
+      }
+    }
+  },
+  "hashFormat": "sha256-utf8-lf",
+  "candidateVersion": "account-launch-2026-10-16-v1"
+}

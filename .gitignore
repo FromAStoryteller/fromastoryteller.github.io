@@ -26,3 +26,6 @@ hosting-baseline.json
 dist-production/
 cloudflare-production-manifest.json
 cloudflare-production-verification.json
+
+# Generated only for a deliberately enabled production account build
+/account/runtime-config.json

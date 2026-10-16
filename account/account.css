@@ -1,0 +1,59 @@
+/* FAS account-page skeletons: use the existing site tokens and shell. */
+.account-page { --password-valid-colour: #166534; --password-invalid-colour: #b91c1c; max-width: var(--container-narrow); margin-inline: auto; padding-bottom: var(--space-10); }
+[data-theme="dark"] .account-page { --password-valid-colour: #4ade80; --password-invalid-colour: #f87171; }
+.account-heading { margin-bottom: var(--space-8); text-align: center; }
+.account-heading h1 { margin: 0 0 var(--space-3); }
+.account-heading > p:last-child { margin: 0; color: var(--colour-text-secondary); }
+.account-eyebrow { margin: 0 0 var(--space-2); color: var(--colour-accent-primary); font-size: .875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.account-panel { min-width: 0; padding: var(--space-7); background: var(--surface-standard-background); border: var(--surface-standard-border); border-radius: var(--radius-lg); box-shadow: var(--surface-standard-shadow); }
+.account-panel h2 { margin: 0 0 var(--space-3); font-size: 1.5rem; }
+.account-preview-note { margin: 0 0 var(--space-6); color: var(--colour-text-muted); font-size: .875rem; }
+.account-form fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.account-field { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); }
+.account-field label { font-weight: 600; }
+.account-field input { width: 100%; box-sizing: border-box; min-height: var(--size-touch-target-minimum); padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-border-default); border-radius: var(--radius-md); background: var(--surface-inset-background); color: var(--colour-text-primary); font: inherit; }
+.account-field input::placeholder { color: var(--colour-text-muted); opacity: 1; }
+.account-field textarea { width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-border-default); border-radius: var(--radius-md); background: var(--surface-inset-background); color: var(--colour-text-primary); font: inherit; resize: vertical; }
+.account-field input:disabled { opacity: 1; cursor: not-allowed; }
+.account-form-options { display: flex; justify-content: flex-end; margin: var(--space-2) 0 var(--space-5); }
+.account-text-button { padding: 0; border: 0; background: transparent; color: var(--colour-accent-primary); font: inherit; font-size: .875rem; text-decoration: none; }
+.account-text-button[href]:hover { text-decoration: underline; }
+.account-recovery-intro { margin: 0 0 var(--space-5); color: var(--colour-text-secondary); }
+.password-guidance { margin: 0; font-size: .875rem; color: var(--colour-text-secondary); }
+.password-rules { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--space-2); font-size: .875rem; }
+.password-rules li { display: flex; align-items: baseline; gap: var(--space-2); color: var(--colour-text-secondary); }
+.password-rules li[data-met="true"] { color: var(--password-valid-colour); }
+.password-rules i { width: 1rem; flex-shrink: 0; }
+.password-input-control { position: relative; }
+.password-input-control input { --password-state-colour: var(--colour-text-secondary); padding-right: calc(var(--size-touch-target-minimum) + var(--space-3)); border-width: 3px; }
+.password-input-control input[data-validation="valid"] { --password-state-colour: var(--password-valid-colour); border-color: var(--password-state-colour); }
+.password-input-control input[data-validation="invalid"] { --password-state-colour: var(--password-invalid-colour); border-color: var(--password-state-colour); }
+.password-input-control input[data-validation]:is(:hover, :focus-visible) { border-color: var(--password-state-colour); }
+.password-input-control input:focus-visible { outline: 2px solid var(--password-state-colour); outline-offset: 3px; box-shadow: none; }
+.password-eye { position: absolute; right: var(--space-1); top: 50%; transform: translateY(-50%); width: var(--size-touch-target-minimum); height: var(--size-touch-target-minimum); display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: var(--colour-text-secondary); border-radius: var(--radius-md); cursor: pointer; }
+.password-eye:hover:not(:disabled) { color: var(--colour-accent-primary); }
+.password-eye:focus-visible { outline: 2px solid var(--colour-text-primary); outline-offset: -4px; }
+.password-eye:disabled { cursor: not-allowed; opacity: .5; }
+.password-summary { margin: 0; font-size: .875rem; color: var(--colour-text-muted); }
+.account-submit, .account-secondary { display: flex; justify-content: center; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--size-touch-target-minimum); padding: var(--space-3) var(--space-4); border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); font: inherit; font-weight: 600; }
+.account-submit { background: var(--colour-accent-primary); color: var(--colour-surface); }
+.account-secondary { box-sizing: border-box; background: transparent; color: var(--colour-accent-primary); text-decoration: none; }
+.account-secondary[href]:hover { border-color: var(--colour-accent-primary-hover); color: var(--colour-accent-primary-hover); }
+.account-reader-note { margin: var(--space-4) 0 0; font-size: .875rem; color: var(--colour-text-secondary); }
+.account-panel button:disabled { cursor: not-allowed; }
+.account-register { border-top: var(--surface-standard-border); margin-top: var(--space-6); padding-top: var(--space-5); }
+.account-register p { margin: 0 0 var(--space-3); color: var(--colour-text-secondary); }
+.account-legal { margin: var(--space-5) 0 0; color: var(--colour-text-muted); font-size: .875rem; }
+@media (max-width: 48rem) {
+  .account-panel { padding: var(--space-6); }
+  .account-heading { margin-bottom: var(--space-6); }
+}
+
+.account-auth-status { padding: var(--space-3) var(--space-4); margin: 0 0 var(--space-5); border: 2px solid var(--colour-border-default); border-radius: var(--radius-md); overflow-wrap: anywhere; }
+.account-auth-status[data-state="error"] { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); }
+.account-auth-status[data-state="success"] { border-color: var(--password-valid-colour); color: var(--password-valid-colour); }
+[data-signed-in-email] { overflow-wrap: anywhere; }
+.account-check { display: flex; align-items: flex-start; gap: var(--space-3); margin-block: var(--space-5); }
+.account-check input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--colour-accent-primary); }
+.account-danger { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); background: transparent; }
+[data-delete-cancel] { min-height: var(--size-touch-target-minimum); margin-top: var(--space-3); }

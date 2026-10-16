@@ -1,10 +1,14 @@
+import { optionalStorageAllowed } from '../privacy/storage-choice.mjs';
 export const Storage = {
     save(key, value) {
-        localStorage.setItem(key, JSON.stringify(value))
+        if (!optionalStorageAllowed(key)) return;
+        try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* Playing remains available. */ }
     },
 
     load(key, fallbackValue) {
-        const storedValue = localStorage.getItem(key)
+        if (!optionalStorageAllowed(key)) return fallbackValue;
+        let storedValue;
+        try { storedValue = localStorage.getItem(key) } catch { return fallbackValue; }
 
         if (storedValue === null) {
             return fallbackValue
