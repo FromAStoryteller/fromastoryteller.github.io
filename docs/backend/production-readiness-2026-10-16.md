@@ -1,5 +1,7 @@
 # Production readiness — read-only review, 16 October 2026
 
+**Current status:** The four production database migrations are now installed after explicit database-only approval. Signup remains OFF. See [installation evidence](production-account-database-installation-2026-10-16.md). The observations below record the earlier preparation baseline; they do not describe the post-installation migration count.
+
 Ryan approved the launch candidate wording after requesting From A Storyteller as
 the public-facing operator name. This approval is recorded as preparation only;
 candidate status and NULL activePublishedVersion are unchanged. No registrant

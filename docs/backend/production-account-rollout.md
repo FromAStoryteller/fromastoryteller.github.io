@@ -1,5 +1,7 @@
 # Production account rollout preparation — 16 October 2026
 
+**Current status:** The four production database migrations are now installed after explicit database-only approval. Signup remains OFF. See [installation evidence](production-account-database-installation-2026-10-16.md). The observations below record the earlier preparation baseline; they do not describe the post-installation migration count.
+
 Status: prepared work only; not a production rollout. Ryan approved the production
 verification/recovery email wording in the local viewer on 16 October. No message
 was sent, production template installed, credential changed or signup enabled.
