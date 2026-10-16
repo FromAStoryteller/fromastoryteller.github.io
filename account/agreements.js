@@ -2,13 +2,16 @@ import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { currentPolicyRequirement, acceptCurrentPolicies } from './published-policies.mjs';
 import { restoreSession } from './session-controller.mjs';
+import { watchSessionEnd } from './session-events.mjs';
 const status=document.querySelector('[data-agreement-status]');
 const form=document.querySelector('[data-agreement-form]');
 let local,requirement,busy=false;
+let sessionEnded=false;
 const show=(message,error=false)=>{status.textContent=message;status.dataset.state=error?'error':'success';};
 function history(records) {
   const target=document.querySelector('[data-agreement-history]');target.replaceChildren();
   for(const record of records) {
+    if(sessionEnded)return;
     const paragraph=document.createElement('p');
     paragraph.textContent=`Terms ${record.terms_version}; Privacy notice ${record.privacy_version}. Recorded ${new Date(record.recorded_at).toLocaleString()}.`;
     target.append(paragraph);
@@ -27,6 +30,11 @@ form.addEventListener('submit',async event=>{
 try {
   local=await loadLocalAuthClient();
   if(local) {
+    watchSessionEnd(local,()=>{
+      sessionEnded=true;form.hidden=true;form.reset();history([]);
+      document.querySelector('[data-agreement-sign-in]').hidden=false;
+      show('Your session has ended. Sign in to view your agreement history.',true);
+    });
     document.querySelector('[data-preview-note]').textContent=accountEnvironmentNote(local.mode, 'Local test only — uses the isolated FAS test stack.', 'Development test only — uses FAS DEV.', 'Review the published versions and your agreement history.');
     requirement=await currentPolicyRequirement(local.client);
     const restored=await restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear());
@@ -37,7 +45,8 @@ try {
       const records=await local.client.rpc('fas_my_policy_agreements');
       if(records.error || !Array.isArray(records.data))throw new Error('We couldn’t load your policy history. Please try again.');
       history(records.data);
-      if(!requirement)show('No published Terms currently need your agreement. Earlier test acknowledgements remain unchanged.');
+      if(sessionEnded) { /* The sign-out handler already cleared private UI. */ }
+      else if(!requirement)show('No published Terms currently need your agreement. Earlier test acknowledgements remain unchanged.');
       else if(records.data.some(record=>record.release_id===requirement.release_id))show('You have already agreed to the current Terms and seen the Privacy notice.');
       else {
         document.querySelector('[data-policy-version]').textContent=`Terms ${requirement.terms_version}; Privacy notice ${requirement.privacy_version}. Published ${new Date(requirement.published_at).toLocaleDateString()}.`;
