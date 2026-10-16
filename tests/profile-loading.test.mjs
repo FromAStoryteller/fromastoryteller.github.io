@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadProfileAccount } from '../account/settings-controller.mjs';
+import { restoreSession, takeRestoredIdentity } from '../account/session-controller.mjs';
 
 test('profile loading runs independent requests together and skips unrelated account history',async()=>{
   const pending=[];
@@ -22,4 +23,19 @@ test('profile loading runs independent requests together and skips unrelated acc
 test('revoked sessions stop profile queries before any private data is requested',async()=>{
   const client={auth:{refreshSession:async()=>({error:new Error('revoked')})},from(){throw new Error('Private query must not run');}};
   await assert.rejects(loadProfileAccount(client),/session has ended/);
+});
+
+test('server-verified restoration can be consumed once and a later failed restoration clears it',async()=>{
+  const user={id:'owner',email:'owner@example.invalid'};
+  let revoked=false;
+  const auth={getSession:async()=>({data:{session:{user:{id:'untrusted-cache'}}}}),
+    refreshSession:async()=>revoked?{error:{status:401}}:{data:{session:{}}},
+    getUser:async()=>({data:{user}}),signOut:async()=>({error:null})};
+  await restoreSession(auth,true);
+  assert.equal(takeRestoredIdentity(auth),user);
+  assert.equal(takeRestoredIdentity(auth),null);
+  await restoreSession(auth,true);
+  revoked=true;
+  assert.equal((await restoreSession(auth,true)).state,'session-ended');
+  assert.equal(takeRestoredIdentity(auth),null);
 });

@@ -37,8 +37,11 @@ try {
       show('Your session has ended. Sign in to view your agreement history.',true);
     });
     document.querySelector('[data-preview-note]').textContent=accountEnvironmentNote(local.mode, 'Local test only — uses the isolated FAS test stack.', 'Development test only — uses FAS DEV.', 'Review the published versions and your agreement history.');
-    requirement=await currentPolicyRequirement(local.client);
-    const restored=await restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear());
+    const [currentRequirement, restored] = await Promise.all([
+      currentPolicyRequirement(local.client),
+      restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear()),
+    ]);
+    requirement = currentRequirement;
     if(restored.state!=='signed-in') {
       show(requirement?'Sign in to review the current Terms and your agreement history.':'No published Terms currently need your agreement. Sign in to view your agreement history.');
       document.querySelector('[data-agreement-sign-in]').hidden=false;
