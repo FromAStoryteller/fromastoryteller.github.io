@@ -39,6 +39,8 @@ test('Build cannot enable accounts in preview, without lifecycle, with a secret,
   assert.throws(()=>productionAccountBuildConfig({...env,FAS_PRODUCTION_LIFECYCLE_ENABLED:'false'},registry,true),/lifecycle/);
   assert.throws(()=>productionAccountBuildConfig({...env,FAS_PRODUCTION_PUBLIC_KEY:key('service_role')},registry,true),/nonprivileged/);
   const actual=JSON.parse(readFileSync(new URL('../account/policy-versions.json',import.meta.url),'utf8'));
+  actual.activePublishedVersion=actual.candidateVersion;
+  actual.versions[actual.candidateVersion].status='publication-candidate';
   assert.throws(()=>productionAccountBuildConfig(env,actual,true),/No published/);
   const wrong=structuredClone(registry);wrong.versions['test-release'].documents.terms.path='/account/terms-review/';
   assert.throws(()=>productionAccountBuildConfig(env,wrong,true),/snapshot paths/);

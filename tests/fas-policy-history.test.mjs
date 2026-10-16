@@ -24,7 +24,7 @@ test('Changed history or acknowledged wording fails verification, independent of
   assert.equal(policyDigest('a\r\nb'),policyDigest('a\nb'));
 });
 test('Draft versions cannot pass the published agreement readiness check', () => {
-  assert.throws(() => publishedAgreement(registry), /No published/);
+  assert.throws(() => publishedAgreement({...registry,activePublishedVersion:null}), /No published/);
   for (const activePublishedVersion of [REGISTRATION_VERSION,registry.reviewVersion]) assert.throws(() => publishedAgreement({...registry,activePublishedVersion}), /No published/);
   const incomplete=structuredClone(registry);
   incomplete.activePublishedVersion=registry.reviewVersion;
@@ -32,12 +32,13 @@ test('Draft versions cannot pass the published agreement readiness check', () =>
   assert.throws(()=>publishedAgreement(incomplete),/snapshots and checksums/);
 });
 
-test('Frozen launch candidate is complete and immutable but cannot activate production accounts', () => {
+test('Frozen launch wording stays immutable; only published status can pass readiness', () => {
   const version=registry.candidateVersion;
   const candidate=registry.versions[version];
-  assert.equal(candidate.status,'publication-candidate');
+  assert.ok(['publication-candidate','published'].includes(candidate.status));
   assert.equal(candidate.acknowledgementKind,'published_terms_agreement');
-  assert.equal(registry.activePublishedVersion,null);
+  if(candidate.status==='publication-candidate') assert.equal(registry.activePublishedVersion,null);
+  else assert.equal(registry.activePublishedVersion,version);
   for(const kind of ['privacy','terms']) {
     const document=candidate.documents[kind];
     assert.equal(document.path,`/account/policy-history/${version}/${kind}/index.html`);
@@ -51,7 +52,12 @@ test('Frozen launch candidate is complete and immutable but cannot activate prod
     changed.versions[version].documents[kind].sha256='0'.repeat(64);
     assert.throws(()=>verifyPolicyHistory(root,changed),/Preserved/);
   }
-  assert.throws(()=>publishedAgreement({...registry,activePublishedVersion:version}),/No published/);
+  const unpublished=structuredClone(registry);
+  unpublished.versions[version].status='publication-candidate';
+  assert.throws(()=>publishedAgreement({...unpublished,activePublishedVersion:version}),/No published/);
+  const published=structuredClone(registry);
+  published.versions[version].status='published';
+  assert.equal(publishedAgreement({...published,activePublishedVersion:version}).documents.terms.sha256,candidate.documents.terms.sha256);
   assert.equal(registry.operator.name,'From A Storyteller');
   assert.doesNotMatch(readFileSync(new URL('../account/sign-up/index.html',import.meta.url),'utf8'),/Ryan Fearon/);
 });

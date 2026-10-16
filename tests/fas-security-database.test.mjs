@@ -1,6 +1,9 @@
 import test from 'node:test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+import { policyReleasePlan } from '../scripts/fas-policy-release-plan.mjs';
 
 test('FAS migrations enforce SQL permissions, workflows and image approval', async () => {
   const db = new PGlite();
@@ -28,5 +31,24 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql', 'policy-agreements.sql', 'policy-contributions.sql']) {
       await db.exec(readFileSync(new URL(`../supabase/tests/${file}`, import.meta.url), 'utf8'));
     }
+    const registry=JSON.parse(readFileSync(new URL('../account/policy-versions.json',import.meta.url),'utf8'));
+    const sql=policyReleasePlan(fileURLToPath(new URL('../',import.meta.url)),registry);
+    assert.equal(readFileSync(new URL(`../supabase/ops/${registry.candidateVersion}.sql`,import.meta.url),'utf8').replace(/\r\n/g,'\n'),sql);
+    await db.exec(sql);
+    const state=async()=> (await db.query(`select release_id,published_at::text from private.account_policy_releases order by release_id`)).rows;
+    const first=await state();
+    assert.equal(first.length,1);
+    await db.exec(sql);
+    assert.deepEqual(await state(),first,'Retry must preserve the original publication timestamp');
+    assert.equal((await db.query('select count(*)::int as n from private.account_policy_agreements')).rows[0].n,0,'Release preparation must not invent account agreements');
+    const hash=registry.versions[registry.candidateVersion].documents.terms.sha256;
+    await assert.rejects(db.exec(sql.replaceAll(hash,'f'.repeat(64))),/Stored release differs/);
+    await db.exec('rollback');
+    assert.deepEqual(await state(),first);
+    await db.exec(`insert into private.account_policy_releases select 'other-reviewed-release',status,published_at,terms_version,privacy_version,terms_sha256,privacy_sha256,terms_path,privacy_path,minimum_age from private.account_policy_releases;
+      update private.account_policy_requirement set release_id='other-reviewed-release';`);
+    await assert.rejects(db.exec(sql),/Another policy release/);
+    await db.exec('rollback');
+    assert.equal((await db.query('select release_id from private.account_policy_requirement')).rows[0].release_id,'other-reviewed-release');
   } finally { await db.close(); }
 });
