@@ -59,4 +59,7 @@
 .account-remember input { min-height: 0; min-width: 0; margin: 0; }
 .account-remember + .account-reader-note { margin-top: 0; margin-bottom: var(--space-5); }
 .account-danger { border-color: var(--password-invalid-colour); color: var(--password-invalid-colour); background: transparent; }
+.account-profile-actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: var(--space-5); }
+.account-profile-actions a { display: inline-flex; align-items: center; justify-content: center; width: auto; margin: 0; }
+.account-profile-actions a[hidden] { display: none; }
 [data-delete-cancel] { min-height: var(--size-touch-target-minimum); margin-top: var(--space-3); }

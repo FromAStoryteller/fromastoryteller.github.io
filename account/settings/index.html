@@ -151,17 +151,13 @@
       <!-- MAIN CONTENT AREA -->
       <main id="main-content" tabindex="-1" class="page-content">
 <div class="account-page">
-<header class="account-heading"><p class="account-eyebrow">Your account</p><h1>Account settings</h1><p>Your profile, your details and your choices.</p><p><a href="/account/profile/">Edit my profile</a> <a data-settings-public-profile hidden>View public profile</a></p></header>
+<header class="account-heading"><p class="account-eyebrow">Your account</p><h1>Account settings</h1><p>Your account details, data and choices.</p><nav class="account-profile-actions" aria-label="Profile pages"><a class="account-secondary" href="/account/profile/">Edit my profile</a><a class="account-secondary" data-settings-public-profile hidden>View public profile</a></nav></header>
 <section class="account-panel" aria-labelledby="settings-title"><h2 id="settings-title">Your details</h2>
 <p class="account-preview-note" data-preview-note>Loading account services…</p>
 <p class="account-auth-status" data-auth-status role="status" aria-live="polite" hidden></p>
 <p data-settings-sign-in hidden><a class="account-secondary" href="/account/sign-in/">Sign in</a></p>
 <div data-account-settings hidden>
 <p>Email: <strong data-account-email></strong></p><p>Account access: <strong data-account-role></strong></p>
-<form class="account-form" data-profile-form><fieldset disabled><legend class="visually-hidden">Profile details</legend>
-<div class="account-field"><label for="display-name">Display name</label><input id="display-name" data-display-name type="text" required maxlength="80" autocomplete="nickname" aria-describedby="profile-visibility"><p id="profile-visibility" class="password-guidance">This is your profile name, not a unique username. Your name and bio may appear with published work.</p></div>
-<div class="account-field"><label for="profile-bio">Bio</label><textarea id="profile-bio" data-bio maxlength="1000" rows="4" aria-describedby="bio-guidance"></textarea><p id="bio-guidance" class="password-guidance">Up to 1,000 characters. Avoid private contact details.</p></div>
-<button class="account-submit" type="submit">Save profile</button></fieldset></form>
 <div class="account-register"><h2>Your policy agreements</h2><p><a href="/account/agreements/">Review policy versions and your agreement history</a>.<span data-test-declaration-note hidden> Your earlier test acknowledgement remains separate from any published Terms.</span></p></div>
 <div class="account-register"><h2>Your account data</h2><p>Download your email, profile and account details in a ZIP file. Open My-account.txt to read them; a JSON copy for software is included in the metadata folder. Passwords and sign-in credentials are never included.</p><button class="account-secondary" data-export-account type="button" disabled>Download my account data</button></div>
 <div class="account-register" data-contributor-export hidden><h2>Your contributor content</h2><p class="account-auth-status" data-content-status role="status" aria-live="polite" hidden></p><p>Download your owned Community stories as readable text files and your original uploaded images in one ZIP. Technical JSON files are kept in a separate metadata folder.</p><p>Existing static games and stories that have not been linked to your account are outside this export. Cloud saves and multiplayer are planned features.</p><button class="account-secondary" data-export-content type="button" disabled>Download my content</button></div>
