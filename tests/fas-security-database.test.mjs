@@ -26,7 +26,7 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     `);
     const migrations = new URL('../supabase/migrations/', import.meta.url);
     for (const file of readdirSync(migrations).filter(f => f.endsWith('.sql')).sort()) {
-      if (file.endsWith('_contributor_permissions.sql') || file.endsWith('_separate_admin_tools.sql') || file.endsWith('_admin_image_session_guard.sql')) continue;
+      if (file.endsWith('_contributor_permissions.sql') || file.endsWith('_separate_admin_tools.sql') || file.endsWith('_admin_image_session_guard.sql') || file.endsWith('_admin_account_directory.sql') || file.endsWith('_retire_moderator_contributor_removal.sql')) continue;
       await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
     }
     for (const file of ['access.sql', 'security.sql', 'lifecycle.sql', 'registration.sql', 'policy-agreements.sql', 'policy-contributions.sql']) {

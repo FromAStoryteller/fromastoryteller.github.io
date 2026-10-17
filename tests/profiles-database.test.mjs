@@ -51,7 +51,7 @@ test('profile ownership, public projection, attribution, pagination and account 
     assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
     await db.exec(`insert into public.user_roles(user_id,role) values('${owner}','admin');`);
     // Staff can contribute independently; admin-only access does not create a public profile.
-    for (const role of ['admin','moderator']) {
+    for (const role of ['admin']) {
       await db.exec(`insert into public.user_roles(user_id,role) values('${viewer}','${role}');`);
       assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
       await db.exec(`insert into public.user_roles(user_id,role) values('${viewer}','member');`);

@@ -52,7 +52,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
       if (['export','prepare-delete'].includes(body.action) && !await rpc('fas_claim_account_action', { ...args, requested_action: body.action })) return json(429, { message: 'Too many account requests. Wait a few minutes, then try again.' });
       if (body.action === 'export') {
         const first = await rpc('fas_account_snapshot', args); const data = first.data;
-        if (!data.stories.length && !data.assets.length && !data.objects.length && !['member', 'moderator', 'admin'].includes(data.role)) return json(403, { message: 'There is no owned Community content to download. You can download your personal account data in settings.' });
+        if (!data.stories.length && !data.assets.length && !data.objects.length && !['member', 'admin'].includes(data.role)) return json(403, { message: 'There is no owned Community content to download. You can download your personal account data in settings.' });
         if (data.objects.length > 500 || data.stories.length > 300) return json(413, { message: 'Your content is too large for this download. Contact support for a complete export. Nothing was deleted.' });
         let total = 0;
         const files = [];

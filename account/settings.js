@@ -42,7 +42,7 @@ function render(account) {
   const staff = account.staff;
   deleteStart.hidden = !local.lifecycleEnabled || staff;
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
-  document.querySelector('[data-deletion-unavailable]').textContent = staff ? 'Administrator and moderator accounts need a separate reviewed deletion process. Contact fromastoryteller@gmail.com for help.' : 'Account deletion is currently unavailable. Please try again later.';
+  document.querySelector('[data-deletion-unavailable]').textContent = staff ? 'Administrator accounts need a separate reviewed deletion process. Contact fromastoryteller@gmail.com for help.' : 'Account deletion is currently unavailable. Please try again later.';
   if (account.state === 'closing') {
     download.disabled = true; contentDownload.disabled = true;
     deleteStart.textContent = 'Finish account removal…';

@@ -6,7 +6,7 @@ export async function verifyAdminDatabase(PGlite){
  try {
   await db.exec("\n      create role supabase_auth_admin; create role anon; create role authenticated; create role service_role bypassrls;\n      create schema auth; create schema storage;\n      create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);\n      create table auth.sessions(id uuid primary key, user_id uuid references auth.users(id) on delete cascade, not_after timestamptz);\n      create function auth.uid() returns uuid language sql stable as\n      $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;\n      grant usage on schema auth, storage to anon, authenticated, service_role;\n      grant execute on function auth.uid() to anon, authenticated, service_role;\n      create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);\n      create table storage.objects(id uuid default gen_random_uuid() primary key, bucket_id text references storage.buckets(id), name text, metadata jsonb default '{}'::jsonb, updated_at timestamptz default now());\n      alter table storage.objects enable row level security;\n      grant select,insert,update,delete on storage.objects to anon,authenticated;\n    ");
   const migrations=new URL('../supabase/migrations/',import.meta.url);
-  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')&&!f.endsWith('_admin_image_session_guard.sql')&&!f.endsWith('_admin_account_directory.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')&&!f.endsWith('_admin_image_session_guard.sql')&&!f.endsWith('_admin_account_directory.sql')&&!f.endsWith('_retire_moderator_contributor_removal.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
   const a='71000000-0000-0000-0000-000000000001',b='71000000-0000-0000-0000-000000000002',v='71000000-0000-0000-0000-000000000003',u='71000000-0000-0000-0000-000000000004';
   const sa='72000000-0000-0000-0000-000000000001',sb='72000000-0000-0000-0000-000000000002',sv='72000000-0000-0000-0000-000000000003';
   await db.exec(`insert into auth.users(id,email,email_confirmed_at) values ('${a}','admin-a@example.invalid',now()),('${b}','admin-b@example.invalid',now()),('${v}','viewer@example.invalid',now()),('${u}','unverified@example.invalid',null);
@@ -17,6 +17,7 @@ export async function verifyAdminDatabase(PGlite){
   await db.exec(readFileSync(new URL('../supabase/migrations/20261016214904_admin_image_session_guard.sql',import.meta.url),'utf8'));
   const directoryMigration=readdirSync(migrations).find(f=>f.endsWith('_admin_account_directory.sql'));
   await db.exec(readFileSync(new URL(directoryMigration,migrations),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/migrations/20261017002148_retire_moderator_contributor_removal.sql',import.meta.url),'utf8'));
   const as=async(id,session,sql)=>{await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);select set_config('request.jwt.claims','${JSON.stringify({session_id:session})}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
   const value=async(id,session,sql)=>(await as(id,session,sql)).rows[0]?.value;
   assert.deepEqual((await db.query(`select role::text from public.user_roles where user_id='${a}' order by role::text`)).rows.map(r=>r.role),['admin','member'],'existing administrator keeps contributor access');
@@ -58,6 +59,17 @@ export async function verifyAdminDatabase(PGlite){
   assert.equal(await value(b,sb,'select private.is_member() value'),false,'admin alone cannot contribute');
   assert.ok(await value(b,sb,'select public.fas_admin_overview() value'));
   await assert.rejects(as(b,sb,`insert into public.stories(author_id,slug,title) values('${b}','admin-only-denied','Denied')`),/row-level security/);
+  await assert.rejects(db.exec(`insert into public.user_roles values('${v}','moderator')`),/fas_supported_roles/);
+  await db.exec(`insert into public.user_roles values('${v}','member');insert into public.stories(id,author_id,slug,title,body,status,published_at) values('73000000-0000-0000-0000-000000000010','${v}','retained-on-removal','Retained','Owned original','published',now());`);
+  await value(a,sa,`select public.fas_admin_set_role('${v}','member',false,'viewer@example.invalid','Remove contribution') value`);
+  assert.equal((await db.query("select status from public.stories where slug='retained-on-removal'")).rows[0].status,'draft');
+  assert.equal((await db.query("select public.fas_public_story('retained-on-removal') value")).rows[0].value,null);
+  const retained=(await db.query(`select public.fas_account_snapshot('${v}','${sv}') value`)).rows[0].value;
+  assert.equal(retained.data.role,'viewer');assert.equal(retained.data.stories[0].body,'Owned original');
+  assert.equal((await as(v,sv,"update public.stories set status='published' where slug='retained-on-removal' returning id")).rows.length,0);
+  await value(a,sa,`select public.fas_admin_set_role('${v}','member',true,'viewer@example.invalid','Restore contribution') value`);
+  assert.equal((await db.query("select status from public.stories where slug='retained-on-removal'")).rows[0].status,'draft');
+  await value(a,sa,`select public.fas_admin_set_role('${v}','member',false,'viewer@example.invalid','End fixture') value`);
   const token=await value(a,sa,`select public.create_invite('viewer@example.invalid',7) value`);
   assert.equal(token.length,72);
   await assert.rejects(value(a,sa,`select public.create_invite('viewer@example.invalid',7) value`),/active invitation/);
