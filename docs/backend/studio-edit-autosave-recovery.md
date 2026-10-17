@@ -1,7 +1,7 @@
 # Studio edit, autosave and preview recovery
 
 Task: **FAS | FAS Community V1 | Implement edit, autosave and preview**.
-Status: implementation verified and ready for frontend release; production verification is recorded below after deployment.
+Status: **complete and deployed**. Draft editing, autosave status, reload/recovery and newest-word private preview are released; failed saves, stale edits and session expiry have automated recovery coverage.
 
 ## Save and reload behavior
 
@@ -53,6 +53,10 @@ A failed response does not prove whether a new-draft insert reached the server. 
 
 ## Release
 
-After checks pass, merge the frontend release with an expected-head lease, wait for the production deployment and compare the served Studio modules/styles to the reviewed sources. Verify the public Studio shell without signing in or editing the operator's content. Record production evidence here before marking complete.
+Frontend [PR #35](https://github.com/FromAStoryteller/fromastoryteller.github.io/pull/35) merged with an expected-head lease as `e66ea7f79b95b841aaa7985c747b7e1ad76853cc`. The feature build passed all **147 Node tests**, real Deno image-codec checks, reference/syntax validation, unchanged index generation and Worker bundling. The final feature build is [117534609190](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39079924509/job/117534609190); the earlier identical runtime test log is [117534464589](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39079873699/job/117534464589).
+
+Production deployment [fas-site-production check 117534927843](https://github.com/FromAStoryteller/fromastoryteller.github.io/runs/117534927843) and the main build/deploy checks succeeded. Read-only live job [117534804974](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39079991035/job/117534804974) then confirmed the exact reviewed contents (normalizing line endings/trailing newline) of all five Studio modules plus studio.css, and HTTP 200 with the Studio root on /account/studio/. This verification used public GET requests only. One-off HTTP verification sources are retained on verify/live-studio-recovery; they are not published application code.
+
+No production account, private draft, cover or publication was edited, deleted or created for these checks. No database migration or new backup was required.
 
 The frozen historical policy documents remain unchanged. The feature's optional tab-copy behavior is disclosed at the control; no manuscript recovery is silently enabled.
