@@ -16,7 +16,9 @@
     "not_found_handling": "404-page",
     "binding": "ASSETS",
     "run_worker_first": [
-      "/read/"
+      "/read/",
+      "/stories/*",
+      "/blog/*"
     ]
   },
   "main": "cloudflare-worker.mjs",

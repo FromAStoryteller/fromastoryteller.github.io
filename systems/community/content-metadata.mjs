@@ -1,6 +1,7 @@
+import {contentPath} from './content-address.mjs';
 import {genreLabel} from './studio-catalog.mjs';
 export function contentMetadata(story,imageUrl=''){
- const canonical=`https://fromastoryteller.com/read/?story=${encodeURIComponent(story.slug)}`;
+ const canonical='https://fromastoryteller.com'+contentPath(story);
  const description=story.summary.trim().replace(/\s+/g,' ').slice(0,160);
  return {title:`${story.title} | From A Storyteller`,description,canonical,language:story.language??'en',image:imageUrl,
   structured:{'@context':'https://schema.org','@type':story.content_type==='blog'?'BlogPosting':'Article',headline:story.title,description,url:canonical,

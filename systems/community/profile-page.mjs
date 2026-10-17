@@ -1,3 +1,4 @@
+import {contentAddress} from './content-address.mjs';
 import { loadLocalAuthClient } from '/account/local-auth-client.mjs';
 import { restoreSession } from '/account/session-controller.mjs';
 import { loadProfileAccount } from '/account/settings-controller.mjs';
@@ -84,7 +85,7 @@ try {
       if (ownsPage) render();
     })().catch(() => {});
   } else {
-    const story = await service.readStory(new URLSearchParams(location.search).get('story'));
+    const address=contentAddress(location.pathname);let story = await service.readStory(address?.slug??new URLSearchParams(location.search).get('story'));if(address&&story&&(story.content_type??'story')!==address.content_type)story=null;
     renderPublicStory(root,story,{imageBase:local.publicImageBase});
     if(story)applyContentMetadata(document,contentMetadata(story,publicCoverUrl(story.cover,local.publicImageBase)));
     if (story) document.title=`${story.title} | From A Storyteller`;

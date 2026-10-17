@@ -21,7 +21,7 @@ export function validateDocument(value) {
 export const documentText = document => document.blocks.map(block=>block.type==='scene'?'***':block.runs?block.runs.map(run=>run.text).join(''):block.text).join('\n\n');
 export function renderManuscript(root, value, {scene_style='space',drop_caps=false,paragraph_style='indented'}={}) {
   const document=validateDocument(value),d=root.ownerDocument;root.replaceChildren();
-  root.classList.add('fas-manuscript');root.dataset.sceneStyle=scene_style;root.dataset.dropCaps=String(drop_caps);root.dataset.paragraphStyle=paragraph_style;
+  root.classList.add('fas-manuscript');root.dataset.sceneStyle=scene_style;root.dataset.dropCaps=String(drop_caps);root.dataset.paragraphStyle='indented';
   for(const block of document.blocks){
     const element=d.createElement(({paragraph:'p',heading:'h2',quote:'blockquote',scene:'hr'})[block.type]);
     if(block.type==='scene'){element.dataset.scene='true';element.setAttribute('aria-label','Scene break');element.setAttribute('contenteditable','false');}
@@ -29,6 +29,7 @@ export function renderManuscript(root, value, {scene_style='space',drop_caps=fal
     if(block.type!=='scene'&&!element.textContent)element.append(d.createElement('br'));
     root.append(element);
   }
+  refreshParagraphLayout(root);
 }
 // Serialize a limited document model, never arbitrary HTML from contenteditable.
 export function readManuscript(root) {
@@ -55,3 +56,5 @@ export function renderSocialLinks(root,links=[]) {
   for(const link of links){let url;try{url=new URL(link.url);}catch{continue;}if(url.protocol!=='https:'||url.username||url.password)continue;
     const a=d.createElement('a');a.href=url.href;a.rel='me noopener noreferrer';a.target='_blank';a.textContent=({x:'X',linkedin:'LinkedIn',github:'GitHub',youtube:'YouTube',tiktok:'TikTok',bluesky:'Bluesky'})[link.platform]||link.platform[0].toUpperCase()+link.platform.slice(1);root.append(a);}
 }
+
+export function refreshParagraphLayout(root){let previous=null;for(const element of root.children){element.dataset.indent=String(['P','DIV'].includes(element.tagName)&&!!element.textContent.trim()&&['P','DIV'].includes(previous?.tagName)&&!!previous.textContent.trim());previous=element;}}

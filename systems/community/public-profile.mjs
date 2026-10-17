@@ -1,5 +1,6 @@
+import {contentPath} from './content-address.mjs';
 import { initials } from './profile-editor.mjs';
-import { publicProfileUrl, publicCoverUrl } from './profiles.mjs';
+import { publicProfileUrl, publicCoverUrl, isPublicId } from './profiles.mjs';
 import { createCardMarkup } from '../content/content-system.js';
 import {renderManuscript,plainDocument,renderSocialLinks} from './manuscript.mjs';
 import {genreLabel} from './studio-catalog.mjs';
@@ -40,11 +41,12 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
 
 export function profileStoryCard(story, { imageBase, preview = false } = {}) {
   const localImage = preview && /^\/assets\/images\/stories\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(story.preview_image ?? '') ? story.preview_image : '';
-  return createCardMarkup({ category:story.content_type==='blog'?'blog':'stories',title:story.title,url:`/read/?story=${encodeURIComponent(story.slug)}`,
+  return createCardMarkup({ category:story.content_type==='blog'?'blog':'stories',title:story.title,url:contentPath(story),
     card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 
 export function renderPublicStory(root, story, { imageBase } = {}) {
+  root.removeAttribute('data-content-id');if(isPublicId(story?.id))root.dataset.contentId=story.id;
   const d = root.ownerDocument;
   root.replaceChildren();
   if (!story) { root.append(node(d, 'h1', '', 'Story unavailable'), node(d, 'p', '', 'This story may no longer be published.')); return; }

@@ -1,8 +1,8 @@
 /* One reading surface shared by the visual editor, preview and public page. */
 .fas-manuscript { font: 400 clamp(1.05rem,1.5vw,1.16rem)/1.85 var(--font-family-reading); letter-spacing:.005em; overflow-wrap:anywhere; text-wrap:pretty; min-width:0; }
-.fas-manuscript p { margin:0; text-indent:1.8em; white-space:pre-wrap; }
+.fas-manuscript > :is(p,div) { margin:0; text-indent:0; white-space:pre-wrap; }
 .fas-manuscript > p:first-child,.fas-manuscript hr+p,.fas-manuscript h2+p,.fas-manuscript blockquote+p {text-indent:0;}
-.fas-manuscript[data-paragraph-style="spaced"] p {text-indent:0;margin:0 0 1.1em;}
+.fas-manuscript > :is(p,div)[data-indent="true"] {text-indent:1.8em;}
 .fas-manuscript h2 {font:500 1.45em/1.4 var(--font-family-reading);margin:1.5em 0 .8em;}
 .fas-manuscript blockquote {margin:1.5em 1em;border-left:2px solid var(--colour-accent-primary);padding-left:1em;font-style:italic;white-space:pre-wrap;}
 .fas-manuscript hr {display:block;position:relative;height:4.5rem;border:0;margin:0;color:var(--colour-text-secondary);text-align:center;}

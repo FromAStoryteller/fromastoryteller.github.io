@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validateDocument,plainDocument,documentText} from '../systems/community/manuscript.mjs';
+import {validateDocument,plainDocument,documentText,refreshParagraphLayout} from '../systems/community/manuscript.mjs';
 import {validateStory,publicationIssues} from '../systems/community/studio-service.mjs';
 import {validateSocialLinks,GENRES} from '../systems/community/studio-catalog.mjs';
 import {contentMetadata} from '../systems/community/content-metadata.mjs';
@@ -15,10 +15,10 @@ test('at most three catalog genres are accepted; custom tags are independent and
  assert.throws(()=>validateStory({...draft,genres:['fantasy','dark-fantasy','horror','mystery']}));assert.throws(()=>validateStory({...draft,genres:['not-in-catalog']}));assert.throws(()=>validateStory({...draft,genres:['fantasy','fantasy']}));
  assert.equal(new Set(GENRES.map(g=>g.id)).size,GENRES.length);
 });
-test('publication requires a real selected, cleared 16:9 cover and complete metadata; drafts remain incomplete',()=>{
+test('publication requires a real selected, verified 16:9 cover and complete metadata; drafts remain incomplete',()=>{
  assert.doesNotThrow(()=>validateStory({title:'An unfinished idea'}));assert.ok(publicationIssues(draft).includes('Choose a cover image'));
  const asset={id:draft.cover_asset_id,alt_text:'A landscape',pixel_width:1600,pixel_height:900,approved_at:'2026-10-17'};assert.deepEqual(publicationIssues(draft,[asset]),[]);
- assert.ok(publicationIssues(draft,[{...asset,pixel_height:1000}]).includes('Use a verified 16:9 cover'));assert.ok(publicationIssues(draft,[{...asset,approved_at:null}]).includes('Cover clearance is pending'));
+ assert.ok(publicationIssues(draft,[{...asset,pixel_height:1000}]).includes('Use a verified 16:9 cover'));assert.deepEqual(publicationIssues(draft,[{...asset,approved_at:null}]),[]);
 });
 test('social links reject script URLs, credential URLs, mismatched platforms and duplicates',()=>{
  assert.equal(validateSocialLinks([{platform:'instagram',url:'https://www.instagram.com/writer/'}]).length,1);
@@ -26,5 +26,7 @@ test('social links reject script URLs, credential URLs, mismatched platforms and
 });
 test('SEO and social metadata derive from content without manual keyword or date fields',()=>{
  const result=contentMetadata({...draft,slug:'a-new-piece',content_type:'blog',language:'en',published_at:'2026-10-17',updated_at:'2026-10-17',author:{display_name:'A writer',public_id:'public-key'}},'https://example.com/cover.jpg');
- assert.equal(result.structured['@type'],'BlogPosting');assert.equal(result.canonical,'https://fromastoryteller.com/read/?story=a-new-piece');assert.equal(result.structured.author.name,'A writer');assert.equal(result.structured.articleSection[0],'Fantasy');assert.equal(result.description,draft.summary);
+ assert.equal(result.structured['@type'],'BlogPosting');assert.equal(result.canonical,'https://fromastoryteller.com/blog/a-new-piece/');assert.equal(result.structured.author.name,'A writer');assert.equal(result.structured.articleSection[0],'Fantasy');assert.equal(result.description,draft.summary);
 });
+
+test('standard paragraphs indent only after another nonempty paragraph, including live browser DIVs',()=>{const elements=[['P','Opening'],['P','Next paragraph'],['P',''],['P','After space'],['HR',''],['P','After scene'],['H2','Heading'],['P','After heading'],['DIV','Browser paragraph'],['DIV',''],['DIV','After blank browser paragraph']].map(([tagName,textContent])=>({tagName,textContent,dataset:{}}));refreshParagraphLayout({children:elements});assert.deepEqual(elements.map(e=>e.dataset.indent),['false','true','false','false','false','false','false','false','true','false','false']);});

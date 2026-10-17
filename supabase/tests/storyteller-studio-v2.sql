@@ -127,6 +127,31 @@ select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-0
 insert into public.stories(author_id,title) values(auth.uid(),'Studio v2 fixture');
 do $$ begin if not exists(select 1 from public.stories where author_id=auth.uid() and title='Studio v2 fixture' and slug ~ '^studio-v2-fixture-[a-f0-9]{32}$') then raise exception 'FAIL cross-contributor automatic address collision';end if;end $$;
 reset role;
+-- Contributor-only automatic verification, reserved URLs and permanent content type.
+set local role authenticated;
+select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000001',true);
+select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000001"}',true);
+do $$ begin
+ begin update public.stories set content_type='story' where slug='studio-v2-fixture';raise exception 'FAIL published type changed';exception when raise_exception then if SQLERRM<>'The content type is permanent after first publication' then raise;end if;end;
+end $$;
+insert into public.stories(author_id,title,summary,body,genres,warning_reviewed) values(auth.uid(),'The Deal','A synthetic description','A synthetic manuscript',array['fantasy'],true);
+select set_config('fas.test_story_id',id::text,true) from public.stories where title='The Deal' and author_id=auth.uid();
+do $$ begin if not exists(select 1 from public.stories where id=current_setting('fas.test_story_id')::uuid and slug like 'the-deal-%') then raise exception 'FAIL reserved static address reused';end if;end $$;
+reset role;
+select public.fas_register_verified_cover(current_setting('fas.test_story_id')::uuid,'93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jpg','Verified without staff review');
+select public.fas_register_verified_cover(current_setting('fas.test_story_id')::uuid,'93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.jpg','Unselected verified alternative');
+set local role authenticated;
+update public.stories set cover_asset_id=(select id from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid order by created_at,id limit 1) where id=current_setting('fas.test_story_id')::uuid;
+do $$ begin begin update public.story_assets set verified_at=now() where story_id=current_setting('fas.test_story_id')::uuid;raise exception 'FAIL forged image verification';exception when insufficient_privilege then null;end;end $$;
+update public.stories set status='published' where id=current_setting('fas.test_story_id')::uuid;
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+do $$ begin if not exists(select 1 from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid and verified_at is not null and approved_at is null and approved_by is null) then raise exception 'FAIL verified cover needs approval';end if;if (select count(*) from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid)<>1 then raise exception 'FAIL unselected verified cover public';end if;end $$;
+reset role;
+update public.stories set status='draft' where id=current_setting('fas.test_story_id')::uuid;
+set local role anon;
+do $$ begin if exists(select 1 from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid) then raise exception 'FAIL unpublished verified cover public';end if;end $$;
+reset role;
 -- Match lifecycle cleanup: remove owned content before deleting the Auth record.
 delete from public.stories where author_id='93000000-0000-0000-0000-000000000001';
 delete from auth.users where id='93000000-0000-0000-0000-000000000001';
