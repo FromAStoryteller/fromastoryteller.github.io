@@ -8,8 +8,8 @@ create table private.publishing_brand(
  social_links jsonb not null default '[{"platform":"facebook","url":"https://www.facebook.com/fromastoryteller/"},{"platform":"instagram","url":"https://www.instagram.com/fromastoryteller/"},{"platform":"tiktok","url":"https://www.tiktok.com/@fromastoryteller/"},{"platform":"youtube","url":"https://www.youtube.com/@fromastoryteller/"}]'
 );
 insert into private.publishing_brand(singleton) values(true);
--- Explicitly verified public profile, never an editable email/JWT metadata claim.
-insert into private.fas_publishers(user_id) select id from public.profiles where public_id='9acaaa0d-24ea-4c2b-a398-ead0d4231a4d';
+-- The reviewed, separately targeted owner-claim operation binds an existing account.
+-- Portable schema installation never embeds an Auth/profile generated identifier.
 alter table public.stories add column publishing_identity text not null default 'personal' check(publishing_identity in ('personal','fas'));
 grant insert(publishing_identity),update(publishing_identity) on public.stories to authenticated;
 create function private.guard_publishing_identity() returns trigger language plpgsql security definer set search_path='' as $$
@@ -36,7 +36,7 @@ create table private.file_content(
 create index file_content_owner_library on private.file_content(owner_id,updated_at desc,id);
 -- Deterministic UUIDs preserve page/report identity across byline and title changes.
 insert into private.file_content(id,owner_id,url,content_type,title,summary,slug,published_at,image,image_alt,publishing_identity)
-select md5('fas-file:'||v.url)::uuid,p.id,v.url,v.content_type,v.title,v.summary,v.slug,v.published_at::timestamptz,v.image,v.image_alt,v.publishing_identity
+select md5('fas-file:'||v.url)::uuid,null::uuid,v.url,v.content_type,v.title,v.summary,v.slug,v.published_at::timestamptz,v.image,v.image_alt,v.publishing_identity
 from (values
 ('/games/rally-clash/', 'game', 'Arcade: Rally Clash', 'Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.', 'rally-clash', '2026-03-22', '/assets/images/games/rally-clash.jpg', 'Arcade Rally Clash artwork', 'personal'),
 ('/games/brick-blitz/', 'game', 'Arcade: Brick Blitz', 'A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.', 'brick-blitz', '2026-03-31', '/assets/images/games/brick-blitz.jpg', 'Arcade Brick Blitz artwork', 'personal'),
@@ -52,8 +52,7 @@ from (values
 ('/stories/date-night-jigsaw/', 'story', 'Date Night Jigsaw', 'When a mysterious jigsaw arrives on Catherine and Bruce''s doorstep for their date night, the picture slowly reveals something disturbingly familiar.', 'date-night-jigsaw', '2026-08-13', '/assets/images/stories/date-night-jigsaw.png', 'Featured artwork for Date Night Jigsaw', 'personal'),
 ('/stories/tea-at-the-summit/', 'story', 'Tea at the Summit', 'Eleanor climbs through the snow toward a mountain summit, carrying tea, an urn, and the promise of one final moment with someone she loved.', 'tea-at-the-summit', '2026-08-14', '/assets/images/stories/tea-at-the-summit.png', 'Featured artwork for Tea at the Summit', 'personal'),
 ('/stories/michaels-choice/', 'story', 'Michael''s Choice', 'After failing to defend his friend from a vicious attack, Michael must face the cost of his silence and decide what kind of man he wants to become.', 'michaels-choice', '2026-08-16', '/assets/images/stories/michaels-choice.png', 'Featured artwork for Michael''s Choice', 'personal')
-) v(url,content_type,title,summary,slug,published_at,image,image_alt,publishing_identity)
-left join public.profiles p on p.public_id='9acaaa0d-24ea-4c2b-a398-ead0d4231a4d';
+) v(url,content_type,title,summary,slug,published_at,image,image_alt,publishing_identity);
 alter table private.file_content enable row level security;
 alter table private.fas_publishers enable row level security;
 alter table private.publishing_brand enable row level security;
