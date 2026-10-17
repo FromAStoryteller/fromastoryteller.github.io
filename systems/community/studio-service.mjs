@@ -29,12 +29,12 @@ export function publicationIssues(input,assets=[],type){
  const cover=assets.find(a=>a.id===input.cover_asset_id);if(!cover)issues.push('Choose a cover image');else{if(!cover.alt_text?.trim())issues.push('Describe the cover for screen readers');if(!cover.pixel_width||cover.pixel_width*9!==cover.pixel_height*16)issues.push('Use a verified 16:9 cover');}return issues;
 }
 export const canDeleteDraft=story=>!!story?.id&&story.status==='draft'&&!story.slug_locked&&!story.published_at&&!story.scheduled_at;
-export class StudioAccessError extends Error{}
+export class StudioAccessError extends Error{constructor(message,reason='access-revoked'){super(message);this.reason=reason;}}
 export class StudioConflictError extends Error{}
 export function createStudioService(client,{ownerId,checkAccount=loadProfileAccount}={}){
  let genreCatalog=GENRES;
  if(!isPublicId(ownerId))throw new Error('A verified account is required.');
- async function authorize(){let account;try{account=await checkAccount(client);}catch{throw new Error('Your account could not be verified. Check your connection and try again. Your unsaved words remain here.');}if(account.user.id!==ownerId||account.state!=='active'||!account.contributor)throw new StudioAccessError('Your contributor access or account has changed. Saved work is available through your account download.');return account;}
+ async function authorize(){let account;try{account=await checkAccount(client);}catch{throw new Error('Your account could not be verified. Check your connection and try again. Your unsaved words remain here.');}if(account.user.id!==ownerId)throw new StudioAccessError('Your account changed. Reopen Studio to continue.','owner-changed');if(account.state!=='active')throw new StudioAccessError('Account removal is in progress.','account-closed');if(!account.contributor)throw new StudioAccessError('Your contributor access changed. Saved work is available through your account download.');return account;}
  const fail=e=>{if(e?.code==='23505')throw new Error('This address is already in use. Save again to generate another.');if(e?.code==='P0001'&&/Publication requires|future publication|genres|timezone/.test(e.message))throw new Error(e.message);throw new Error('The save failed. Check your connection and current account agreements. Your unsaved words remain here.');};
  return {authorize,
   async catalogs(){await authorize();const results=await Promise.all([client.from('studio_content_types').select('*').order('id'),client.from('content_warnings').select('id,label,active').order('label'),client.from('content_genres').select('id,label,parent_label').order('label'),client.rpc('fas_my_publishing_options')]);if(results.some(r=>r.error))throw new Error('Content requirements could not be loaded. Reload before publishing.');genreCatalog=results[2].data;return {types:results[0].data,warnings:results[1].data,genres:genreCatalog,publishing:results[3].data};},
