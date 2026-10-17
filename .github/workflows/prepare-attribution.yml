@@ -1,0 +1,19 @@
+name: Prepare attribution migration
+on:
+  push:
+    branches: [prepare/publishing-attribution]
+permissions:
+  contents: read
+jobs:
+  migration-name:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npx --yes supabase@2.120.0 migration new --help
+      - run: npx --yes supabase@2.120.0 migration new publishing_identity_and_legacy_ownership
+      - name: Record generated filename only
+        run: ls supabase/migrations/*publishing_identity_and_legacy_ownership.sql
