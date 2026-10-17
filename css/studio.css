@@ -135,3 +135,8 @@
 .ss-delete-dialog .ss-save-actions{flex-wrap:wrap;}
 .ss-delete-dialog .ss-save-actions>button{flex:1 1 9rem;min-width:0;white-space:normal;}
 .ss-delete-dialog p{overflow-wrap:anywhere;}
+
+/* Draft actions share one row and wrap together in the sticky save bar. */
+.ss-savebar>div:first-child{min-width:0;}
+.ss-draft-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin-top:.4rem;}
+.ss-savebar .ss-draft-actions :is(.studio-action-button,.account-secondary){width:auto;min-height:2.75rem;margin:0;}
