@@ -40,3 +40,10 @@ test('every existing game/story/tool has one themed linked byline and keeps its 
   assert.ok(page.includes(meta.canonicalUrl));assert.ok(page.includes('data-file-schema'));const schema=JSON.parse(page.match(/<script type="application\/ld\+json" data-file-schema>([\s\S]*?)<\/script>/)[1]);assert.equal(schema.author.name,meta.authorDisplay);assert.equal(meta.authorDisplay,meta.type==='tool'?'From A Storyteller':'Ry');
  }
 });
+
+test('production and preview run public attribution for every supported content route',()=>{
+ for(const path of ['../wrangler.production.jsonc','../wrangler.jsonc']){
+  const config=JSON.parse(readFileSync(new URL(path,import.meta.url),'utf8'));
+  for(const route of ['/stories/*','/blog/*','/games/*','/tools/*','/videos/*'])assert.ok(config.assets.run_worker_first.includes(route),route+' must reach the publishing worker');
+ }
+});
