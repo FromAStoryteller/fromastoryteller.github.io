@@ -6,7 +6,7 @@ Implementation and DEV verification: 17 October 2026 (New Zealand). Draft PR #26
 
 `/account/studio/` uses the existing verified account/session loader and contributor checks. Stories and blog posts are enabled. Games, tools and video have disabled registry entries until their own editors are implemented. Existing file-backed content is not imported.
 
-The design uses the website shell, theme tokens, Literata manuscript typography and Source Sans controls. Desktop has a work library, manuscript and tabbed inspector. Mobile stacks the controls; paired fields share aligned label/control rows. Native controls, labelled warning-removal buttons, keyboard tabs, visible focus and save announcements support accessible operation.
+The design uses the website shell, theme tokens, Literata manuscript typography and Source Sans controls. Studio starts with a full-width work library. Opening a piece replaces that list with its editor and a link to insights scoped to the selected piece; a back action returns to the work list. Add content opens a type chooser before the editor. Desktop editing has a manuscript and tabbed inspector. Mobile stacks the controls; paired fields share aligned label/control rows. Native controls, labelled warning-removal buttons, keyboard tabs, visible focus and save announcements support accessible operation.
 
 - Visual manuscript supports paragraphs, headings, quotes, bold, italic and scene breaks. Shared CSS renders the editor and published page alike. Drop caps apply only to the very first paragraph, never after scene breaks. Scene breaks can show space only, dots, a diamond or a rule. Arbitrary manuscript HTML is never stored or rendered.
 - Drafts may be incomplete. Publishing and scheduling require title, description, manuscript, 1–3 catalog genres/subgenres, reviewed content warnings and an owned, cleared 16:9 cover with alternative text. Language defaults to English. Parent genre labels, URLs, author, dates, word/read counts and search/share metadata derive automatically.
@@ -44,6 +44,7 @@ The Cloudflare reading worker derives crawler-visible title, description, canoni
 | `20261017032357_studio_reporting_foundation.sql` | `20261017034705` |
 | `20261017033843_studio_catalogs_and_metadata_versions.sql` | `20261017034716` |
 | `20261017035818_studio_warning_request_retention.sql` | `20261017035856` |
+| `20261017083044_studio_unique_content_addresses.sql` | `20261017083610` |
 
 Do not rewrite migration history timestamps. DEV has the corrected `fas-studio-cover` deployed with JWT verification enabled. `supabase/ops/studio-publication-cron.sql` installs only the named `fas-community-publication` minute job and refuses conflicting configuration. No production database, function, cron or website deployment was performed.
 
@@ -66,3 +67,11 @@ Before production: complete the new guarded API and authenticated browser checks
 The first guarded upload on 17 October exposed an import-time failure: the npm ImageScript entry selected native Node codecs (`unsupported arch/platform`). It failed before handling the image; fixture accounts, stories and assets were removed and no test Storage object remained. The bucket contained only its pre-existing `.emptyFolderPlaceholder`. The corrected DEV function selects the pinned Deno/WebAssembly distribution instead. A separate Deno 2.1.4 CI smoke test now imports the real deployed normalizer and runs PNG-to-JPEG and JPEG-to-JPEG 1600×900 checks; handler mocks alone could not detect this startup problem. Production is unchanged.
 
 The real Deno codec smoke test passed in CI run 95, including both source formats and exact output dimensions. Cleanup reporting now distinguishes a failed assertion from failed fixture removal.
+
+## Library-first navigation and address allocation correction
+
+The next guarded API run successfully uploaded and decoded the real cover, then found a collision while creating the second contributor’s identically titled draft. The old slug collision lookup ran through owner RLS and could not see another author’s private draft. A narrowly scoped trigger now allocates addresses with global visibility and a transaction lock, appending a full content-ID suffix on collision. Existing ownership/publication/manuscript guards remain in place; the allocation trigger cannot be called directly by API roles. The regression deliberately retains equal titles across contributors. The dedicated SQL regression passed locally and in hosted DEV with rollback.
+
+Cleanup was independently verified: no test accounts, content, assets or files remained. Cleanup verification now checks the exact parent-directory listing instead of downloading recently removed bytes, avoiding stale download-cache false positives. It retains strict fixture owner/story/path checks and never deletes unrelated files.
+
+The initial view is now the searchable work list. Existing pieces open their editing view and per-content insights; new content starts with a type chooser. Overall insights are reached from the library. Returning to the list checks unsaved work and resets private cover/crop state. Desktop filters align; the 390px mobile overview has no horizontal overflow.

@@ -120,6 +120,13 @@ do $$ declare p jsonb; c jsonb; ids uuid[]:='{}';item jsonb;pages int:=0;begin
  if cardinality(ids)<>45 or pages<>3 then raise exception 'FAIL library paging';end if;
 end $$;
 reset role;
+-- Private titles owned by another contributor must not collide on automatic URLs.
+set local role authenticated;
+select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000002"}',true);
+insert into public.stories(author_id,title) values(auth.uid(),'Studio v2 fixture');
+do $$ begin if not exists(select 1 from public.stories where author_id=auth.uid() and title='Studio v2 fixture' and slug ~ '^studio-v2-fixture-[a-f0-9]{32}$') then raise exception 'FAIL cross-contributor automatic address collision';end if;end $$;
+reset role;
 -- Match lifecycle cleanup: remove owned content before deleting the Auth record.
 delete from public.stories where author_id='93000000-0000-0000-0000-000000000001';
 delete from auth.users where id='93000000-0000-0000-0000-000000000001';

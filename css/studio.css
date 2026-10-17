@@ -101,3 +101,26 @@
 @media(max-width:85rem){.ss-main{grid-template-columns:minmax(0,1fr);}.ss-library{position:static;border:1px solid var(--ss-line);border-radius:var(--radius-md);padding:.6rem 1rem;}.ss-work-list{grid-template-columns:repeat(3,minmax(0,1fr));}.ss-profile-link{display:inline-block;margin:0 0 0 1rem;border:0;padding:.5rem;}}
 @media(max-width:58rem){.ss-editing-grid{grid-template-columns:minmax(0,1fr);}.ss-inspector{border-left:0;border-top:1px solid var(--ss-line);}.ss-inspector [role="tabpanel"]{padding:1.4rem;}.ss-inspector .ss-field-pair{grid-template-columns:repeat(2,minmax(0,1fr));}.ss-paper>.fas-manuscript{min-height:24rem;}.ss-savebar{flex-wrap:wrap;}.ss-save-actions{width:100%;}.ss-save-actions>button{flex:1;}.ss-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:38rem){.ss-heading{align-items:flex-start;flex-direction:column;}.ss-heading-actions{width:100%;}.ss-heading-actions>button{flex:1;}.ss-work-list{grid-template-columns:minmax(0,1fr);}.ss-titlebar{padding:1.1rem;}.ss-writing{padding:0 1.1rem 1rem;}.ss-paper{padding-top:1.5rem;}.ss-savebar{padding:.8rem 1rem;padding-bottom:max(.8rem,env(safe-area-inset-bottom));}.ss-library>summary{font-size:1.1rem;}.ss-report-filters{grid-template-columns:minmax(0,1fr);}.ss-stat-grid{gap:.6rem;}.ss-stat-grid article{padding:.8rem;}}
+
+/* Library is the entry view; opening content replaces it with editing/insights. */
+.ss-main{display:block;}
+.ss-library-home{position:static;max-width:86rem;margin:0 auto 3rem;border:1px solid var(--ss-line);border-radius:var(--radius-lg);padding:clamp(1rem,3vw,2rem);background:var(--surface-standard-background);}
+.ss-library-home h2{font:400 1.7rem/1.4 var(--font-family-reading);margin:0 0 .6rem;}
+.ss-library-home>.ss-field{display:grid;grid-template-columns:minmax(12rem,2fr) minmax(9rem,1fr) minmax(10rem,1fr) auto;gap:.6rem 1rem;margin:1.6rem 0 1rem;}
+.ss-library-home label[for="ss-search"]{grid-area:1/1;}.ss-library-home #ss-search{grid-area:2/1;}
+.ss-library-home label[for="ss-filter-type"]{grid-area:1/2;}.ss-library-home #ss-filter-type{grid-area:2/2;}
+.ss-library-home label[for="ss-filter-state"]{grid-area:1/3;}.ss-library-home #ss-filter-state{grid-area:2/3;}
+.ss-library-home [data-filter]{grid-area:2/4;margin:0;width:auto;}
+.ss-library-home .ss-work-list{display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem;}
+.ss-library-home .ss-work-list button{grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;align-items:center;gap:1.25rem;padding:1.2rem;}
+.ss-library-home .ss-work-list button::after{content:'Open →';color:var(--colour-accent-primary);font-size:.85rem;}
+.ss-content-navigation{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;margin:0 0 1.25rem;}
+.ss-content-navigation .ss-content-context{flex:1;min-width:9rem;font:400 1.2rem var(--font-family-reading);overflow-wrap:anywhere;}
+.ss-content-navigation .account-secondary{width:auto;margin:0;min-height:2.85rem;}
+.ss-current-view{font-size:.85rem;color:var(--colour-accent-primary);border-bottom:2px solid var(--colour-accent-primary);padding:.8rem;}
+.ss-new-dialog{width:min(34rem,calc(100% - 2rem));box-sizing:border-box;background:var(--background-page);color:var(--colour-text-primary);border:1px solid var(--colour-accent-primary);border-radius:var(--radius-lg);padding:2rem;}
+.ss-new-dialog h2{font:400 1.6rem/1.4 var(--font-family-reading);}.ss-type-choices{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1.5rem 0;}.ss-type-choices>button{width:100%;margin:0;min-height:3.5rem;white-space:normal;}
+.ss-new-dialog::backdrop{background:color-mix(in srgb,var(--colour-midnight) 75%,transparent);}
+@media(max-width:58rem){.ss-library-home>.ss-field{grid-template-columns:minmax(0,1fr);}.ss-library-home>.ss-field>*{grid-area:auto!important;}.ss-library-home .ss-work-list button{grid-template-columns:minmax(0,1fr) auto;gap:.6rem 1rem;}.ss-library-home .ss-work-list button>span:last-child{grid-area:2/1;}.ss-library-home .ss-work-list button::after{grid-area:1/2/3/3;}.ss-content-navigation{gap:.6rem;}.ss-content-navigation .ss-content-context{order:3;flex-basis:100%;}.ss-new-dialog{padding:1.25rem;}}
+
+.ss-insights[data-scope="content"] .ss-report-filters{grid-template-columns:minmax(0,1fr) auto;max-width:30rem;}
