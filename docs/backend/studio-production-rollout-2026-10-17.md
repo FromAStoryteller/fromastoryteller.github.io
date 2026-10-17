@@ -1,6 +1,6 @@
 # Storyteller Studio production rollout — 17 October 2026
 
-Status: production backend installed and verified. Operator confirmed encrypted archive integrity and off-site sync on 17 October 2026 at 22:59 NZDT (09:59 UTC). PR #26 merged and deployed; a reader redirect-mode compatibility fix is in progress before final acceptance.
+Status: production backend installed and verified. Operator confirmed encrypted archive integrity and off-site sync on 17 October 2026 at 22:59 NZDT (09:59 UTC). Production rollout complete. PRs #26 and #27 are merged; live checks passed, including the Cloudflare reader runtime correction.
 
 ## Reviewed release
 
@@ -74,4 +74,15 @@ Hosting rollback does not roll back database data. No DNS, nameserver, Auth/SMTP
 - PR #26 merged as b8a8894d1c7de95b317dc9b947efb16c31c6fdbd. Cloudflare build 0c85d626-8698-4448-ad7f-d08685c63234 deployed version cb6614e9-2205-4770-ab86-58e60743d728 successfully. Production account configuration was preserved exactly; the real signed-in Studio library loaded.
 - Live verification found missing Community paths returned 503. Reproduction in the installed workerd runtime identified redirect: error as unsupported; the runtime explicitly requires manual/follow. Manual mode retains the fail-closed result.ok check and never follows upstream redirects.
 - The corrected runtime rehearsal returns 404 for a missing public story. Reader tests cover manual mode, denied upstream redirects, retained no-store/noindex failures, static precedence and safe published metadata. No database or Auth changes are needed for this correction.
-- Public-file differences were attributable to Windows/Git line endings, Cloudflare-managed robots additions, and the intentional 404 reader shell when no story is supplied. Existing static stories, HTTP/HTTPS and www redirects, source-file exclusion and all real account settings remained available. Final reader-route acceptance remains pending deployment of the correction.
+- Public-file differences were attributable to Windows/Git line endings, Cloudflare-managed robots additions, and the intentional 404 reader shell when no story is supplied. Existing static stories, HTTP/HTTPS and www redirects, source-file exclusion and all real account settings remained available. Final reader-route checks passed after the correction deployed.
+
+## Final acceptance
+
+- Runtime correction PR #27 merged as 31067b260337de4352355e56d71903eb94a11e39. CI run 105 passed all checks; all 131 local tests passed. Cloudflare build 52504078-d9a5-4380-bbd4-227a4240b0cb deployed version 4d2e3755; the dashboard shows 100% traffic and Ready status.
+- Verified the entire 226-file public inventory: content matches after line-ending normalization, with explicitly reviewed managed-robots additions and the expected 404 status for /read/ without a story. The generated production account runtime configuration is unchanged.
+- Live missing /stories/, /blog/ and legacy /read/?story= routes return 404, Cache-Control: no-store and X-Robots-Tag: noindex, nofollow. Positive canonical redirects and safe published metadata are covered by the reader tests and DEV publication checks; no artificial production story was created.
+- Existing file-backed stories serve correctly; slash/index redirects retain query parameters. HTTP and www redirect to the HTTPS apex. Source/package/Git paths remain 404.
+- The real signed-in production Studio opens on Your work. The content picker enables Story and Blog post, and disables Game, Tool and Video. The picker was cancelled without creating content. Profile/social navigation uses the shared themed control styling.
+- Final database counts remain one account, zero Community stories/assets/image files. Ten publication cron runs succeeded with zero failures at verification.
+- Reporting/ads/monetization remain foundations only: no analytics provider, ad delivery, earnings accrual or payouts were activated.
+- The Studio implementation and production rollout are ready to mark complete. The full hosted account-backup restore rehearsal remains a separate operations task; an archive integrity test is not represented as a completed restore.
