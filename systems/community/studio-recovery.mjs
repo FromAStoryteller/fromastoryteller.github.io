@@ -23,16 +23,16 @@ export function clearRecoveryStorage(storage,exceptOwner=null){
 }
 export function createRecoveryStore(storage,{ownerId,now=Date.now}={}){
  if(!isPublicId(ownerId))throw new Error('A verified owner is required for recovery.');
- const base=PREFIX+ownerId+':',key=base+'copy',choice=base+'enabled';let enabled=false;
- try{enabled=storage?.getItem(choice)==='1';}catch{}
+ const key=PREFIX+ownerId+':copy';
+ // Remove the retired opt-in preference; recovery now protects edits automatically.
+ try{storage?.removeItem(PREFIX+ownerId+':enabled');}catch{}
  return {
-  get enabled(){return enabled;},
-  enable(value){enabled=false;try{if(value){storage.setItem(choice,'1');enabled=true;}else{storage.removeItem(choice);storage.removeItem(key);}return enabled===value;}catch{return false;}},
-  read(genres=GENRES){if(!enabled)return null;try{const raw=storage.getItem(key);if(!raw)return null;return parseRecovery(raw,{ownerId,now:now(),genres});}catch{try{storage.removeItem(key);}catch{}return null;}},
-  write(record){if(!enabled||record?.owner!==ownerId||record?.format!=='fas-studio-recovery-v1')return false;try{const raw=JSON.stringify(record);if(new TextEncoder().encode(raw).length>MAX)return false;storage.setItem(key,raw);return storage.getItem(key)===raw;}catch{return false;}},
+  read(genres=GENRES){try{const raw=storage?.getItem(key);if(!raw)return null;return parseRecovery(raw,{ownerId,now:now(),genres});}catch{try{storage?.removeItem(key);}catch{}return null;}},
+  write(record){if(record?.owner!==ownerId||record?.format!=='fas-studio-recovery-v1')return false;try{const raw=JSON.stringify(record);if(new TextEncoder().encode(raw).length>MAX)return false;storage.setItem(key,raw);return storage.getItem(key)===raw;}catch{return false;}},
   clear(){try{storage?.removeItem(key);}catch{}},
  };
 }
+
 export function downloadRecovery(document,record,textOnly=false){
  const values=record.values,text=[values.title||'Untitled',values.summary,values.content_warning?'Content warning: '+values.content_warning:'',values.body_document?documentText(values.body_document):values.body].filter(Boolean).join('\n\n');
  const content=textOnly?text:JSON.stringify(record,null,2),url=URL.createObjectURL(new Blob([content],{type:textOnly?'text/plain;charset=utf-8':'application/json'})),a=document.createElement('a');
