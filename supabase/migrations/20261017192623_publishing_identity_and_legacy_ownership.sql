@@ -16,6 +16,8 @@ grant insert(publishing_identity),update(publishing_identity) on public.stories 
 create function private.guard_publishing_identity() returns trigger language plpgsql security definer set search_path='' as $$
 begin
  if new.content_type='tool' then new.publishing_identity:='fas';end if;
+ -- Existing attribution can still be archived by moderation after access revocation.
+ if TG_OP='UPDATE' and new.publishing_identity is not distinct from old.publishing_identity and new.author_id=old.author_id and new.content_type=old.content_type then return new;end if;
  if new.publishing_identity='fas' and not exists(select 1 from private.fas_publishers where user_id=new.author_id) then raise exception 'FAS publishing access required';end if;
  return new;
 end;$$;

@@ -7,9 +7,25 @@ insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data)
 insert into auth.sessions(id,user_id) values('94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001'),('94000000-0000-0000-0000-000000000002','93000000-0000-0000-0000-000000000002'),('94000000-0000-0000-0000-000000000003','93000000-0000-0000-0000-000000000003');
 insert into public.user_roles(user_id,role) values('93000000-0000-0000-0000-000000000001','member'),('93000000-0000-0000-0000-000000000002','member');
 
-insert into private.fas_publishers(user_id) values('93000000-0000-0000-0000-000000000001');
+-- Exercise the exact claim operation against the named synthetic fixture account.
+do $$
+declare owner_key uuid;
+begin
+ if (select count(*) from auth.users where lower(email)='studio-v2-owner@example.invalid' and email_confirmed_at is not null)<>1 then raise exception 'Exactly one verified site-owner account is required';end if;
+ select id into owner_key from auth.users where lower(email)='studio-v2-owner@example.invalid' and email_confirmed_at is not null;
+ perform 1 from public.profiles where id=owner_key for update;
+ if not private.account_active(owner_key) or not exists(select 1 from public.user_roles where user_id=owner_key and role='member') then raise exception 'An active contributor account is required';end if;
+ if (select count(*) from private.file_content)<>14 or (select count(*) from private.file_content where content_type='story')<>10 or (select count(*) from private.file_content where content_type='game')<>2 or (select count(*) from private.file_content where content_type='tool')<>2 then raise exception 'Reviewed file content inventory changed';end if;
+ if exists(select 1 from private.file_content where owner_id is not null and owner_id<>owner_key) then raise exception 'Existing ownership differs; review before reassigning';end if;
+ if exists(select 1 from private.fas_publishers where user_id<>owner_key) then raise exception 'FAS publishing access differs; review before granting';end if;
+ if exists(select 1 from private.publishing_brand where owner_id is not null and owner_id<>owner_key) then raise exception 'Brand owner differs; review before reassigning';end if;
+ update private.publishing_brand set owner_id=owner_key where singleton;
+ insert into private.fas_publishers(user_id) values(owner_key) on conflict do nothing;
+ update private.file_content set owner_id=owner_key where owner_id is null;
+end;$$;
+
 update private.publishing_brand set owner_id='93000000-0000-0000-0000-000000000001';
-update private.file_content set owner_id='93000000-0000-0000-0000-000000000001' where owner_id is null;
+do $begin if (select count(*) from private.file_content where owner_id='93000000-0000-0000-0000-000000000001')<>14 then raise exception 'FAIL reviewed owner claim';end if;end;$;
 select set_config('fas.fixture.file',id::text,true) from private.file_content where url='/games/brick-blitz/';
 select set_config('fas.fixture.version',updated_at::text,true) from private.file_content where id=current_setting('fas.fixture.file')::uuid;
 insert into public.stories(author_id,title,body,status,published_at) values('93000000-0000-0000-0000-000000000001','Publishing identity fixture','Synthetic text','published',now());
