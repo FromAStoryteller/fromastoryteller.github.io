@@ -35,3 +35,9 @@
 .admin-account-details{padding:0 1.25rem 1.25rem;border-top:1px solid var(--colour-border-default);}
 .admin-account-details>.admin-actions{margin-bottom:0;}
 @container admin (max-width:30rem){.admin-account-summary{padding:.85rem;gap:.75rem;}.admin-account-identity{display:grid;gap:.15rem;}.admin-account-details{padding:0 .85rem .85rem;}}
+
+.admin-account-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 2rem;margin:1.25rem 0;}
+.admin-account-fields>div{min-width:0;}
+.admin-account-fields dt{font-family:var(--font-ui);font-size:.875rem;font-weight:600;color:var(--colour-text-secondary);margin-bottom:.25rem;}
+.admin-account-fields dd{margin:0;overflow-wrap:anywhere;}
+@container admin (max-width:30rem){.admin-account-fields{grid-template-columns:1fr;}}

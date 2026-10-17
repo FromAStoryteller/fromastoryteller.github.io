@@ -29,7 +29,6 @@ export function mountAdminTools(root,service,{onAccessLost=()=>{}}={}){
  form.querySelector('input').value=accountSearch;form.querySelector('#account-role-filter').value=accountFilter;form.querySelector('#account-sort').value=accountSort;
  const apply=()=>{accountSearch=form.querySelector('input').value.trim();accountFilter=form.querySelector('#account-role-filter').value;accountSort=form.querySelector('#account-sort').value;return accounts(0);};
  form.addEventListener('submit',e=>{e.preventDefault();if(form.reportValidity())void run(apply);});
- for(const selector of ['#account-role-filter','#account-sort'])form.querySelector(selector).addEventListener('change',()=>run(apply));
  form.querySelector('[data-reset-filters]').addEventListener('click',()=>run(async()=>{accountSearch='';accountFilter='all';accountSort='name';await accounts(0);}));
  form.querySelector('[data-refresh-accounts]').addEventListener('click',()=>run(async()=>{await accounts(accountOffset);say('Account list refreshed.');}));
  content.append(form);
@@ -44,8 +43,9 @@ export function mountAdminTools(root,service,{onAccessLost=()=>{}}={}){
   const toggle=el(d,'span','admin-account-toggle','View details');
   summary.append(identity,toggle);item.append(summary);
   const details=el(d,'div','admin-account-details');
-  details.append(el(d,'p','',account.email),el(d,'p','admin-muted',`${account.verified?'Verified email':'Email not verified'} · ${account.active?'Active':'Account removal in progress'} · ${account.stories} ${account.stories===1?'story':'stories'}`));
-  if(account.created_at)details.append(el(d,'p','admin-muted','Joined '+date(account.created_at)));
+  const fields=el(d,'dl','admin-account-fields');
+  for(const [label,value] of [['Email address',account.email],['Access roles',roleLabel(account.roles)],['Email verification',account.verified?'Verified':'Not verified'],['Account status',account.active?'Active':'Removal in progress'],['Stories owned',String(account.stories)],['Joined',account.created_at?date(account.created_at):'Not available']]){const field=el(d,'div','');field.append(el(d,'dt','',label),el(d,'dd','',value));fields.append(field);}
+  details.append(fields);
   if(account.active&&account.verified){const actions=el(d,'div','admin-actions');for(const [role,label] of [['member','contributor'],['admin','admin']]){const enabled=!account.roles.includes(role);actions.append(button(`${enabled?'Grant':'Remove'} ${label} access`,async()=>confirmRole(account,role,enabled,details),!enabled));}details.append(actions);}
   else details.append(el(d,'p','admin-muted','Access changes are available for verified, active accounts.'));
   item.append(details);
