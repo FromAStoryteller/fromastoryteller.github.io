@@ -12,6 +12,8 @@ begin
  if (select count(*) from private.file_content)<>14 or (select count(*) from private.file_content where content_type='story')<>10 or (select count(*) from private.file_content where content_type='game')<>2 or (select count(*) from private.file_content where content_type='tool')<>2 then raise exception 'Reviewed file content inventory changed';end if;
  if exists(select 1 from private.file_content where owner_id is not null and owner_id<>owner_key) then raise exception 'Existing ownership differs; review before reassigning';end if;
  if exists(select 1 from private.fas_publishers where user_id<>owner_key) then raise exception 'FAS publishing access differs; review before granting';end if;
+ if exists(select 1 from private.publishing_brand where owner_id is not null and owner_id<>owner_key) then raise exception 'Brand owner differs; review before reassigning';end if;
+ update private.publishing_brand set owner_id=owner_key where singleton;
  insert into private.fas_publishers(user_id) values(owner_key) on conflict do nothing;
  update private.file_content set owner_id=owner_key where owner_id is null;
 end;$$;

@@ -4,6 +4,7 @@ create table private.fas_publishers(user_id uuid primary key references public.p
 create table private.publishing_brand(
  singleton boolean primary key default true check(singleton),
  public_id uuid not null unique default 'fa500000-0000-4000-8000-000000000001',
+ owner_id uuid references public.profiles(id) on delete set null,
  display_name text not null default 'From A Storyteller',
  social_links jsonb not null default '[{"platform":"facebook","url":"https://www.facebook.com/fromastoryteller/"},{"platform":"instagram","url":"https://www.instagram.com/fromastoryteller/"},{"platform":"tiktok","url":"https://www.tiktok.com/@fromastoryteller/"},{"platform":"youtube","url":"https://www.youtube.com/@fromastoryteller/"}]'
 );
@@ -155,7 +156,7 @@ begin
   if new.page_kind='content' then select author_id into owner_key from public.stories where id=new.page_id;
    if owner_key is null then select owner_id into owner_key from private.file_content where id=new.page_id;end if;
   elsif new.page_kind='profile' then select id into owner_key from public.profiles where public_id=new.page_id;
-   if owner_key is null and exists(select 1 from private.publishing_brand where public_id=new.page_id) then select user_id into owner_key from private.fas_publishers order by user_id limit 1;end if;
+   if owner_key is null and exists(select 1 from private.publishing_brand where public_id=new.page_id) then select owner_id into owner_key from private.publishing_brand where public_id=new.page_id;end if;
   else owner_key:=null;end if;
   if new.page_kind<>'site' and owner_key is null then raise exception 'Page owner unavailable';end if;
   if new.page_kind='site' then new.beneficiary_id:=null;

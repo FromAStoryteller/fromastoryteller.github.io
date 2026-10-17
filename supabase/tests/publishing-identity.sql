@@ -8,6 +8,7 @@ insert into auth.sessions(id,user_id) values('94000000-0000-0000-0000-0000000000
 insert into public.user_roles(user_id,role) values('93000000-0000-0000-0000-000000000001','member'),('93000000-0000-0000-0000-000000000002','member');
 
 insert into private.fas_publishers(user_id) values('93000000-0000-0000-0000-000000000001');
+update private.publishing_brand set owner_id='93000000-0000-0000-0000-000000000001';
 update private.file_content set owner_id='93000000-0000-0000-0000-000000000001' where owner_id is null;
 select set_config('fas.fixture.file',id::text,true) from private.file_content where url='/games/brick-blitz/';
 select set_config('fas.fixture.version',updated_at::text,true) from private.file_content where id=current_setting('fas.fixture.file')::uuid;
