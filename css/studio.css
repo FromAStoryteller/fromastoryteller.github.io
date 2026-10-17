@@ -139,7 +139,7 @@
 /* Draft actions share one row and wrap together in the sticky save bar. */
 .ss-savebar>div:first-child{min-width:0;}
 .ss-draft-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin-top:.4rem;}
-.ss-savebar .ss-draft-actions :is(.studio-action-button,.account-secondary){width:auto;min-height:2.75rem;margin:0;}
+.ss-savebar .ss-draft-actions :is(.studio-action-button,.account-secondary){display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:auto;min-height:2.75rem;margin:0;padding:.55rem .85rem;font-size:.85rem;line-height:1.4;}
 
 .ss-file-details{max-width:52rem;padding:clamp(1rem,3vw,2rem);border:1px solid var(--colour-border-default);border-radius:var(--radius-md);background:var(--surface-standard-background);}
 .ss-file-details .ss-save-actions{display:flex;flex-wrap:wrap;gap:.75rem;}
