@@ -34,11 +34,11 @@ The latest confirmed pre-change backup was 18 October 2026 at 12:08 NZDT: five S
 
 ## Environment separation
 
-| Environment | Purpose | Operator working copy |
+| Environment | Purpose | Explicit target |
 | --- | --- | --- |
-| Local | Disposable development and restore tests on the PC | Original website checkout; local .env.local |
-| Hosted dev | Real-service testing with disposable content | Original website checkout linked to dev |
-| Hosted prod | Real community accounts and content | Separate FAS-Production-Setup checkout linked to prod |
+| Local | Disposable development and restore tests on the PC | FAS local configuration; API 55321 |
+| Hosted dev | Real-service testing with disposable content | fas-community-dev: oqmmvjjycpyxvxipcyli |
+| Hosted prod | Real community accounts and content | fas-community-prod: vzdicnufhidelaoeqbza |
 
 Git branches do not change the CLI's project link. Verify the project before any
 linked database command. Git push updates source; it does not apply Supabase
