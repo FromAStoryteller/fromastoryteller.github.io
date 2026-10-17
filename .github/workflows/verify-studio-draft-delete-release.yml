@@ -1,0 +1,17 @@
+name: Verify Studio draft-delete release
+on:
+  push:
+    branches: [verify/studio-draft-delete-release]
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify reviewed live source and private-route handling without mutations
+        run: node scripts/verify-studio-draft-delete-release.mjs
