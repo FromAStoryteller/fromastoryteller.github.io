@@ -27,6 +27,7 @@ export function publicationIssues(input,assets=[],type){
  const body=input.body_document?documentText(input.body_document):input.body;if(!body?.replace(/\*\*\*/g,'').trim())issues.push('Write your manuscript');if(!input.genres?.length)issues.push('Choose at least one genre or subgenre');
  const cover=assets.find(a=>a.id===input.cover_asset_id);if(!cover)issues.push('Choose a cover image');else{if(!cover.alt_text?.trim())issues.push('Describe the cover for screen readers');if(!cover.pixel_width||cover.pixel_width*9!==cover.pixel_height*16)issues.push('Use a verified 16:9 cover');}return issues;
 }
+export const canDeleteDraft=story=>!!story?.id&&story.status==='draft'&&!story.slug_locked&&!story.published_at&&!story.scheduled_at;
 export class StudioAccessError extends Error{}
 export class StudioConflictError extends Error{}
 export function createStudioService(client,{ownerId,checkAccount=loadProfileAccount}={}){
@@ -45,6 +46,12 @@ export function createStudioService(client,{ownerId,checkAccount=loadProfileAcco
    if(previous){if(!isPublicId(previous.id)||!previous.updated_at)throw new Error('Reopen this content before saving.');q=client.from('stories').update({...changes,status}).eq('author_id',ownerId).eq('id',previous.id).eq('updated_at',previous.updated_at);}
    else{if(status!=='draft'||changes.cover_asset_id||changes.scheduled_at)throw new Error('Save a draft before choosing its cover or publishing.');const {cover_asset_id,...draft}=changes;q=client.from('stories').insert({...draft,author_id:ownerId});}
    const r=await q.select(STORY_FIELDS).maybeSingle();if(r.error)fail(r.error);if(!r.data)throw new StudioConflictError('This content changed elsewhere or is locked. Download your text, then reopen it.');return r.data;
+  },
+  async deleteDraft(previous){
+   if(!canDeleteDraft(previous)||!isPublicId(previous.id)||!previous.updated_at)throw new Error('Only saved, never-published drafts can be deleted here. Cancel any schedule first.');
+   await authorize();const r=await client.from('stories').delete().eq('author_id',ownerId).eq('id',previous.id).eq('updated_at',previous.updated_at).eq('status','draft').eq('slug_locked',false).is('published_at',null).is('scheduled_at',null).select('id').maybeSingle();
+   if(r.error)throw new Error('The draft could not be deleted. Reopen it from Your work before trying again.');
+   if(r.data?.id!==previous.id)throw new StudioConflictError('This draft changed elsewhere, was scheduled or published, or is no longer available. Reopen it from Your work before deleting.');
   },
   async uploadCover(id,file,alt,crop){await authorize();if(!isPublicId(id)||!file||file.size>5*1024*1024||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and describe the image.');const body=new FormData();body.set('story_id',id);body.set('image',file);body.set('alt',alt.trim());body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));const r=await client.functions.invoke('fas-studio-cover',{body});if(r.error||!r.data?.asset)throw new Error('Cover upload could not finish. Try again. Existing covers are unchanged.');return r.data.asset;},
   async traffic(pageId=null,days=30){await authorize();const r=await client.rpc('fas_my_studio_traffic',{page_key:pageId,period_days:days});if(r.error)throw new Error('Traffic reports could not be loaded. Try again.');return r.data;},

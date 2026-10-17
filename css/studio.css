@@ -130,3 +130,8 @@
 @media(max-width:58rem){.ss-library-home>.ss-field{grid-template-columns:minmax(0,1fr);}.ss-library-home>.ss-field>*{grid-area:auto!important;}.ss-library-home .ss-work-list button{grid-template-columns:minmax(0,1fr) auto;gap:.6rem 1rem;}.ss-library-home .ss-work-list button>span:last-child{grid-area:2/1;}.ss-library-home .ss-work-list button::after{grid-area:1/2/3/3;}.ss-content-navigation{gap:.6rem;}.ss-content-navigation .ss-content-context{order:3;flex-basis:100%;}.ss-new-dialog{padding:1.25rem;}}
 
 .ss-insights[data-scope="content"] .ss-report-filters{grid-template-columns:minmax(0,1fr) auto;max-width:30rem;}
+
+/* Keep confirmation actions reachable on narrow screens and long titles. */
+.ss-delete-dialog .ss-save-actions{flex-wrap:wrap;}
+.ss-delete-dialog .ss-save-actions>button{flex:1 1 9rem;min-width:0;white-space:normal;}
+.ss-delete-dialog p{overflow-wrap:anywhere;}
