@@ -1,6 +1,6 @@
 # Storyteller Studio production rollout — 17 October 2026
 
-Status: production backend installed and verified. Operator confirmed encrypted archive integrity and off-site sync on 17 October 2026 at 22:59 NZDT (09:59 UTC). Website release is pending the final merge/deployment.
+Status: production backend installed and verified. Operator confirmed encrypted archive integrity and off-site sync on 17 October 2026 at 22:59 NZDT (09:59 UTC). PR #26 merged and deployed; a reader redirect-mode compatibility fix is in progress before final acceptance.
 
 ## Reviewed release
 
@@ -68,3 +68,10 @@ Hosting rollback does not roll back database data. No DNS, nameserver, Auth/SMTP
 - Post-installation counts remain one Auth account, zero Community stories/assets/image files. No production fixture accounts or uploads were created.
 - Security advisory categories remain the documented intentional RLS/no-policy and checked public/authenticated definer functions, plus the existing leaked-password-protection setting notice. No new exposed-table issue.
 - Cloudflare dashboard currently serves version 9631d1c6 at 100% traffic from main commit 4e3b3bc7511f860e11bb107956b01c9dc23ab86a. Retain this deployment as the immediate website rollback target. Existing production public account configuration is enabled and points to the correct production project.
+
+## Website release and runtime correction
+
+- PR #26 merged as b8a8894d1c7de95b317dc9b947efb16c31c6fdbd. Cloudflare build 0c85d626-8698-4448-ad7f-d08685c63234 deployed version cb6614e9-2205-4770-ab86-58e60743d728 successfully. Production account configuration was preserved exactly; the real signed-in Studio library loaded.
+- Live verification found missing Community paths returned 503. Reproduction in the installed workerd runtime identified redirect: error as unsupported; the runtime explicitly requires manual/follow. Manual mode retains the fail-closed result.ok check and never follows upstream redirects.
+- The corrected runtime rehearsal returns 404 for a missing public story. Reader tests cover manual mode, denied upstream redirects, retained no-store/noindex failures, static precedence and safe published metadata. No database or Auth changes are needed for this correction.
+- Public-file differences were attributable to Windows/Git line endings, Cloudflare-managed robots additions, and the intentional 404 reader shell when no story is supplied. Existing static stories, HTTP/HTTPS and www redirects, source-file exclusion and all real account settings remained available. Final reader-route acceptance remains pending deployment of the correction.
