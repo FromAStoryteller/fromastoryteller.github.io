@@ -23,7 +23,7 @@ Status: preflight complete; waiting for the operator's fresh verified/encrypted 
 
 The existing operating choice is a manual production export before database changes: SQL roles/schema/data/migration history plus a Storage inventory, encrypted and verified, with an off-site copy. See [backup-restore.md](backup-restore.md). There are no current image bytes, but record/verify the empty inventory. Do not treat a repository checkout or the DEV fixture cleanup as a production backup.
 
-The documented CLI dump procedure needs Docker, which is unavailable in the current execution environment. Ask the operator to complete or confirm a fresh backup for this exact release before any production migration. Never request its password, database password, SQL contents or service key in chat. Record confirmation and backup time, not confidential backup contents.
+The documented CLI dump procedure needs Docker. Docker was verified available through PATH (the initial default-installation-path probe missed it). The operating procedure assigns backup encryption/password custody and off-site verification to the operator. Ask the operator to complete or confirm a fresh backup for this exact release before any production migration. Never request its password, database password, SQL contents or service key in chat. Record confirmation and backup time, not confidential backup contents.
 
 ## Ordered installation after backup confirmation
 
