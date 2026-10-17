@@ -4,17 +4,15 @@ Work in progress, 17 October 2026 (New Zealand). Production is unchanged.
 
 ## Role model
 
-Contributor (stored as member), moderator and admin are separate role rows with
-a composite user/role key. Existing admin/moderator accounts gain an explicit
-member row during migration to preserve the contribution rights they already had.
-New admin grants do not add contributor access. Relinquishing admin leaves member
-access untouched. Removing member access leaves administrative access untouched.
-A viewer has no role rows. Public storyteller pages require member access or
-published stories; admin-only accounts do not acquire a public profile by rank.
+Contributor (stored as member) and admin are independent role rows with a composite user/role key. A viewer has neither role. Existing admins receive an explicit member row during the initial upgrade to preserve their former contribution rights. New admin grants do not add contributor access. Removing either role leaves the other unchanged.
+
+Moderator is retired: no current DEV or production account uses it. A database constraint rejects new moderator assignments and staff authorization now means admin only. The historical enum label remains solely for migration compatibility; it grants no permissions.
+
+Removing contributor access atomically returns published stories to private drafts and hides the public contributor profile. Text, image associations and uploaded originals remain owned by the same account and available through its content ZIP download. Reinstating access does not republish stories. Publication and contributor-role changes serialize per author so concurrent saves cannot leave revoked work public. Moderation archives remain archived.
 
 ## Tools
 
-- /account/admin/: invitation list/create/revoke; exact-email account lookup and
+- /account/admin/: invitation list/create/revoke; a searchable account directory with role filters, sorting, 25-row pages and expandable labelled details;
   independent contributor/admin grant/removal; story moderation and restoration;
   immutable invitation/access/moderation activity.
 - /account/invitation/: verified matching account accepts a single-use contributor
@@ -22,7 +20,7 @@ published stories; admin-only accounts do not acquire a public profile by rank.
   account services, and optionally retained in this tab for at most 24 hours to
   finish sign-in. An invitation is not policy acceptance and never grants admin.
 - /tests/admin-preview/: fictional local demonstration. It never touches live
-  accounts, roles, stories or invitations. Search alex@example.invalid.
+  accounts, roles, stories or invitations. Browse 57 fictional accounts.
 
 Invitation links are displayed once for the operator to copy and privately share.
 No email is sent automatically. Lost links must be revoked and reissued.
@@ -91,3 +89,5 @@ in DEV. Existing image approval now requires the same live verified session and
 records an audit action. Hosted stale-session approval denial passed. The legacy
 security harness prints its synthetic subject IDs as well, because its invitation,
 moderation and image actions now generate protected admin-audit records.
+
+DEV additions: 20261017000835_admin_account_directory.sql and 20261017002148_retire_moderator_contributor_removal.sql. Native rolled-back regression checks verify bounded directory privacy, role retirement, public story/profile hiding, retained viewer-owned export snapshots and private reinstatement. Hosted HTTP regression now also checks the actual former-contributor ZIP. Production rollout remains pending that updated hosted run.

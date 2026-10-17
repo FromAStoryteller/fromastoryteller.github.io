@@ -58,7 +58,7 @@ export async function verifyAdminDatabase(PGlite){
   await value(a,sa,`select public.fas_admin_set_role('${b}','member',false,'admin-b@example.invalid','Separate contributor access') value`);
   assert.equal(await value(b,sb,'select private.is_member() value'),false,'admin alone cannot contribute');
   assert.ok(await value(b,sb,'select public.fas_admin_overview() value'));
-  await assert.rejects(as(b,sb,`insert into public.stories(author_id,slug,title) values('${b}','admin-only-denied','Denied')`),/row-level security/);
+  await assert.rejects(as(b,sb,`insert into public.stories(author_id,slug,title) values('${b}','admin-only-denied','Denied')`),/row-level security|Contributor access required/);
   await assert.rejects(db.exec(`insert into public.user_roles values('${v}','moderator')`),/fas_supported_roles/);
   await db.exec(`insert into public.user_roles values('${v}','member');insert into public.stories(id,author_id,slug,title,body,status,published_at) values('73000000-0000-0000-0000-000000000010','${v}','retained-on-removal','Retained','Owned original','published',now());`);
   await value(a,sa,`select public.fas_admin_set_role('${v}','member',false,'viewer@example.invalid','Remove contribution') value`);
