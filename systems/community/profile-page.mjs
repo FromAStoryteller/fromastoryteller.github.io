@@ -63,14 +63,14 @@ try {
       renderPublicProfile(root,current,{imageBase:local.publicImageBase});
       if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth, admin: ownerAdmin }));
       if (current?.next_offset != null) {
-        const more = document.createElement('button');more.className='account-secondary';more.textContent='More stories';
+        const more = document.createElement('button');more.className='account-secondary';more.textContent='More work';
         more.addEventListener('click',async () => {
           more.disabled=true;
           try {
             const page = await service.readPublic(id,current.next_offset);
             if (!page) { current=null; render(); return; }
             current={...page,stories:[...current.stories,...page.stories]}; render();
-          } catch { more.textContent='Could not load stories. Try again';more.disabled=false; }
+          } catch { more.textContent='Could not load work. Try again';more.disabled=false; }
         });root.append(more);
       }
     }

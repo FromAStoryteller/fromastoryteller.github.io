@@ -1,3 +1,4 @@
+import {fileContentPath} from './publishing-identity.mjs';
 import {contentPath} from './content-address.mjs';
 import { initials } from './profile-editor.mjs';
 import { publicProfileUrl, publicCoverUrl, isPublicId } from './profiles.mjs';
@@ -22,7 +23,7 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
   if (profile.bio) header.append(node(d, 'p', 'profile-bio', profile.bio));
   if(profile.social_links?.length){const socials=node(d,'nav','storyteller-socials');renderSocialLinks(socials,profile.social_links);header.append(socials);}
   const section = node(d, 'section', 'storyteller-stories');
-  section.append(node(d, 'h2', '', 'Published stories & posts'));
+  section.append(node(d, 'h2', '', 'Published work'));
   const list = node(d, 'div', 'profile-story-list');
   for (const story of profile.stories ?? []) {
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(story.slug ?? '')) continue;
@@ -34,14 +35,14 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
     const fallback=node(d,'span','content-grid-card-placeholder','From, A Storyteller');
     fallback.setAttribute('aria-hidden','true');image.replaceWith(fallback);
   },{once:true});
-  if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'A quiet corner, waiting for its first story.'));
+  if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'No published work yet.'));
   else section.append(list);
   root.append(header, section);
 }
 
 export function profileStoryCard(story, { imageBase, preview = false } = {}) {
-  const localImage = preview && /^\/assets\/images\/stories\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(story.preview_image ?? '') ? story.preview_image : '';
-  return createCardMarkup({ category:story.content_type==='blog'?'blog':'stories',title:story.title,url:contentPath(story),
+  const localImage = (preview||story.source_kind==='file') && /^\/assets\/images\/[a-z0-9/_-]+\.(jpg|jpeg|png|webp)$/i.test(story.preview_image ?? '') ? story.preview_image : '';
+  return createCardMarkup({ category:({story:'stories',blog:'blog',game:'games',tool:'tools',video:'videos'})[story.content_type]||'stories',title:story.title,url:story.source_kind==='file'?fileContentPath(story.url)||'#':contentPath(story),
     card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 

@@ -1599,3 +1599,10 @@ html, body, button, input, textarea, select,
 .storage-settings-link { min-height: var(--size-touch-target-minimum); padding: .25rem 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 .footer-legal a:active, .socials a:active { background: var(--state-current-background); }
 #contact-email { scroll-margin-top: 6rem; }
+
+/* Shared public authorship, using the same quiet metadata treatment as stories. */
+.file-publishing-author{display:inline-flex;align-items:center;max-width:100%;font-size:.95rem;color:var(--colour-text-secondary);}
+.file-publishing-author a{color:inherit;text-underline-offset:.2em;}
+.file-publishing-author a:hover{color:var(--colour-accent-primary);}
+.file-publishing-socials{display:flex;flex-wrap:wrap;gap:.75rem;margin-block:1.5rem;}
+.file-publishing-socials a{display:inline-flex;align-items:center;min-height:var(--size-touch-target-minimum);text-transform:capitalize;}

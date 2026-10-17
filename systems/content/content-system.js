@@ -1,3 +1,4 @@
+import {publicFileCatalog} from '../community/publishing-identity.mjs'
 import { readingTimeLabel } from "../reading/reading-time.mjs"
 import {isKeyboardInteraction} from "../core/focus.js"
 
@@ -120,9 +121,10 @@ async function loadMetaFile(metaPath) {
 async function loadAllContent() {
     const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
     const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
+    const authors=new Map((await publicFileCatalog()).map(item=>[item.url,item.author]));
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
     if (metaPaths.length && !loaded.length) throw new Error("No content metadata could be loaded")
-    return loaded.map(item => ({...item, readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
+    return loaded.map(item => ({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
 }
 
 // ----- SORT / FILTER -----
