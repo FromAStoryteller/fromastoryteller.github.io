@@ -36,6 +36,8 @@ create table private.file_content(
  publishing_identity text not null default 'personal' check(publishing_identity in ('personal','fas')),
  check(content_type<>'tool' or publishing_identity='fas')
 );
+create index stories_publishing_profile on public.stories(publishing_identity,author_id,published_at desc,id) where status='published';
+create index file_content_publishing_profile on private.file_content(publishing_identity,owner_id,published_at desc,id);
 create index file_content_owner_library on private.file_content(owner_id,updated_at desc,id);
 -- Deterministic UUIDs preserve page/report identity across byline and title changes.
 insert into private.file_content(id,owner_id,url,content_type,title,summary,slug,published_at,image,image_alt,publishing_identity)
@@ -115,20 +117,20 @@ create or replace function public.fas_public_story(story_slug text) returns json
 $$;
 
 -- One published projection for community and existing file-backed work.
-create function private.public_publishing_work() returns table(owner_id uuid,identity_key text,id uuid,published_at timestamptz,item jsonb) language sql stable security definer set search_path='' as $$
+create function private.public_publishing_work(target_owner uuid,target_identity text) returns table(owner_id uuid,identity_key text,id uuid,published_at timestamptz,item jsonb) language sql stable security definer set search_path='' as $$
  select s.author_id,s.publishing_identity,s.id,s.published_at,
  jsonb_build_object('id',s.id,'slug',s.slug,'title',s.title,'summary',s.summary,'content_type',s.content_type,'published_at',s.published_at,'cover',(select jsonb_build_object('asset_id',a.id,'alt',a.alt_text) from public.story_assets a where a.id=s.cover_asset_id and a.story_id=s.id and (a.verified_at is not null or a.approved_at is not null)))
- from public.stories s where status='published' and private.public_publishing_author(s.author_id,s.publishing_identity) is not null
+ from public.stories s where status='published' and s.publishing_identity=target_identity and (target_identity='fas' or s.author_id=target_owner) and private.public_publishing_author(s.author_id,s.publishing_identity) is not null
  union all select f.owner_id,f.publishing_identity,f.id,f.published_at,
  jsonb_build_object('id',f.id,'source_kind','file','url',f.url,'slug',f.slug,'title',f.title,'summary',f.summary,'content_type',f.content_type,'published_at',f.published_at,'preview_image',f.image,'preview_alt',f.image_alt)
- from private.file_content f where private.public_publishing_author(f.owner_id,f.publishing_identity) is not null;
+ from private.file_content f where f.publishing_identity=target_identity and (target_identity='fas' or f.owner_id=target_owner) and private.public_publishing_author(f.owner_id,f.publishing_identity) is not null;
 $$;
-revoke all on function private.public_publishing_work() from public,anon,authenticated;
+revoke all on function private.public_publishing_work(uuid,text) from public,anon,authenticated;
 create or replace function public.fas_public_profile(profile_key uuid,page_offset integer default 0) returns jsonb language sql stable security definer set search_path='' as $$
  with identity as (
  select p.public_id,p.display_name,p.bio,p.welcome_line,p.social_links,p.id as owner_id,'personal'::text as identity_key from public.profiles p where p.public_id=profile_key and private.public_publishing_author(p.id,'personal') is not null
  union all select b.public_id,b.display_name,'Stories, games and useful things from From A Storyteller.','',b.social_links,null::uuid,'fas' from private.publishing_brand b where b.public_id=profile_key and singleton
- ), work as (select w.* from private.public_publishing_work() w join identity i on w.identity_key=i.identity_key and (i.identity_key='fas' or w.owner_id=i.owner_id))
+ ), work as (select w.* from identity i cross join lateral private.public_publishing_work(i.owner_id,i.identity_key) w)
  select jsonb_build_object('public_id',i.public_id,'display_name',i.display_name,'bio',i.bio,'welcome_line',i.welcome_line,'social_links',i.social_links,
  'stories',coalesce((select jsonb_agg(item order by published_at desc,id) from(select * from work order by published_at desc,id limit 12 offset page_offset)x),'[]'),
  'next_offset',case when (select count(*) from work)>page_offset+12 then page_offset+12 else null end)
