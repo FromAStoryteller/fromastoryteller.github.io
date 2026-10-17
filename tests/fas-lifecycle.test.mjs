@@ -38,3 +38,26 @@ test('Receipt check can confirm completed deletion after the ordinary session is
     assert.equal(prepared.started, true);
   } finally { globalThis.fetch = original; }
 });
+
+test('A former contributor can export retained stories; an empty viewer cannot export content', async () => {
+  const id = '30000000-0000-0000-0000-000000000001';
+  const session = '30000000-0000-0000-0000-000000000002';
+  const token = 'test.' + Buffer.from(JSON.stringify({ session_id: session })).toString('base64url') + '.test';
+  let owned = true;
+  const handler = makeLifecycleHandler(config, async (url, options) => {
+    if (url.endsWith('/auth/v1/user')) return Response.json({ id, email: 'former@example.invalid', email_confirmed_at: '2026-01-01' });
+    const args = JSON.parse(options.body);
+    assert.equal(args.target_user, id);
+    assert.equal(args.target_session, session);
+    if (url.endsWith('/fas_claim_account_action')) return Response.json(true);
+    assert.ok(url.endsWith('/fas_account_snapshot'));
+    return Response.json({ fingerprint: 'stable', data: { role: 'viewer', profile: {}, assets: [], objects: [], stories: owned ? [{ id, slug: 'retained-story', title: 'Retained story', body: 'My original words', status: 'draft' }] : [] } });
+  });
+  const makeRequest = () => new Request('http://localhost/lifecycle', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Origin: 'http://127.0.0.1:55400' }, body: JSON.stringify({ action: 'export', target_user: 'someone-else' }) });
+  const response = await handler(makeRequest());
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('Content-Type'), 'application/zip');
+  assert.match(new TextDecoder().decode(await response.arrayBuffer()), /My original words/);
+  owned = false;
+  assert.equal((await handler(makeRequest())).status, 403);
+});

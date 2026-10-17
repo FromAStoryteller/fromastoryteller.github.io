@@ -36,9 +36,9 @@ function render(account) {
   nav.replaceChildren(accountNavigation(document, { current: 'settings', auth: local.client.auth, publicId, admin:account.admin }));
   download.disabled = false;
   const contributor = account.contributor;
-  document.querySelector('[data-contributor-export]').hidden = !contributor;
-  contentDownload.disabled = !local.lifecycleEnabled || !contributor;
-  document.querySelector('[data-delete-export-label]').textContent = contributor ? 'I downloaded my content or choose to continue without a copy.' : 'I understand my account will be permanently deleted.';
+  document.querySelector('[data-contributor-export]').hidden = false;
+  contentDownload.disabled = !local.lifecycleEnabled;
+  document.querySelector('[data-delete-export-label]').textContent = 'I downloaded any content I own or choose to continue without a copy.';
   const staff = account.staff;
   deleteStart.hidden = !local.lifecycleEnabled || staff;
   document.querySelector('[data-deletion-unavailable]').hidden = local.lifecycleEnabled && !staff;
