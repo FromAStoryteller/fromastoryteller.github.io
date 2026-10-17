@@ -1,16 +1,17 @@
 # fromastoryteller.github.io
 From A Storyteller - hand-coded portfolio and experiments. Learning as I go
 
-## Community backend foundation
+## Community and Storyteller Studio
 
 FAS Community V1 database setup lives in `supabase/`. Start with
 [the Windows and hosted setup guide](docs/backend/setup.md); see
 [backend architecture](docs/backend/README.md) and
-[backup/restore](docs/backend/backup-restore.md). The existing website still uses
-its static stories; these files do not activate a community frontend.
+[backup/restore](docs/backend/backup-restore.md). Viewer accounts, contributor profiles
+and Storyteller Studio V1 are deployed. Existing stories/games/tools retain their
+source files and URLs; Community stories/posts use the Studio editor.
 
-Local, hosted development and hosted production setup was completed on 14 October
-2026. See [current operations](docs/backend/operations.md) for the verified status,
+Studio V1 was accepted on 18 October 2026. See [acceptance and follow-ups](docs/backend/studio-v1-handover.md)
+and [current operations](docs/backend/operations.md) for the released scope,
 environment separation and manual backup routine.
 
 
