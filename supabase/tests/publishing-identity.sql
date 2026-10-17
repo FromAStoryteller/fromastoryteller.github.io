@@ -25,7 +25,7 @@ begin
 end;$$;
 
 update private.publishing_brand set owner_id='93000000-0000-0000-0000-000000000001';
-do $begin if (select count(*) from private.file_content where owner_id='93000000-0000-0000-0000-000000000001')<>14 then raise exception 'FAIL reviewed owner claim';end if;end;$;
+do $$begin if (select count(*) from private.file_content where owner_id='93000000-0000-0000-0000-000000000001')<>14 then raise exception 'FAIL reviewed owner claim';end if;end;$$;
 select set_config('fas.fixture.file',id::text,true) from private.file_content where url='/games/brick-blitz/';
 select set_config('fas.fixture.version',updated_at::text,true) from private.file_content where id=current_setting('fas.fixture.file')::uuid;
 insert into public.stories(author_id,title,body,status,published_at) values('93000000-0000-0000-0000-000000000001','Publishing identity fixture','Synthetic text','published',now());
