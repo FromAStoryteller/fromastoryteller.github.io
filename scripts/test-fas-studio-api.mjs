@@ -50,14 +50,16 @@ try {
  console.log('PASS DEV Studio creates/loads private drafts, preserves metadata, enforces required cleared 16:9 covers, schedules privately, self-publishes, saves live edits, rejects stale versions, unpublishes, respects moderation and contributor removal');
 }catch {failed=true;console.error('FAIL DEV Story Studio at '+stage+'; confidential details suppressed.');}
 finally {
+ let cleanupFailed=false;
  for(const client of clients)await client.auth.signOut({scope:'global'}).catch(()=>{});
- if(users.length){const owned=await setup.from('stories').select('id').in('author_id',users);if(owned.error)failed=true;for(const row of owned.data??[])if(!storyIds.includes(row.id))storyIds.push(row.id);}
- const objects=[];if(storyIds.length){const rows=await setup.from('story_assets').select('story_id,object_path').in('story_id',storyIds);if(rows.error)failed=true;for(const row of rows.data??[]){const parts=row.object_path.split('/');if(parts.length===3&&users.includes(parts[0])&&parts[1]===row.story_id&&/^[a-f0-9-]{36}\.jpg$/.test(parts[2]))objects.push(row.object_path);else failed=true;}}
- if(objects.length){const removed=await setup.storage.from('fas-story-images').remove(objects);if(removed.error)failed=true;else for(const path of objects){const check=await setup.storage.from('fas-story-images').download(path);if(!check.error)failed=true;}}
- for(const id of storyIds){const result=await setup.from('stories').delete().eq('id',id);if(result.error)failed=true;}
- for(const id of users){const result=await setup.auth.admin.deleteUser(id);if(result.error)failed=true;}
- if(users.length){const remaining=await setup.from('profiles').select('id').in('id',users);if(remaining.error||remaining.data?.length)failed=true;}
- if(storyIds.length){const remaining=await setup.from('stories').select('id').in('id',storyIds);if(remaining.error||remaining.data?.length)failed=true;}
- console.log(failed?'Studio API checks failed; inspect DEV fixture cleanup.':'Studio API fixture cleanup verified. Disposable cover bytes removed; no real accounts or files were targeted.');
+ if(users.length){const owned=await setup.from('stories').select('id').in('author_id',users);if(owned.error)cleanupFailed=true;for(const row of owned.data??[])if(!storyIds.includes(row.id))storyIds.push(row.id);}
+ const objects=[];if(storyIds.length){const rows=await setup.from('story_assets').select('story_id,object_path').in('story_id',storyIds);if(rows.error)cleanupFailed=true;for(const row of rows.data??[]){const parts=row.object_path.split('/');if(parts.length===3&&users.includes(parts[0])&&parts[1]===row.story_id&&/^[a-f0-9-]{36}\.jpg$/.test(parts[2]))objects.push(row.object_path);else cleanupFailed=true;}}
+ if(objects.length){const removed=await setup.storage.from('fas-story-images').remove(objects);if(removed.error)cleanupFailed=true;else for(const path of objects){const check=await setup.storage.from('fas-story-images').download(path);if(!check.error)cleanupFailed=true;}}
+ for(const id of storyIds){const result=await setup.from('stories').delete().eq('id',id);if(result.error)cleanupFailed=true;}
+ for(const id of users){const result=await setup.auth.admin.deleteUser(id);if(result.error)cleanupFailed=true;}
+ if(users.length){const remaining=await setup.from('profiles').select('id').in('id',users);if(remaining.error||remaining.data?.length)cleanupFailed=true;}
+ if(storyIds.length){const remaining=await setup.from('stories').select('id').in('id',storyIds);if(remaining.error||remaining.data?.length)cleanupFailed=true;}
+ failed ||= cleanupFailed;
+ console.log(cleanupFailed?'Studio API fixture cleanup needs attention.':'Studio API fixture cleanup verified. Disposable cover bytes removed; no real accounts or files were targeted.');
 }
 process.exitCode=failed?1:0;
