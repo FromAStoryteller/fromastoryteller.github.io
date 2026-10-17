@@ -41,7 +41,7 @@ export function profileStoryCard(story, { imageBase, preview = false } = {}) {
     card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 
-export function renderPublicStory(root, story) {
+export function renderPublicStory(root, story, { imageBase } = {}) {
   const d = root.ownerDocument;
   root.replaceChildren();
   if (!story) { root.append(node(d, 'h1', '', 'Story unavailable'), node(d, 'p', '', 'This story may no longer be published.')); return; }
@@ -49,5 +49,12 @@ export function renderPublicStory(root, story) {
   const authorUrl = publicProfileUrl(story.author?.public_id);
   const byline = node(d, authorUrl ? 'a' : 'p', '', `By ${story.author?.display_name || 'Storyteller'}`);
   if (authorUrl) byline.href = authorUrl;
-  root.append(byline, node(d, 'div', 'community-prose', story.body));
+  root.append(byline);
+  if (story.summary) root.append(node(d,'p','profile-welcome',story.summary));
+  const metadata = [story.genre, ...(story.tags ?? [])].filter(Boolean).join(' · ');
+  if (metadata) root.append(node(d,'p','profile-muted',metadata));
+  if (story.content_warning) root.append(node(d,'p','profile-bio',`Content warning: ${story.content_warning}`));
+  const coverUrl = publicCoverUrl(story.cover,imageBase);
+  if (coverUrl) { const img=node(d,'img','community-story-cover'); img.src=coverUrl;img.alt=story.cover.alt;img.addEventListener('error',()=>img.remove(),{once:true});root.append(img); }
+  root.append(node(d, 'div', 'community-prose', story.body));
 }

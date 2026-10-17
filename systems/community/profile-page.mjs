@@ -83,7 +83,7 @@ try {
     })().catch(() => {});
   } else {
     const story = await service.readStory(new URLSearchParams(location.search).get('story'));
-    renderPublicStory(root,story);
+    renderPublicStory(root,story,{imageBase:local.publicImageBase});
     if (story) document.title=`${story.title} | From A Storyteller`;
   }
 } catch (error) { if (!ended) message('This page could not be loaded',error.message || 'Please try again later.'); }
