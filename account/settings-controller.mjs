@@ -1,3 +1,4 @@
+import { accountRoles } from './roles.mjs';
 import { takeRestoredIdentity } from './session-controller.mjs';
 
 async function verifiedIdentity(client, useRestoredSession = false) {
@@ -21,7 +22,7 @@ export async function loadAccount(client, { useRestoredSession = false, includeP
     includePolicyHistory ? client.rpc('fas_my_policy_agreements') : Promise.resolve({ data: [], error: null }),
   ]);
   if (profile.error || roles.error || state.error || declaration.error || agreements.error || !Array.isArray(agreements.data)) throw new Error('We couldn’t load your account. Please try again.');
-  return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, role: roles.data[0]?.role ?? 'viewer', state: state.data, registration: declaration.data, policy_agreements: agreements.data };
+  return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, ...accountRoles(roles.data), state: state.data, registration: declaration.data, policy_agreements: agreements.data };
 }
 
 export async function loadProfileAccount(client, { useRestoredSession = false } = {}) {
@@ -32,7 +33,7 @@ export async function loadProfileAccount(client, { useRestoredSession = false } 
     client.rpc('fas_my_account_state'),
   ]);
   if (profile.error || !profile.data || roles.error || state.error) throw new Error('Your profile could not be loaded. Please try again.');
-  return { user, profile: profile.data, role: roles.data[0]?.role ?? 'viewer', state: state.data };
+  return { user, profile: profile.data, ...accountRoles(roles.data), state: state.data };
 }
 
 export async function saveProfile(client, { displayName, bio }) {

@@ -36,8 +36,8 @@ try {
       if (!ended) {
         if (account.state !== 'active') message('Account removal is in progress','Profile editing is unavailable while your account is being removed.');
         else {
-          const contributor = ['member','moderator','admin'].includes(account.role);
-          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor,viewer:!contributor,initialProfile:account.profile,ownerId:account.user.id});
+          const contributor = account.contributor;
+          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor,viewer:!contributor,initialProfile:account.profile,ownerId:account.user.id,admin:account.admin});
         }
       }
     }
@@ -45,6 +45,7 @@ try {
   } else if (mode === 'public') {
     const id = new URLSearchParams(location.search).get('author');
     let ownsPage = false;
+    let ownerAdmin = false;
     let ownerSessionEnded = false;
     // Verify ownership alongside public content, rather than starting afterwards.
     const stopOwnerWatch = watchSessionEnd(local, () => { ownerSessionEnded = true; ownsPage = false; root.querySelector('.account-navigation')?.remove(); });
@@ -52,12 +53,12 @@ try {
     const ownProfile = (async () => {
       const session = await local.client.auth.getSession();
       if (!session.data?.session) return null;
-      return service.readOwn();
+      return loadProfileAccount(local.client);
     })().catch(() => null);
     let current = await service.readPublic(id);
     function render() {
       renderPublicProfile(root,current,{imageBase:local.publicImageBase});
-      if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth }));
+      if (current && ownsPage) root.prepend(accountNavigation(document, { current: 'public', publicId: id, auth: local.client.auth, admin: ownerAdmin }));
       if (current?.next_offset != null) {
         const more = document.createElement('button');more.className='account-secondary';more.textContent='More stories';
         more.addEventListener('click',async () => {
@@ -76,7 +77,8 @@ try {
     void (async () => {
       const own = await ownProfile;
       if (!own || !current) return;
-      ownsPage = !ownerSessionEnded && own.public_id === id;
+      ownsPage = !ownerSessionEnded && own.profile.public_id === id;
+      ownerAdmin = own.admin;
       if (ownsPage) render();
     })().catch(() => {});
   } else {

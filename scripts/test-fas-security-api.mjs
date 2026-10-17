@@ -114,7 +114,7 @@ try {
   const owner = await fixtureUser('author', 'member');
   const other = await fixtureUser('other', 'member');
   const admin = await fixtureUser('admin', 'admin');
-  const moderator = await fixtureUser('moderator', 'moderator');
+  const imageAdmin = await fixtureUser('image-admin', 'admin');
   for (const user of [viewer, owner, admin]) rejected(await request(`/storage/v1/bucket/${bucket}`, {
     token: user.token, method: 'PUT', body: { name: bucket, public: true },
   }), 'Client cannot make image bucket public');
@@ -191,7 +191,7 @@ try {
   // Editing its alt text must invalidate the previous approval.
   success(await request(rest + `story_assets?id=eq.${approved.asset.id}`, { token: owner.token, method: 'PATCH', body: { alt_text: 'Revised image description' } }), 'Edit image description');
   assert.equal(success(await request(rest + `story_assets?id=eq.${approved.asset.id}`, { token: owner.token }), 'Read revised image')[0].approved_at, null);
-  success(await rpc('approve_story_image', moderator, { target_asset: approved.asset.id }), 'Moderator approve revised image');
+  success(await rpc('approve_story_image', imageAdmin, { target_asset: approved.asset.id }), 'Separate admin approve revised image');
   pass('Image ownership, MIME/size limits, private bucket and separate staff approval enforced');
 
   success(await request(rest + `stories?id=eq.${published.id}`, { token: owner.token, method: 'PATCH', body: { status: 'published' } }), 'Contributor publishes without staff approval');
@@ -296,6 +296,7 @@ try {
 } finally {
   // Only random fixture IDs/paths recorded by this run; never reset the database.
   const cleanupErrors = [];
+  console.log('Security synthetic subject IDs for independent admin-audit cleanup: '+JSON.stringify([...users,...stories,...invites,...assetIds.values()]));
   async function clean(action, label) {
     try { await action(); } catch { cleanupErrors.push(label); }
   }

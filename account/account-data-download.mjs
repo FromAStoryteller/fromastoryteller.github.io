@@ -1,3 +1,4 @@
+import { roleLabel } from './roles.mjs';
 import { zipFiles } from './export-archive.mjs';
 
 export function accountDataArchive(data) {
@@ -13,7 +14,7 @@ Display name: ${profile.display_name}
 Welcome line: ${profile.welcome_line || '(empty)'}
 Bio: ${profile.bio || '(empty)'}
 Public profile ID: ${profile.public_id || '(not assigned)'}
-Access: ${({ viewer: 'Viewer', member: 'Contributor', moderator: 'Moderator', admin: 'Administrator' })[role] ?? role}
+Access: ${roleLabel(data.account.roles ?? (role === 'viewer' ? [] : [role]))}
 Account state: ${data.account.state}
 Profile created: ${profile.created_at}
 ${data.account.registration ? `

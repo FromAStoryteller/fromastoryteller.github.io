@@ -1,6 +1,7 @@
+import { showPendingInvitation } from '../../account/invitation-storage.mjs';
 import { publicProfileUrl } from './profiles.mjs';
 
-export function accountNavigation(document, { current, publicId, auth } = {}) {
+export function accountNavigation(document, { current, publicId, auth, admin = false } = {}) {
   const nav = document.createElement('nav');
   nav.className = 'account-navigation';
   nav.setAttribute('aria-label', 'Your profile and account');
@@ -17,6 +18,11 @@ export function accountNavigation(document, { current, publicId, auth } = {}) {
     if (key === 'public') link.setAttribute('data-public-link', '');
     if (key === current) link.setAttribute('aria-current', 'page');
     nav.append(link);
+  }
+  if (admin) {
+    const link=document.createElement('a');link.className='account-secondary';link.href='/account/admin/';link.textContent='Admin tools';
+    if(current==='admin')link.setAttribute('aria-current','page');nav.append(link);
+    nav.classList.add('account-navigation--admin');
   }
   if (auth) {
     const signOut = document.createElement('button');
@@ -45,5 +51,6 @@ export function accountNavigation(document, { current, publicId, auth } = {}) {
     });
     nav.append(signOut);
   }
+  if (auth) showPendingInvitation(nav);
   return nav;
 }

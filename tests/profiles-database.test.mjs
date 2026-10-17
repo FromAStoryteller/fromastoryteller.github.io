@@ -49,14 +49,17 @@ test('profile ownership, public projection, attribution, pagination and account 
     assert.equal(JSON.stringify(profile).includes('SECRET'),false);assert.equal(JSON.stringify(profile).includes(owner),false);assert.equal(JSON.stringify(profile).includes('@'),false);
     assert.equal((await as('anon','',`select public.fas_public_profile('${key}',12) as value`)).rows[0].value.stories.length,1);
     assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
-    // Staff author pages exist before database stories, including file-based site owners.
-    for (const role of ['admin','moderator']) {
+    await db.exec(`insert into public.user_roles(user_id,role) values('${owner}','admin');`);
+    // Staff can contribute independently; admin-only access does not create a public profile.
+    for (const role of ['admin']) {
       await db.exec(`insert into public.user_roles(user_id,role) values('${viewer}','${role}');`);
+      assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
+      await db.exec(`insert into public.user_roles(user_id,role) values('${viewer}','member');`);
       const staffProfile=(await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value;
       assert.equal(staffProfile.public_id,viewerKey);
       assert.deepEqual(staffProfile.stories,[]);
       assert.equal(JSON.stringify(staffProfile).includes(role),false);
-      await db.exec(`delete from public.user_roles where user_id='${viewer}' and role='${role}';`);
+      await db.exec(`delete from public.user_roles where user_id='${viewer}' and role in ('${role}','member');`);
       assert.equal((await as('anon','',`select public.fas_public_profile('${viewerKey}') as value`)).rows[0].value,null);
     }
     assert.equal((await as('anon','',`select * from public.profiles`)).rows.length,0);
