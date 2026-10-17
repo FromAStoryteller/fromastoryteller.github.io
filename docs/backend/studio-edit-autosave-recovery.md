@@ -12,11 +12,11 @@ Status: **complete and deployed**. Draft editing, autosave status, reload/recove
 - Input-method composition is allowed to finish before an automatic save is scheduled. Private preview renders the newest editor values through the shared manuscript renderer.
 - Never-published draft deletion still requires confirmation and clears its recovery copy. Previously published addresses/history remain protected.
 
-## Optional tab copy and recovery files
+## Automatic tab copy and recovery files
 
-Server autosave does not depend on browser recovery. **Tab recovery is off by default** and has its own explicit checkbox and storage explanation. It is not enabled by accepting optional appearance/game storage choices.
+Following Ryan's simplification request, **tab recovery is automatic** while editing. It needs no setting and is separate from optional appearance/game storage choices. Server autosave still works if browser recovery storage is unavailable. A small message confirms an actual protected copy; blocked/quota storage reports the limitation honestly. Recovery-file import/export and text download are under **More options**. Recovery choices appear only when an unsaved copy needs attention.
 
-When enabled, the current unsaved copy is written to account-scoped sessionStorage in the current tab. It contains bounded title/manuscript/metadata and a public profile ID/source-version reference, never auth tokens, passwords, uploaded bytes or secret keys. It does not use localStorage. Copies are offered for 24 hours; expired or malformed copies are removed when checked. Browser tab restoration can retain sessionStorage, so tab closing is not promised as guaranteed erasure. Successful saves, explicit discard and signing out through this Studio remove the checkpoint. Switching accounts clears recovery namespaces for other accounts. Blocked/quota storage produces an honest failure message and does not claim a new copy was saved.
+The current unsaved copy is written to account-scoped sessionStorage in the current tab. It contains bounded title/manuscript/metadata and a public profile ID/source-version reference, never auth tokens, passwords, uploaded bytes or secret keys. It does not use localStorage. Copies are offered for 24 hours; expired or malformed copies are removed when checked. Browser tab restoration can retain sessionStorage, so tab closing is not promised as guaranteed erasure. Successful saves, explicit discard and signing out through this Studio remove the checkpoint. Switching accounts clears recovery namespaces for other accounts. Blocked/quota storage produces an honest failure message and does not claim a new copy was saved.
 
 A private recovery file preserves valid structured text and metadata and can be explicitly imported by the owning account. It is limited to 1 MiB. It remains importable after the temporary tab-copy age limit. It is a user-downloaded private file, not an uploaded image or a server backup. Treat its contents as untrusted and render only validated text/document blocks.
 
@@ -37,13 +37,13 @@ The existing password sign-in controller is reused in the same tab, preserving t
 - Matching active account that lost contributor access: allow downloading its own unsaved writing; do not recreate a writer or grant publishing rights.
 - Different/closing account: discard the old recovery and do not reveal it.
 
-A session-end event alone does not identify whether expiry or a sign-out elsewhere caused it. Such events lock recovery rather than granting anonymous download access. Explicit Studio sign-out and detected account switches discard it. With tab recovery disabled, unsaved expiry recovery lasts only while this page stays open; the screen tells the writer to keep the tab open. A beforeunload warning protects that held copy.
+A session-end event alone does not identify whether expiry or a sign-out elsewhere caused it. Such events lock recovery rather than granting anonymous download access. Explicit Studio sign-out and detected account switches discard it. If browser storage is unavailable, unsaved expiry recovery lasts only while this page stays open; the screen tells the writer to keep the tab open. A beforeunload warning protects that held copy.
 
 ## Verification
 
-Unit tests cover safe metadata/document roundtrips, untitled writing, malformed/other-account files, resume version/state checks, optional storage, expiration, quota/blocked storage, namespace cleanup and repeated-genre recovery.
+Unit tests cover safe metadata/document roundtrips, untitled writing, malformed/other-account files, resume version/state checks, automatic storage, retired-setting migration, expiration, quota/blocked storage, namespace cleanup and repeated-genre recovery.
 
-The fictional Chromium rehearsal covers creation/autosave/server reload, newest-word preview, failed saves without silent retries, optional tab reload recovery, explicit resumed save, typing during a delayed save with Ctrl+S, stale edits recovered into a new private draft, mobile overflow, same-account expiry recovery, different-account denial, offline export/import browser-storage errors, invalid repeated-genre recovery, account-switch/sign-out clearing and oversized-text download after verified reauthentication. The fixtures are isolated browser contexts and do not use real accounts or content.
+The fictional Chromium rehearsal covers creation/autosave/server reload, newest-word preview, failed saves without silent retries, automatic tab reload recovery, explicit resumed save, typing during a delayed save with Ctrl+S, stale edits recovered into a new private draft, mobile overflow, same-account expiry recovery, different-account denial, offline export/import browser-storage errors, invalid repeated-genre recovery, account-switch/sign-out clearing and oversized-text download after verified reauthentication. The fixtures are isolated browser contexts and do not use real accounts or content.
 
 Existing PostgreSQL/service tests continue to check ownership, stale versions, publication, draft deletion and session/access safeguards. No database migration, Auth provider configuration, published policy-history rewrite, analytics or ad setup belongs to this change.
 
@@ -59,4 +59,10 @@ Production deployment [fas-site-production check 117534927843](https://github.co
 
 No production account, private draft, cover or publication was edited, deleted or created for these checks. No database migration or new backup was required.
 
-The frozen historical policy documents remain unchanged. The feature's optional tab-copy behavior is disclosed at the control; no manuscript recovery is silently enabled.
+The frozen historical policy documents remain unchanged. The automatic tab-copy behavior and browser-restoration limits are disclosed under More options. It uses sessionStorage only; no persistent localStorage manuscript history is introduced.
+
+## Automatic-recovery follow-up
+
+Ryan authorized automatic recovery and a simpler interface on 18 October 2026 (Auckland). The former checkbox/preference has been removed. Existing valid recovery copies remain readable, and the retired preference key is removed without touching Auth or unrelated storage. Recovery availability is reported from the actual write result. Fresh-tab storage starts empty; browsers may restore sessionStorage after reopening a tab, so a hard session-end erasure promise is not made.
+
+Follow-up release verification: pending.

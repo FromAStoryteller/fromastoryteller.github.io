@@ -21,26 +21,25 @@ test('only an unchanged unscheduled draft can be resumed in place; published/sta
  const record=recoveryRecord(values,{ownerId:owner,story,now});assert.equal(canResumeRecovery(record,story),true);
  for(const change of [{id:other},{updated_at:'newer'},{status:'published'},{status:'archived'},{scheduled_at:'2026-11-01T00:00:00Z'}])assert.equal(canResumeRecovery(record,{...story,...change}),false);
 });
-test('tab recovery is explicit, survives store recreation, expires and can be discarded without touching unrelated data',()=>{
+test('automatic tab recovery survives store recreation, expires and clears without touching unrelated data',()=>{
  const s=storage(),record=recoveryRecord(values,{ownerId:owner,story,now}),store=createRecoveryStore(s,{ownerId:owner,now:()=>now});
- s.setItem('account-token','unrelated');assert.equal(store.enabled,false);assert.equal(store.write(record),false);
- assert.equal(store.enable(true),true);assert.equal(store.write(record),true);
+ s.setItem('account-token','unrelated');assert.equal(store.write(record),true);
  const reloaded=createRecoveryStore(s,{ownerId:owner,now:()=>now});assert.deepEqual(reloaded.read(),record);
  assert.equal(createRecoveryStore(s,{ownerId:other,now:()=>now}).read(),null);
  assert.equal(store.write({...record,owner:other}),false);
  assert.equal(createRecoveryStore(s,{ownerId:owner,now:()=>now+25*60*60*1000}).read(),null);
- store.write(record);assert.equal(store.enable(false),true);assert.equal(store.read(),null);assert.equal(s.getItem('account-token'),'unrelated');
+ store.write(record);store.clear();assert.equal(store.read(),null);assert.equal(s.getItem('account-token'),'unrelated');
 });
 test('portable recovery files remain importable after tab expiry; blocked/quota storage never claims to save',()=>{
  const record=recoveryRecord(values,{ownerId:owner,story,now});
  assert.throws(()=>parseRecovery(JSON.stringify(record),{ownerId:owner,now:now+25*60*60*1000}),/expired/);
  assert.equal(parseRecovery(JSON.stringify(record),{ownerId:owner,now:now+25*60*60*1000,checkAge:false}).values.title,values.title);
  const blocked={getItem(){throw Error();},setItem(){throw Error();},removeItem(){throw Error();}};
- const store=createRecoveryStore(blocked,{ownerId:owner});assert.equal(store.enable(true),false);assert.equal(store.write(record),false);assert.equal(store.read(),null);assert.doesNotThrow(()=>store.clear());
- const s=storage(),full=createRecoveryStore(s,{ownerId:owner});full.enable(true);s.setItem=()=>{throw Error('quota');};assert.equal(full.write(record),false);
+ const store=createRecoveryStore(blocked,{ownerId:owner});assert.equal(store.write(record),false);assert.equal(store.read(),null);assert.doesNotThrow(()=>store.clear());
+ const s=storage(),full=createRecoveryStore(s,{ownerId:owner});s.setItem=()=>{throw Error('quota');};assert.equal(full.write(record),false);
 });
 test('account switching clears only Studio recovery namespaces',()=>{
- const s=storage();s.setItem('account-token','keep');for(const id of [owner,other]){const store=createRecoveryStore(s,{ownerId:id,now:()=>now});store.enable(true);store.write(recoveryRecord(values,{ownerId:id,now}));}
+ const s=storage();s.setItem('account-token','keep');for(const id of [owner,other]){const store=createRecoveryStore(s,{ownerId:id,now:()=>now});store.write(recoveryRecord(values,{ownerId:id,now}));}
  clearRecoveryStorage(s,owner);assert.ok(createRecoveryStore(s,{ownerId:owner,now:()=>now}).read());assert.equal(createRecoveryStore(s,{ownerId:other,now:()=>now}).read(),null);
  clearRecoveryStorage(s);assert.equal(s.length,1);assert.equal(s.getItem('account-token'),'keep');
 });
@@ -50,4 +49,10 @@ test('recovery can repair a repeated genre without losing manuscript formatting'
  assert.deepEqual(record.values.genres,['fantasy']);assert.deepEqual(record.values.body_document,values.body_document);
  const textOnly={...record,source_id:owner,base_version:story.updated_at,text_only:true};
  assert.equal(parseRecovery(JSON.stringify(textOnly),{ownerId:owner,now}).text_only,true);assert.equal(canResumeRecovery(textOnly,story),false);
+});
+
+test('retired recovery preferences do not disable automatic protection or retain an extra setting',()=>{
+ const s=storage(),key='fas-studio-recovery-v1:'+owner+':enabled';
+ for(const oldChoice of ['0','1']){s.setItem(key,oldChoice);const store=createRecoveryStore(s,{ownerId:owner,now:()=>now});assert.equal(s.getItem(key),null);assert.equal(store.write(recoveryRecord(values,{ownerId:owner,now})),true);assert.equal(store.read().values.title,values.title);}
+ assert.equal(createRecoveryStore(undefined,{ownerId:owner}).write(recoveryRecord(values,{ownerId:owner,now})),false);
 });
