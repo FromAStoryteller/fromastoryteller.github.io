@@ -35,7 +35,7 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
     const fallback=node(d,'span','content-grid-card-placeholder','From, A Storyteller');
     fallback.setAttribute('aria-hidden','true');image.replaceWith(fallback);
   },{once:true});
-  if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'A quiet corner, waiting for its first story.'));
+  if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'No published work yet.'));
   else section.append(list);
   root.append(header, section);
 }
