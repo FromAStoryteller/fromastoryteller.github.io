@@ -71,7 +71,7 @@ test('profile ownership, public projection, attribution, pagination and account 
     await as('authenticated',owner,`update public.profiles set display_name='New pen name',welcome_line='New welcome' where id='${owner}'`);
     const published=(await as('anon','',`select public.fas_public_story('profile-story-1') as value`)).rows[0].value;
     assert.equal(published.author.display_name,'New pen name');assert.equal(published.author.public_id,key);
-    assert.deepEqual(Object.keys(published.author).sort(),['display_name','public_id','social_links']);
+    assert.deepEqual(Object.keys(published.author).sort(),['display_name','kind','public_id','social_links']);
     assert.equal((await as('authenticated',owner,`select public.fas_public_story('profile-private-draft') as value`)).rows[0].value,null);
     await db.exec(`insert into private.account_deletion_jobs(user_id,receipt_hash) values('${owner}',repeat('a',64));`);
     assert.equal(await read(),null);

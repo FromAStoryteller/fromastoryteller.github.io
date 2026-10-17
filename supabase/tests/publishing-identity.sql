@@ -11,7 +11,7 @@ insert into private.fas_publishers(user_id) values('93000000-0000-0000-0000-0000
 update private.file_content set owner_id='93000000-0000-0000-0000-000000000001' where owner_id is null;
 select set_config('fas.fixture.file',id::text,true) from private.file_content where url='/games/brick-blitz/';
 select set_config('fas.fixture.version',updated_at::text,true) from private.file_content where id=current_setting('fas.fixture.file')::uuid;
-insert into public.stories(author_id,title,body,status) values('93000000-0000-0000-0000-000000000001','Publishing identity fixture','Synthetic text','published');
+insert into public.stories(author_id,title,body,status,published_at) values('93000000-0000-0000-0000-000000000001','Publishing identity fixture','Synthetic text','published',now());
 set local role authenticated;
 select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000001"}',true);
