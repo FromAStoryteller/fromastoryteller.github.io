@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createStudioService,validateStory,storySlug,StudioAccessError,StudioConflictError} from '../systems/community/studio-service.mjs';
+import {createStudioService,validateStory,storySlug,StudioAccessError,StudioConflictError,canDeleteDraft} from '../systems/community/studio-service.mjs';
 import {wordCount} from '../systems/community/studio-editor.mjs';
 const owner='81000000-0000-0000-0000-000000000001';
 const input={slug:'a-story',title:'A story',summary:'A description',body:'Once upon a time.',genre:'Fantasy',tags:'magic, discovery',content_warning:'',cover_asset_id:''};
 function fixture(response={data:{id:owner},error:null}) {
- const calls=[];const query={};for(const key of ['select','eq','order','range','update','insert'])query[key]=(...args)=>{calls.push([key,...args]);return query;};query.maybeSingle=async()=>response;query.single=async()=>response;query.then=(resolve,reject)=>Promise.resolve(response).then(resolve,reject);
+ const calls=[];const query={};for(const key of ['select','eq','order','range','update','insert','delete','is'])query[key]=(...args)=>{calls.push([key,...args]);return query;};query.maybeSingle=async()=>response;query.single=async()=>response;query.then=(resolve,reject)=>Promise.resolve(response).then(resolve,reject);
  let account={user:{id:owner},state:'active',contributor:true};
  const service=createStudioService({from:table=>{calls.push(['from',table]);return query;}},{ownerId:owner,checkAccount:async()=>account});return {service,calls,account:value=>{account=value;}};
 }
@@ -34,4 +34,23 @@ test('role removal, account closure and identity changes stop reads and writes b
  for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:owner},state:'deleting',contributor:true},{user:{id:'other'},state:'active',contributor:true}]){
   const f=fixture();f.account(account);await assert.rejects(f.service.save(input,null),StudioAccessError);assert.equal(f.calls.length,0);await assert.rejects(f.service.list(),StudioAccessError);
  }
+});
+
+const deletable={id:owner,status:'draft',updated_at:'previous',slug_locked:false,published_at:null,scheduled_at:null};
+test('draft deletion binds owner, version and never-published unscheduled state',async()=>{
+ const f=fixture();await f.service.deleteDraft(deletable);assert.ok(f.calls.some(c=>c[0]==='delete'));
+ for(const filter of [['eq','author_id',owner],['eq','id',owner],['eq','updated_at','previous'],['eq','status','draft'],['eq','slug_locked',false],['is','published_at',null],['is','scheduled_at',null]])assert.ok(f.calls.some(c=>JSON.stringify(c)===JSON.stringify(filter)));
+ assert.ok(f.calls.some(c=>c[0]==='select'&&c[1]==='id'));
+});
+test('delete controls exclude unsaved, published, scheduled, previously published and locked content',async()=>{
+ assert.equal(canDeleteDraft(deletable),true);
+ for(const change of [{id:null},{status:'published'},{status:'archived'},{slug_locked:true},{published_at:'2026-10-01'},{scheduled_at:'2026-12-01'}]){const s={...deletable,...change};assert.equal(canDeleteDraft(s),false);const f=fixture();await assert.rejects(f.service.deleteDraft(s),/Only saved/);assert.equal(f.calls.length,0);}
+});
+test('deletion never reports success for stale, missing, rejected or mismatched rows',async()=>{
+ for(const response of [{data:null,error:null},{data:{id:'other'},error:null}])await assert.rejects(fixture(response).service.deleteDraft(deletable),StudioConflictError);
+ await assert.rejects(fixture({data:null,error:{code:'42501'}}).service.deleteDraft(deletable),/could not be deleted/);
+ await assert.rejects(fixture().service.deleteDraft({...deletable,updated_at:null}),/Only saved/);
+});
+test('draft deletion checks current contributor identity and account state before querying',async()=>{
+ for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:owner},state:'deleting',contributor:true},{user:{id:'other'},state:'active',contributor:true}]){const f=fixture();f.account(account);await assert.rejects(f.service.deleteDraft(deletable),StudioAccessError);assert.equal(f.calls.length,0);}
 });

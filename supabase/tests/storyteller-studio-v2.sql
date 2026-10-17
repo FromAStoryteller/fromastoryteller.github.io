@@ -152,6 +152,34 @@ update public.stories set status='draft' where id=current_setting('fas.test_stor
 set local role anon;
 do $$ begin if exists(select 1 from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid) then raise exception 'FAIL unpublished verified cover public';end if;end $$;
 reset role;
+
+-- Draft deletion uses existing owner RLS and optimistic filters, including covers.
+reset role;
+insert into public.stories(id,author_id,title) values('97000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001','Disposable deletion fixture');
+insert into public.story_assets(id,story_id,object_path,alt_text,pixel_width,pixel_height,verified_at)
+ values('97000000-0000-0000-0000-000000000002','97000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/97000000-0000-0000-0000-000000000001/cccccccc-cccc-cccc-cccc-cccccccccccc.jpg','Synthetic deletion cover',1600,900,now());
+update public.stories set cover_asset_id='97000000-0000-0000-0000-000000000002' where id='97000000-0000-0000-0000-000000000001';
+select set_config('fas.delete_draft_version',updated_at::text,true) from public.stories where id='97000000-0000-0000-0000-000000000001';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000002"}',true);
+do $ declare n integer;begin
+ with removed as(delete from public.stories where id='97000000-0000-0000-0000-000000000001' returning id) select count(*) into n from removed;
+ if n<>0 then raise exception 'FAIL another contributor deleted the draft';end if;
+end $;
+select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000001',true);
+select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000001"}',true);
+do $ declare n integer;begin
+ with removed as(delete from public.stories where author_id=auth.uid() and id='97000000-0000-0000-0000-000000000001' and updated_at=current_setting('fas.delete_draft_version')::timestamptz-interval '1 second' and status='draft' and not slug_locked and published_at is null and scheduled_at is null returning id) select count(*) into n from removed;
+ if n<>0 then raise exception 'FAIL stale draft version deleted';end if;
+ with removed as(delete from public.stories where author_id=auth.uid() and id='97000000-0000-0000-0000-000000000001' and updated_at=current_setting('fas.delete_draft_version')::timestamptz and status='draft' and not slug_locked and published_at is null and scheduled_at is null returning id) select count(*) into n from removed;
+ if n<>1 then raise exception 'FAIL owner could not delete draft with selected cover';end if;
+end $;
+reset role;
+do $ begin
+ if exists(select 1 from public.stories where id='97000000-0000-0000-0000-000000000001') or exists(select 1 from public.story_assets where story_id='97000000-0000-0000-0000-000000000001') then raise exception 'FAIL deleted draft retained content or cover metadata';end if;
+end $;
+
 -- Match lifecycle cleanup: remove owned content before deleting the Auth record.
 delete from public.stories where author_id='93000000-0000-0000-0000-000000000001';
 delete from auth.users where id='93000000-0000-0000-0000-000000000001';
