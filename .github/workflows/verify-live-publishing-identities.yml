@@ -1,0 +1,31 @@
+name: Verify live publishing identities
+on:
+  push:
+    branches: [verify/live-publishing-identities]
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Wait for the reviewed game-page routing
+        run: |
+          node --input-type=module <<'NODE'
+          let ready=false;
+          for(let attempt=0;attempt<36;attempt++){
+            try{
+              const r=await fetch('https://fromastoryteller.com/games/brick-blitz/',{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(10000)});
+              if(r.ok&&r.headers.get('Cache-Control')==='no-store'&&(await r.text()).includes('data-content-id=')){ready=true;break;}
+            }catch{}
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          if(!ready)throw new Error('Reviewed publishing route is not live yet');
+          console.log('Reviewed game attribution routing is live');
+          NODE
+      - name: Read-only public production verification
+        run: node scripts/verify-live-publishing-identities.mjs
