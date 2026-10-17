@@ -163,22 +163,22 @@ select set_config('fas.delete_draft_version',updated_at::text,true) from public.
 set local role authenticated;
 select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000002',true);
 select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000002"}',true);
-do $ declare n integer;begin
+do $$ declare n integer;begin
  with removed as(delete from public.stories where id='97000000-0000-0000-0000-000000000001' returning id) select count(*) into n from removed;
  if n<>0 then raise exception 'FAIL another contributor deleted the draft';end if;
-end $;
+end $$;
 select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000001"}',true);
-do $ declare n integer;begin
+do $$ declare n integer;begin
  with removed as(delete from public.stories where author_id=auth.uid() and id='97000000-0000-0000-0000-000000000001' and updated_at=current_setting('fas.delete_draft_version')::timestamptz-interval '1 second' and status='draft' and not slug_locked and published_at is null and scheduled_at is null returning id) select count(*) into n from removed;
  if n<>0 then raise exception 'FAIL stale draft version deleted';end if;
  with removed as(delete from public.stories where author_id=auth.uid() and id='97000000-0000-0000-0000-000000000001' and updated_at=current_setting('fas.delete_draft_version')::timestamptz and status='draft' and not slug_locked and published_at is null and scheduled_at is null returning id) select count(*) into n from removed;
  if n<>1 then raise exception 'FAIL owner could not delete draft with selected cover';end if;
-end $;
+end $$;
 reset role;
-do $ begin
+do $$ begin
  if exists(select 1 from public.stories where id='97000000-0000-0000-0000-000000000001') or exists(select 1 from public.story_assets where story_id='97000000-0000-0000-0000-000000000001') then raise exception 'FAIL deleted draft retained content or cover metadata';end if;
-end $;
+end $$;
 
 -- Match lifecycle cleanup: remove owned content before deleting the Auth record.
 delete from public.stories where author_id='93000000-0000-0000-0000-000000000001';
