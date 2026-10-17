@@ -6,7 +6,7 @@ export async function verifyAdminDatabase(PGlite){
  try {
   await db.exec("\n      create role supabase_auth_admin; create role anon; create role authenticated; create role service_role bypassrls;\n      create schema auth; create schema storage;\n      create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);\n      create table auth.sessions(id uuid primary key, user_id uuid references auth.users(id) on delete cascade, not_after timestamptz);\n      create function auth.uid() returns uuid language sql stable as\n      $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;\n      grant usage on schema auth, storage to anon, authenticated, service_role;\n      grant execute on function auth.uid() to anon, authenticated, service_role;\n      create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);\n      create table storage.objects(id uuid default gen_random_uuid() primary key, bucket_id text references storage.buckets(id), name text, metadata jsonb default '{}'::jsonb, updated_at timestamptz default now());\n      alter table storage.objects enable row level security;\n      grant select,insert,update,delete on storage.objects to anon,authenticated;\n    ");
   const migrations=new URL('../supabase/migrations/',import.meta.url);
-  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')&&!f.endsWith('_admin_image_session_guard.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')&&!f.endsWith('_separate_admin_tools.sql')&&!f.endsWith('_admin_image_session_guard.sql')&&!f.endsWith('_admin_account_directory.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
   const a='71000000-0000-0000-0000-000000000001',b='71000000-0000-0000-0000-000000000002',v='71000000-0000-0000-0000-000000000003',u='71000000-0000-0000-0000-000000000004';
   const sa='72000000-0000-0000-0000-000000000001',sb='72000000-0000-0000-0000-000000000002',sv='72000000-0000-0000-0000-000000000003';
   await db.exec(`insert into auth.users(id,email,email_confirmed_at) values ('${a}','admin-a@example.invalid',now()),('${b}','admin-b@example.invalid',now()),('${v}','viewer@example.invalid',now()),('${u}','unverified@example.invalid',null);
@@ -15,10 +15,35 @@ export async function verifyAdminDatabase(PGlite){
   const next=readdirSync(migrations).find(f=>f.endsWith('_separate_admin_tools.sql'));
   await db.exec(readFileSync(next?new URL(next,migrations):new URL('../supabase/ops/separate-admin-tools.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/migrations/20261016214904_admin_image_session_guard.sql',import.meta.url),'utf8'));
+  const directoryMigration=readdirSync(migrations).find(f=>f.endsWith('_admin_account_directory.sql'));
+  await db.exec(readFileSync(new URL(directoryMigration,migrations),'utf8'));
   const as=async(id,session,sql)=>{await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);select set_config('request.jwt.claims','${JSON.stringify({session_id:session})}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
   const value=async(id,session,sql)=>(await as(id,session,sql)).rows[0]?.value;
   assert.deepEqual((await db.query(`select role::text from public.user_roles where user_id='${a}' order by role::text`)).rows.map(r=>r.role),['admin','member'],'existing administrator keeps contributor access');
   await assert.rejects(value(v,sv,'select public.fas_admin_overview() value'),/Administrator access/);
+  await assert.rejects(value(v,sv,'select public.fas_admin_accounts() value'),/Administrator access/);
+  await assert.rejects(value(a,sv,'select public.fas_admin_accounts() value'),/Active account session/);
+  await db.exec('set role anon');
+  await assert.rejects(db.query('select public.fas_admin_accounts()'),/permission denied/);
+  await db.exec('reset role');
+  let directory=await value(a,sa,'select public.fas_admin_accounts() value');
+  assert.equal(directory.total,4);assert.equal(directory.accounts.length,4);
+  assert.equal((await value(a,sa,"select public.fas_admin_accounts('', 'admin') value")).total,1);
+  assert.equal((await value(a,sa,"select public.fas_admin_accounts('', 'member') value")).total,2);
+  assert.equal((await value(a,sa,"select public.fas_admin_accounts('', 'viewer') value")).total,2);
+  assert.equal((await value(a,sa,"select public.fas_admin_accounts('ADMIN-A@') value")).total,1);
+  assert.equal((await value(a,sa,"select public.fas_admin_accounts('%') value")).total,0,'search treats wildcard characters literally');
+  await assert.rejects(value(a,sa,"select public.fas_admin_accounts('', 'invalid') value"),/Invalid account directory/);
+  await assert.rejects(value(a,sa,"select public.fas_admin_accounts('', 'all', -1) value"),/Invalid account directory/);
+  await db.exec("insert into auth.users(id,email,email_confirmed_at) select ('74000000-0000-0000-0000-'||lpad(n::text,12,'0'))::uuid,'page'||lpad(n::text,2,'0')||'@example.invalid',now() from generate_series(1,30) n");
+  const firstPage=await value(a,sa,"select public.fas_admin_accounts('page', 'all', 0, 'email') value");
+  const secondPage=await value(a,sa,"select public.fas_admin_accounts('page', 'all', 25, 'email') value");
+  assert.equal(firstPage.total,30);assert.equal(firstPage.accounts.length,25);assert.equal(secondPage.accounts.length,5);
+  assert.equal(new Set([...firstPage.accounts,...secondPage.accounts].map(row=>row.id)).size,30);
+  assert.equal(firstPage.accounts[0].email,'page01@example.invalid');assert.equal(secondPage.accounts[0].email,'page26@example.invalid');
+  assert.deepEqual(Object.keys(firstPage.accounts[0]).sort(),['active','created_at','display_name','email','id','public_id','roles','stories','verified']);
+  await db.exec("delete from auth.users where email like 'page%@example.invalid'");
+
   await assert.rejects(value(a,sv,'select public.fas_admin_overview() value'),/Active account session/);
   await assert.rejects(value(a,'00000000-0000-0000-0000-000000000000','select public.fas_admin_overview() value'),/Active account session/);
   await assert.rejects(value(a,sa,`select public.fas_admin_set_role('${a}','admin',false,'admin-a@example.invalid','Leave') value`),/at least one/);

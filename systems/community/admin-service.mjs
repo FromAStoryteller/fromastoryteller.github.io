@@ -7,6 +7,7 @@ export function createAdminService(client,{ownerId}={}){
   const result=await client.rpc(name,args);if(result.error)throw new Error(knownErrors.has(result.error.message)?result.error.message:'This request could not be completed. Refresh and try again.');return result.data;
  }
  return {overview:()=>call('fas_admin_overview'),invites:offset=>call('fas_admin_invites',{page_offset:offset}),activity:offset=>call('fas_admin_activity',{page_offset:offset}),
+  accounts:(search='',role='all',offset=0,sort='name')=>call('fas_admin_accounts',{search_text:search,role_filter:role,page_offset:offset,sort_order:sort}),
   findAccount:email=>call('fas_admin_find_account',{account_email:email}),
   setRole:(id,role,enabled,email,note)=>call('fas_admin_set_role',{target_user:id,target_role:role,enabled,confirmation_email:email,note},true),
   issueInvite:(email,days)=>call('create_invite',{invitee_email:email,valid_days:days},true),revokeInvite:id=>call('revoke_invite',{invite_id:id},true),

@@ -13,3 +13,9 @@
 .admin-page .account-check input[type=checkbox]{appearance:auto;display:block;width:1.25rem;height:1.25rem;min-height:0;min-width:0;padding:0;margin:.2em 0 0;}
 .admin-page .account-check span{line-height:1.6;}
 @container admin (max-width:30rem){.admin-overview,.admin-tabs{gap:.5rem;}.admin-stat{padding:.85rem;}.admin-pagination{flex-wrap:wrap;}.admin-confirm>.account-secondary{width:100%;margin-right:0;}}
+
+/* Every destructive action uses a solid wine fill. */
+.admin-page .admin-destructive{background:var(--colour-wine);border-color:var(--colour-wine);color:var(--colour-parchment);}
+.admin-page .admin-destructive:hover:not(:disabled){background:var(--colour-wine-dark);border-color:var(--colour-wine-dark);color:var(--colour-parchment);filter:none;}
+.admin-directory-filters{max-width:none;}
+.admin-directory-filters .admin-actions{margin-bottom:0;}
