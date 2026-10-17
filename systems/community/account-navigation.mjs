@@ -8,7 +8,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
   for (const [key, label, href] of [
     ['profile', 'Edit my profile', '/account/profile/'],
     ['public', 'View public profile', publicProfileUrl(publicId)],
-    ['studio', 'Story Studio', contributor ? '/account/studio/' : null],
+    ['studio', 'Storyteller Studio', contributor ? '/account/studio/' : null],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;

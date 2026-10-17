@@ -11,7 +11,7 @@ function fixture(response={data:{id:owner},error:null}) {
 }
 test('story input accepts bounded metadata and rejects ownership, status, markup fields and invalid covers',()=>{
  assert.deepEqual(validateStory(input).tags,['magic','discovery']);assert.equal(storySlug('Échos in the Dark!'),'echos-in-the-dark');assert.equal(wordCount(' One\n\n two '),'2 words');
- for(const changes of [{author_id:owner},{status:'published'},{body_html:'<script>'},{slug:'../escape'},{cover_asset_id:'https://example.com/image'},{tags:Array(13).fill('x')},{title:' '},{body:'x'.repeat(200001)}])assert.throws(()=>validateStory({...input,...changes}));
+ for(const changes of [{author_id:owner},{status:'published'},{body_html:'<script>'},{cover_asset_id:'https://example.com/image'},{tags:Array(13).fill('x')},{title:' '},{body:'x'.repeat(200001)}])assert.throws(()=>validateStory({...input,...changes}));
 });
 test('story updates bind the owner, ID and previous timestamp; database values confirm success',async()=>{
  const f=fixture({data:{id:owner,status:'draft',updated_at:'next'},error:null});const saved=await f.service.save(input,{id:owner,updated_at:'previous',status:'draft'});
@@ -22,13 +22,13 @@ test('new stories are drafts; public writes require content and moderation locks
  const f=fixture();await f.service.save(input,null);assert.equal(f.calls.find(call=>call[0]==='insert')[1].author_id,owner);
  assert.equal('status' in f.calls.find(call=>call[0]==='insert')[1],false);
  await assert.rejects(f.service.save(input,null,'published'),/Save a draft/);
- await assert.rejects(f.service.save({...input,body:' '},{id:owner,updated_at:'x'},'published'),/story text/);
+ await assert.rejects(f.service.save({...input,body:' '},{id:owner,updated_at:'x'},'published'),/manuscript/);
  await assert.rejects(f.service.save(input,{id:owner,status:'archived',updated_at:'x'}),/locked/);
 });
 test('zero rows, failed requests and duplicate addresses never report a successful save',async()=>{
  await assert.rejects(fixture({data:null,error:null}).service.save(input,{id:owner,updated_at:'x'}),StudioConflictError);
  await assert.rejects(fixture({data:null,error:{code:'23505'}}).service.save(input,null),/already in use/);
- await assert.rejects(fixture({data:null,error:{code:'42501'}}).service.save(input,null),/unsaved text is still here/);
+ await assert.rejects(fixture({data:null,error:{code:'42501'}}).service.save(input,null),/unsaved words remain here/);
 });
 test('role removal, account closure and identity changes stop reads and writes before querying stories',async()=>{
  for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:owner},state:'deleting',contributor:true},{user:{id:'other'},state:'active',contributor:true}]){

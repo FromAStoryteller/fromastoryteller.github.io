@@ -35,7 +35,7 @@ test('profile ownership, public projection, attribution, pagination and account 
     assert.deepEqual(Object.keys(newContributor).sort(),Object.keys(profile).sort());
     assert.deepEqual(newContributor.stories,[]);
     assert.equal(newContributor.next_offset,null);
-    assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','next_offset','public_id','stories','welcome_line']);
+    assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','next_offset','public_id','social_links','stories','welcome_line']);
     assert.equal(profile.stories.length,12);assert.equal(profile.next_offset,12);
     const publishedId=(await db.query("select id from public.stories where slug='profile-story-1'")).rows[0].id;
     const draftId=(await db.query("select id from public.stories where slug='profile-private-draft'")).rows[0].id;
@@ -71,7 +71,7 @@ test('profile ownership, public projection, attribution, pagination and account 
     await as('authenticated',owner,`update public.profiles set display_name='New pen name',welcome_line='New welcome' where id='${owner}'`);
     const published=(await as('anon','',`select public.fas_public_story('profile-story-1') as value`)).rows[0].value;
     assert.equal(published.author.display_name,'New pen name');assert.equal(published.author.public_id,key);
-    assert.deepEqual(Object.keys(published.author).sort(),['display_name','public_id']);
+    assert.deepEqual(Object.keys(published.author).sort(),['display_name','public_id','social_links']);
     assert.equal((await as('authenticated',owner,`select public.fas_public_story('profile-private-draft') as value`)).rows[0].value,null);
     await db.exec(`insert into private.account_deletion_jobs(user_id,receipt_hash) values('${owner}',repeat('a',64));`);
     assert.equal(await read(),null);

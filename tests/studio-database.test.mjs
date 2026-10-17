@@ -16,5 +16,6 @@ test('Studio metadata bounds, private drafts, public projections, moderation loc
   const migrations=new URL('../supabase/migrations/',import.meta.url);
   for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')).sort())await db.exec(readFileSync(new URL(file,migrations),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/story-studio.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/tests/storyteller-studio-v2.sql',import.meta.url),'utf8'));
  }finally{await db.close();}
 });

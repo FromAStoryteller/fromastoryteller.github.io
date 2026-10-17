@@ -1,73 +1,53 @@
-import { loadProfileAccount } from '../../account/settings-controller.mjs';
-import { isPublicId } from './profiles.mjs';
-
-export const STORY_FIELDS = 'id,slug,title,summary,body,genre,tags,content_warning,cover_asset_id,status,updated_at,published_at';
-const text = (value, name, max, required = false) => {
-  if (typeof value !== 'string' || [...value].length > max || (required && !value.trim())) throw new Error(`${name}: ${required ? 'enter text, up to' : 'use up to'} ${max.toLocaleString()} characters.`);
-  return value;
-};
-export function validateStory(input) {
-  if (!input || Object.keys(input).some(key => !['slug','title','summary','body','genre','tags','content_warning','cover_asset_id'].includes(key))) throw new Error('Only story text, metadata and cover can be edited.');
-  const slug = text(input.slug, 'Story address', 120, true);
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error('Use lowercase letters, numbers and single hyphens for the story address.');
-  const tags = typeof input.tags === 'string' ? input.tags.split(',').map(tag => tag.trim()).filter(Boolean) : input.tags;
-  if (!Array.isArray(tags) || tags.length > 12 || tags.some(tag => typeof tag !== 'string' || !tag.trim() || [...tag].length > 40)) throw new Error('Use up to 12 tags, each up to 40 characters, separated by commas.');
-  const cover = input.cover_asset_id || null;
-  if (cover !== null && !isPublicId(cover)) throw new Error('Choose a cover from this story’s images.');
-  return { slug, title: text(input.title,'Title',200,true).trim(), summary: text(input.summary,'Description',1000), body: text(input.body,'Story',200000), genre: text(input.genre,'Genre',80), tags: [...new Set(tags.map(tag=>tag.trim()))], content_warning: text(input.content_warning,'Content warning',1000), cover_asset_id: cover };
+import {loadProfileAccount} from '../../account/settings-controller.mjs';
+import {isPublicId} from './profiles.mjs';
+import {GENRES,genreLabel,metadataIssues} from './studio-catalog.mjs';
+import {validateDocument,documentText} from './manuscript.mjs';
+export const STORY_FIELDS='id,slug,title,summary,body,genre,genres,tags,content_warning,cover_asset_id,status,updated_at,published_at,content_type,body_document,scene_style,drop_caps,paragraph_style,language,scheduled_at,publication_timezone,slug_locked,metadata,metadata_version,warning_ids,warning_reviewed';
+const allowed=['slug','title','summary','body','genre','genres','tags','content_warning','cover_asset_id','content_type','body_document','scene_style','drop_caps','paragraph_style','language','scheduled_at','publication_timezone','metadata','warning_ids','warning_reviewed'];
+const text=(value,name,max,required=false)=>{if(typeof value!=='string'||[...value].length>max||required&&!value.trim())throw new Error(`${name}: ${required?'enter text, up to':'use up to'} ${max.toLocaleString()} characters.`);return value;};
+export const storySlug=title=>title.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100).replace(/-$/,'')||'untitled';
+export function validateStory(input,genreCatalog=GENRES){
+ if(!input||Object.keys(input).some(key=>!allowed.includes(key)))throw new Error('Only content, presentation and publication fields can be edited.');
+ const title=text(input.title,'Title',200,true).trim(),tags=typeof input.tags==='string'?input.tags.split(',').map(t=>t.trim()).filter(Boolean):input.tags??[];
+ if(!Array.isArray(tags)||tags.length>12||tags.some(t=>typeof t!=='string'||!t.trim()||[...t].length>40))throw new Error('Use up to 12 tags, each up to 40 characters.');
+ const genres=input.genres??(input.genre?genreCatalog.filter(g=>g.label.toLowerCase()===input.genre.toLowerCase()).map(g=>g.id):[]);
+ if(!Array.isArray(genres)||genres.length>3||new Set(genres).size!==genres.length||genres.some(id=>!genreCatalog.some(g=>g.id===id)))throw new Error('Choose up to three genres or subgenres from the list.');
+ const cover=input.cover_asset_id||null;if(cover!==null&&!isPublicId(cover))throw new Error('Choose a cover attached to this content.');
+ const document=input.body_document?validateDocument(input.body_document):null,body=document?documentText(document):text(input.body??'','Manuscript',200000);
+ const type=input.content_type??'story',scene=input.scene_style??'space',paragraph=input.paragraph_style??'indented',language=input.language??'en';
+ if(!['story','blog'].includes(type)||!['space','dots','diamond','rule'].includes(scene)||!['indented','spaced'].includes(paragraph)||!['en','mi','fr','de','es','it','pt','ja','ko','zh','other'].includes(language))throw new Error('Choose supported content and presentation options.');
+ const schedule=input.scheduled_at||null;if(schedule&&(typeof schedule!=='string'||!Number.isFinite(Date.parse(schedule))))throw new Error('Choose a valid publication time.');
+ const timezone=input.publication_timezone??Intl.DateTimeFormat().resolvedOptions().timeZone;try{new Intl.DateTimeFormat('en',{timeZone:timezone});}catch{throw new Error('Your publication timezone could not be determined.');}
+ if(!Array.isArray(input.warning_ids??[])||(input.warning_ids??[]).length>10||(input.warning_ids??[]).some(id=>typeof id!=='string'||!/^[a-z0-9-]{1,100}$/.test(id)))throw new Error('Choose content warnings from the list.');
+ if(input.metadata!=null&&(typeof input.metadata!=='object'||Array.isArray(input.metadata)||JSON.stringify(input.metadata).length>16000))throw new Error('Check your content details.');
+ return {metadata:input.metadata??{},warning_ids:input.warning_ids??[],warning_reviewed:input.warning_reviewed===true,title,summary:text(input.summary??'','Description',1000),body,body_document:document,genres,genre:genres.map(id=>genreCatalog.find(g=>g.id===id)?.label??id).join(', ').slice(0,80),tags:[...new Set(tags.map(t=>t.trim()))],content_warning:text(input.content_warning??'','Content warning',1000),cover_asset_id:cover,content_type:type,scene_style:scene,drop_caps:input.drop_caps===true,paragraph_style:paragraph,language,scheduled_at:schedule,publication_timezone:timezone};
 }
-export function storySlug(title) {
-  return title.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100).replace(/-$/,'') || 'untitled-story';
+export function publicationIssues(input,assets=[],type){
+ const issues=metadataIssues(input,type);if(!input.warning_reviewed)issues.push('Review content warnings (or confirm none)');if(!input.title?.trim())issues.push('Add a title');if((input.summary?.trim().length??0)<10)issues.push('Add a description (at least 10 characters)');
+ const body=input.body_document?documentText(input.body_document):input.body;if(!body?.replace(/\*\*\*/g,'').trim())issues.push('Write your manuscript');if(!input.genres?.length)issues.push('Choose at least one genre or subgenre');
+ const cover=assets.find(a=>a.id===input.cover_asset_id);if(!cover)issues.push('Choose a cover image');else{if(!cover.alt_text?.trim())issues.push('Describe the cover for screen readers');if(!cover.pixel_width||cover.pixel_width*9!==cover.pixel_height*16)issues.push('Use a verified 16:9 cover');if(!cover.approved_at)issues.push('Cover clearance is pending');}return issues;
 }
-export class StudioAccessError extends Error {}
-export class StudioConflictError extends Error {}
-
-export function createStudioService(client, { ownerId, checkAccount = loadProfileAccount } = {}) {
-  if (!isPublicId(ownerId)) throw new Error('A verified account is required.');
-  async function authorize() {
-    let account;
-    try { account = await checkAccount(client); } catch { throw new Error('Your account could not be verified. Check your connection and try again. Your unsaved text is still here.'); }
-    if (account.user.id !== ownerId || account.state !== 'active' || !account.contributor) throw new StudioAccessError('Your contributor access or account has changed. Your saved work remains in your account download.');
-  }
-  function failure(error) {
-    if (error?.code === '23505') throw new Error('That story address is already in use. Choose another.');
-    throw new Error('Your story could not be saved. Check your connection and current account agreements, then try again. Your unsaved text is still here.');
-  }
-  return {
-    authorize,
-    async list(offset = 0) {
-      await authorize();
-      const {data,error} = await client.from('stories').select('id,title,slug,status,updated_at').eq('author_id',ownerId).order('updated_at',{ascending:false}).order('id').range(offset,offset+19);
-      if (error) throw new Error('Your stories could not be loaded. Please try again.');
-      return data;
-    },
-    async read(id) {
-      if (!isPublicId(id)) throw new Error('Story unavailable.');
-      await authorize();
-      const {data,error} = await client.from('stories').select(STORY_FIELDS).eq('author_id',ownerId).eq('id',id).single();
-      if (error || !data) throw new StudioConflictError('This story is unavailable. Reopen it from your stories.');
-      const assets = await client.from('story_assets').select('id,alt_text,approved_at').eq('story_id',id).order('created_at');
-      if (assets.error) throw new Error('The story’s cover choices could not be loaded. Try opening it again.');
-      return {story:data,assets:assets.data};
-    },
-    async save(input, previous, status = previous?.status ?? 'draft') {
-      const changes = validateStory(input);
-      if (!['draft','published'].includes(status)) throw new Error('This story is locked for moderation.');
-      if (status === 'published' && !changes.body.trim()) throw new Error('Add your story text before publishing.');
-      await authorize();
-      let query;
-      if (previous) {
-        if (!isPublicId(previous.id) || !previous.updated_at) throw new Error('Reopen your story before saving.');
-        query = client.from('stories').update({...changes,status}).eq('author_id',ownerId).eq('id',previous.id).eq('updated_at',previous.updated_at);
-      } else {
-        if (status !== 'draft' || changes.cover_asset_id) throw new Error('Save a draft before publishing or choosing a cover.');
-        const {cover_asset_id,...draft} = changes;
-        query = client.from('stories').insert({...draft,author_id:ownerId});
-      }
-      const {data,error} = await query.select(STORY_FIELDS).maybeSingle();
-      if (error) failure(error);
-      if (!data) throw new StudioConflictError('This story changed elsewhere or is locked. Download your unsaved text, then reopen the story before saving again.');
-      return data;
-    },
-  };
+export class StudioAccessError extends Error{}
+export class StudioConflictError extends Error{}
+export function createStudioService(client,{ownerId,checkAccount=loadProfileAccount}={}){
+ let genreCatalog=GENRES;
+ if(!isPublicId(ownerId))throw new Error('A verified account is required.');
+ async function authorize(){let account;try{account=await checkAccount(client);}catch{throw new Error('Your account could not be verified. Check your connection and try again. Your unsaved words remain here.');}if(account.user.id!==ownerId||account.state!=='active'||!account.contributor)throw new StudioAccessError('Your contributor access or account has changed. Saved work is available through your account download.');return account;}
+ const fail=e=>{if(e?.code==='23505')throw new Error('This address is already in use. Save again to generate another.');if(e?.code==='P0001'&&/Publication requires|future publication|genres|timezone/.test(e.message))throw new Error(e.message);throw new Error('The save failed. Check your connection and current account agreements. Your unsaved words remain here.');};
+ return {authorize,
+  async catalogs(){await authorize();const results=await Promise.all([client.from('studio_content_types').select('*').order('id'),client.from('content_warnings').select('id,label,active').order('label'),client.from('content_genres').select('id,label,parent_label').order('label')]);if(results.some(r=>r.error))throw new Error('Content requirements could not be loaded. Reload before publishing.');genreCatalog=results[2].data;return {types:results[0].data,warnings:results[1].data,genres:genreCatalog};},
+  async list({search='',type='',state='',cursor=null}={}){await authorize();const r=await client.rpc('fas_my_studio_work',{search_text:search,type_filter:type,state_filter:state,before_time:cursor?.updated_at??null,after_id:cursor?.id??null});if(r.error)throw new Error('Your work could not be loaded. Try again.');return r.data;},
+  async requestWarning(label,reason){await authorize();const r=await client.rpc('fas_request_content_warning',{requested_label:label,request_reason:reason});if(r.error)throw new Error('Request could not be added. Check the details; you can have up to five pending requests.');return r.data;},
+  async warningRequests(){await authorize();const r=await client.rpc('fas_my_warning_requests');if(r.error)throw new Error('Requests could not be loaded.');return r.data;},
+  async read(id){if(!isPublicId(id))throw new Error('Content unavailable.');await authorize();const r=await client.from('stories').select(STORY_FIELDS).eq('author_id',ownerId).eq('id',id).single();if(r.error||!r.data)throw new StudioConflictError('This content is unavailable. Reopen it from your work.');const a=await client.from('story_assets').select('id,alt_text,approved_at,pixel_width,pixel_height').eq('story_id',id).order('created_at');if(a.error)throw new Error('Cover choices could not be loaded. Try opening this content again.');return {story:r.data,assets:a.data};},
+  async save(input,previous,status=previous?.status??'draft'){
+   const changes=validateStory(input,genreCatalog);if(!['draft','published'].includes(status)||previous?.status==='archived')throw new Error('This content is locked for moderation.');if(status==='published'&&!changes.body.replace(/\*\*\*/g,'').trim())throw new Error('Write your manuscript before publishing.');await authorize();let q;
+   if(previous){if(!isPublicId(previous.id)||!previous.updated_at)throw new Error('Reopen this content before saving.');q=client.from('stories').update({...changes,status}).eq('author_id',ownerId).eq('id',previous.id).eq('updated_at',previous.updated_at);}
+   else{if(status!=='draft'||changes.cover_asset_id||changes.scheduled_at)throw new Error('Save a draft before choosing its cover or publishing.');const {cover_asset_id,...draft}=changes;q=client.from('stories').insert({...draft,author_id:ownerId});}
+   const r=await q.select(STORY_FIELDS).maybeSingle();if(r.error)fail(r.error);if(!r.data)throw new StudioConflictError('This content changed elsewhere or is locked. Download your text, then reopen it.');return r.data;
+  },
+  async uploadCover(id,file,alt,crop){await authorize();if(!isPublicId(id)||!file||file.size>5*1024*1024||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and describe the image.');const body=new FormData();body.set('story_id',id);body.set('image',file);body.set('alt',alt.trim());body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));const r=await client.functions.invoke('fas-studio-cover',{body});if(r.error||!r.data?.asset)throw new Error('Cover upload could not finish. Try again. Existing covers are unchanged.');return r.data.asset;},
+  async approveCover(id){await authorize();const r=await client.rpc('approve_story_image',{target_asset:id});if(r.error)throw new Error('Cover clearance requires an active administrator and a verified image.');},
+  async traffic(pageId=null,days=30){await authorize();const r=await client.rpc('fas_my_studio_traffic',{page_key:pageId,period_days:days});if(r.error)throw new Error('Traffic reports could not be loaded. Try again.');return r.data;},
+ };
 }

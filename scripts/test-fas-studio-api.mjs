@@ -20,12 +20,12 @@ async function fixture(label,contributor=true){
  const client=createClient(base,key,options);clients.push(client);good(await client.auth.signInWithPassword({email,password}));
  return {id:created.id,client,service:createStudioService(client,{ownerId:created.id})};
 }
-const text={slug:'fas-studio-'+run,title:'Synthetic Studio story',summary:'Synthetic description',body:'Synthetic original prose',genre:'Fantasy',tags:['test','fiction'],content_warning:'Synthetic warning',cover_asset_id:null};
+const text={slug:'fas-studio-'+run,title:'Synthetic Studio story',summary:'Synthetic description',body:'Synthetic original prose',genre:'Fantasy',tags:['test','fiction'],warning_ids:['violence'],warning_reviewed:true,content_warning:'Violence',cover_asset_id:null};
 try {
  const owner=await fixture('owner'),other=await fixture('other'),viewer=await fixture('viewer',false);
- stage='private draft creation';let saved=await owner.service.save(text,null);storyIds.push(saved.id);assert.equal(saved.status,'draft');assert.equal(saved.genre,text.genre);assert.deepEqual(saved.tags,text.tags);
- assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:text.slug})),null);
- assert.ok((await owner.service.list()).some(row=>row.id===saved.id));
+ stage='private draft creation';let saved=await owner.service.save(text,null);storyIds.push(saved.id);assert.equal(saved.status,'draft');assert.equal(saved.genre,text.genre);assert.ok(saved.slug);const catalogs=await owner.service.catalogs();assert.ok(catalogs.types.some(t=>t.id==='story'&&t.enabled));assert.deepEqual(saved.tags,text.tags);
+ assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:saved.slug})),null);
+ assert.ok((await owner.service.list()).items.some(row=>row.id===saved.id));
  const read=await owner.service.read(saved.id);assert.equal(read.story.body,text.body);assert.deepEqual(read.assets,[]);
  stage='owner and viewer denial';await assert.rejects(other.service.read(saved.id),StudioConflictError);await assert.rejects(viewer.service.list(),StudioAccessError);
  const tamper=await other.client.from('stories').update({genre:'Tampered'}).eq('id',saved.id).select('id');assert.ok(tamper.error||tamper.data.length===0);
@@ -33,13 +33,15 @@ try {
  const otherText={...text,slug:text.slug+'-other'};const otherStory=await other.service.save(otherText,null);storyIds.push(otherStory.id);
  await assert.rejects(other.service.save({...otherText,cover_asset_id:asset.id},otherStory));
  saved=await owner.service.save({...text,cover_asset_id:asset.id},saved);assert.equal(saved.cover_asset_id,asset.id);assert.equal((await owner.service.read(saved.id)).assets[0].id,asset.id);
- stage='publication and live metadata';saved=await owner.service.save({...text,cover_asset_id:asset.id},saved,'published');let published=good(await anonymous.rpc('fas_public_story',{story_slug:text.slug}));assert.equal(published.genre,'Fantasy');assert.equal(published.content_warning,text.content_warning);assert.equal(published.cover,null);assert.ok(!('author_id' in published));
- const original=saved;saved=await owner.service.save({...text,genre:'Mystery',body:'Synthetic live edit',cover_asset_id:asset.id},saved,'published');assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:text.slug})).body,'Synthetic live edit');
+ stage='required cover clearance';await assert.rejects(owner.service.save({...text,cover_asset_id:asset.id},saved,'published'));good(await setup.from('story_assets').update({pixel_width:1600,pixel_height:900,approved_at:new Date().toISOString(),approved_by:owner.id}).eq('id',asset.id));
+ stage='publication and live metadata';saved=await owner.service.save({...text,cover_asset_id:asset.id},saved,'published');let published=good(await anonymous.rpc('fas_public_story',{story_slug:saved.slug}));assert.equal(published.genre,'Fantasy');assert.equal(published.content_warning,text.content_warning);assert.equal(published.cover.asset_id,asset.id);assert.ok(!('author_id' in published));
+ const original=saved;saved=await owner.service.save({...text,genre:'Mystery',genres:['mystery'],body:'Synthetic live edit',cover_asset_id:asset.id},saved,'published');assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:saved.slug})).body,'Synthetic live edit');
  stage='stale version rejection';await assert.rejects(owner.service.save(text,original,'published'),StudioConflictError);
- stage='unpublication';saved=await owner.service.save(text,saved,'draft');assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:text.slug})),null);
+ stage='unpublication';saved=await owner.service.save(text,saved,'draft');assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:saved.slug})),null);
+ stage='scheduling';saved=await owner.service.save({...text,cover_asset_id:asset.id,scheduled_at:new Date(Date.now()+3600000).toISOString()},saved);assert.ok(saved.scheduled_at);assert.equal(good(await anonymous.rpc('fas_public_story',{story_slug:saved.slug})),null);saved=await owner.service.save(text,saved);assert.equal(saved.scheduled_at,null);
  stage='moderation lock';good(await setup.from('stories').update({status:'archived'}).eq('id',saved.id));await assert.rejects(owner.service.save(text,saved,'draft'));assert.equal((await owner.service.read(saved.id)).story.status,'archived');
  stage='contributor revocation';good(await setup.from('user_roles').delete().eq('user_id',owner.id).eq('role','member'));await assert.rejects(owner.service.list(),StudioAccessError);
- console.log('PASS DEV Studio creates/loads private drafts, preserves metadata, selects only own covers, self-publishes, saves live edits, rejects stale versions, unpublishes, respects moderation and contributor removal');
+ console.log('PASS DEV Studio creates/loads private drafts, preserves metadata, enforces required cleared 16:9 covers, schedules privately, self-publishes, saves live edits, rejects stale versions, unpublishes, respects moderation and contributor removal');
 }catch {failed=true;console.error('FAIL DEV Story Studio at '+stage+'; confidential details suppressed.');}
 finally {
  for(const client of clients)await client.auth.signOut({scope:'global'}).catch(()=>{});

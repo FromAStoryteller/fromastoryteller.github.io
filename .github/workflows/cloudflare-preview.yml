@@ -23,6 +23,10 @@ jobs:
       - name: Require current generated content
         run: git diff --exit-code -- content sitemap.xml '*.html'
       - run: npm run build:cloudflare
+      - name: Bundle reading worker without deploying
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npx wrangler deploy --dry-run --outdir .preview-cache/studio-worker
       - uses: actions/upload-artifact@v4
         with:
           name: fas-cloudflare-preview

@@ -18,7 +18,7 @@ insert into public.user_roles(user_id,role) values
 set local role authenticated;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
 insert into public.stories(author_id,slug,title,body,genre,tags,content_warning) values
- (auth.uid(),'studio-sql-fixture','Studio fixture','Private prose','Fantasy',array['folklore','magic'],'Fictional warning');
+ (auth.uid(),'studio-sql-fixture','Studio SQL fixture','Private prose','Fantasy',array['folklore','magic'],'Fictional warning');
 do $$ begin
  if not exists(select 1 from public.stories where slug='studio-sql-fixture' and status='draft' and genre='Fantasy' and tags=array['folklore','magic']) then raise exception 'FAIL metadata draft';end if;
  begin update public.stories set genre=repeat('x',81) where slug='studio-sql-fixture';raise exception 'FAIL genre bound';exception when check_violation then null;end;
@@ -41,12 +41,18 @@ do $$ begin
  begin insert into public.stories(author_id,slug,title,genre) values(auth.uid(),'studio-viewer-denied','Denied','Denied');raise exception 'FAIL viewer insert';exception when insufficient_privilege then null;when raise_exception then if SQLERRM<>'Contributor access required' then raise;end if;end;
 end $$;
 select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
-update public.stories set status='published' where slug='studio-sql-fixture';
+reset role;
+insert into public.story_assets(story_id,object_path,alt_text,pixel_width,pixel_height,approved_at,approved_by)
+ select id,author_id::text||'/'||id::text||'/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jpg','A fictional landscape',1600,900,now(),author_id from public.stories where slug='studio-sql-fixture';
+update public.stories set summary='A synthetic metadata check',genres=array['fantasy'],cover_asset_id=(select id from public.story_assets where story_id=stories.id) where slug='studio-sql-fixture';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','91000000-0000-0000-0000-000000000001',true);
+update public.stories set warning_ids=array['violence'],warning_reviewed=true,status='published' where slug='studio-sql-fixture';
 set local role anon;
 select set_config('request.jwt.claim.sub','',true);
 do $$ declare result jsonb;begin
  result:=public.fas_public_story('studio-sql-fixture');
- if result->>'genre'<>'Fantasy' or result->'tags'<>'["folklore","magic"]'::jsonb or result->>'content_warning'<>'Fictional warning' then raise exception 'FAIL public metadata';end if;
+ if result->>'genre'<>'Fantasy' or result->'tags'<>'["folklore","magic"]'::jsonb or result->>'content_warning'<>'Violence' then raise exception 'FAIL public metadata';end if;
  if result->'author' ? 'id' or result->'author' ? 'email' or result ? 'author_id' then raise exception 'FAIL private fields exposed';end if;
 end $$;
 set local role authenticated;

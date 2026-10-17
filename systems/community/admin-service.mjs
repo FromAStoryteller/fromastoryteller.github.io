@@ -6,7 +6,7 @@ export function createAdminService(client,{ownerId}={}){
   if(ownerId&&ownerId!==verified.data.user.id)throw new Error('Your account changed. Reopen this page.');ownerId=verified.data.user.id;
   const result=await client.rpc(name,args);if(result.error)throw new Error(knownErrors.has(result.error.message)?result.error.message:'This request could not be completed. Refresh and try again.');return result.data;
  }
- return {overview:()=>call('fas_admin_overview'),invites:offset=>call('fas_admin_invites',{page_offset:offset}),activity:offset=>call('fas_admin_activity',{page_offset:offset}),
+ return {warningRequests:()=>call('fas_admin_warning_requests'),reviewWarning:(id,approve,note)=>call('fas_admin_review_warning',{request_id:id,approve,note},true),overview:()=>call('fas_admin_overview'),invites:offset=>call('fas_admin_invites',{page_offset:offset}),activity:offset=>call('fas_admin_activity',{page_offset:offset}),
   accounts:(search='',role='all',offset=0,sort='name')=>call('fas_admin_accounts',{search_text:search,role_filter:role,page_offset:offset,sort_order:sort}),
   findAccount:email=>call('fas_admin_find_account',{account_email:email}),
   setRole:(id,role,enabled,email,note)=>call('fas_admin_set_role',{target_user:id,target_role:role,enabled,confirmation_email:email,note},true),

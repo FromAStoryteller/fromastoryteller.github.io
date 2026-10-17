@@ -6,6 +6,8 @@ import { mountProfileEditor } from './profile-editor.mjs';
 import { createProfileService } from './profiles.mjs';
 import { renderPublicProfile, renderPublicStory } from './public-profile.mjs';
 import { accountNavigation } from './account-navigation.mjs';
+import {contentMetadata,applyContentMetadata} from './content-metadata.mjs';
+import {publicCoverUrl} from './profiles.mjs';
 const root = document.querySelector('[data-profile-root]');
 const mode = document.querySelector('[data-profile-mode]').dataset.profileMode;
 let dispose;
@@ -84,6 +86,7 @@ try {
   } else {
     const story = await service.readStory(new URLSearchParams(location.search).get('story'));
     renderPublicStory(root,story,{imageBase:local.publicImageBase});
+    if(story)applyContentMetadata(document,contentMetadata(story,publicCoverUrl(story.cover,local.publicImageBase)));
     if (story) document.title=`${story.title} | From A Storyteller`;
   }
 } catch (error) { if (!ended) message('This page could not be loaded',error.message || 'Please try again later.'); }

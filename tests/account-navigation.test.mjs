@@ -13,7 +13,7 @@ const document = { createElement(tag) { return {
 test('account navigation keeps destinations consistent and signs out only the current session',async()=>{
   let scope;
   const nav=accountNavigation(document,{current:'settings',publicId:'81000000-0000-0000-0000-000000000001',auth:{signOut:async options=>{scope=options.scope;return {error:null};}}});
-  assert.deepEqual(nav.children.map(n=>n.textContent),['Edit my profile','View public profile','Story Studio','Account settings','Sign out']);
+  assert.deepEqual(nav.children.map(n=>n.textContent),['Edit my profile','View public profile','Storyteller Studio','Account settings','Sign out']);
   assert.equal(nav.children[3].attributes['aria-current'],'page');
   await nav.children[4].click();
   assert.equal(scope,'local');
