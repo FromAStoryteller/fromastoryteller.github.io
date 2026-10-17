@@ -63,6 +63,10 @@ The frozen historical policy documents remain unchanged. The automatic tab-copy 
 
 ## Automatic-recovery follow-up
 
-Ryan authorized automatic recovery and a simpler interface on 18 October 2026 (Auckland). The former checkbox/preference has been removed. Existing valid recovery copies remain readable, and the retired preference key is removed without touching Auth or unrelated storage. Recovery availability is reported from the actual write result. Fresh-tab storage starts empty; browsers may restore sessionStorage after reopening a tab, so a hard session-end erasure promise is not made.
+Ryan authorized automatic recovery and a simpler interface on 18 October 2026 (Auckland). The former checkbox/preference has been removed. Existing valid recovery copies remain readable, and the retired preference key is removed without touching Auth or unrelated storage. Recovery availability is reported from the actual write result. Browser tab duplication or restoration can retain sessionStorage, so a hard session-end erasure promise is not made. No long-term localStorage manuscript history is created.
 
-Follow-up release verification: pending.
+Automatic recovery released in [PR #37](https://github.com/FromAStoryteller/fromastoryteller.github.io/pull/37), merged as `2684cc5d56dd88b5ea396647a445ec309a1806ba`. The final feature build [117537092937](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39080780305/job/117537092937) passed **148 tests**, reference/syntax/index checks and Worker bundling. [Browser job 117537087564](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39080778549/job/117537087564) passed all 11 scenarios with recovery automatic and More options closed by default; it also checked the settled saved state. The browser harness is retained on `verify/studio-automatic-recovery`.
+
+Production deployment [117537519298](https://github.com/FromAStoryteller/fromastoryteller.github.io/runs/117537519298) succeeded. Read-only live [job 117537390783](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39080883001/job/117537390783) matched all five reviewed Studio modules and studio.css on fromastoryteller.com and verified HTTP 200 with the Studio root. It performed public GETs only; the verification sources are retained on verify/live-studio-automatic-recovery.
+
+No production account, draft or image was edited for this follow-up. No database migration or backup was required.
