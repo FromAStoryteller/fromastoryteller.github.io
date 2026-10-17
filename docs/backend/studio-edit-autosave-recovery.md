@@ -1,7 +1,7 @@
 # Studio edit, autosave and preview recovery
 
 Task: **FAS | FAS Community V1 | Implement edit, autosave and preview**.
-Status: implementation and automated verification in progress; production has not yet received this change.
+Status: implementation verified and ready for frontend release; production verification is recorded below after deployment.
 
 ## Save and reload behavior
 
@@ -43,9 +43,13 @@ A session-end event alone does not identify whether expiry or a sign-out elsewhe
 
 Unit tests cover safe metadata/document roundtrips, untitled writing, malformed/other-account files, resume version/state checks, optional storage, expiration, quota/blocked storage, namespace cleanup and repeated-genre recovery.
 
-The fictional Chromium rehearsal covers creation/autosave/server reload, newest-word preview, failed saves without silent retries, optional tab reload recovery, explicit resumed save, typing during a delayed save with Ctrl+S, stale edits recovered into a new private draft, mobile overflow, same-account expiry recovery, different-account denial, offline export/import and browser-storage errors. The fixtures are isolated browser contexts and do not use real accounts or content.
+The fictional Chromium rehearsal covers creation/autosave/server reload, newest-word preview, failed saves without silent retries, optional tab reload recovery, explicit resumed save, typing during a delayed save with Ctrl+S, stale edits recovered into a new private draft, mobile overflow, same-account expiry recovery, different-account denial, offline export/import browser-storage errors, invalid repeated-genre recovery, account-switch/sign-out clearing and oversized-text download after verified reauthentication. The fixtures are isolated browser contexts and do not use real accounts or content.
 
 Existing PostgreSQL/service tests continue to check ownership, stale versions, publication, draft deletion and session/access safeguards. No database migration, Auth provider configuration, published policy-history rewrite, analytics or ad setup belongs to this change.
+
+Automated evidence: Chromium browser job [117534268850](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39079806989/job/117534268850) passed all 11 scenarios against the feature sources at `b80aebea751adb1bad4c47351bead9f6f6262bd6`. The browser harness lives on the isolated `verify/studio-recovery` branch, not in the published site. This is a fictional service/auth rehearsal, not forced expiry of a real account.
+
+A failed response does not prove whether a new-draft insert reached the server. Before retrying creation after an interrupted connection, check Your work; recovery preserves the words but does not introduce a new database insert-idempotency contract.
 
 ## Release
 
