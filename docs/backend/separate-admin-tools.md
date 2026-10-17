@@ -1,6 +1,6 @@
 # Separate administrator permissions and tools
 
-Work in progress, 17 October 2026 (New Zealand). Production is unchanged.
+Released to production, 17 October 2026 (New Zealand). See [production verification](production-admin-release-2026-10-17.md).
 
 ## Role model
 
@@ -54,7 +54,7 @@ multiple roles; the archive retains a scalar role field for existing consumers.
 ## Verification / rollout
 
 Migration 20261016214432_separate_admin_tools.sql is installed in DEV. Production
-is unchanged. The initial full GitHub validation passed, including independent
+has the verified upgrades installed. The initial full GitHub validation passed, including independent
 roles, last-admin, invitation and moderation workflow tests. Re-run legacy
 account/contributor APIs plus scripts/test-fas-admin-api.mjs through the guarded
 node scripts/run-fas-dev-tests.mjs entry point. It forbids production targets.
@@ -68,9 +68,7 @@ before repeating, not treated as a clean pass.
 
 Browser QA must cover both themes, narrow screens, confirmation/cancel behavior,
 empty/error lists, role loss/account switches and invitation sign-in return.
-The local command runner and browser are currently blocked by Windows sandbox
-provisioning; GitHub and native Supabase remain available. Do not merge or deploy
-the interface before required integration and UI checks pass.
+The local command runner remains blocked by Windows sandbox provisioning. Ryan ran the updated hosted tests successfully; native database cleanup and CI passed. Browser access recovered during rollout and live authenticated directory, expanded labels, solid destructive styling and explicit-filter behavior were verified.
 
 Support scope is intentionally limited to account lookup, role management and
 content moderation. It does not reveal passwords, impersonate users, rewrite
@@ -90,4 +88,4 @@ records an audit action. Hosted stale-session approval denial passed. The legacy
 security harness prints its synthetic subject IDs as well, because its invitation,
 moderation and image actions now generate protected admin-audit records.
 
-DEV additions: 20261017000835_admin_account_directory.sql and 20261017002148_retire_moderator_contributor_removal.sql. Native rolled-back regression checks verify bounded directory privacy, role retirement, public story/profile hiding, retained viewer-owned export snapshots and private reinstatement. Hosted HTTP regression now also checks the actual former-contributor ZIP. Production rollout remains pending that updated hosted run.
+DEV additions: 20261017000835_admin_account_directory.sql and 20261017002148_retire_moderator_contributor_removal.sql. Native rolled-back regression checks verify bounded directory privacy, role retirement, public story/profile hiding, retained viewer-owned export snapshots and private reinstatement. Hosted HTTP regression now also checks the actual former-contributor ZIP. That hosted run passed and production rollout is complete; see the release record.
