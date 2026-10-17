@@ -81,7 +81,7 @@ insert into private.page_performance_reports(provider,report_key,report_date,pag
 set local role authenticated;
 select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000001"}',true);
-do $$begin if (public.fas_my_studio_traffic(null,30)->>'views')::int<>10 then raise exception 'FAIL file or brand report attribution';end if;end;$$;
+do $$begin if (public.fas_my_studio_traffic(null,30)->>'views')::int<>10 then raise exception 'FAIL file or brand report attribution';end if;if (public.fas_my_studio_traffic('fa500000-0000-4000-8000-000000000001',30)->>'views')::int<>3 then raise exception 'FAIL brand profile report filter';end if;end;$$;
 reset role;
 do $$declare v timestamptz;begin
  select updated_at into v from private.file_content where content_type='tool' limit 1;

@@ -49,6 +49,41 @@ The previous confirmed production backup was 17 October 2026 at 09:59 UTC, befor
 
 No new backup password, key or database contents should be committed. Record confirmation time and scope only.
 
+
+### Fresh backup commands
+
+Run from the existing FAS checkout. Keep site editing/uploads paused until this export is complete. This example uses a new folder beside the previous backup, outside the repository.
+
+```powershell
+$fasBackup = 'C:\Users\Ryan\Documents\FAS-Backups-Private\2026-10-17-publishing-names'
+if (Test-Path -LiteralPath $fasBackup) { throw 'Choose a new empty backup folder; keep the earlier backup.' }
+New-Item -ItemType Directory -Path $fasBackup | Out-Null
+
+npx --yes supabase@2.120.0 db dump --project-ref vzdicnufhidelaoeqbza --role-only -f "$fasBackup\roles.sql"
+if ($LASTEXITCODE -ne 0) { throw 'Roles export failed' }
+npx --yes supabase@2.120.0 db dump --project-ref vzdicnufhidelaoeqbza --schema public,private -f "$fasBackup\schema.sql"
+if ($LASTEXITCODE -ne 0) { throw 'Schema export failed' }
+npx --yes supabase@2.120.0 db dump --project-ref vzdicnufhidelaoeqbza --data-only --use-copy --schema public,private,auth -f "$fasBackup\data.sql"
+if ($LASTEXITCODE -ne 0) { throw 'Data export failed' }
+npx --yes supabase@2.120.0 db dump --project-ref vzdicnufhidelaoeqbza --schema supabase_migrations -f "$fasBackup\history-schema.sql"
+if ($LASTEXITCODE -ne 0) { throw 'Migration schema export failed' }
+npx --yes supabase@2.120.0 db dump --project-ref vzdicnufhidelaoeqbza --data-only --use-copy --schema supabase_migrations -f "$fasBackup\history-data.sql"
+if ($LASTEXITCODE -ne 0) { throw 'Migration data export failed' }
+
+$env:FAS_STORAGE_URL = 'https://vzdicnufhidelaoeqbza.supabase.co'
+try {
+    $env:FAS_STORAGE_SECRET_KEY = [System.Net.NetworkCredential]::new('', (Read-Host 'FAS production secret key' -AsSecureString)).Password
+    node scripts/fas-storage-backup.mjs export "$fasBackup\images"
+    if ($LASTEXITCODE -ne 0) { throw 'Storage export failed' }
+} finally {
+    Remove-Item Env:FAS_STORAGE_SECRET_KEY -ErrorAction SilentlyContinue
+    Remove-Item Env:FAS_STORAGE_URL -ErrorAction SilentlyContinue
+}
+Get-ChildItem -LiteralPath $fasBackup -Filter '*.sql' | Get-FileHash -Algorithm SHA256 | Export-Csv -NoTypeInformation -LiteralPath "$fasBackup\sql-sha256.csv"
+```
+
+Encrypt the **whole 2026-10-17-publishing-names folder**, including the five SQL files, SQL checksums and images/manifest.json (plus any exported image bytes). Use the previously established AES-256 7z procedure with encrypted filenames. Test the archive and sync the encrypted copy off-site before confirming. Do not upload the plaintext folder or send any backup contents/password here.
+
 ## Installation after backup confirmation
 
 1. Recheck PR #30 head/checks, main and production counts. Recheck the verified account and content inventory. Compare the two source hashes above.
