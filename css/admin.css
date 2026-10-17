@@ -19,3 +19,19 @@
 .admin-page .admin-destructive:hover:not(:disabled){background:var(--colour-wine-dark);border-color:var(--colour-wine-dark);color:var(--colour-parchment);filter:none;}
 .admin-directory-filters{max-width:none;}
 .admin-directory-filters .admin-actions{margin-bottom:0;}
+
+/* Compact native disclosures keep the directory easy to scan and keyboard accessible. */
+.admin-account-row{padding:0;}
+.admin-account-summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;cursor:pointer;list-style:none;min-height:3.5rem;}
+.admin-account-summary::-webkit-details-marker{display:none;}
+.admin-account-summary:focus-visible{outline:2px solid var(--colour-accent-primary);outline-offset:3px;border-radius:var(--radius-lg);}
+.admin-account-summary:hover{background:var(--surface-inset-background);border-radius:var(--radius-lg);}
+.admin-account-identity{display:flex;align-items:baseline;gap:.5rem 1.25rem;flex-wrap:wrap;min-width:0;}
+.admin-account-identity strong{font-family:var(--font-ui);}
+.admin-account-identity .admin-muted{font-size:.9rem;}
+.admin-account-toggle{color:var(--colour-text-primary);font-size:.9rem;flex-shrink:0;}
+.admin-account-toggle::after{content:' +';color:var(--colour-accent-primary);font-weight:700;}
+.admin-account-row[open] .admin-account-toggle::after{content:' −';}
+.admin-account-details{padding:0 1.25rem 1.25rem;border-top:1px solid var(--colour-border-default);}
+.admin-account-details>.admin-actions{margin-bottom:0;}
+@container admin (max-width:30rem){.admin-account-summary{padding:.85rem;gap:.75rem;}.admin-account-identity{display:grid;gap:.15rem;}.admin-account-details{padding:0 .85rem .85rem;}}

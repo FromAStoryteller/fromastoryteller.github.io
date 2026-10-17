@@ -37,11 +37,19 @@ export function mountAdminTools(root,service,{onAccessLost=()=>{}}={}){
  content.append(count);
  const list=el(d,'div','admin-list');
  for(const account of page.accounts){
-  const item=el(d,'article','admin-row');
-  item.append(el(d,'h3','',account.display_name||'Unnamed account'),el(d,'p','',account.email),el(d,'p','admin-muted',`${roleLabel(account.roles)} · ${account.verified?'Verified email':'Email not verified'} · ${account.active?'Active':'Account removal in progress'} · ${account.stories} ${account.stories===1?'story':'stories'}`));
-  if(account.created_at)item.append(el(d,'p','admin-muted','Joined '+date(account.created_at)));
-  if(account.active&&account.verified){const actions=el(d,'div','admin-actions');for(const [role,label] of [['member','contributor'],['admin','admin']]){const enabled=!account.roles.includes(role);actions.append(button(`${enabled?'Grant':'Remove'} ${label} access`,async()=>confirmRole(account,role,enabled,item),!enabled));}item.append(actions);}
-  else item.append(el(d,'p','admin-muted','Access changes are available for verified, active accounts.'));
+  const item=el(d,'details','admin-row admin-account-row');
+  const summary=el(d,'summary','admin-account-summary');
+  const identity=el(d,'span','admin-account-identity');
+  identity.append(el(d,'strong','',account.display_name||'Unnamed account'),el(d,'span','admin-muted',roleLabel(account.roles)));
+  const toggle=el(d,'span','admin-account-toggle','View details');
+  summary.append(identity,toggle);item.append(summary);
+  const details=el(d,'div','admin-account-details');
+  details.append(el(d,'p','',account.email),el(d,'p','admin-muted',`${account.verified?'Verified email':'Email not verified'} · ${account.active?'Active':'Account removal in progress'} · ${account.stories} ${account.stories===1?'story':'stories'}`));
+  if(account.created_at)details.append(el(d,'p','admin-muted','Joined '+date(account.created_at)));
+  if(account.active&&account.verified){const actions=el(d,'div','admin-actions');for(const [role,label] of [['member','contributor'],['admin','admin']]){const enabled=!account.roles.includes(role);actions.append(button(`${enabled?'Grant':'Remove'} ${label} access`,async()=>confirmRole(account,role,enabled,details),!enabled));}details.append(actions);}
+  else details.append(el(d,'p','admin-muted','Access changes are available for verified, active accounts.'));
+  item.append(details);
+  item.addEventListener('toggle',()=>{toggle.textContent=item.open?'Hide details':'View details';});
   list.append(item);
  }
  if(!page.accounts.length)list.append(el(d,'p','admin-empty','No accounts match these filters. Try another name, email or role.'));
