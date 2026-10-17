@@ -1,10 +1,18 @@
 # FAS current operations
 
-Updated 14 October 2026. This records completed setup and its operating boundaries;
+Updated 18 October 2026. Studio V1 is deployed and accepted. This records the current operating boundaries;
 the setup and restore guides remain the repeatable procedures. No credentials or
 backup data belong in this repository.
 
-## Completed foundation
+## Current release
+
+Viewer accounts, contributor profiles and Storyteller Studio V1 are live. Contributors publish their own stories/blog posts and upload verified covers without administrator approval. Existing source-file stories/games/tools retain their URLs and source editing; their publishing settings and insights are available in Studio. Tools use FAS attribution; the specifically granted owner can select personal/FAS for other content.
+
+See [V1 acceptance and follow-ups](studio-v1-handover.md), [Studio rollout](studio-production-rollout-2026-10-17.md) and [publishing-name rollout](publishing-identities-release-2026-10-17.md). The final runtime passed 140 tests and all 14 existing public pages were verified. The operator's current draft was preserved.
+
+The latest confirmed pre-change backup was 18 October 2026 at 12:08 NZDT: five SQL exports, zero-file Storage inventory, encrypted/tested archive and confirmed off-site sync. Backup integrity is not a full hosted restore rehearsal. Keep the manual routine below.
+
+## Foundation history — 14 October 2026
 
 - Existing website hosting uses Cloudflare Workers Static Assets. Production
   follows main with the configuration in [the hosting guide](../cloudflare-production-deployment.md).
@@ -50,19 +58,8 @@ Use dated archive names; encrypt/test before placing copies in the private Dropb
 website Backups/FAS-Backups folder. Keep passwords separately and check sync.
 No scheduler, automatic retention pruning or automatic restore is installed.
 
-## Before community launch
+## Follow-up work
 
-The existing static website remains usable. Account/profile pages, viewer signup,
-invitation delivery/acceptance, story submission/moderation and image handling
-still require implementation and end-to-end checks. Public signup remains disabled
-for now. An account alone must not grant contributor privileges.
+The accepted V1 is complete. Further usability/function refinements, source-content editing/type expansion, private-image cleanup, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
 
-The database and storage security task is complete as of 15 October 2026. Actual
-anonymous/viewer/contributor/admin API tests passed, including draft isolation,
-ownership, role protection, invitation validation and private image access.
-See [completion evidence](security-completion.md) for the approved production
-rollout, backup recovery rehearsal and development/production permission parity.
-It did not require finished profile pages. Reconcile the
-historical immediate-publication proposal with the currently implemented review
-workflow before changing rules. Server image validation, safe text rendering and
-exact Auth redirect/recovery routes remain launch requirements.
+Accounts do not grant contributor or FAS-publishing rights automatically. Administrators moderate rather than approve every publication. Analytics reporting is disconnected and no ads, earnings or payouts are active. Retain environment separation, safe text/image rendering, current session checks and the documented rollback procedures during future work.

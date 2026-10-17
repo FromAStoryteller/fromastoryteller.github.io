@@ -1,122 +1,87 @@
 # FAS Community V1 backend
 
-Start with [setup.md](setup.md), then [backup-restore.md](backup-restore.md).
-For the additive security changes and direct API checks, follow [security.md](security.md).
-The **Enforce database and storage security** task is complete as of 15 October
-2026 in hosted FAS development and production. See [completion evidence](security-completion.md).
-This is the database foundation, not a deployed community interface. The current
-website still reads static files. Nothing here imports, edits or republishes the
-existing stories. Online games and optional community features remain later scope.
+Status: accounts, contributor profiles and **Storyteller Studio V1 are deployed**.
+Studio V1 was accepted on 18 October 2026. Start with [current operations](operations.md),
+[Studio acceptance and follow-ups](studio-v1-handover.md) and
+[backup/restore](backup-restore.md). The original foundation setup is in [setup.md](setup.md).
 
-Local, hosted dev and hosted prod setup is complete as of 14 October 2026.
-See [operations.md](operations.md) for verified checks and the current manual
-backup routine. This status does not mean the community UI is ready to launch.
+## Current behavior
 
-## Decisions and boundaries
+- Viewer registration is open in the deliberate production account configuration.
+  Contributor privileges are invitation-only; an Auth account alone grants none.
+- Contributor and admin permissions are separate. Contributors publish and update
+  their own work without administrator approval. Admin moderation can unpublish/lock
+  content; it does not grant an ordinary contributor ownership of someone else's work.
+- Community stories/blog posts use the Studio manuscript editor, private drafts,
+  catalog metadata, verified covers and private scheduling. See [Studio](story-studio.md).
+- Existing file-backed stories, games and tools retain their source-file workflow
+  and canonical URLs. Their owner can manage publishing attribution and insights
+  through the separate selected-work view.
+- Private account ownership and public personal/FAS publishing identity are distinct.
+  Only the explicitly granted account can select FAS; tools always use the FAS byline.
+- Public profiles/readers receive explicit safe projections. Raw profiles, Auth
+  identifiers, email, private asset paths and publishing capabilities are not a
+  public directory.
+- Draft deletion is limited to saved, never-published, unscheduled drafts.
+  Previously published addresses/history are retained. See [draft deletion](studio-draft-deletion-2026-10-18.md).
 
-The intended account model is open viewer registration with invitation-only
-contributors. A viewer has an Auth account/profile and no contributor role;
-`member` is the current database name for a contributor. Public signup is disabled
-during foundation setup and must be enabled deliberately when the account flows
-are built and tested. These implemented choices require security review before
-launch: member/moderator/admin roles, moderation before publication, plain-text
-story bodies, private image storage and archival rather than client deletion.
-An earlier hosting plan proposed immediate contributor publication; resolve that
-workflow difference before changing permissions. FAS has its own local project
-and separate hosted dev/prod projects.
-Never reuse a PMP project, database, key, user identity store, bucket or backup.
+The earlier submitted/rejected review and staff-approved-image workflows belong to
+the initial schema history. They are not the current contributor publishing path.
+Legacy columns/functions remain only where required for compatibility; do not use
+old setup examples to reintroduce approval.
 
-The browser will use Supabase Auth, the Data API with a publishable key, Storage
-for owned uploads, and `fas-story-image` for permitted image downloads. Direct
-client Storage reads and signed image URLs are blocked for the FAS image bucket.
-Row-level security (RLS) means the database checks each user's permission for every
-row. Browser code must still render user text safely (textContent, or an approved
-sanitizer if rich text is added). The backend is not an HTML sanitizer.
+## Images and security
 
-Auth manages identities, email and passwords in `auth.users`; never make a separate
-password table. `profiles` holds display name and bio only. Profiles are created
-automatically, but a new account is not a member until an invite is accepted.
-Only public-story authors' profiles are visible to visitors; authors should know
-their display name and bio will become public. Moderators can read profiles/drafts.
+The image bucket is private. Studio uploads are authenticated, decoded, cropped
+and re-encoded server-side to verified 1600×900 JPEGs. Cover selection requires
+an owned verified 16:9 image with alternative text, not human clearance.
+A selected cover becomes publicly readable only with eligible published content.
+Unpublished and unselected alternatives remain private.
 
-| Table | Purpose | Client access |
-| --- | --- | --- |
-| profiles | Auth UUID, public display name/bio | Own edits; own/staff/published-author reads |
-| user_roles | One role per account | Own role or admin reads; no browser writes |
-| invites | Email-bound hashed single-use token, expiry, revocation | RPC only; no table reads |
-| stories | Author, slug, plain-text body, review status, timestamps | Public published reads; own draft/rejection edits |
-| story_assets | Story, immutable storage path, alt text | Visible story reads; own draft/rejection metadata writes |
-| moderation_log | Actor, status change, reason, time | Staff reads; moderation RPC appends atomically |
+Public/private image delivery uses the checked Edge image endpoint; direct Storage
+reads/signing remain blocked. RLS, owner/version checks, current session/account
+checks and server-side publishing grants enforce authorization. Browser code renders
+safe structured manuscript blocks and text; user-editable JWT metadata is not used
+to grant contributor or FAS-publishing access.
 
-## Workflows
+Physical cleanup of orphaned uploaded bytes and expanded static-source exports are
+follow-up capabilities, not effects promised by deleting a draft.
 
-An authenticated admin calls `create_invite(invitee_email, valid_days)`; it returns
-a random token once. Store/deliver it privately; never place it in public URLs,
-Git, screenshots or logs. A verified user with the matching email calls
-`accept_invite(invite_token)` using their signed-in session. Expired, revoked,
-reused or wrong-email invites fail. `revoke_invite(invite_id)` is admin-only.
-Invites always grant member, never moderator/admin. Invite delivery and the
-acceptance screen are future UI work, not included here. Administrators inspect
-invite IDs in the trusted Dashboard SQL editor, not through the browser.
+## Environment separation and secrets
 
-Members create `draft` stories, edit them and set status to `submitted`. Submitted
-stories are frozen. Staff call `moderate_story(target_story, decision, note)`:
-`submitted -> published/rejected`, `published -> archived`, or
-`archived -> submitted` for another review. Authors can revise rejected stories,
-then save as draft or resubmit. No author can publish, change ownership, or edit a
-published/submitted story. Staff use the RPC rather than direct status edits so
-the decision and audit record commit together. Direct Dashboard/service-role
-operations are trusted and can bypass client protections; use them sparingly.
+FAS uses its own local stack and separate hosted DEV/PROD projects. Never reuse
+another application's project, identity store, key, bucket or backup.
+Local API/DB/Studio/Mailpit ports remain 55321/55322/55323/55324.
+Git branches do not change the CLI's linked database.
 
-For an image: create the draft, upload with `upsert:false` into
-`fas-story-images` at `<author UUID>/<story UUID>/<new UUID>.png` (or jpg/jpeg/webp),
-then insert `story_assets` with that exact path and meaningful alt text. Each file
-has a 5 MiB limit; SVG and arbitrary files are excluded. A storage upload and an
-asset row are separate operations: handle registration failure and clean orphaned
-uploads with a trusted maintenance process. File extensions/MIME types do not
-prove safe contents; add server-side image validation/re-encoding before allowing
-untrusted uploads in a live community.
+Production public account configuration is generated deliberately for the exact
+site origin. Only publishable/legacy anon keys belong in browser configuration.
+Secret/service_role keys, database passwords, access tokens and backup contents
+stay out of Git, frontend bundles and chat.
 
-No client can overwrite or delete images. Authors/staff can read registered images
-on visible stories; public readers additionally require explicit staff approval
-through `approve_story_image(target_asset)`. Changing alt text clears that approval.
-The bucket is private, including published images. All client image reads use
-`fas-story-image?asset_id=ASSET_UUID`, which checks current RLS and returns
-no-store bytes. Direct Storage reads/signing are blocked, even for authors/staff;
-private image requests send the user's session in the Auth header. Follow the
-hosted security guide for deployment and old-URL cutover. Files uploaded but not registered cannot be
-read by regular clients. No image storage has been copied from static stories.
+## Current schema and releases
 
-## Environments and secrets
+The original six tables are the foundation, not a complete inventory of today's
+schema. Later reviewed migrations add account/policy controls, public profile IDs,
+separate contributor/admin roles, Studio catalogs and verified assets, reporting
+foundations, publishing identities and private file-content ownership.
 
-Local project: `fas-community-v1`, API 55321, DB 55322, Studio 55323, Mailpit 55324.
-These ports avoid the usual Supabase defaults; if another app occupies them,
-change only FAS ports and update local URLs. Hosted: create `fas-community-dev`
-and `fas-community-prod` separately. Dev contains disposable synthetic content;
-prod contains real community data. The committed CLI config only configures the
-local stack: hosted Auth settings require their own Dashboard setup.
+See:
+- [Database/storage security](security-completion.md)
+- [Contributor permissions](contributor-permissions.md)
+- [Separate admin tools](separate-admin-tools.md)
+- [Studio production rollout](studio-production-rollout-2026-10-17.md)
+- [Publishing identity rollout and mappings](publishing-identities-release-2026-10-17.md)
 
-`.env.example` contains blank public configuration names for future Vite integration.
-Vite exposes every `VITE_` value to browsers; only URL and publishable/legacy anon
-key belong there. The present site does not consume them. RLS provides the access
-boundary, not secrecy of a publishable key. Secret/service_role keys bypass RLS:
-keep them in server/Edge Function secrets or a temporary operator terminal only.
-DB passwords and Supabase access tokens stay out of Git, frontend bundles and chat.
-No backend server or Edge Function is deployed in this change.
+Applied migration files and installed history are immutable. Repository, DEV and
+production timestamps can differ; preserve the recorded mappings rather than
+blindly pushing or repairing history. Test new migrations locally/DEV, make the
+required production backup, then apply only the reviewed changes to the explicit
+target. Never reset production as a deployment or rehearsal.
 
-Supabase files and docs are outside the existing Cloudflare build allowlist.
-GitHub Pages may serve tracked documentation/SQL, so those files must always be
-credential-free. Never store a backup beneath a publicly served folder.
+## Remaining work
 
-## Changing the database later
-
-Migrations are numbered recipes executed once, in filename order. Keep applied
-files immutable. Add a new timestamped migration for each change and test a local
-reset before hosted dev. Inspect `db push --dry-run`, verify the target project,
-back up prod and deploy only a reviewed change. Do not use remote reset as a
-deployment method. Do not push into an existing database without first inspecting
-and baselining its schema; these initial migrations expect a fresh FAS project.
-
-Official references: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),
-[Storage permissions](https://supabase.com/docs/guides/storage/security/access-control),
-[migration workflow](https://supabase.com/docs/guides/local-development/cli-workflows).
+Studio V1 is complete. The [follow-up backlog](studio-v1-handover.md#follow-up-backlog)
+covers usability/function polish, source-content editing/type expansion, orphan
+cleanup, reporting/monetization and a full isolated hosted restore rehearsal.
+No analytics provider, ad delivery, earnings or payouts are active.
