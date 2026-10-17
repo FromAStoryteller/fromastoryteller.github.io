@@ -11,7 +11,7 @@ The design uses the website shell, theme tokens, Literata manuscript typography 
 - Visual manuscript supports paragraphs, headings, quotes, bold, italic and scene breaks. Shared CSS renders the editor and published page alike. Drop caps apply only to the very first paragraph, never after scene breaks. Scene breaks can show space only, dots, a diamond or a rule. Arbitrary manuscript HTML is never stored or rendered.
 - Drafts may be incomplete. Publishing and scheduling require title, description, manuscript, 1–3 catalog genres/subgenres, reviewed content warnings and an owned, cleared 16:9 cover with alternative text. Language defaults to English. Parent genre labels, URLs, author, dates, word/read counts and search/share metadata derive automatically.
 - Genres/subgenres count toward one combined maximum of three; suggested or custom tags are separate (maximum 12). Content warnings use a controlled dropdown with removable choices and an explicit review/none confirmation.
-- Contributors can request another warning, see its decision and refresh the catalog. Admin tools have a checked, audited approval/decline queue. Requests do not send email; pending requests are limited to five per contributor.
+- Contributors can request another warning, see its decision and refresh the catalog. Admin tools have a checked, audited approval/decline queue. Request text is erased when its author’s account is deleted; separate admin audit events remain. Requests do not send email; pending requests are limited to five per contributor.
 - Server-generated addresses follow the title until the first publication, then remain stable through title edits and unpublication.
 - New work is a private draft. Draft autosave waits 1.8 seconds. Published and scheduled edits require explicit saving. Failed saves preserve typing; exact previous timestamps prevent stale overwrites. Conflicts stop writes until reopening. Unsaved text can be downloaded; it is not cached in local storage.
 - Account switching, revoked access and session end clear private UI and image blobs. Network verification failures preserve unsaved text. The database checks ownership, live sessions, account state, current policy agreements and contributor role independently.
@@ -43,6 +43,7 @@ The Cloudflare reading worker derives crawler-visible title, description, canoni
 | `20261017032053_storyteller_studio_publishing.sql` | `20261017034654` |
 | `20261017032357_studio_reporting_foundation.sql` | `20261017034705` |
 | `20261017033843_studio_catalogs_and_metadata_versions.sql` | `20261017034716` |
+| `20261017035818_studio_warning_request_retention.sql` | `20261017035856` |
 
 Do not rewrite migration history timestamps. DEV has `fas-studio-cover` v1 deployed with JWT verification enabled. `supabase/ops/studio-publication-cron.sql` installs only the named `fas-community-publication` minute job and refuses conflicting configuration. No production database, function, cron or website deployment was performed.
 

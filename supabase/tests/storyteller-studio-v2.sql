@@ -120,4 +120,8 @@ do $$ declare p jsonb; c jsonb; ids uuid[]:='{}';item jsonb;pages int:=0;begin
  if cardinality(ids)<>45 or pages<>3 then raise exception 'FAIL library paging';end if;
 end $$;
 reset role;
+-- Match lifecycle cleanup: remove owned content before deleting the Auth record.
+delete from public.stories where author_id='93000000-0000-0000-0000-000000000001';
+delete from auth.users where id='93000000-0000-0000-0000-000000000001';
+do $$ begin if exists(select 1 from private.content_warning_requests where label='Synthetic warning request') then raise exception 'FAIL deleted account retained request text';end if;end $$;
 rollback;
