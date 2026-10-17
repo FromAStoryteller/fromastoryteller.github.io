@@ -52,7 +52,7 @@ Local PostgreSQL tests cover publication requirements, safe manuscripts, catalog
 
 Supabase advisory notices for intentionally protected private tables and checked SECURITY DEFINER workflows remain expected: [public projections](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [checked workflows](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). The pre-existing [leaked-password protection notice](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) is unchanged.
 
-The user's earlier guarded v1 API run passed. The expanded suite passes 126 tests; 1,005 local references and 154 JavaScript syntax checks pass. Both static build variants pass. The updated contract needs a fresh authenticated DEV API run. The local Wrangler bundle check encounters Windows ancestor-directory access restrictions; GitHub CI run 92 passed the complete suite, reference/index/build checks and the dry-run worker bundle check on Linux. This sandbox cannot retrieve the private CLI credentials (outbound access is denied); run from the user's authenticated terminal in this checkout:
+The expanded authenticated DEV API run passed in the user's terminal on 17 October 2026, including real cover normalization/upload, required clearance, private scheduling, publication, live edits, stale-version rejection, moderation and contributor removal. Disposable cover bytes and all API fixtures were removed; cleanup verification passed. The local suite passes 126 tests; 1,007 references and 156 JavaScript syntax checks pass. Both static build variants pass. GitHub CI run 97 passed all checks, including the real Deno codec smoke test and dry-run worker bundle on Linux. The guarded API check can be repeated from the authenticated user terminal:
 
 ```powershell
 node scripts/run-fas-dev-tests.mjs --studio-only
@@ -60,7 +60,7 @@ node scripts/run-fas-dev-tests.mjs --studio-only
 
 The runner fixes the project to FAS DEV, holds credentials only in memory, sends no email, creates disposable accounts and verifies exact fixture cleanup. The Studio test uploads a tiny generated PNG through the actual cover service, verifies private JPEG 1600×900 output, checks required clearance, and deletes/verifies only its disposable cover objects. Approval is seeded through the privileged fixture setup; a genuine contributor/admin crop and clearance browser check remains required before release. The separate security/admin API fixtures use metadata-only synthetic covers. The full runner also rehearses existing account/security/admin flows; their exact-ID audit cleanup remains documented separately.
 
-Before production: complete the new guarded API and authenticated browser checks, review the draft PR, install the identical migrations and cover function in production, install its own cron and deploy the reviewed Cloudflare build. Keep the task in progress until those release checks pass. Preview test fixtures are excluded from public builds.
+Before production: complete the genuine contributor/admin crop and clearance browser walkthrough, review the draft PR, install the identical migrations and cover function in production, install its own cron and deploy the reviewed Cloudflare build. Keep the task in progress until those release checks pass. Preview test fixtures are excluded from public builds.
 
 ## Cover runtime correction
 
