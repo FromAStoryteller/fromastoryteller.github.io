@@ -2,13 +2,18 @@
 // Never prints credentials/response bodies and never sends email.
 import assert from 'node:assert/strict';
 import {randomUUID,randomBytes} from 'node:crypto';
+import {deflateSync} from 'node:zlib';
 import {createClient} from '@supabase/supabase-js';
 import {securityTarget,checkLegacyProjectKey} from './fas-security-target.mjs';
 import {createStudioService,StudioAccessError,StudioConflictError} from '../systems/community/studio-service.mjs';
 const {base}=securityTarget(['--hosted-dev'],process.env.FAS_TEST_CONFIRM);
 const key=process.env.FAS_TEST_ANON_KEY,secret=process.env.FAS_TEST_SERVICE_KEY;
 assert.ok(key&&secret,'Process-only DEV credentials required.');checkLegacyProjectKey(key,'anon');checkLegacyProjectKey(secret,'service_role');
-const options={auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(url,options={})=>fetch(url,{...options,signal:AbortSignal.any([...(options.signal?[options.signal]:[]),AbortSignal.timeout(15000)])})}},setup=createClient(base,secret,options),anonymous=createClient(base,key,options);
+const options={auth:{persistSession:false,autoRefreshToken:false},global:{headers:{Origin:'http://127.0.0.1:55410'},fetch:(url,options={})=>fetch(url,{...options,signal:AbortSignal.any([...(options.signal?[options.signal]:[]),AbortSignal.timeout(15000)])})}},setup=createClient(base,secret,options),anonymous=createClient(base,key,options);
+function fixturePng(){
+ const chunk=(name,data)=>{const type=Buffer.from(name),payload=Buffer.concat([type,data]);let crc=0xffffffff;for(const byte of payload){crc^=byte;for(let n=0;n<8;n++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}const length=Buffer.alloc(4),checksum=Buffer.alloc(4);length.writeUInt32BE(data.length);checksum.writeUInt32BE((crc^0xffffffff)>>>0);return Buffer.concat([length,payload,checksum]);};
+ const header=Buffer.alloc(13);header.writeUInt32BE(16,0);header.writeUInt32BE(9,4);header[8]=8;header[9]=2;const pixels=Buffer.alloc(9*(1+16*3));for(let y=0;y<9;y++)for(let x=0;x<16;x++){const at=y*49+1+x*3;pixels[at]=90;pixels[at+1]=70;pixels[at+2]=30;}return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',header),chunk('IDAT',deflateSync(pixels)),chunk('IEND',Buffer.alloc(0))]);
+}
 const run=randomUUID(),users=[],clients=[],storyIds=[];let stage='fixture setup',failed=false;
 const good=result=>{assert.ok(!result.error,'Studio API request failed at '+stage);return result.data;};
 async function fixture(label,contributor=true){
@@ -29,7 +34,8 @@ try {
  const read=await owner.service.read(saved.id);assert.equal(read.story.body,text.body);assert.deepEqual(read.assets,[]);
  stage='owner and viewer denial';await assert.rejects(other.service.read(saved.id),StudioConflictError);await assert.rejects(viewer.service.list(),StudioAccessError);
  const tamper=await other.client.from('stories').update({genre:'Tampered'}).eq('id',saved.id).select('id');assert.ok(tamper.error||tamper.data.length===0);
- stage='cover ownership and public approval';const asset=good(await owner.client.from('story_assets').insert({story_id:saved.id,object_path:`${owner.id}/${saved.id}/${randomUUID()}.png`,alt_text:'Synthetic private cover'}).select('id').single());
+ stage='private normalized cover upload';const asset=await owner.service.uploadCover(saved.id,new File([fixturePng()],'synthetic.png',{type:'image/png'}),'Synthetic private cover',{x:.5,y:.5});assert.equal(asset.pixel_width,1600);assert.equal(asset.pixel_height,900);assert.equal(asset.approved_at,null);const object=good(await setup.from('story_assets').select('object_path').eq('id',asset.id).single());const uploaded=good(await setup.storage.from('fas-story-images').download(object.object_path));const jpeg=new Uint8Array(await uploaded.arrayBuffer());assert.equal(jpeg[0],255);assert.equal(jpeg[1],216);
+ stage='cover ownership and public approval';
  const otherText={...text,slug:text.slug+'-other'};const otherStory=await other.service.save(otherText,null);storyIds.push(otherStory.id);
  await assert.rejects(other.service.save({...otherText,cover_asset_id:asset.id},otherStory));
  saved=await owner.service.save({...text,cover_asset_id:asset.id},saved);assert.equal(saved.cover_asset_id,asset.id);assert.equal((await owner.service.read(saved.id)).assets[0].id,asset.id);
@@ -46,10 +52,12 @@ try {
 finally {
  for(const client of clients)await client.auth.signOut({scope:'global'}).catch(()=>{});
  if(users.length){const owned=await setup.from('stories').select('id').in('author_id',users);if(owned.error)failed=true;for(const row of owned.data??[])if(!storyIds.includes(row.id))storyIds.push(row.id);}
+ const objects=[];if(storyIds.length){const rows=await setup.from('story_assets').select('story_id,object_path').in('story_id',storyIds);if(rows.error)failed=true;for(const row of rows.data??[]){const parts=row.object_path.split('/');if(parts.length===3&&users.includes(parts[0])&&parts[1]===row.story_id&&/^[a-f0-9-]{36}\.jpg$/.test(parts[2]))objects.push(row.object_path);else failed=true;}}
+ if(objects.length){const removed=await setup.storage.from('fas-story-images').remove(objects);if(removed.error)failed=true;else for(const path of objects){const check=await setup.storage.from('fas-story-images').download(path);if(!check.error)failed=true;}}
  for(const id of storyIds){const result=await setup.from('stories').delete().eq('id',id);if(result.error)failed=true;}
  for(const id of users){const result=await setup.auth.admin.deleteUser(id);if(result.error)failed=true;}
  if(users.length){const remaining=await setup.from('profiles').select('id').in('id',users);if(remaining.error||remaining.data?.length)failed=true;}
  if(storyIds.length){const remaining=await setup.from('stories').select('id').in('id',storyIds);if(remaining.error||remaining.data?.length)failed=true;}
- console.log(failed?'Studio API checks failed; inspect DEV fixture cleanup.':'Studio API fixture cleanup verified. No Storage bytes or real accounts were targeted.');
+ console.log(failed?'Studio API checks failed; inspect DEV fixture cleanup.':'Studio API fixture cleanup verified. Disposable cover bytes removed; no real accounts or files were targeted.');
 }
 process.exitCode=failed?1:0;
