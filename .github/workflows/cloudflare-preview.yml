@@ -17,6 +17,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.1.4
+      - name: Test actual Edge image codecs
+        run: deno test --allow-net=deno.land,cdn.deno.land scripts/test-fas-studio-normalizer.deno.mjs
       - run: npm test
       - run: npm run validate:references
       - run: npm run validate
