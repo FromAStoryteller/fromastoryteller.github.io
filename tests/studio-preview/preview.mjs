@@ -16,6 +16,7 @@ const seedRows=[{...base,id:owner,title:'The lantern keeper',slug:'the-lantern-k
 const persistFixture=new URL(location.href).searchParams.has('fixture-persist');
 let rows=seedRows;try{if(persistFixture){const saved=JSON.parse(sessionStorage.getItem('fas-studio-fictional-server')||'null');if(Array.isArray(saved)&&saved.length)rows=saved;}}catch{}
 const persist=()=>{if(persistFixture)sessionStorage.setItem('fas-studio-fictional-server',JSON.stringify(rows));};
+persist();
 const choices=new Map([[owner,[{id:assetId,alt_text:'A small lantern glowing beside an old stone stairway at dusk',approved_at:now,pixel_width:1600,pixel_height:900,preview_url:'/assets/images/stories/sunset-at-the-lighthouse.png'}]]]);
 let fail=false,deleteFail=false,conflict=false,access=true,sampleReports=false,sessionValid=true,previewUser=owner,saveDelay=0;
 const copy=x=>structuredClone(x),authorize=async()=>{if(previewUser!==owner)throw new StudioAccessError('Account changed.','owner-changed');if(!sessionValid)throw new StudioAccessError('Your session expired.','session-ended');if(!access)throw new StudioAccessError('Contributor access removed. Saved work remains available through account download.');};
