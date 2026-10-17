@@ -44,3 +44,10 @@ test('account switching clears only Studio recovery namespaces',()=>{
  clearRecoveryStorage(s,owner);assert.ok(createRecoveryStore(s,{ownerId:owner,now:()=>now}).read());assert.equal(createRecoveryStore(s,{ownerId:other,now:()=>now}).read(),null);
  clearRecoveryStorage(s);assert.equal(s.length,1);assert.equal(s.getItem('account-token'),'keep');
 });
+
+test('recovery can repair a repeated genre without losing manuscript formatting',()=>{
+ const record=recoveryRecord({...values,genres:['fantasy','fantasy']},{ownerId:owner,now});
+ assert.deepEqual(record.values.genres,['fantasy']);assert.deepEqual(record.values.body_document,values.body_document);
+ const textOnly={...record,source_id:owner,base_version:story.updated_at,text_only:true};
+ assert.equal(parseRecovery(JSON.stringify(textOnly),{ownerId:owner,now}).text_only,true);assert.equal(canResumeRecovery(textOnly,story),false);
+});

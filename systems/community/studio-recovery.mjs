@@ -5,7 +5,7 @@ import {documentText} from './manuscript.mjs';
 const PREFIX='fas-studio-recovery-v1:',MAX=1024*1024,AGE=24*60*60*1000;
 export function recoveryRecord(values,{ownerId,story=null,now=Date.now(),genres=GENRES}={}){
  if(!isPublicId(ownerId))throw new Error('A verified owner is required for recovery.');
- const title=values.title??'',clean=validateStory({...values,title:title.trim()?title:'Untitled recovery'},genres);clean.title=title;
+ const title=values.title??'',clean=validateStory({...values,...(Array.isArray(values.genres)?{genres:[...new Set(values.genres)]}:{}),title:title.trim()?title:'Untitled recovery'},genres);clean.title=title;
  const record={format:'fas-studio-recovery-v1',owner:ownerId,saved_at:new Date(now).toISOString(),source_id:story?.id??null,base_version:story?.updated_at??null,values:clean};
  if(new TextEncoder().encode(JSON.stringify(record)).length>MAX)throw new Error('This recovery copy is too large. Download your text instead.');
  return record;
@@ -15,9 +15,9 @@ export function parseRecovery(raw,{ownerId,now=Date.now(),genres=GENRES,checkAge
  let record;try{record=JSON.parse(raw);}catch{throw new Error('This recovery file could not be read.');}
  if(record?.format!=='fas-studio-recovery-v1'||record.owner!==ownerId||!record.values||!Number.isFinite(Date.parse(record.saved_at))||record.source_id!==null&&!isPublicId(record.source_id)||record.base_version!==null&&typeof record.base_version!=='string')throw new Error('This recovery copy does not belong to this account or is unsupported.');
  if(checkAge&&(now-Date.parse(record.saved_at)>AGE||Date.parse(record.saved_at)>now+60000))throw new Error('This tab recovery copy has expired.');
- return recoveryRecord(record.values,{ownerId,story:record.source_id?{id:record.source_id,updated_at:record.base_version}:null,now:Date.parse(record.saved_at),genres});
+ const clean=recoveryRecord(record.values,{ownerId,story:record.source_id?{id:record.source_id,updated_at:record.base_version}:null,now:Date.parse(record.saved_at),genres});if(record.text_only===true)clean.text_only=true;return clean;
 }
-export const canResumeRecovery=(record,story)=>!!record.source_id&&record.source_id===story?.id&&record.base_version===story.updated_at&&story.status==='draft'&&!story.scheduled_at;
+export const canResumeRecovery=(record,story)=>!record.text_only&&!!record.source_id&&record.source_id===story?.id&&record.base_version===story.updated_at&&story.status==='draft'&&!story.scheduled_at;
 export function clearRecoveryStorage(storage,exceptOwner=null){
  try{for(let i=storage.length-1;i>=0;i--){const key=storage.key(i);if(key?.startsWith(PREFIX)&&(!exceptOwner||!key.startsWith(PREFIX+exceptOwner+':')))storage.removeItem(key);}}catch{}
 }
