@@ -18,7 +18,10 @@
     "run_worker_first": [
       "/read/",
       "/stories/*",
-      "/blog/*"
+      "/blog/*",
+      "/games/*",
+      "/tools/*",
+      "/videos/*"
     ]
   },
   "main": "cloudflare-worker.mjs",
