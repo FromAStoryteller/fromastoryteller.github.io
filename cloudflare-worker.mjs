@@ -27,7 +27,8 @@ export async function readingResponse(request,env,fetcher=fetch){
  try{
   const configResponse=await env.ASSETS.fetch(new Request(new URL('/account/runtime-config.json',url)));
   if(!configResponse.ok)return fallback();const config=await configResponse.json();if(!isProductionAuthConfig(config))return fallback();
-  const result=await fetcher(PRODUCTION_AUTH_URL+'/rest/v1/rpc/fas_public_story',{method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000),headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({story_slug:slug})});
+  // Workers support manual/follow redirects; reject every 3xx via result.ok.
+  const result=await fetcher(PRODUCTION_AUTH_URL+'/rest/v1/rpc/fas_public_story',{method:'POST',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(5000),headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({story_slug:slug})});
   if(!result.ok)return fallback(503);const story=await result.json();if(!story||address&&(story.content_type??'story')!==address.content_type)return fallback(404);
   const canonical=contentPath(story);if(!canonical)return fallback(404);
   if(legacy||url.pathname!==canonical){const destination=new URL(canonical,url);destination.search=url.search;destination.searchParams.delete('story');return new Response(null,{status:308,headers:{Location:destination.href,'Cache-Control':'no-store'}});}
