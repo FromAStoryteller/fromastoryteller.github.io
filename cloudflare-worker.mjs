@@ -1,3 +1,4 @@
+import {fileContentPath} from './systems/community/publishing-identity.mjs';
 import {contentPath,contentAddress} from './systems/community/content-address.mjs';
 import {contentMetadata} from './systems/community/content-metadata.mjs';
 import {isProductionAuthConfig,PRODUCTION_ACCOUNT_ORIGIN,PRODUCTION_AUTH_URL} from './account/auth-settings.mjs';
@@ -10,13 +11,41 @@ export function renderReadingMetadata(html,story,image){
  `<script type="application/ld+json" data-community-schema>${JSON.stringify(m.structured).replace(/</g,'\\u003c')}</script>`;
  return html.replace(/<title>[\s\S]*?<\/title>/i,'').replace(/<meta\s+name="(?:description|robots)"[^>]*>/gi,'').replace(/<link\s+rel="canonical"[^>]*>/gi,'').replace('</head>',()=>head+'</head>');
 }
+
+export function renderFilePublishing(html,item){
+ const author=item.author,profile='/storytellers/?author='+encodeURIComponent(author.public_id);
+ html=html.replace(/<span class="file-publishing-author" data-file-publishing>[\s\S]*?<\/span>/,()=>'<span class="file-publishing-author" data-file-publishing><a href="'+escape(profile)+'">By '+escape(author.display_name)+'</a></span>');
+ html=html.replace(/(<meta\s+name="author"\s+content=")[^"]*(")/gi,(_,a,b)=>a+escape(author.display_name)+b);
+ const schemaAuthor={'@type':author.kind==='organization'?'Organization':'Person',name:author.display_name,url:'https://fromastoryteller.com'+profile};
+ html=html.replace(/<script([^>]*type="application\/ld\+json"[^>]*)>([\s\S]*?)<\/script>/gi,(full,attributes,text)=>{
+  try{const data=JSON.parse(text);const visit=x=>{if(!x||typeof x!=='object')return;if(x.author)x.author=schemaAuthor;for(const v of Object.values(x))if(typeof v==='object')visit(v);};visit(data);return '<script'+attributes+'>'+JSON.stringify(data).replace(/</g,'\\u003c')+'</script>';}catch{return full;}
+ });
+ const social=(author.social_links??[]).filter(s=>{try{return new URL(s.url).protocol==='https:';}catch{return false;}}).map(s=>'<a href="'+escape(s.url)+'" target="_blank" rel="noopener noreferrer">'+escape(s.platform==='website'?'Website':s.platform)+'</a>').join(' ');
+ if(social)html=html.replace('</main>',()=>'<nav class="file-publishing-socials" aria-label="Author social links">'+social+'</nav></main>');
+ return html.replace('<body','<body data-content-id="'+escape(item.id)+'"');
+}
+export async function filePublishingResponse(request,env,response,fetcher=fetch){
+ const html=await response.text();if(!html.includes('data-file-publishing')||new URL(request.url).origin!==PRODUCTION_ACCOUNT_ORIGIN)return new Response(request.method==='HEAD'?null:html,response);
+ const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.delete('Content-Length');headers.delete('ETag');
+ const unavailable=status=>{headers.set('X-Robots-Tag','noindex, nofollow');return new Response(request.method==='HEAD'?null:'This page is currently unavailable.',{status,headers});};
+ try{
+  const configResponse=await env.ASSETS.fetch(new Request(new URL('/account/runtime-config.json',request.url)));
+  if(!configResponse.ok)return unavailable(503);const config=await configResponse.json();if(!isProductionAuthConfig(config))return unavailable(503);
+  const result=await fetcher(PRODUCTION_AUTH_URL+'/rest/v1/rpc/fas_public_file_content',{method:'POST',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(5000),headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({content_path:new URL(request.url).pathname})});
+  if(!result.ok)return unavailable(503);const item=await result.json();if(!item?.author)return unavailable(404);
+  return new Response(request.method==='HEAD'?null:renderFilePublishing(html,item),{status:response.status,headers});
+ }catch{return unavailable(503);}
+}
+
 // The worker never forwards a reader session or uses a privileged key. Only the
 // allowlisted published projection can populate crawler-visible metadata.
 export async function readingResponse(request,env,fetcher=fetch){
- const url=new URL(request.url),address=contentAddress(url.pathname),legacy=url.pathname==='/read/';
+ const url=new URL(request.url);
+ if(['GET','HEAD'].includes(request.method)&&fileContentPath(url.pathname)&&!url.pathname.startsWith('/stories/')&&!url.pathname.startsWith('/blog/')){const page=await env.ASSETS.fetch(new Request(request,{method:'GET'}));return page.ok?filePublishingResponse(request,env,page,fetcher):page;}
+ const address=contentAddress(url.pathname),legacy=url.pathname==='/read/';
  if(!['GET','HEAD'].includes(request.method)||(!legacy&&!address))return env.ASSETS.fetch(request);
  // Existing file-backed stories retain their own pages and URLs.
- if(address){const staticPage=await env.ASSETS.fetch(request);if(staticPage.status!==404)return staticPage;}
+ if(address){const staticPage=await env.ASSETS.fetch(new Request(request,{method:'GET'}));if(staticPage.status!==404)return staticPage.ok?filePublishingResponse(request,env,staticPage,fetcher):staticPage;}
  const shellUrl=new URL('/read/',url),response=await env.ASSETS.fetch(new Request(shellUrl));
  const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.set('X-Robots-Tag','noindex, nofollow');
  const fallbackBody=request.method==='HEAD'?null:response.clone().body;

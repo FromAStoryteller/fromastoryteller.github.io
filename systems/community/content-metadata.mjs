@@ -6,7 +6,7 @@ export function contentMetadata(story,imageUrl=''){
  return {title:`${story.title} | From A Storyteller`,description,canonical,language:story.language??'en',image:imageUrl,
   structured:{'@context':'https://schema.org','@type':story.content_type==='blog'?'BlogPosting':'Article',headline:story.title,description,url:canonical,
    inLanguage:story.language??'en',datePublished:story.published_at,dateModified:story.updated_at,
-   author:{'@type':'Person',name:story.author?.display_name??'Storyteller',url:`https://fromastoryteller.com/storytellers/?author=${encodeURIComponent(story.author?.public_id??'')}`},
+   author:{'@type':story.author?.kind==='organization'?'Organization':'Person',name:story.author?.display_name??'Storyteller',url:`https://fromastoryteller.com/storytellers/?author=${encodeURIComponent(story.author?.public_id??'')}`},
    publisher:{'@type':'Organization',name:'From A Storyteller',url:'https://fromastoryteller.com/'},
    articleSection:(story.genres??[]).map(genreLabel),keywords:(story.tags??[]).join(', '),...(imageUrl?{image:imageUrl}:{})}};
 }
