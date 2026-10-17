@@ -1,13 +1,14 @@
 import { showPendingInvitation } from '../../account/invitation-storage.mjs';
 import { publicProfileUrl } from './profiles.mjs';
 
-export function accountNavigation(document, { current, publicId, auth, admin = false } = {}) {
+export function accountNavigation(document, { current, publicId, auth, admin = false, contributor = Boolean(publicId), beforeSignOut } = {}) {
   const nav = document.createElement('nav');
   nav.className = 'account-navigation';
   nav.setAttribute('aria-label', 'Your profile and account');
   for (const [key, label, href] of [
     ['profile', 'Edit my profile', '/account/profile/'],
     ['public', 'View public profile', publicProfileUrl(publicId)],
+    ['studio', 'Storyteller Studio', contributor ? '/account/studio/' : null],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;
@@ -30,6 +31,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     signOut.className = 'account-secondary';
     signOut.textContent = 'Sign out';
     signOut.addEventListener('click', async () => {
+      if (beforeSignOut && !beforeSignOut()) return;
       signOut.disabled = true;
       signOut.textContent = 'Signing out…';
       try {

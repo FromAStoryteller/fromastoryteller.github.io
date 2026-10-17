@@ -1,0 +1,15 @@
+/* One reading surface shared by the visual editor, preview and public page. */
+.fas-manuscript { font: 400 clamp(1.05rem,1.5vw,1.16rem)/1.85 var(--font-family-reading); letter-spacing:.005em; overflow-wrap:anywhere; text-wrap:pretty; min-width:0; }
+.fas-manuscript > :is(p,div) { margin:0; text-indent:0; white-space:pre-wrap; }
+.fas-manuscript > p:first-child,.fas-manuscript hr+p,.fas-manuscript h2+p,.fas-manuscript blockquote+p {text-indent:0;}
+.fas-manuscript > :is(p,div)[data-indent="true"] {text-indent:1.8em;}
+.fas-manuscript h2 {font:500 1.45em/1.4 var(--font-family-reading);margin:1.5em 0 .8em;}
+.fas-manuscript blockquote {margin:1.5em 1em;border-left:2px solid var(--colour-accent-primary);padding-left:1em;font-style:italic;white-space:pre-wrap;}
+.fas-manuscript hr {display:block;position:relative;height:4.5rem;border:0;margin:0;color:var(--colour-text-secondary);text-align:center;}
+.fas-manuscript hr::after {position:absolute;inset:0;display:grid;place-items:center;font:400 .9rem var(--font-family-reading);content:'';}
+.fas-manuscript[data-scene-style="dots"] hr::after {content:'•   •   •';letter-spacing:.6em;}
+.fas-manuscript[data-scene-style="diamond"] hr::after {content:'◆';font-size:.7rem;}
+.fas-manuscript[data-scene-style="rule"] hr::after {content:'';inset:50% 35% auto;border-top:1px solid var(--colour-border-default);}
+.fas-manuscript[data-drop-caps="true"] > p:first-child::first-letter {float:left;font:500 3.6em/.85 var(--font-family-reading);padding:.1em .12em 0 0;color:var(--colour-accent-primary);}
+.storyteller-socials {display:flex;flex-wrap:wrap;gap:.7rem 1.2rem;margin:1.5rem 0;font-size:.9rem;}
+.storyteller-socials a {min-height:2.75rem;display:inline-flex;align-items:center;}

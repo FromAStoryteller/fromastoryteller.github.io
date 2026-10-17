@@ -1,11 +1,12 @@
 // The account integration supplies its shared, authenticated Supabase client.
 // Never construct a privileged client or accept an editable author ID here.
-const fields = 'display_name,bio,welcome_line,public_id';
+import {validateSocialLinks} from './studio-catalog.mjs';
+const fields = 'display_name,bio,welcome_line,public_id,social_links';
 const length = value => Array.from(value).length;
 
 export function validateProfile(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
-      Object.keys(input).some(key => !['display_name', 'bio', 'welcome_line'].includes(key))) {
+      Object.keys(input).some(key => !['display_name', 'bio', 'welcome_line','social_links'].includes(key))) {
     throw new Error('Only your profile text can be edited here.');
   }
   if (typeof input.display_name !== 'string' || (input.bio !== undefined && typeof input.bio !== 'string')) {
@@ -19,12 +20,13 @@ export function validateProfile(input) {
   if (bio !== undefined && length(bio) > 1000) throw new Error('Keep about me to 1,000 characters.');
   const welcome_line = input.welcome_line ?? '';
   if (typeof welcome_line !== 'string' || length(welcome_line.trim()) > 160) throw new Error('Keep your welcome line to 160 characters.');
-  if (bio === undefined && input.welcome_line === undefined) return { display_name };
-  return { display_name, ...(bio !== undefined ? { bio } : {}), welcome_line: welcome_line.trim() };
+  const social=input.social_links!==undefined?{social_links:validateSocialLinks(input.social_links)}:{};
+  if (bio === undefined && input.welcome_line === undefined) return { display_name,...social };
+  return { display_name, ...(bio !== undefined ? { bio } : {}), welcome_line: welcome_line.trim(),...social };
 }
 
 function publicFields(row) {
-  return { display_name: row.display_name, bio: row.bio, welcome_line: row.welcome_line ?? '', public_id: row.public_id ?? null };
+  return { display_name: row.display_name, bio: row.bio, welcome_line: row.welcome_line ?? '', public_id: row.public_id ?? null,...(row.social_links?{social_links:row.social_links}:{}) };
 }
 
 export function createProfileService(client, { expectedOwnerId } = {}) {

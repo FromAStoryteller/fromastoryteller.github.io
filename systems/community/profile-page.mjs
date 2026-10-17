@@ -1,3 +1,4 @@
+import {contentAddress} from './content-address.mjs';
 import { loadLocalAuthClient } from '/account/local-auth-client.mjs';
 import { restoreSession } from '/account/session-controller.mjs';
 import { loadProfileAccount } from '/account/settings-controller.mjs';
@@ -6,6 +7,8 @@ import { mountProfileEditor } from './profile-editor.mjs';
 import { createProfileService } from './profiles.mjs';
 import { renderPublicProfile, renderPublicStory } from './public-profile.mjs';
 import { accountNavigation } from './account-navigation.mjs';
+import {contentMetadata,applyContentMetadata} from './content-metadata.mjs';
+import {publicCoverUrl} from './profiles.mjs';
 const root = document.querySelector('[data-profile-root]');
 const mode = document.querySelector('[data-profile-mode]').dataset.profileMode;
 let dispose;
@@ -82,8 +85,9 @@ try {
       if (ownsPage) render();
     })().catch(() => {});
   } else {
-    const story = await service.readStory(new URLSearchParams(location.search).get('story'));
-    renderPublicStory(root,story);
+    const address=contentAddress(location.pathname);let story = await service.readStory(address?.slug??new URLSearchParams(location.search).get('story'));if(address&&story&&(story.content_type??'story')!==address.content_type)story=null;
+    renderPublicStory(root,story,{imageBase:local.publicImageBase});
+    if(story)applyContentMetadata(document,contentMetadata(story,publicCoverUrl(story.cover,local.publicImageBase)));
     if (story) document.title=`${story.title} | From A Storyteller`;
   }
 } catch (error) { if (!ended) message('This page could not be loaded',error.message || 'Please try again later.'); }

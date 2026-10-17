@@ -83,6 +83,9 @@ async function createStory(user, label) {
     headers: { Prefer: 'return=representation' } }), 'Create contributor draft');
   assert.equal(rows.length, 1);
   stories.push(rows[0].id);
+  // Privileged metadata-only cover fixture. No Storage bytes are created here.
+  const cover=success(await request(rest+'story_assets',{privileged:true,method:'POST',body:{story_id:rows[0].id,object_path:user.id+'/'+rows[0].id+'/'+randomUUID()+'.jpg',alt_text:'Synthetic publication cover',pixel_width:1600,pixel_height:900,approved_at:new Date().toISOString(),approved_by:user.id},headers:{Prefer:'return=representation'}}),'Seed publication cover')[0];
+  success(await request(rest+'stories?id=eq.'+rows[0].id,{privileged:true,method:'PATCH',body:{summary:'Synthetic publication description',genres:['fantasy'],warning_reviewed:true,cover_asset_id:cover.id}}),'Seed publication metadata');
   return rows[0];
 }
 async function upload(user, story, register = true) {
