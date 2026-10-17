@@ -37,6 +37,6 @@ test('every existing game/story/tool has one themed linked byline and keeps its 
  for(const path of paths){
   const meta=JSON.parse(readFileSync(new URL('..'+path,import.meta.url)));const page=readFileSync(new URL('..'+meta.url+'index.html',import.meta.url),'utf8');
   assert.equal((page.match(/data-file-publishing/g)||[]).length,1,meta.url);
-  assert.ok(page.includes(meta.canonicalUrl));assert.equal(meta.authorDisplay,meta.type==='tool'?'From A Storyteller':'Ry');
+  assert.ok(page.includes(meta.canonicalUrl));assert.ok(page.includes('data-file-schema'));const schema=JSON.parse(page.match(/<script type="application\/ld\+json" data-file-schema>([\s\S]*?)<\/script>/)[1]);assert.equal(schema.author.name,meta.authorDisplay);assert.equal(meta.authorDisplay,meta.type==='tool'?'From A Storyteller':'Ry');
  }
 });

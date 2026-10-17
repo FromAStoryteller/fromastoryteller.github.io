@@ -20,6 +20,16 @@ export function renderFilePublishing(html,item){
  html=html.replace(/<script([^>]*type="application\/ld\+json"[^>]*)>([\s\S]*?)<\/script>/gi,(full,attributes,text)=>{
   try{const data=JSON.parse(text);const visit=x=>{if(!x||typeof x!=='object')return;if(x.author)x.author=schemaAuthor;for(const v of Object.values(x))if(typeof v==='object')visit(v);};visit(data);return '<script'+attributes+'>'+JSON.stringify(data).replace(/</g,'\\u003c')+'</script>';}catch{return full;}
  });
+
+ const canonical='https://fromastoryteller.com'+item.url;
+ const schema={'@context':'https://schema.org','@type':item.content_type==='game'?'VideoGame':item.content_type==='tool'?'SoftwareApplication':item.content_type==='blog'?'BlogPosting':'Article',
+  identifier:item.id,name:item.title,headline:item.title,description:item.summary,url:canonical,datePublished:item.published_at,dateModified:item.updated_at,
+  author:schemaAuthor,publisher:{'@type':'Organization',name:'From A Storyteller',url:'https://fromastoryteller.com/'},
+  ...(item.preview_image?{image:'https://fromastoryteller.com'+item.preview_image}:{})};
+ const schemaScript='<script type="application/ld+json" data-file-schema>'+JSON.stringify(schema).replace(/</g,'\\u003c')+'</script>';
+ if(/<script type="application\/ld\+json" data-file-schema>[\s\S]*?<\/script>/.test(html))html=html.replace(/<script type="application\/ld\+json" data-file-schema>[\s\S]*?<\/script>/,()=>schemaScript);
+ else html=html.replace('</head>',()=>schemaScript+'</head>');
+
  const social=(author.social_links??[]).filter(s=>{try{return new URL(s.url).protocol==='https:';}catch{return false;}}).map(s=>'<a href="'+escape(s.url)+'" target="_blank" rel="noopener noreferrer">'+escape(s.platform==='website'?'Website':s.platform)+'</a>').join(' ');
  if(social)html=html.replace('</main>',()=>'<nav class="file-publishing-socials" aria-label="Author social links">'+social+'</nav></main>');
  return html.replace('<body','<body data-content-id="'+escape(item.id)+'"');
