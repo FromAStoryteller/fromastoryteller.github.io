@@ -1,0 +1,17 @@
+name: Prepare public listing migration
+on:
+  push:
+    branches: [verify/studio-public-listing-migration]
+permissions:
+  contents: read
+jobs:
+  migration-name:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npx --yes supabase@2.120.0 migration new --help
+      - run: npx --yes supabase@2.120.0 migration new story_public_listing
+      - run: git ls-files --others --exclude-standard supabase/migrations
