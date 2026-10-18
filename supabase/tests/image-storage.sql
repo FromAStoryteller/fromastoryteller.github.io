@@ -58,9 +58,9 @@ do $$declare key uuid;v uuid;asset jsonb;path text;begin
  perform public.fas_reserve_image_upload('98000000-0000-0000-0000-000000000003','98100000-0000-0000-0000-000000000003',path,'profile');
  asset:=public.fas_register_profile_image('98000000-0000-0000-0000-000000000003','98100000-0000-0000-0000-000000000003',path,'Viewer portrait',v);
  perform set_config('request.jwt.claim.sub','',true);
- if public.fas_visible_profile_image((asset->>'asset_id')::uuid) is not null then raise exception 'FAIL viewer image public';end if;
+ if public.fas_visible_profile_image((asset->>'asset_id')::uuid) is true then raise exception 'FAIL viewer image public';end if;
  perform set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000003',true);
- if public.fas_visible_profile_image((asset->>'asset_id')::uuid)<>path then raise exception 'FAIL owner image hidden';end if;
+ if public.fas_visible_profile_image((asset->>'asset_id')::uuid) is not true then raise exception 'FAIL owner image hidden';end if;
 end;$$;
 -- Cover removal refuses a selected reference and queues unused images.
 insert into public.story_assets(id,story_id,object_path,alt_text,pixel_width,pixel_height,verified_at)

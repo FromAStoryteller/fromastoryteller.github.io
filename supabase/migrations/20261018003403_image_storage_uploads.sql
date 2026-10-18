@@ -51,8 +51,8 @@ create function public.fas_my_profile_image() returns jsonb language sql set sea
 revoke all on function public.fas_my_profile_image(),private.my_profile_image() from public,anon,authenticated,service_role;
 grant execute on function public.fas_my_profile_image(),private.my_profile_image() to authenticated;
 
-create function private.visible_profile_image(asset_key uuid) returns text language sql stable security definer set search_path='' as $$select p.image_path from public.profiles p where p.image_id=asset_key and private.account_active(p.id) and (p.id=(select auth.uid()) or private.public_publishing_author(p.id,'personal') is not null);$$;
-create function public.fas_visible_profile_image(asset_key uuid) returns text language sql set search_path='' as $$select private.visible_profile_image(asset_key);$$;
+create function private.visible_profile_image(asset_key uuid) returns boolean language sql stable security definer set search_path='' as $select exists(select 1 from public.profiles p where p.image_id=asset_key and private.account_active(p.id) and (p.id=(select auth.uid()) or private.public_publishing_author(p.id,'personal') is not null));$;
+create function public.fas_visible_profile_image(asset_key uuid) returns boolean language sql set search_path='' as $$select private.visible_profile_image(asset_key);$$;
 revoke all on function public.fas_visible_profile_image(uuid),private.visible_profile_image(uuid) from public,anon,authenticated,service_role;
 grant execute on function public.fas_visible_profile_image(uuid),private.visible_profile_image(uuid) to anon,authenticated;
 
@@ -186,7 +186,7 @@ begin
  if not found then raise exception 'Upload expired or unavailable';end if;
  insert into public.story_assets(story_id,object_path,alt_text,pixel_width,pixel_height,verified_at) values(target_story,image_path,btrim(image_alt),1600,900,now()) returning * into asset;
  return jsonb_build_object('id',asset.id,'alt_text',asset.alt_text,'pixel_width',1600,'pixel_height',900,'verified_at',asset.verified_at,'approved_at',null);
-end;$function$
+end;$function$;
 
 CREATE OR REPLACE FUNCTION public.fas_public_profile(profile_key uuid, page_offset integer DEFAULT 0)
  RETURNS jsonb
@@ -202,7 +202,7 @@ AS $function$
  'stories',coalesce((select jsonb_agg(item order by published_at desc,id) from(select * from work order by published_at desc,id limit 12 offset page_offset)x),'[]'),
  'next_offset',case when (select count(*) from work)>page_offset+12 then page_offset+12 else null end)
  from identity i where page_offset between 0 and 1000000;
-$function$
+$function$;
 
 -- Uploads must pass the authenticated normalizer. Raw byte writes are closed.
 drop policy if exists fas_images_upload on storage.objects;
@@ -216,4 +216,9 @@ end;$$;
 create function public.fas_abandon_image_upload(image_path text) returns boolean language sql set search_path='' as $$select private.abandon_image_upload(image_path);$$;
 revoke all on function private.abandon_image_upload(text),public.fas_abandon_image_upload(text) from public,anon,authenticated;
 grant execute on function private.abandon_image_upload(text),public.fas_abandon_image_upload(text) to service_role;
+
+create function private.profile_image_path(asset_key uuid) returns text language sql stable security definer set search_path='' as $$select image_path from public.profiles where image_id=asset_key and private.account_active(id);$$;
+create function public.fas_profile_image_path(asset_key uuid) returns text language sql set search_path='' as $$select private.profile_image_path(asset_key);$$;
+revoke all on function private.profile_image_path(uuid),public.fas_profile_image_path(uuid) from public,anon,authenticated;
+grant execute on function private.profile_image_path(uuid),public.fas_profile_image_path(uuid) to service_role;
 commit;

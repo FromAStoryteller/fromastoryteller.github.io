@@ -46,7 +46,8 @@ test('stale profile replacement cannot blindly delete a possibly registered imag
 test('profile reader checks visibility again after bytes arrive and never exposes private paths',async()=>{
  for(const revoke of [false,true]){
   let reads=0;const handler=makeImageHandler(config,async url=>{
-   if(url.includes('fas_visible_profile_image'))return Response.json(++reads===2&&revoke?null:owner+'/'+publicId+'/'+version+'.jpg');
+   if(url.includes('fas_visible_profile_image'))return Response.json(!(++reads===2&&revoke));
+   if(url.includes('fas_profile_image_path'))return Response.json(owner+'/'+publicId+'/'+version+'.jpg');
    return new Response(jpeg(),{headers:{'Content-Type':'image/jpeg'}});
   });
   const r=await handler(new Request(config.base+'?asset_id='+publicId));assert.equal(r.status,revoke?404:200);assert.match(r.headers.get('Cache-Control'),/no-store/);

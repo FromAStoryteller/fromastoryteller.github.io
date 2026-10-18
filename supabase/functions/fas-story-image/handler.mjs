@@ -29,7 +29,11 @@ export function makeImageHandler({ base, anonKey, serviceKey, kind='cover' }, fe
       });
       if (!response.ok) return null;
       const rows = await response.json();
-      if(kind==='profile')return typeof rows==='string'&&imagePath.test(rows)?rows:null;
+      if(kind==='profile'){
+        if(rows!==true)return null;
+        const resolved=await fetcher(`${base}/rest/v1/rpc/fas_profile_image_path?asset_key=${id}`,{headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`},redirect:'error',cache:'no-store',signal:AbortSignal.timeout(15000)});
+        if(!resolved.ok)return null;const path=await resolved.json();return typeof path==='string'&&imagePath.test(path)?path:null;
+      }
       return rows.length === 1 && imagePath.test(rows[0].object_path) ? rows[0].object_path : null;
     };
     try {
