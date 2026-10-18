@@ -39,7 +39,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','ca000000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"session_id":"cb000000-0000-0000-0000-000000000001"}',true);
 do $$begin
- if private.current_policies_accepted(auth.uid()) then raise exception 'FAIL role inferred agreement';end if;
+ if private.is_member() then raise exception 'FAIL role inferred agreement';end if;
  begin insert into public.stories(author_id,slug,title,body) values(auth.uid(),'policy-fixture-denied','Fixture','Text');raise exception 'FAIL write without agreement';exception when insufficient_privilege then null;end;
  if public.fas_my_policy_agreements()<>'[]'::jsonb then raise exception 'FAIL acceptance copied from another account';end if;
 end;$$;

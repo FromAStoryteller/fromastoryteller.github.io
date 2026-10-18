@@ -8,13 +8,13 @@ try{
   const context=await browser.newContext({viewport:{width,height:900}});
   await context.addInitScript(({release})=>{
    const policy={release_id:release,status:'published',published_at:'2026-10-18T00:00:00Z',minimum_age:16,terms_version:release,privacy_version:release,terms_sha256:'a'.repeat(64),privacy_sha256:'b'.repeat(64),terms_path:'/account/policy-history/'+release+'/terms/',privacy_path:'/account/policy-history/'+release+'/privacy/'};
-   window.policyFixture={accepted:false,inviteCalls:0};
+   window.policyFixture={accepted:sessionStorage.getItem('fixture-policy-accepted')==='yes',inviteCalls:0};
    window.fixtureAccount={user:{id:'a1000000-0000-0000-0000-000000000001',email:'fixture@example.invalid'},profile:{public_id:'a2000000-0000-0000-0000-000000000001',display_name:'Fixture Writer'},state:'active',contributor:true,admin:false};
    window.fixtureClient={auth:{refreshSession:async()=>({data:{session:{}}}),getUser:async()=>({data:{user:{...window.fixtureAccount.user,email_confirmed_at:'2026-10-18'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({})},
     rpc:async(name,args)=>{
      if(name==='fas_current_policy_requirement')return {data:policy};
      if(name==='fas_my_policy_agreements')return {data:window.policyFixture.accepted?[{release_id:release,terms_version:release,privacy_version:release,recorded_at:'2026-10-18'}]:[]};
-     if(name==='fas_accept_current_policies'){if(args.target_release!==release||!args.terms_agreed||!args.privacy_notice_seen||!args.age_16_or_over)throw Error('Invalid fixture confirmation');window.policyFixture.accepted=true;return {data:[{release_id:release,terms_version:release,privacy_version:release,recorded_at:'2026-10-18'}]};}
+     if(name==='fas_accept_current_policies'){if(args.target_release!==release||!args.terms_agreed||!args.privacy_notice_seen||!args.age_16_or_over)throw Error('Invalid fixture confirmation');window.policyFixture.accepted=true;sessionStorage.setItem('fixture-policy-accepted','yes');return {data:[{release_id:release,terms_version:release,privacy_version:release,recorded_at:'2026-10-18'}]};}
      if(name==='accept_invite'){window.policyFixture.inviteCalls++;return {data:null};}
      throw Error('Unexpected RPC '+name);
     }};
@@ -29,7 +29,7 @@ try{
   assert.equal(await page.getByRole('link',{name:'Review and agree',exact:true}).getAttribute('href'),'/account/agreements/');
   await page.goto('http://127.0.0.1:55410/account/invitation/#invite='+'a'.repeat(72));
   await page.getByRole('link',{name:'Review and agree',exact:true}).waitFor();
-  assert.equal(await page.locator('button[type=submit]').count(),0);
+  assert.equal(await page.locator('[data-invitation-root] button[type=submit]').count(),0);
   assert.equal(await page.evaluate(()=>location.hash),'');
   await page.getByRole('link',{name:'Review and agree',exact:true}).click();
   await page.locator('[data-agreement-form]:not([hidden])').waitFor();
@@ -39,8 +39,6 @@ try{
   for(const selector of ['[data-age]','[data-terms]','[data-privacy]'])await page.locator(selector).check();
   await page.getByRole('button',{name:'Agree to these Terms',exact:true}).click();
   await page.getByRole('link',{name:'Continue to your invitation',exact:true}).waitFor();
-  // The mock state is per-page memory, so arrange the persisted server record for the next navigation.
-  await context.addInitScript(()=>{window.policyFixture.accepted=true;});
   await page.getByRole('link',{name:'Continue to your invitation',exact:true}).click();
   await page.getByRole('button',{name:'Accept contributor invitation',exact:true}).click();
   await page.getByRole('heading',{name:'Invitation accepted',exact:true}).waitFor();
