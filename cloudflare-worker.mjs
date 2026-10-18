@@ -1,4 +1,5 @@
-// Account policy versions are emitted into runtime-config.json during the production build.
+// Generated account policy release: community-policies-2026-10-18-v1
+// Regenerated with site indexes so policy-only releases also refresh the hosting build.
 import {fileContentPath} from './systems/community/publishing-identity.mjs';
 import {contentPath,contentAddress} from './systems/community/content-address.mjs';
 import {contentMetadata} from './systems/community/content-metadata.mjs';

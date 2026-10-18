@@ -26,7 +26,7 @@ jobs:
       - run: npm run validate:references
       - run: npm run validate
       - name: Require current generated content
-        run: git diff --exit-code -- content sitemap.xml '*.html'
+        run: git diff --exit-code -- content sitemap.xml '*.html' cloudflare-worker.mjs
       - run: npm run build:cloudflare
       - name: Bundle reading worker without deploying
         env:
