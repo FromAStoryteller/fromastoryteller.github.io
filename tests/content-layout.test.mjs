@@ -43,3 +43,12 @@ test('Worker renders validated prose in the shared shell without forwarding a re
  assert.match(html,/data-content-layout="story"/);assert.match(html,/Opening &lt;script&gt;/);assert.ok(!html.includes('<script>alert(1)</script>'));assert.ok(!html.includes('Loading the story'));
  assert.equal(response.headers.get('Cache-Control'),'no-store');
 });
+
+test('editorial pages omit card descriptions while retaining warnings and taxonomy',()=>{
+ const html=storyPageMarkup({...story,summary:'Card description only',genres:['Fantasy'],content_warning:'Violence'});
+ assert.ok(!html.includes('Card description only'));assert.ok(!html.includes('story-summary'));
+ assert.ok(html.includes('Content warning:'));assert.ok(html.includes('Fantasy'));
+ const noDetails=storyPageMarkup({...story,summary:'Card only',genres:[],tags:[],content_warning:''});
+ assert.ok(!noDetails.includes('story-details'));
+ assert.ok(!storyPageMarkup({...story,summary:'Card description only'},{preview:true}).includes('Card description only'));
+});
