@@ -1,0 +1,36 @@
+name: Final transactional email public checks
+on:
+  push:
+    branches: [verify/email-final-preflight]
+permissions:
+  contents: read
+jobs:
+  public-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify public DNS and production guards
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {resolveTxt,resolveNs} from 'node:dns/promises';
+          const records=(await resolveTxt('_dmarc.auth.fromastoryteller.com')).map(parts=>parts.join('')).filter(s=>s.startsWith('v=DMARC1'));
+          assert.equal(records.length,1,'Exactly one sending-subdomain DMARC record required');
+          assert.match(records[0],/(?:^|;)\s*p=none(?:;|$)/);
+          console.log('PASS public DMARC: '+records[0]);
+          const nameservers=await resolveNs('fromastoryteller.com');
+          console.log('Public DNS provider: '+nameservers.join(', '));
+          const response=await fetch('https://fromastoryteller.com/account/runtime-config.json',{redirect:'error'});
+          assert.equal(response.status,200);
+          const config=await response.json();
+          assert.equal(config.mode,'production');assert.equal(config.enabled,true);assert.equal(config.signup,true);
+          assert.equal(config.url,'https://vzdicnufhidelaoeqbza.supabase.co');
+          console.log('PASS production runtime: accounts and registration enabled for expected project; public key omitted');
+          for(const name of ['fas-contributor-email','fas-email-events']){
+            const r=await fetch('https://vzdicnufhidelaoeqbza.supabase.co/functions/v1/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+            assert.equal(r.status,401);
+            console.log('PASS '+name+': unauthenticated or unsigned request rejected');
+          }
+          JS
