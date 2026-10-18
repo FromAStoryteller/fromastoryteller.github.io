@@ -155,3 +155,5 @@
 
 [data-recovery-status][data-error="true"]{color:var(--colour-error-text);}
 [data-recovery-status]:empty{display:none;}
+
+.ss-paper>.fas-manuscript{max-width:var(--width-reading);}
