@@ -1,0 +1,26 @@
+name: Prepare transactional email checks
+on:
+  push:
+    branches: [verify/transactional-email-preflight]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generate migration name
+        run: npx --yes supabase@2.120.0 migration new transactional_email
+      - name: Read current Supabase changelog and sender DNS
+        run: |
+          node --input-type=module <<'NODE'
+          import {resolveTxt,resolveCname} from 'node:dns/promises';
+          const r=await fetch('https://supabase.com/changelog.md');if(!r.ok)throw new Error('Changelog unavailable');
+          console.log((await r.text()).slice(0,18000));
+          for(const [kind,name] of [['txt','_dmarc.auth.fromastoryteller.com'],['txt','_dmarc.fromastoryteller.com'],['cname','send.auth.fromastoryteller.com'],['cname','rsend.auth.fromastoryteller.com'],['txt','resend._domainkey.auth.fromastoryteller.com']]){
+           try{const records=await (kind==='txt'?resolveTxt(name):resolveCname(name));console.log(JSON.stringify({kind,name,records}).replace(/mailto:[^"; ]+/g,'mailto:[redacted]'));}catch(error){console.log(JSON.stringify({kind,name,error:error.code}));}
+          }
+          NODE
