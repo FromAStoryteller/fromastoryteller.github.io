@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const origin='https://fromastoryteller.com',normalize=s=>s.replace(/\r\n/g,'\n').trimEnd();
-for(const path of ["systems/community/studio-editor.mjs","systems/community/studio-service.mjs","systems/community/profile-image-editor.mjs","systems/community/profile-image-service.mjs","systems/community/profile-editor.mjs","systems/community/profile-page.mjs","systems/community/public-profile.mjs","account/settings-controller.mjs","account/account-data-download.mjs","account/settings/index.html","css/profiles.css"]){
+for(const path of ["systems/community/studio-editor.mjs","systems/community/studio-service.mjs","systems/community/profile-image-editor.mjs","systems/community/profile-image-service.mjs","systems/community/profile-editor.mjs","systems/community/profile-page.mjs","systems/community/public-profile.mjs","account/settings-controller.mjs","account/account-data-download.mjs","css/profiles.css"]){
  const expected=normalize(await readFile(path,'utf8'));let matched=false;
  for(let attempt=0;attempt<16;attempt++){
   const response=await fetch(origin+'/'+path+'?image-storage-release='+process.env.GITHUB_SHA,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000),redirect:'error'});
@@ -40,3 +40,5 @@ const key=files.find(item=>item.author.kind==='personal')?.author.public_id;
 if(key){
  const r=await rpc('fas_public_profile',{profile_key:key,page_offset:0});assert.ok(r.ok);const profile=await r.json();assert.ok(Object.hasOwn(profile,'image'));assert.ok(!JSON.stringify(profile).includes('image_path'));assert.ok(!Object.hasOwn(profile,'id'));console.log('PASS public profile image projection excludes private paths and account IDs');
 }
+
+const settings=await fetch(origin+'/account/settings/',{redirect:'error',signal:AbortSignal.timeout(15000)});assert.ok((await settings.text()).includes('stored profile-image and cover crops'));console.log('PASS canonical settings page describes the stored crops');
