@@ -61,14 +61,14 @@ try{
   assert.equal(await page.locator('[data-manuscript]').innerText(),sessionText);
   await page.locator('[data-save]').click();await saved(page);
   console.log('PASS '+width+'px session recovery');await publish.click();await page.locator('[data-publish]').click();
-  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='published').catch(async()=>{throw new Error('Publication check: '+await page.locator('[data-status]').innerText()+'; checklist: '+await page.locator('[data-checklist]').innerText());});
+  await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='published').catch(async()=>{throw new Error('Publication check: '+await page.locator('[data-status]').innerText()+'; checklist: '+await page.locator('[data-checklist]').innerText());});
   assert.equal(await page.locator('[data-save]').innerText(),'Save live changes');
   await page.locator('[data-unpublish]').click();
-  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='draft');
+  await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='draft');
   await page.getByText('Archive & restore',{exact:true}).click();await page.locator('[data-archive]').click();
-  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='archived');
+  await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='archived');
   await page.locator('[data-restore]').click();
-  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='draft');
+  await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='draft');
   // A concurrent writer rejection retains local edits and offers copying rather than overwrite.
   await page.getByRole('button',{name:'Simulate conflicting edit',exact:true}).click();
   const conflictText=sessionText+' Conflicting change.';
