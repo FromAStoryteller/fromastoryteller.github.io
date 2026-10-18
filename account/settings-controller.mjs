@@ -15,7 +15,7 @@ async function verifiedIdentity(client, useRestoredSession = false) {
 export async function loadAccount(client, { useRestoredSession = false, includePolicyHistory = true } = {}) {
   const user = await verifiedIdentity(client, useRestoredSession);
   const [profile, roles, state, declaration, agreements] = await Promise.all([
-    client.from('profiles').select('id,display_name,bio,welcome_line,public_id,social_links,created_at').eq('id', user.id).single(),
+    client.from('profiles').select('id,display_name,bio,welcome_line,public_id,social_links,image_id,image_alt,created_at').eq('id', user.id).single(),
     client.from('user_roles').select('role').eq('user_id', user.id),
     client.rpc('fas_my_account_state'),
     client.rpc('fas_my_registration_declaration'),

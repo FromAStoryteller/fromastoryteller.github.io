@@ -8,3 +8,9 @@ export async function normalizeCover(bytes,focus){
  image.crop(x,y,width,height).resize(1600,900);
  return await image.encodeJPEG(90);
 }
+
+export async function normalizeProfile(bytes,focus){
+ const image=await Image.decode(bytes),size=Math.min(image.width,image.height);
+ image.crop(Math.floor((image.width-size)*focus.x),Math.floor((image.height-size)*focus.y),size,size).resize(512,512);
+ return await image.encodeJPEG(90);
+}

@@ -1,3 +1,4 @@
+import {profileImageUrl} from './profile-image-service.mjs';
 import {fileContentPath} from './publishing-identity.mjs';
 import {contentPath} from './content-address.mjs';
 import { initials } from './profile-editor.mjs';
@@ -19,6 +20,9 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
   if (!profile) { root.append(node(d, 'h1', '', 'Storyteller page unavailable'), node(d, 'p', 'profile-muted', 'This page may no longer be public.')); return; }
   const header = node(d, 'header', 'storyteller-header');
   header.append(node(d, 'p', 'profile-eyebrow', 'From, a storyteller'), node(d, 'div', 'profile-monogram', initials(profile.display_name)), node(d, 'h1', '', profile.display_name));
+  const avatarUrl=profileImageUrl(profile.image,imageBase);
+  if(avatarUrl){const img=node(d,'img','profile-avatar');img.src=avatarUrl;img.alt=profile.image.alt;img.width=img.height=96;
+    const monogram=header.querySelector('.profile-monogram');monogram.hidden=true;monogram.after(img);img.addEventListener('error',()=>{img.remove();monogram.hidden=false;},{once:true});}
   if (profile.welcome_line) header.append(node(d, 'p', 'profile-welcome', profile.welcome_line));
   if (profile.bio) header.append(node(d, 'p', 'profile-bio', profile.bio));
   if(profile.social_links?.length){const socials=node(d,'nav','storyteller-socials');renderSocialLinks(socials,profile.social_links);header.append(socials);}

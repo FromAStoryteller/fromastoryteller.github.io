@@ -40,7 +40,7 @@ try {
         if (account.state !== 'active') message('Account removal is in progress','Profile editing is unavailable while your account is being removed.');
         else {
           const contributor = account.contributor;
-          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor,viewer:!contributor,initialProfile:account.profile,ownerId:account.user.id,admin:account.admin});
+          if (!ended) dispose = mountProfileEditor(root,local.client,{contributor,viewer:!contributor,initialProfile:account.profile,ownerId:account.user.id,imageBase:local.publicImageBase,admin:account.admin});
         }
       }
     }

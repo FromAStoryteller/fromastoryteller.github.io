@@ -67,7 +67,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
         }
         addJson('metadata/story-images.json', data.assets);
         const paths = new Set(data.objects.map(o => o.path));
-        if (data.assets.some(a => !paths.has(a.object_path))) return json(409, { message: 'An original image is unavailable. The export was not completed; nothing was deleted.' });
+        if (data.assets.some(a => !paths.has(a.object_path)) || (data.profile?.image_path && !paths.has(data.profile.image_path))) return json(409, { message: 'An original image is unavailable. The export was not completed; nothing was deleted.' });
         for (const item of data.objects) {
           if (!imagePath.test(item.path) || !item.path.startsWith(user.id + '/')) throw new Error('Invalid owned path');
           const response = await call('/storage/v1/object/authenticated/fas-story-images/' + item.path);
