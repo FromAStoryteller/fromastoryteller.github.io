@@ -34,7 +34,7 @@ export function mountAdminTools(root,service,{onAccessLost=()=>{}}={}){
   result.append(input,button('Select link',async()=>{input.focus();input.select();say('Link selected. Copy it and share it privately.');}));
   say('Invitation created. No email was sent.');await summary();
  }));
- content.append(form,fallback,result,button('Refresh delivery status',()=>invitations()));
+ content.append(form,fallback,result,button('Refresh delivery status',async()=>{await invitations();await summary();say('Invitation and email statuses refreshed.');}));
  const labels={queued:'Queued',sending:'Sending',retrying:'Waiting to retry',accepted:'Accepted by email provider',delivered:'Delivered',delayed:'Delivery delayed',failed:'Delivery failed',bounced:'Bounced — check the address',complained:'Delivery blocked',suppressed:'Delivery blocked',canceled:'Canceled'};
  const list=el(d,'div','admin-list');for(const row of rows){
   const item=el(d,'article','admin-row'),state=row.accepted_at?'Accepted':row.revoked_at?'Revoked':new Date(row.expires_at)<=new Date()?'Expired':'Pending';
