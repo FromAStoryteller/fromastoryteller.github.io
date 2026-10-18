@@ -72,6 +72,39 @@ do $$begin
  if exists(select 1 from public.invites where email='mail-rotate@example.invalid' and token_hash=current_setting('fas.mail.old_hash')) then raise exception 'FAIL resend retained old link';end if;
  if exists(select 1 from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000003' and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL resend retained old queued token';end if;
 end;$$;
+set local role authenticated;
+select public.fas_queue_invitation_email('mail-member@example.invalid',7,null,'a6000000-0000-0000-0000-000000000005');
+select public.fas_queue_invitation_email('mail-wrong@example.invalid',7,null,'a6000000-0000-0000-0000-000000000006');
+reset role;
+do $$begin
+ perform set_config('fas.mail.own_token',(select invite_token from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000005'),true);
+ perform set_config('fas.mail.wrong_token',(select invite_token from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000006'),true);
+end;$$;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','a4000000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"session_id":"a5000000-0000-0000-0000-000000000002"}',true);
+do $$begin
+ begin perform public.accept_invite(current_setting('fas.mail.wrong_token'));raise exception 'FAIL wrong recipient accepted';exception when raise_exception then if SQLERRM<>'Invite unavailable' then raise;end if;end;
+ perform public.accept_invite(current_setting('fas.mail.own_token'));
+ begin perform public.accept_invite(current_setting('fas.mail.own_token'));raise exception 'FAIL invitation reused';exception when raise_exception then if SQLERRM<>'Invite unavailable' then raise;end if;end;
+end;$$;
+reset role;
+do $$begin
+ if exists(select 1 from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000005' and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL acceptance retained pending credential';end if;
+ update public.invites set email='mail-member@example.invalid',created_at=now()-interval '1 hour',expires_at=now()-interval '1 second' where email='mail-wrong@example.invalid';
+end;$$;
+set local role authenticated;
+do $$begin
+ begin perform public.accept_invite(current_setting('fas.mail.wrong_token'));raise exception 'FAIL expired invitation accepted';exception when raise_exception then if SQLERRM<>'Invite unavailable' then raise;end if;end;
+end;$$;
+select set_config('request.jwt.claim.sub','a4000000-0000-0000-0000-000000000001',true);
+select set_config('request.jwt.claims','{"session_id":"a5000000-0000-0000-0000-000000000001"}',true);
+reset role;
+do $$declare key uuid;begin
+ select id into key from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000006';
+ if public.fas_claim_invitation_email(key) is not null then raise exception 'FAIL expired invitation claimed';end if;
+ if exists(select 1 from private.email_outbox where id=key and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL expired invitation retained token';end if;
+end;$$;
 update auth.sessions set not_after=now()-interval '1 second' where id='a5000000-0000-0000-0000-000000000001';
 set local role service_role;
 select public.fas_claim_invitation_email(null);
