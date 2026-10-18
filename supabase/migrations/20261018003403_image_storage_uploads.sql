@@ -1,6 +1,6 @@
 begin;
 -- Immutable objects share the existing private bucket, backup and account export.
-alter table public.profiles add column image_id uuid, add column image_path text unique,
+alter table public.profiles add column image_id uuid unique, add column image_path text unique,
  add column image_alt text not null default '' check(char_length(image_alt)<=500),
  add column image_version uuid not null default gen_random_uuid();
 alter table public.profiles add constraint profile_image_pair check

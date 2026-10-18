@@ -22,7 +22,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
     ${viewer ? '' : `<aside class="profile-preview" aria-labelledby="preview-title"><p class="profile-eyebrow" id="preview-title">A glimpse for your readers</p><div class="profile-monogram" aria-hidden="true" data-monogram>—</div><h2 data-preview-name>Your name</h2><p class="profile-welcome" data-preview-welcome></p><p class="profile-bio" data-preview-bio></p><p class="profile-muted" data-preview-note>Preview of your profile text.</p></aside>`}
   </div>`;
   const form = root.querySelector('form');
-  const fieldset = root.querySelector('fieldset');
+  const fieldset = form.querySelector('fieldset');
   const status = root.querySelector('[data-status]');
   const name = form.elements.namedItem('display_name');
   const bio = form.elements.namedItem('bio');
