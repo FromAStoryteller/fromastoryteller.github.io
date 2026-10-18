@@ -1,0 +1,33 @@
+name: Community V1 acceptance
+on:
+  pull_request:
+    paths:
+      - systems/community/**
+      - account/**
+      - scripts/test-fas-community-browser.mjs
+      - scripts/test-fas-community-api.mjs
+      - .github/workflows/community-v1-acceptance.yml
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-community-vite.log 2>&1 &
+      - run: node scripts/test-fas-community-browser.mjs
+  production-read-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/test-fas-community-public.mjs --production-read-only

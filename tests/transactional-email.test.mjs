@@ -47,9 +47,16 @@ test('DEV allowlist blocks accidental mail to an unapproved real recipient',asyn
  const f=workerFixture(()=>Response.json({id:provider}));assert.equal((await sendInvitationJob({...config,dev:true,testRecipients:['someone-else@example.invalid']},id,f.fetcher)).state,'failed');assert.ok(!f.calls.some(c=>c.url==='https://api.resend.com/emails'));assert.equal(f.finish().failure_reason,'configuration');
 });
 test('webhook HMAC rejects changed, unsigned, stale and future messages',async()=>{
- const body=JSON.stringify({type:'email.delivered',data:{email_id:provider}}),headers=await signature(body);
- assert.equal(await verifyMailSignature(body,headers,config.webhookSecret),true);assert.equal(await verifyMailSignature(body+' ',headers,config.webhookSecret),false);assert.equal(await verifyMailSignature(body,new Headers(),config.webhookSecret),false);
- for(const offset of [-301,301]){const h=await signature(body,{time:String(Math.floor(Date.now()/1000)+offset)});assert.equal(await verifyMailSignature(body,h,config.webhookSecret),false);}
+ const now=Date.UTC(2026,9,18,0,0,0),seconds=now/1000;
+ const body=JSON.stringify({type:'email.delivered',data:{email_id:provider}}),headers=await signature(body,{time:String(seconds)});
+ assert.equal(await verifyMailSignature(body,headers,config.webhookSecret,now),true);assert.equal(await verifyMailSignature(body+' ',headers,config.webhookSecret,now),false);assert.equal(await verifyMailSignature(body,new Headers(),config.webhookSecret,now),false);
+ for(const offset of [-301,301]){const h=await signature(body,{time:String(seconds+offset)});assert.equal(await verifyMailSignature(body,h,config.webhookSecret,now),false);}
+ // Freeze the verifier clock: wall-clock rollover must not change the expected boundary.
+ for(const offset of [-300,300]){
+  const h=await signature(body,{time:String(seconds+offset)});
+  assert.equal(await verifyMailSignature(body,h,config.webhookSecret,now),true);
+  assert.equal(await verifyMailSignature(body,h,config.webhookSecret,now+(offset<0?1:-1)),false);
+ }
 });
 test('signed event handling stores only event metadata and requires durable success before acknowledging',async()=>{
  const body=JSON.stringify({type:'email.delivered',created_at:new Date().toISOString(),data:{email_id:provider,to:['private@example.invalid'],html:'PRIVATE CONTENT'}});
