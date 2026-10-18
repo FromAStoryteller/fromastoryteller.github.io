@@ -17,7 +17,7 @@ for(const kind of ['terms','privacy']){
  assert.equal(createHash('sha256').update((await r.text()).replace(/\r\n/g,'\n')).digest('hex'),requirement.data[kind+'_sha256']);
 }
 for(const table of ['profiles','user_roles','invites']){
- const r=await call('/rest/v1/'+table+'?select=id&limit=1');
+ const r=await call('/rest/v1/'+table+'?select='+(table==='user_roles'?'user_id':'id')+'&limit=1');
  assert.ok([401,403].includes(r.status)||r.status===200&&Array.isArray(r.data)&&r.data.length===0,table+' anonymous privacy boundary');
 }
 const drafts=await call('/rest/v1/stories?select=id,status&status=eq.draft&limit=1');assert.ok([401,403].includes(drafts.status)||drafts.status===200&&Array.isArray(drafts.data)&&drafts.data.length===0);
