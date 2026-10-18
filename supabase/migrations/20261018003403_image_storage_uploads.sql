@@ -143,7 +143,7 @@ grant execute on function public.fas_change_cover_image(uuid,uuid,timestamptz,te
 
 create function private.claim_image_cleanup(owner_key uuid) returns jsonb language plpgsql security definer set search_path='' as $$declare item record;batch jsonb:='[]';claim_key uuid;begin
  -- Pending reservations are never retired while registration holds their row lock.
- for item in select path from private.image_uploads where state='pending' and created_at<now()-interval '1 hour' and (owner_key is null or owner_id=owner_key) for update skip locked limit 50 loop
+ for item in select path from private.image_uploads where state='pending' and (created_at<now()-interval '1 hour' or not exists(select 1 from public.profiles where id=image_uploads.owner_id)) and (owner_key is null or owner_id=owner_key) for update skip locked limit 50 loop
   if not exists(select 1 from public.story_assets where object_path=item.path) and not exists(select 1 from public.profiles where image_path=item.path) then perform private.queue_image(item.path);end if;
  end loop;
  for item in select * from private.image_cleanup where done_at is null and retry_at<=now() and (owner_key is null or owner_id=owner_key) order by created_at for update skip locked limit 25 loop

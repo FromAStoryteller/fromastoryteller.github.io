@@ -17,6 +17,8 @@ declare token text:=gen_random_uuid()::text||gen_random_uuid()::text;project_url
 begin
  select base_url into project_url from private.image_cleanup_config where singleton;
  if project_url is null then return null;end if;
+ delete from private.image_uploads u using private.image_cleanup c where u.path=c.path and c.done_at<now()-interval '30 days';
+ delete from private.image_cleanup where done_at<now()-interval '30 days';
  delete from private.image_cleanup_tokens where expires_at<=now();
  insert into private.image_cleanup_tokens values(encode(sha256(convert_to(token,'UTF8')),'hex'),now()+interval '2 minutes');
  -- The one-use short-lived token is not a Supabase API credential.
