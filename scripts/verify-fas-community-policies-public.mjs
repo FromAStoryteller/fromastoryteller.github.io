@@ -21,7 +21,7 @@ for(let attempt=0;attempt<12;attempt++){
   const r=await fetch(config.url+'/rest/v1/rpc/fas_current_policy_requirement',{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});
   assert.equal(r.status,200);const requirement=await r.json();assert.equal(requirement.release_id,process.env.FAS_EXPECTED_POLICY);
   if(requirement.release_id===version)for(const kind of ['terms','privacy'])assert.equal(requirement[kind+'_sha256'],entry.documents[kind].sha256);
-  console.log('PASS public policy bytes, required routes and matching server/runtime release '+requirement.release_id);last=null;break;
+  console.log('PASS public policy bytes and required routes; runtime '+config.policyRelease+'; server '+requirement.release_id);last=null;break;
  }catch(error){last=error;if(attempt<11)await new Promise(resolve=>setTimeout(resolve,5000));}
 }
 if(last)throw last;
