@@ -30,8 +30,10 @@ try {
   console.log('PASS admin invitation controls '+width+'px: accepted versus delivered, failed send, disabled setup, private-link fallback, no overflow');
   await page.close();
  }
+ for(const project of ['oqmmvjjycpyxvxipcyli','vzdicnufhidelaoeqbza']) {
  const results=await Promise.all(['fas-contributor-email','fas-email-events'].map(async name=>{
-  const response=await fetch('https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/'+name,{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
+  const response=await fetch('https://'+project+'.supabase.co/functions/v1/'+name,{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
   assert.equal(response.status,name==='fas-contributor-email'?401:503);return name+' safely disabled';
- }));console.log('PASS deployed DEV endpoints: '+results.join('; '));
+ }));console.log('PASS deployed '+project+' endpoints: '+results.join('; '));
+ }
 } finally {await browser.close();}
