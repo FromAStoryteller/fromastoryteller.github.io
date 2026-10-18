@@ -82,7 +82,7 @@ Both projects have `fas-contributor-email` and `fas-email-events` version 1 depl
 
 Validation: 171 automated tests, actual Edge image codec checks, reference/content validation, Cloudflare build and worker bundle passed. The additional hosted DEV rollback fixture passed, including wrong-recipient acceptance, one-use/expired links, revocation, session expiry and private payload access. Desktop (1280px) and mobile (390px) browser checks passed for provider-accepted versus delivered labels, failed sends, disabled setup, manual fallback and no horizontal overflow. No real messages were sent by these tests.
 
-Release checks completed on 18 October 2026. No configuration or delivery blockers remain. A disposable verification-test viewer account remains for operator cleanup through Account settings; no content or privileged roles were added to it.
+Release checks completed on 18 October 2026. No configuration or delivery blockers remain. The operator removed the disposable verification-test viewer through Account settings. The account had zero owned stories/images and no privileged roles; its auth record is absent, subsequent sign-in was rejected, and the main account remains present.
 
 DEV evidence: the initial controlled email reached Spam; after the recipient marked it Not spam, the next message reached Inbox. This is recipient-specific feedback, not proof of general inbox placement. The second message produced a signed delivered event, and explicit invitation acceptance was recorded. Browser checks at 1280px and 390px verify the initially signed-out journey, automatic return after sign-in, explicit acceptance, success copy, removal of the pending credential and refreshed admin summary/row counts. A hosted DEV transaction verifies that a viewer gains contributor access without administrator access; all fixture data is rolled back.
 
@@ -102,3 +102,6 @@ DEV evidence: the initial controlled email reached Spam; after the recipient mar
 | Browser flow | Signed-out sign-in continuation and explicit acceptance, success copy, pending credential cleanup and matching row/summary refresh pass at 1280px and 390px |
 
 Public read-only rollout checks passed in GitHub Actions job `117594670463`. Live checks were performed by the operator; passwords, API keys and tokenized links are not retained in this record. Inbox placement was verified only for the controlled recipient and is not a guarantee for every mailbox. DMARC remains at the documented monitoring policy; review alignment and reporting before stronger enforcement.
+
+
+Verification fixture cleanup confirmed on 18 October 2026: explicit password confirmation and DELETE confirmation completed through the production account lifecycle; signed-out receipt displayed, deleted-account sign-in failed, and a read-only database check confirmed the test identity is absent while the main identity remains. No remaining fixture cleanup is required for this email rollout.
