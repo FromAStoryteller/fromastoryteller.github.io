@@ -24,7 +24,15 @@ else {
   const client = { auth: { signOut: async () => ({error:null}), getUser: async () => ({ data: { user: { id: 'preview-only' } } }) }, from: () => {
     const query = {select: () => query,eq: () => query,update: changes => { profile = {...profile,...changes}; return query; },single: async () => ({data:profile,error:null})}; return query;
   }};
-  dispose = mountProfileEditor(root, client, { contributor: mode !== 'viewer' });
+  let image={asset_id:null,alt:'',version:'83000000-0000-0000-0000-000000000001'},fail=false,uploads=[];
+  const imageService={
+    read:async()=>({...image}),
+    upload:async(file,alt,crop,version)=>{if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');const bitmap=await createImageBitmap(file);uploads.push({width:bitmap.width,height:bitmap.height,type:file.type,alt,crop});bitmap.close();image={asset_id:crypto.randomUUID(),alt,version:crypto.randomUUID()};return {...image};},
+    change:async(version,alt,remove)=>{if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');image={asset_id:remove?null:image.asset_id,alt:remove?'':alt,version:crypto.randomUUID()};return {...image};}
+  };
+  window.__profilePreview={image:()=>({...image}),uploads:()=>uploads,fail:value=>fail=value};
+  client.auth.getSession=async()=>({data:{session:{access_token:'fictional-preview-token'}}});
+  dispose = mountProfileEditor(root, client, { contributor: mode !== 'viewer',imageBase:'https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-story-image',imageService });
   // Keep the test preview inside its own clearly marked fictional screens.
   const observer = new MutationObserver(() => {
     const link = root.querySelector('[data-public-link]');

@@ -58,6 +58,7 @@ export function mountProfileImage(root,client,{ownerId,imageBase,contributor,get
  $('#profile-image-file').addEventListener('change',()=>{
   const selected=$('#profile-image-file').files[0];reset();if(!selected){update();return;}
   if(selected.size>5242880||!['image/jpeg','image/png'].includes(selected.type)){status.textContent='Choose a JPEG or PNG up to 5 MiB.';update();return;}
+  if(!image?.asset_id&&(!alt.value||alt.value==='Profile image for Storyteller'))alt.value='Profile image for '+(getName().trim()||'Storyteller');
   sourceURL=URL.createObjectURL(selected);const next=new w.Image(),stamp=generation;
   next.onload=()=>{if(disposed||stamp!==generation)return;if(next.naturalWidth*next.naturalHeight>8000000){status.textContent='Choose an image with at most 8 million pixels.';update();return;}source=next;file=selected;draw();update();status.textContent='Adjust the square crop, then save your image.';};
   next.onerror=()=>{if(!disposed&&stamp===generation){status.textContent='This image could not be opened.';update();}};next.src=sourceURL;
