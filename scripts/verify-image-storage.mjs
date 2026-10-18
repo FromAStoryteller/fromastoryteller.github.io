@@ -32,5 +32,17 @@ try{
   await page.locator('#profile-display-name').fill('Edited pen name');await page.getByRole('button',{name:'Save profile',exact:true}).click();await page.getByText('Your profile was saved.',{exact:true}).waitFor();
   assert.deepEqual(errors,[]);await context.close();console.log('PASS profile upload/crop/alt/failure/reload/removal/text save at '+width);
  }
+
+ for(const width of [1440,390]){
+  const context=await browser.newContext({viewport:{width,height:1100}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://127.0.0.1:5173/tests/studio-preview/');if(await page.locator('[data-essential]').isVisible())await page.locator('[data-essential]').click();
+  await page.getByRole('button',{name:'Open The lantern keeper',exact:true}).click();await page.locator('#ss-tab-cover').click();await page.getByText('Manage attached images',{exact:true}).click();
+  await page.locator('#ss-manage-alt').fill('A revised lantern description');await page.locator('[data-save-image-alt]').click();await page.getByText('Image description saved.',{exact:true}).waitFor();assert.match(await page.locator('#ss-cover').innerText(),/A revised lantern description/);
+  page.once('dialog',d=>d.accept());await page.locator('[data-remove-image]').click();await page.getByText('Choose and save another cover before removing this image.',{exact:true}).waitFor();
+  await page.locator('#ss-cover').selectOption('');await page.locator('[data-save]').click();await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('Private draft saved.'));
+  page.once('dialog',d=>d.dismiss());await page.locator('[data-remove-image]').click();assert.equal(await page.locator('#ss-manage-asset option').count(),1);
+  page.once('dialog',d=>d.accept());await page.locator('[data-remove-image]').click();await page.getByText('Unused image removed. Stored bytes will be cleaned up automatically.',{exact:true}).waitFor();assert.equal(await page.locator('#ss-manage-asset option').count(),0);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);assert.deepEqual(errors,[]);await context.close();console.log('PASS cover description/reference guard/confirmation/removal at '+width);
+ }
  const page=await browser.newPage();await page.goto(base+'?mode=viewer');await page.getByText('Only you can see your image while your account is a viewer.',{exact:false}).waitFor();await page.close();console.log('PASS viewer image privacy disclosure');
 }finally{await browser?.close();server.kill();}

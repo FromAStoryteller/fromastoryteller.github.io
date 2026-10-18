@@ -429,3 +429,14 @@ verify_jwt = false
 
 [functions.fas-studio-cover]
 verify_jwt = true
+
+[functions.fas-profile-upload]
+verify_jwt = true
+
+[functions.fas-profile-image]
+# Anonymous delivery still checks caller-scoped visibility twice.
+verify_jwt = false
+
+[functions.fas-image-cleanup]
+# No anonymous operation: each call consumes a server-generated one-use token.
+verify_jwt = false

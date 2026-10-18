@@ -23,4 +23,5 @@ jobs:
         if: always()
         with:
           name: image-storage-browser
+          include-hidden-files: true
           path: .preview-cache/

@@ -138,7 +138,9 @@ insert into public.stories(author_id,title,summary,body,genres,warning_reviewed)
 select set_config('fas.test_story_id',id::text,true) from public.stories where title='The Deal' and author_id=auth.uid();
 do $$ begin if not exists(select 1 from public.stories where id=current_setting('fas.test_story_id')::uuid and slug like 'the-deal-%') then raise exception 'FAIL reserved static address reused';end if;end $$;
 reset role;
+select public.fas_reserve_image_upload('93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jpg','cover');
 select public.fas_register_verified_cover(current_setting('fas.test_story_id')::uuid,'93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jpg','Verified without staff review');
+select public.fas_reserve_image_upload('93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.jpg','cover');
 select public.fas_register_verified_cover(current_setting('fas.test_story_id')::uuid,'93000000-0000-0000-0000-000000000001','94000000-0000-0000-0000-000000000001','93000000-0000-0000-0000-000000000001/'||current_setting('fas.test_story_id')||'/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.jpg','Unselected verified alternative');
 set local role authenticated;
 update public.stories set cover_asset_id=(select id from public.story_assets where story_id=current_setting('fas.test_story_id')::uuid order by created_at,id limit 1) where id=current_setting('fas.test_story_id')::uuid;
