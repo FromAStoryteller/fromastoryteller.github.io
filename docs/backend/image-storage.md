@@ -140,7 +140,7 @@ This rollout follows the user's explicit instruction to complete the updates and
 make backups later. Migrations did not remove any existing byte or content rows.
 Physical deletion tests targeted only named disposable DEV fixtures.
 
-Live read-only verification job 117548488497 (run 39084622642, branch
+Live read-only verification job 117548731869 (run 39084705177, branch
 verify/live-image-storage) passed exact comparisons for ten live source files,
 canonical profile/settings/Studio shells, anonymous published-only discovery,
 all 14 public file pages and bylines, uncached missing-image responses, denial
