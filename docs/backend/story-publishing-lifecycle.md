@@ -1,7 +1,7 @@
 # Story publishing and lifecycle
 
 Task: **FAS | FAS Community V1 | Implement story publishing and lifecycle**.
-Status: implementation and verification in progress; not yet installed in production.
+Status: **complete and deployed** on 18 October 2026 (Auckland).
 
 ## Contributor workflow
 
@@ -24,9 +24,26 @@ Deleted story and asset records become unavailable immediately to public/owner p
 
 ## Verification and rollout
 
-Node/service tests, transactional PostgreSQL permission/visibility checks and fictional desktop/mobile browser rehearsals must pass before rollout. Hosted DEV fixtures run in rollback transactions. Verify unchanged production content before installing; deploy the additive database change before frontend sources that select the new column. Production installation follows the operations backup routine; no production mutation is performed by test fixtures.
+Node/service tests, transactional PostgreSQL permission/visibility checks and fictional desktop/mobile browser rehearsals must pass before rollout. Hosted DEV fixtures run in rollback transactions. Verify unchanged production content before installing; deploy the additive database change before frontend sources that select the new column. The operator requested backups be deferred for this work. The existing confirmed encrypted archive remains recorded in operations; no new backup or restore rehearsal is claimed. These migrations are additive schema/function/policy changes, not content deletion. Pre/post production fingerprints verified unchanged stories, cover records, profiles and file content. Test fixtures ran only in the test engine/DEV rollback transactions.
 
-Implementation/release evidence: pending.
+[PR #39](https://github.com/FromAStoryteller/fromastoryteller.github.io/pull/39) merged as `59194455b8e48b071a5d59708d7ff551c58e1643`. The final feature [build 117541548872](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39082286972/job/117541548872) passed **155 Node tests**, including PostgreSQL lifecycle/public-discovery assertions, real codec smoke checks, reference/syntax/index validation and Worker bundling. [Chromium job 117541842867](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39082385132/job/117541842867) passed **18 scenarios**: 11 recovery plus seven lifecycle/discovery cases. Fictional tests covered native confirmation cancellation/title validation, owner restore, moderation locks, schedule cancellation, failed/stale actions, mobile fit, and home/category/search appearance and withdrawal. Harness sources are retained on `verify/story-publishing-lifecycle`, separate from published source.
+
+Hosted DEV transactional tests passed for owner/other-contributor/viewer/anonymous/session rejection, server-owned archive state, unpublish/archive public removal, explicit republish, private unscheduled restore, moderation supersession, direct-delete restrictions, deletion/audit/address retention and equal-time pagination. All fixture accounts/content rolled back. DEV retained its existing one story, one asset, two accounts and 14 file items; story/asset fingerprints match pre-migration values.
+
+| Repository migration | DEV installed version | Production installed version |
+| --- | --- | --- |
+| 20261018000428_story_publishing_lifecycle.sql | 20261018001002 | 20261018002308 |
+| 20261018001349_story_public_listing.sql | 20261018001845 | 20261018002324 |
+
+Keep applied files/history immutable; filenames and installed timestamps intentionally retain these mappings. Do not repair the timestamps by replaying migrations.
+
+Production function-body fingerprints match DEV. Real ACL checks confirm anonymous lifecycle execution is denied, authenticated execution is granted only through guarded functions, the archive flag cannot be inserted/updated by authenticated clients, and public discovery remains anonymous-readable. Security advisor categories/counts remain unchanged: intentionally protected private [RLS tables](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), existing checked [anonymous](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable)/[authenticated](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) function workflows, and the pre-existing [password protection notice](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+Production [deployment 117542789198](https://github.com/FromAStoryteller/fromastoryteller.github.io/runs/117542789198) and main checks succeeded. Read-only [live verification 117542746051](https://github.com/FromAStoryteller/fromastoryteller.github.io/actions/runs/39082686296/job/117542746051) matched exact reviewed editor/service/catalog/content-system/styles, checked Studio/home/category/search shells, called the real published-only anonymous catalog, verified HTTP permission denial for anonymous lifecycle actions, and checked all 14 existing public file pages and bylines. Verification sources are retained on `verify/live-story-lifecycle`. No signed-in session or production content mutation was used for testing.
+
+Immediately before/after installation, production retained zero Community stories/assets, one account and 14 file items. File-content/profile fingerprints were unchanged. No existing stories, games, tools, identities or publication states were changed by the rollout.
+
+Rollback: revert frontend source if needed while retaining the compatible additive backend and tightened deletion rules. Do not drop archive markers, reservation records or applied migration history; use a tested forward migration for backend corrections. Physical Storage cleanup and a full hosted restore rehearsal remain separate.
 
 ## Public discovery
 

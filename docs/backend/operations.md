@@ -8,9 +8,9 @@ backup data belong in this repository.
 
 Viewer accounts, contributor profiles and Storyteller Studio V1 are live. Contributors publish their own stories/blog posts and upload verified covers without administrator approval. Existing source-file stories/games/tools retain their URLs and source editing; their publishing settings and insights are available in Studio. Tools use FAS attribution; the specifically granted owner can select personal/FAS for other content.
 
-See [V1 acceptance and follow-ups](studio-v1-handover.md), [Studio rollout](studio-production-rollout-2026-10-17.md) and [publishing-name rollout](publishing-identities-release-2026-10-17.md). The final runtime passed 140 tests and all 14 existing public pages were verified. The operator's current draft was preserved.
+See [V1 acceptance and follow-ups](studio-v1-handover.md), [Studio rollout](studio-production-rollout-2026-10-17.md) and [publishing-name rollout](publishing-identities-release-2026-10-17.md). The latest [lifecycle/discovery release](story-publishing-lifecycle.md) passed 155 tests and 18 browser scenarios, hosted DEV rollback fixtures, and live verification of all 14 existing file pages. Production content/profile fingerprints were unchanged. Automatic recovery is also live; see [edit/autosave recovery](studio-edit-autosave-recovery.md).
 
-The latest confirmed pre-change backup was 18 October 2026 at 12:08 NZDT: five SQL exports, zero-file Storage inventory, encrypted/tested archive and confirmed off-site sync. Backup integrity is not a full hosted restore rehearsal. Keep the manual routine below.
+The latest confirmed pre-change backup was 18 October 2026 at 12:08 NZDT: five SQL exports, zero-file Storage inventory, encrypted/tested archive and confirmed off-site sync. Backup integrity is not a full hosted restore rehearsal. Ryan asked to defer new backups for the current lifecycle work; that additive rollout and its unchanged-data verification are recorded in [lifecycle release](story-publishing-lifecycle.md). Keep the manual routine below for subsequent changes.
 
 ## Foundation history — 14 October 2026
 

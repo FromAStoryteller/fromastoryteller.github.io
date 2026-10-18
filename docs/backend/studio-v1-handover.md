@@ -45,3 +45,5 @@ These are proposed workstreams, not automatically started features or verified d
 - Run the existing local/DEV checks before functional changes. Apply database changes through new reviewed migrations after the required fresh production backup.
 - Keep applied migration files/history immutable and preserve the documented repository/DEV/production mappings.
 - The separately requested **Implement edit, autosave and preview** task is released; see [autosave and recovery evidence](studio-edit-autosave-recovery.md). It adds automatic tab recovery, portable copies under More options and locked same-account recovery without reopening the original V1 acceptance. The broader usability/function audit above remains follow-up work.
+
+The separate **Implement story publishing and lifecycle** task is now complete and deployed. See [lifecycle/discovery evidence](story-publishing-lifecycle.md) for owner archive/private restore, checked permanent deletion, public discovery and rollout verification. The original V1 acceptance history above remains unchanged.
