@@ -1,6 +1,6 @@
 # Transactional email setup
 
-Status on 18 October 2026: implementation deployed; invitation sending is deliberately disabled pending private credentials and a controlled inbox check. Verification and password recovery already use the verified custom SMTP sender. Recent provider records show both delivered on 16 October; this does not replace checking the links in an inbox.
+Status on 18 October 2026: implementation deployed. DEV credentials are installed, its delivery webhook is enabled, and the controlled invitation was delivered and accepted. Production invitation sending remains disabled pending private credentials and a controlled inbox check. Verification and password recovery already use the verified custom SMTP sender. Recent provider records show both delivered on 16 October; this does not replace checking the links in an inbox.
 
 ## Verified sender
 
@@ -24,7 +24,7 @@ If that DNS manager requires the full name, use `_dmarc.auth.fromastoryteller.co
 ## 2. Install DEV credentials privately
 
 1. Open [Resend API keys](https://resend.com/api-keys). Create a **sending access** key restricted to the verified `auth.fromastoryteller.com` domain, named `FAS contributor invitations DEV`.
-2. Open [Resend webhooks](https://resend.com/webhooks), select the prepared DEV endpoint ending in `oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-email-events`, and reveal its signing secret. Its webhook ID is `07ae81d6-ec79-40ec-91fc-2aba6f91a50c`. It is currently disabled.
+2. Open [Resend webhooks](https://resend.com/webhooks), select the prepared DEV endpoint ending in `oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-email-events`, and reveal its signing secret. Its webhook ID is `07ae81d6-ec79-40ec-91fc-2aba6f91a50c`. It is enabled following the controlled DEV setup; use its existing signing secret when maintaining that environment.
 3. Open [DEV Edge Function secrets](https://supabase.com/dashboard/project/oqmmvjjycpyxvxipcyli/functions/secrets) and save:
 
 | Secret name | Value |
@@ -82,4 +82,6 @@ Both projects have `fas-contributor-email` and `fas-email-events` version 1 depl
 
 Validation: 171 automated tests, actual Edge image codec checks, reference/content validation, Cloudflare build and worker bundle passed. The additional hosted DEV rollback fixture passed, including wrong-recipient acceptance, one-use/expired links, revocation, session expiry and private payload access. Desktop (1280px) and mobile (390px) browser checks passed for provider-accepted versus delivered labels, failed sends, disabled setup, manual fallback and no horizontal overflow. No real messages were sent by these tests.
 
-Still required before marking the task complete: DNS propagation, private key/signing-secret installation, enabling both configured webhooks, and controlled inbox/link checks.
+Still required before marking the task complete: public DNS verification of the reported DMARC addition, production key/signing-secret installation, enabling the production webhook, and controlled production inbox/link checks for invitations, verification and recovery.
+
+DEV evidence: the initial controlled email reached Spam; after the recipient marked it Not spam, the next message reached Inbox. This is recipient-specific feedback, not proof of general inbox placement. The second message produced a signed delivered event, and explicit invitation acceptance was recorded. Browser checks at 1280px and 390px verify the initially signed-out journey, automatic return after sign-in, explicit acceptance, success copy, removal of the pending credential and refreshed admin summary/row counts. A hosted DEV transaction verifies that a viewer gains contributor access without administrator access; all fixture data is rolled back.

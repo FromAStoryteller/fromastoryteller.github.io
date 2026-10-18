@@ -1,4 +1,4 @@
-import { showPendingInvitation } from './invitation-storage.mjs';
+import { pendingInvitation, showPendingInvitation } from './invitation-storage.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { createSignInController } from './sign-in-controller.mjs';
@@ -100,6 +100,7 @@ function render({ state, message, email }) {
   form.setAttribute('aria-busy', String(busy));
   if (state === 'signed-in') {
     signedInEmail.textContent = email;
+    if (pendingInvitation()) { location.replace('/account/invitation/'); return; }
     showPendingInvitation(signedInPanel.querySelector('.account-signed-in-actions') || signedInPanel);
     document.querySelector('[data-signed-in-home]').focus({ preventScroll: true });
   }
