@@ -76,6 +76,7 @@ set local role authenticated;
 select public.fas_queue_invitation_email('mail-member@example.invalid',7,null,'a6000000-0000-0000-0000-000000000005');
 select public.fas_queue_invitation_email('mail-wrong@example.invalid',7,null,'a6000000-0000-0000-0000-000000000006');
 reset role;
+delete from public.user_roles where user_id='a4000000-0000-0000-0000-000000000002' and role='member';
 do $$begin
  perform set_config('fas.mail.own_token',(select invite_token from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000005'),true);
  perform set_config('fas.mail.wrong_token',(select invite_token from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000006'),true);
@@ -90,6 +91,7 @@ do $$begin
 end;$$;
 reset role;
 do $$begin
+ if not exists(select 1 from public.user_roles where user_id='a4000000-0000-0000-0000-000000000002' and role='member') or exists(select 1 from public.user_roles where user_id='a4000000-0000-0000-0000-000000000002' and role='admin') then raise exception 'FAIL viewer invitation did not grant contributor-only access';end if;
  if exists(select 1 from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000005' and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL acceptance retained pending credential';end if;
  update public.invites set email='mail-member@example.invalid',created_at=now()-interval '1 hour',expires_at=now()-interval '1 second' where email='mail-wrong@example.invalid';
 end;$$;
