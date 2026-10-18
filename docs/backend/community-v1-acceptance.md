@@ -10,11 +10,11 @@ Status: in progress. Do not mark complete until the live direct-API run, its exa
 | Two authors and ownership | Hosted DEV rollback: private drafts, distinct URLs, cover ownership, public projections and publishing identities pass | Fresh HTTP/API run |
 | Optional friend admin | Hosted DEV admin-tools grant, relinquish, independent contributor removal/regrant pass with synthetic accounts | Fresh API grant/relinquish; no real friend is granted access by testing |
 | Policy acknowledgements | Hosted DEV community-policy fixtures pass, including stale/missing agreement and no role-inferred acceptance | None for server fixture coverage |
-| Publish/unpublish/archive/restore/delete | Hosted DEV lifecycle fixture passes, including public catalogue removal and moderation locks | Browser check and Ryan's real content |
+| Publish/unpublish/archive/restore/delete | Hosted DEV lifecycle fixture passes, including public catalogue removal and moderation locks | Browser passed; Ryan's real content remains |
 | Images | Hosted DEV image reference/replacement/cleanup ownership fixtures pass; no real bytes targeted | Fresh actual cover upload through HTTP |
 | Failed email and retries | Hosted DEV email outbox fixtures pass: retry versions/leases, signatures/events, expiry and cancellation; existing automated provider-failure tests included in full suite | No unsolicited email or test invitation to a friend |
-| Mobile and keyboard | New isolated 1280px/390px editor acceptance harness | Run in CI |
-| Failed saves, offline, stale edits, reload and session expiry | New browser integration harness plus existing service/recovery tests | Run in CI |
+| Mobile and keyboard | Isolated 1280px/390px editor acceptance passed | None for synthetic browser coverage |
+| Failed saves, offline, stale edits, reload and session expiry | Browser integration and existing service/recovery tests pass | None for synthetic coverage |
 | Ryan writes and publishes real content | Cannot substitute an automated fixture for the writer's test | Ryan performs Studio checklist below |
 
 All eight hosted SQL suites (story-studio, storyteller-studio-v2, story-publishing-lifecycle, image-storage, admin-tools, publishing-identity, community-policies and transactional-email) passed in rolled-back DEV transactions. Preflight found zero existing identities for the exact fixture IDs. Postflight found zero remaining fixture identities and no synthetic policy release; DEV's original NULL policy requirement was preserved. Real accounts, content and Storage bytes were not changed.
@@ -51,3 +51,15 @@ This command's fixed target is FAS DEV. It reads existing private CLI credential
 5. Unpublish and check the public page/listing disappears. Archive, restore to private draft, then republish if you want it kept. Deletion is optional; do not delete content you want to keep.
 
 Record actual outcomes and any confusing controls. The assistant must not click acceptance boxes, write the operator's real test story or publish it on their behalf.
+
+## CI and production read-only results
+
+On 18 October 2026, browser job 117603389305 passed at 1280px and 390px. It exercised essential-only storage via keyboard, roving editor tabs, private preview and focus return, failed save with preserved text, reload recovery, actual browser offline mode/retry, session-expiry lock/re-authentication, publishing, unpublishing, archive/restore, conflicting-edit copying, delete cancellation and final confirmation. The same run checks admin failed-email input retention, delivery refresh, retry without duplicate jobs, correct provider-accepted wording and disabled-delivery manual fallback. These browser services are fictional; they do not substitute for real HTTP permission checks.
+
+Production read-only job 117603389192 passed. It checks current server/runtime policy agreement and exact public document hashes, anonymous raw REST denial/empty results for private profiles/roles/invitations/drafts, denial of admin and personal-agreement RPCs, unsigned/unauthenticated email endpoint rejection, public routes and catalogue availability. It creates no identity, story, invitation, outbox job or acceptance.
+
+Build job 117603389246 passed all 174 automated tests, actual Edge image codecs, references/syntax, generated indexes/Worker marker, Cloudflare preview build and Worker bundle. One repeated run exposed a wall-clock boundary flake in the email signature test: a nominally 301-second future stamp could enter the valid 300-second window during execution. The test now injects a fixed clock and checks both inclusive five-minute boundaries and one-millisecond rejection outside them. Production HMAC behavior was not changed or relaxed.
+
+The apparent publishing stall during harness development was a selector reading an unrelated page state attribute; the actual UI had already confirmed publication. The harness now checks the Studio badge specifically. It also uses the actual Essential only control before testing the footer controls, rather than clicking through the storage banner.
+
+Authenticated DEV HTTP checks and exact audit-fixture cleanup remain pending the operator command above. Ryan's real story and public URL remain pending. No unresolved application blocker was reproduced by the checks completed so far; these pending acceptance steps must not be reported as passed.
