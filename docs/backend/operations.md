@@ -4,7 +4,7 @@ Updated 19 October 2026. Studio V1 is deployed and accepted. This records the cu
 the setup and restore guides remain the repeatable procedures. No credentials or
 backup data belong in this repository.
 
-See [Community operational readiness](community-operational-readiness.md) for the current deployment checks, remaining fresh-backup confirmation, recovery/rollback and support triage. Historical preparation documents do not override that record.
+See [Community operational readiness](community-operational-readiness.md) for the completed deployment/backup checks, recovery/rollback and support triage. Historical preparation documents do not override that record.
 
 ## Current release
 
@@ -12,7 +12,7 @@ Viewer accounts, contributor profiles and Storyteller Studio V1 are live. Contri
 
 See [V1 acceptance and follow-ups](studio-v1-handover.md), [Studio rollout](studio-production-rollout-2026-10-17.md) and [publishing-name rollout](publishing-identities-release-2026-10-17.md). The latest [lifecycle/discovery release](story-publishing-lifecycle.md) passed 155 tests and 18 browser scenarios, hosted DEV rollback fixtures, and live verification of all 14 existing file pages. Production content/profile fingerprints were unchanged. Automatic recovery is also live; see [edit/autosave recovery](studio-edit-autosave-recovery.md).
 
-The latest confirmed pre-change backup was 18 October 2026 at 12:08 NZDT: five SQL exports, zero-file Storage inventory, encrypted/tested archive and confirmed off-site sync. Backup integrity is not a full hosted restore rehearsal. Ryan asked to defer new backups for the current lifecycle work; that additive rollout and its unchanged-data verification are recorded in [lifecycle release](story-publishing-lifecycle.md). Keep the manual routine below for subsequent changes.
+The latest post-release backup is 2026-10-19-community-v1-readiness, confirmed by Ryan at approximately 06:56 NZDT on 19 October 2026: five SQL exports, zero-file SHA-256 Storage inventory, SQL checksums/source notes, AES-256 archive with encrypted names, successful archive test and off-site Dropbox sync. Provider-recovery record steps were included in his completion confirmation. Archive integrity/testing is operator-reported; a full current hosted restore/cutover remains a separate rehearsal. Keep the manual routine below for subsequent changes.
 
 ## Foundation history — 14 October 2026
 
@@ -62,7 +62,7 @@ No scheduler, automatic retention pruning or automatic restore is installed.
 
 ## Follow-up work
 
-Community end-to-end acceptance is complete. Operational readiness remains in progress until the new post-release encrypted backup is confirmed. Further usability/function refinements, source-content editing/type expansion, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
+Community end-to-end acceptance is complete. Operational readiness is complete for this version, including the fresh post-release encrypted backup confirmation. Further usability/function refinements, source-content editing/type expansion, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
 
 Accounts do not grant contributor or FAS-publishing rights automatically. Administrators moderate rather than approve every publication. Analytics reporting is disconnected and no ads, earnings or payouts are active. Retain environment separation, safe text/image rendering, current session checks and the documented rollback procedures during future work.
 

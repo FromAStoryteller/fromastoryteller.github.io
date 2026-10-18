@@ -1,6 +1,6 @@
 # Community V1 operational readiness — 19 October 2026
 
-Status: production deployed; read-only operational smoke and build checks passed. A fresh post-release encrypted backup and operator verification remain required before this task is marked complete. Brand's final logo is optional for functional readiness.
+Status: complete for Community V1 functional readiness. Production smoke/build checks passed and Ryan confirmed the fresh encrypted/tested/off-site backup on 19 October 2026 at approximately 06:56 NZDT. Brand's final logo remains optional for functional readiness.
 
 ## Release and smoke evidence
 
@@ -39,7 +39,7 @@ Security advisors have no ERROR findings. Existing findings remain: 26 private R
 
 ## Backup closeout
 
-Latest operator-confirmed encrypted/tested/off-site archive: 18 October at 12:08 NZDT, before later releases. Preserve it until a fresh set is verified, subject to the 30-day deletion-data retention policy. A newer backup is not yet claimed.
+Latest operator-confirmed encrypted/tested/off-site archive: 19 October 2026, confirmed at approximately 06:56 NZDT, named 2026-10-19-community-v1-readiness. Ryan reported successful exports of all five SQL files and zero-file SHA-256 Storage inventory, then confirmed completion of backup notes/checksum inventory, AES-256 archive with encrypted file names, archive testing, off-site Dropbox sync and secure provider-recovery record steps. Credentials and archive contents were not sent to chat or committed. Archive testing/sync is operator-reported; the assistant did not inspect or decrypt the archive. Retain/prune prior sets under the 30-day deletion-data retention policy.
 
 Use [the current backup procedure](backup-restore.md), in a quiet window with no author edits/uploads/moderation/deletions or scheduled publication due. If other contributors are active, arrange an enforced write pause with an operator; merely closing Studio is not a write freeze. Do not claim cross-service snapshot consistency if writes occurred during database/image exports.
 
@@ -91,5 +91,11 @@ Keep the current theme/placeholder branding. Apply final logo assets only when B
 - Production account/policy/publishing smoke and live-source checks pass.
 - Existing controlled account/email acceptance and Ryan's real Studio publishing test remain recorded; no duplicate production fixture needed.
 - Background job/access/queue checks are recorded and operational runbooks are available.
-- Ryan confirms the NEW encrypted, tested, off-site backup and private provider-recovery record. Keep task in progress until that confirmation.
+- Completed: Ryan confirmed the new encrypted, tested, off-site backup and provider-recovery record steps on 19 October at approximately 06:56 NZDT.
 - Preserve explicit limitation: current full hosted restore/cutover is a separate rehearsal, not an achieved result of this task.
+
+## Final closeout
+
+All functional readiness gates above are satisfied. Main a9309476f549f1ed1a5d827a9abe8dedba375aaf subsequently passed production and preview Worker builds, deployment and validation. The post-export production count check matched the empty image inventory: 1 Auth identity/profile, 2 role rows, 0 Studio stories/assets/moderation rows, 1 invitation, 0 Storage objects and 32 applied migrations. Counts are point-in-time operational evidence, not a substitute for inspecting/restoring an encrypted backup. The latest archive includes SQL/hash notes referencing that exact source revision.
+
+No further operator action is required to close this task. Full current hosted recovery/cutover rehearsal, recurring backup automation, final Brand logo and story-page visual polish retain their separately stated scope/limitations. No production schema/data, branding, billing or credentials were changed by readiness closeout.
