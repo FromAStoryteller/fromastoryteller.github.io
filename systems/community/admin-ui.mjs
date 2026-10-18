@@ -9,15 +9,54 @@ export function mountAdminTools(root,service,{onAccessLost=()=>{}}={}){
  <p class="admin-status" role="status" aria-live="polite" data-admin-status></p><div data-admin-content></div>`;
  const content=root.querySelector('[data-admin-content]'),status=root.querySelector('[data-admin-status]');
  const say=(message,error=false)=>{if(disposed)return;status.textContent=message;status.dataset.state=error?'error':'';};
- async function run(fn){if(busy||disposed)return;busy=true;root.setAttribute('aria-busy','true');root.querySelectorAll('button,input,select,textarea').forEach(n=>{if(!n.readOnly)n.disabled=true;});try{await fn();}catch(e){say(e.message,true);if(/Administrator access|Sign in again|account changed|Active account session/.test(e.message))onAccessLost();}finally{busy=false;if(!disposed){root.removeAttribute('aria-busy');root.querySelectorAll('button,input,select,textarea').forEach(n=>n.disabled=false);}}}
+ async function run(fn){if(busy||disposed)return;busy=true;root.setAttribute('aria-busy','true');root.querySelectorAll('button,input,select,textarea').forEach(n=>{if(!n.readOnly)n.disabled=true;});try{await fn();}catch(e){say(e.message,true);if(/Administrator access|Sign in again|account changed|Active account session/.test(e.message))onAccessLost();}finally{busy=false;if(!disposed){root.removeAttribute('aria-busy');root.querySelectorAll('button,input,select,textarea').forEach(n=>n.disabled=n.hasAttribute('data-unavailable'));}}}
  async function summary(){const data=await service.overview();if(disposed)return;const box=root.querySelector('[data-overview]');box.replaceChildren();for(const [key,label] of [['contributors','Contributors'],['admins','Administrators'],['pending_invites','Open invitations'],['published_stories','Published stories']]){const item=el(d,'div','admin-stat');item.append(el(d,'strong','',String(data[key]??0)),el(d,'span','',label));box.append(item);}}
  function button(label,handler,danger=false,primary=false){const b=el(d,'button',primary?'account-submit admin-destructive admin-destructive--primary':danger?'account-secondary admin-destructive':'account-secondary',label);b.type='button';b.addEventListener('click',()=>run(handler));return b;}
  function heading(title,description){content.replaceChildren(el(d,'h2','',title),el(d,'p','admin-muted',description));}
  function pager(offset,rows,next){const p=el(d,'div','admin-pagination');if(offset>0)p.append(button('Previous',()=>next(Math.max(0,offset-25))));p.append(el(d,'span','admin-muted',rows.length?`Showing ${offset+1}–${offset+rows.length}`:'Nothing to show'));if(rows.length===25)p.append(button('Next',()=>next(offset+25)));content.append(p);}
- async function invitations(offset=inviteOffset){inviteOffset=offset;const rows=await service.invites(offset);if(disposed)return;heading('Contributor invitations','Invite someone to contribute. Invitations grant contributor access only; admin access is managed separately.');
- const form=el(d,'form','account-form admin-form');form.innerHTML=`<div class="account-field"><label for="invite-email">Email address</label><input id="invite-email" type="email" autocomplete="off" required maxlength="254"></div><div class="account-field"><label for="invite-days">Valid for</label><select id="invite-days"><option value="7">7 days</option><option value="14">14 days</option><option value="30">30 days</option></select></div><button class="account-submit" type="submit">Create invitation link</button><p class="password-guidance">Copy and share the link yourself. No email is sent automatically.</p>`;
- const result=el(d,'div','admin-invite-result');form.addEventListener('submit',e=>{e.preventDefault();if(!form.reportValidity())return;run(async()=>{const email=form.querySelector('input').value.trim();const token=await service.issueInvite(email,Number(form.querySelector('select').value));if(disposed)return;const url=new URL('/account/invitation/',location.origin);url.hash='invite='+encodeURIComponent(token);result.replaceChildren(el(d,'h3','','Invitation ready'),el(d,'p','',`For ${email}. This private link is shown only now. Copy it before leaving this section.`));const input=el(d,'input','admin-invite-link');input.readOnly=true;input.value=url.href;input.setAttribute('aria-label','Private contributor invitation link');result.append(input,button('Select link',async()=>{input.focus();input.select();say('Link selected. Copy it, then share it privately with the intended person.');}));say('Invitation created. Share it only with the intended contributor.');await summary();});});content.append(form,result);
- const list=el(d,'div','admin-list');for(const row of rows){const item=el(d,'article','admin-row');const state=row.accepted_at?'Accepted':row.revoked_at?'Revoked':new Date(row.expires_at)<=new Date()?'Expired':'Pending';item.append(el(d,'h3','',row.email),el(d,'p','admin-muted',`${state} · Expires ${date(row.expires_at)}`));if(state==='Pending'){const revoke=button('Revoke invitation',async()=>{item.querySelector('.admin-confirm')?.remove();const confirm=el(d,'div','admin-confirm');confirm.append(el(d,'p','','Revoking this invitation makes its link unusable.'),button('Confirm revoke',async()=>{await service.revokeInvite(row.id);await invitations();await summary();say('Invitation revoked.');},true,true),button('Cancel',async()=>confirm.remove()));item.append(confirm);},true);item.append(revoke);}list.append(item);}if(!rows.length)list.append(el(d,'p','admin-empty','No invitations yet.'));content.append(list);pager(offset,rows,invitations);}
+ async function invitations(offset=inviteOffset){
+ inviteOffset=offset;const [rows,jobs,delivery]=await Promise.all([service.invites(offset),service.emailJobs?service.emailJobs(0):[],service.emailStatus?service.emailStatus().catch(()=>({ready:false})):({ready:false})]);
+ if(disposed)return;heading('Contributor invitations','Invite someone to contribute. Invitations grant contributor access only; admin access is managed separately.');
+ const ready=delivery.ready===true;
+ const form=el(d,'form','account-form admin-form');form.innerHTML=`<div class="account-field"><label for="invite-email">Email address</label><input id="invite-email" type="email" autocomplete="off" required maxlength="254"></div><div class="account-field"><label for="invite-days">Valid for</label><select id="invite-days"><option value="7">7 days</option><option value="14">14 days</option><option value="30">30 days</option></select></div><button class="account-submit" type="submit" data-email-invite>Send invitation email</button><p class="password-guidance">${ready?'The email includes a private invitation link. The recipient must verify their email and choose to accept.':'Email delivery is not enabled yet. You can still create a private invitation link below.'}</p>`;
+ const send=form.querySelector('[data-email-invite]');if(!ready){send.disabled=true;send.setAttribute('data-unavailable','');}
+ const result=el(d,'div','admin-invite-result');
+ form.addEventListener('submit',event=>{event.preventDefault();if(!ready||!form.reportValidity())return;void run(async()=>{
+  const job=await service.sendInvitation(form.querySelector('input').value.trim(),Number(form.querySelector('select').value));if(disposed)return;
+  await invitations();await summary();say(job.state==='accepted'?'Invitation accepted by the email provider. Delivery is confirmed separately below.':job.state==='failed'?'Email delivery failed. Check the address and delivery status before resending.':'Invitation queued. Temporary delivery failures will retry automatically.');
+ });});
+ const fallback=el(d,'details','admin-invite-fallback'),label=el(d,'summary','','Create a private link instead');fallback.append(label,el(d,'p','admin-muted','No email is sent by this action. Share the link privately with the invited person.'));
+ fallback.append(button('Create invitation link',async()=>{
+  if(!form.reportValidity())return;const email=form.querySelector('input').value.trim(),token=await service.issueInvite(email,Number(form.querySelector('select').value));if(disposed)return;
+  const url=new URL('/account/invitation/',location.origin);url.hash='invite='+encodeURIComponent(token);
+  result.replaceChildren(el(d,'h3','','Invitation link ready'),el(d,'p','',`For ${email}. This private link is shown only now. Copy it before leaving this section.`));
+  const input=el(d,'input','admin-invite-link');input.readOnly=true;input.value=url.href;input.setAttribute('aria-label','Private contributor invitation link');
+  result.append(input,button('Select link',async()=>{input.focus();input.select();say('Link selected. Copy it and share it privately.');}));
+  say('Invitation created. No email was sent.');await summary();
+ }));
+ content.append(form,fallback,result,button('Refresh delivery status',()=>invitations()));
+ const labels={queued:'Queued',sending:'Sending',retrying:'Waiting to retry',accepted:'Accepted by email provider',delivered:'Delivered',delayed:'Delivery delayed',failed:'Delivery failed',bounced:'Bounced — check the address',complained:'Delivery blocked',suppressed:'Delivery blocked',canceled:'Canceled'};
+ const list=el(d,'div','admin-list');for(const row of rows){
+  const item=el(d,'article','admin-row'),state=row.accepted_at?'Accepted':row.revoked_at?'Revoked':new Date(row.expires_at)<=new Date()?'Expired':'Pending';
+  const job=jobs.find(j=>j.invite_id===row.id);
+  item.append(el(d,'h3','',row.email),el(d,'p','admin-muted',`${state} · Expires ${date(row.expires_at)}`));
+  if(job)item.append(el(d,'p','admin-mail-state',`Email: ${labels[job.state]??'Status unavailable'}${job.state==='retrying'?' · Next attempt '+date(job.next_attempt):''}`));
+  if(state==='Pending'){
+   if(ready&&!['bounced','complained','suppressed'].includes(job?.state)){
+    item.append(button(job?'Resend invitation email':'Send invitation email',async()=>{
+     if(!d.defaultView.confirm('Send a new invitation email? Any earlier invitation link will stop working.'))return;
+     const sent=await service.sendInvitation(null,7,row.id);await invitations();say(sent.state==='accepted'?'Invitation accepted by the email provider.':'Check the updated delivery status.');
+    }));
+   }
+   item.append(button('Revoke invitation',async()=>{
+    item.querySelector('.admin-confirm')?.remove();const confirm=el(d,'div','admin-confirm');confirm.append(el(d,'p','','Revoking this invitation makes its link unusable and cancels queued email.'),button('Confirm revoke',async()=>{await service.revokeInvite(row.id);await invitations();await summary();say('Invitation revoked.');},true,true),button('Cancel',async()=>confirm.remove()));item.append(confirm);
+   },true));
+  }
+  list.append(item);
+ }if(!rows.length)list.append(el(d,'p','admin-empty','No invitations yet.'));
+ content.append(list);pager(offset,rows,invitations);
+ }
+
  async function accounts(offset=accountOffset){
  accountOffset=offset;
  const page=await service.accounts(accountSearch,accountFilter,offset,accountSort);
