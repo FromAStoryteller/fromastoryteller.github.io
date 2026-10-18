@@ -23,3 +23,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-community-vite.log 2>&1 &
       - run: node scripts/test-fas-community-browser.mjs
+  production-read-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/test-fas-community-public.mjs --production-read-only
