@@ -23,6 +23,7 @@ alter table private.image_cleanup enable row level security;
 revoke all on private.image_uploads,private.image_cleanup from public,anon,authenticated;
 create function private.queue_image(path_key text) returns void language plpgsql security definer set search_path='' as $$
 begin
+ perform pg_advisory_xact_lock(hashtextextended(path_key,146389897));
  if path_key !~ '^[a-f0-9-]{36}/[a-f0-9-]{36}/[a-f0-9-]+[.](jpg|jpeg|png|webp)$' then raise exception 'Invalid stored image path';end if;
  insert into private.image_cleanup(path,owner_id) values(path_key,split_part(path_key,'/',1)::uuid) on conflict do nothing;
  update private.image_uploads set state='retired' where path=path_key;
@@ -38,6 +39,7 @@ end;$$;
 create trigger fas_retire_profile_image after update or delete on public.profiles for each row execute function private.retire_profile_image();
 create function private.guard_retired_image() returns trigger language plpgsql security definer set search_path='' as $$
 begin
+ perform pg_advisory_xact_lock(hashtextextended(new.object_path,146389897));
  if exists(select 1 from private.image_cleanup where path=new.object_path) then raise exception 'Image has been retired';end if;
  if TG_OP='UPDATE' and new.object_path is distinct from old.object_path then raise exception 'Stored images are immutable';end if;
  return new;
