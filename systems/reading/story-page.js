@@ -126,3 +126,4 @@ async function initStoryPage() {
 initStoryPage().catch((error) => {
     console.error("Error initializing story page enhancements:", error)
 })
+document.addEventListener('fas:content-rendered',()=>void initStoryPage().catch(error=>console.error('Story layout could not initialize',error)));

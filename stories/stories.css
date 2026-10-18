@@ -264,3 +264,24 @@
   .story-hero-copy, .story-meta { position: static; padding: 0; color: var(--colour-text-primary); }
   .story-header h1 { color: var(--colour-text-primary); }
 }
+
+/* Shared template details for repository, Studio and private preview. */
+.story-details {width:min(100%,var(--width-reading));margin:0 auto var(--space-5);overflow-wrap:anywhere;}
+.story-summary {font-family:var(--font-family-reading);line-height:1.7;color:var(--colour-text-secondary);}
+.story-taxonomy,.story-warning {font-size:var(--font-size-sm);line-height:1.6;color:var(--colour-text-secondary);}
+.story-hero--no-image {min-height:12rem;background:var(--surface-standard-background);}
+.story-hero--no-image .story-hero-copy {position:relative;color:var(--colour-text-primary);}
+.story-hero--no-image h1 {color:var(--colour-text-primary);}
+.story-content.fas-manuscript > :is(p,div) {text-indent:0;}
+.story-content.fas-manuscript > :is(p,div)[data-indent="true"] {text-indent:var(--paragraph-indent);}
+.ss-reader-preview .story-page {width:100%;min-width:0;}
+.ss-reader-preview .story-hero {aspect-ratio:16/9;}
+.ss-reader-preview .story-footer {margin-top:var(--space-6);}
+.story-footer .storyteller-socials {justify-content:center;}
+
+.ss-reader-preview .story-content h2 {font:500 1.45em/1.4 var(--font-family-reading);margin:1.5em 0 .8em;}
+
+.story-meta a {color:inherit;display:inline-flex;align-items:center;min-height:var(--size-touch-target-minimum);text-decoration-color:currentColor;text-underline-offset:.18em;}
+.story-hero--no-image + .story-meta {color:var(--colour-text-secondary);}
+
+@media(max-width:48rem){.story-content.fas-manuscript > :is(p,div)[data-indent="true"]{text-indent:1.5em;}}

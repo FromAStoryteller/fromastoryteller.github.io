@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "validate": "node scripts/generate-site-indexes.mjs",
+    "validate": "node scripts/build-games.mjs && node scripts/generate-content-layouts.mjs && node scripts/generate-site-indexes.mjs",
     "test": "node --test tests/*.test.mjs",
     "check:account-policies": "node scripts/check-fas-policy-history.mjs",
     "test:security:api": "node scripts/test-fas-security-api.mjs",
@@ -28,12 +28,15 @@
     "test:settings:local": "node scripts/test-fas-settings-local.mjs",
     "test:policies:local": "node scripts/test-fas-policies-local.mjs",
     "test:lifecycle:local": "node scripts/test-fas-lifecycle-local.mjs",
-    "test:restore:local": "node scripts/test-fas-restore-local.mjs"
+    "test:restore:local": "node scripts/test-fas-restore-local.mjs",
+    "build:games": "node scripts/build-games.mjs",
+    "generate:content-layouts": "node scripts/generate-content-layouts.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",
     "vite": "^8.2.2",
-    "wrangler": "4.149.0"
+    "wrangler": "4.149.0",
+    "esbuild": "0.28.2"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3"

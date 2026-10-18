@@ -1,5 +1,6 @@
 // Generated account policy release: community-policies-2026-10-18-v1
 // Regenerated with site indexes so policy-only releases also refresh the hosting build.
+import {storyPageMarkup} from './systems/content/page-layout.mjs';
 import {fileContentPath} from './systems/community/publishing-identity.mjs';
 import {contentPath,contentAddress} from './systems/community/content-address.mjs';
 import {contentMetadata} from './systems/community/content-metadata.mjs';
@@ -33,7 +34,7 @@ export function renderFilePublishing(html,item){
  else html=html.replace('</head>',()=>schemaScript+'</head>');
 
  const social=(author.social_links??[]).filter(s=>{try{return new URL(s.url).protocol==='https:';}catch{return false;}}).map(s=>'<a href="'+escape(s.url)+'" target="_blank" rel="noopener noreferrer">'+escape(s.platform==='website'?'Website':s.platform)+'</a>').join(' ');
- if(social)html=html.replace('</main>',()=>'<nav class="file-publishing-socials" aria-label="Author social links">'+social+'</nav></main>');
+ if(social){const nav='<nav class="storyteller-socials file-publishing-socials" aria-label="Author social links">'+social+'</nav>';html=html.includes('<!--author-socials-->')?html.replace('<!--author-socials-->',()=>nav):html.replace('</main>',()=>nav+'</main>');}
  return html.replace('<body','<body data-content-id="'+escape(item.id)+'"');
 }
 export async function filePublishingResponse(request,env,response,fetcher=fetch){
@@ -74,7 +75,7 @@ export async function readingResponse(request,env,fetcher=fetch){
   const canonical=contentPath(story);if(!canonical)return fallback(404);
   if(legacy||url.pathname!==canonical){const destination=new URL(canonical,url);destination.search=url.search;destination.searchParams.delete('story');return new Response(null,{status:308,headers:{Location:destination.href,'Cache-Control':'no-store'}});}
   const image=story.cover?.asset_id?PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+encodeURIComponent(story.cover.asset_id):'';
-  const html=renderReadingMetadata(await response.text(),story,image);headers.delete('Content-Length');headers.delete('ETag');headers.set('X-Robots-Tag','index, follow');
+  let html=renderReadingMetadata(await response.text(),story,image);html=html.replace(/<!--content-layout:start-->[\s\S]*?<!--content-layout:end-->/,()=>storyPageMarkup({...story,image,image_alt:story.cover?.alt}));headers.delete('Content-Length');headers.delete('ETag');headers.set('X-Robots-Tag','index, follow');
   return new Response(request.method==='HEAD'?null:html,{status:200,headers});
  }catch{return fallback(503);}
 }

@@ -1,0 +1,30 @@
+name: Shared content layout browser checks
+on:
+  pull_request:
+    paths:
+      - systems/content/page-layout.mjs
+      - scripts/test-content-layout-browser.mjs
+      - .github/workflows/content-layout-browser.yml
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - run: node scripts/verify-content-layouts.mjs
+        env:
+          FAS_LAYOUT_BASE: ${{ github.event.pull_request.base.sha }}
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
+      - run: node scripts/test-content-layout-browser.mjs
