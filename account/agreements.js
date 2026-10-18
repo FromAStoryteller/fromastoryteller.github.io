@@ -1,3 +1,4 @@
+import {pendingInvitation} from './invitation-storage.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { currentPolicyRequirement, acceptCurrentPolicies } from './published-policies.mjs';
@@ -8,6 +9,11 @@ const form=document.querySelector('[data-agreement-form]');
 let local,requirement,busy=false;
 let sessionEnded=false;
 const show=(message,error=false)=>{status.textContent=message;status.dataset.state=error?'error':'success';};
+function nextStep(){
+ if(sessionEnded)return;
+ const actions=document.createElement('div');actions.className='account-flow-actions';
+ const a=document.createElement('a');a.className='account-secondary';a.href=pendingInvitation()?'/account/invitation/':'/account/studio/';a.textContent=pendingInvitation()?'Continue to your invitation':'Return to Storyteller Studio';actions.append(a);document.querySelector('[data-agreement-history]').after(actions);
+}
 function history(records) {
   const target=document.querySelector('[data-agreement-history]');target.replaceChildren();
   for(const record of records) {
@@ -23,7 +29,7 @@ form.addEventListener('submit',async event=>{
   show('Recording your agreement…');
   try {
     history(await acceptCurrentPolicies(local.client,requirement,{ageConfirmed:form.querySelector('[data-age]').checked,termsAgreed:form.querySelector('[data-terms]').checked,privacyNoticeSeen:form.querySelector('[data-privacy]').checked}));
-    form.hidden=true;show('Your agreement to these policy versions has been recorded.');
+    form.hidden=true;show('Your agreement to these policy versions has been recorded.');nextStep();
   } catch(error){show(error.message,true);}
   finally{busy=false;form.querySelector('fieldset').disabled=false;}
 });
@@ -51,7 +57,7 @@ try {
       history(records.data);
       if(sessionEnded) { /* The sign-out handler already cleared private UI. */ }
       else if(!requirement)show('No published Terms currently need your agreement.');
-      else if(records.data.some(record=>record.release_id===requirement.release_id))show('You have already agreed to the current Terms and seen the Privacy notice.');
+      else if(records.data.some(record=>record.release_id===requirement.release_id)){show('You have already agreed to the current Terms and seen the Privacy notice.');nextStep();}
       else {
         document.querySelector('[data-policy-version]').textContent=`Terms ${requirement.terms_version}; Privacy notice ${requirement.privacy_version}. Published ${new Date(requirement.published_at).toLocaleDateString()}.`;
         document.querySelector('[data-terms-link]').href=requirement.terms_path;
