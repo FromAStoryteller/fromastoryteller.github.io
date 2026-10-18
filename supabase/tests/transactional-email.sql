@@ -27,6 +27,7 @@ reset role;
 do $$declare j private.email_outbox;first jsonb;second jsonb;token text;begin
  select * into j from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000001';
  if (select count(*) from private.email_outbox where request_id=j.request_id)<>1 then raise exception 'FAIL duplicate job';end if;
+ perform set_config('fas.mail.bounce_invite',j.invite_id::text,true);
  token:=j.invite_token;first:=public.fas_claim_invitation_email(j.id);
  if first->>'token'<>token or (first->>'attempts')::int<>1 then raise exception 'FAIL first claim';end if;
  if public.fas_claim_invitation_email(j.id) is not null then raise exception 'FAIL concurrent claim';end if;
@@ -46,10 +47,9 @@ do $$declare j private.email_outbox;first jsonb;second jsonb;token text;begin
 end;$$;
 set local role authenticated;
 do $$declare key uuid;begin
- select (value->>'invite_id')::uuid into key from jsonb_array_elements(public.fas_admin_email_jobs(0));
+ key:=current_setting('fas.mail.bounce_invite')::uuid;
  begin perform public.fas_queue_invitation_email(null,7,key,gen_random_uuid());raise exception 'FAIL bounced recipient retried';exception when raise_exception then if SQLERRM<>'Delivery blocked for this address' then raise;end if;end;
- perform public.fas_queue_invitation_email('mail-revoke@example.invalid',7,null,'a6000000-0000-0000-0000-000000000002');
- select (value->>'invite_id')::uuid into key from jsonb_array_elements(public.fas_admin_email_jobs(0)) where value->>'state'='queued';
+ key:=(public.fas_queue_invitation_email('mail-revoke@example.invalid',7,null,'a6000000-0000-0000-0000-000000000002')->>'invite_id')::uuid;
  perform public.revoke_invite(key);
 end;$$;
 reset role;
@@ -61,10 +61,13 @@ set local role authenticated;
 select public.fas_queue_invitation_email('mail-rotate@example.invalid',7,null,'a6000000-0000-0000-0000-000000000003');
 reset role;
 update private.email_outbox set created_at=now()-interval '2 minutes' where request_id='a6000000-0000-0000-0000-000000000003';
-select set_config('fas.mail.old_hash',token_hash,true) from public.invites where email='mail-rotate@example.invalid';
+do $$begin
+ perform set_config('fas.mail.old_hash',token_hash,true) from public.invites where email='mail-rotate@example.invalid';
+ perform set_config('fas.mail.rotate_invite',invite_id::text,true) from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000003';
+end;$$;
 set local role authenticated;
 do $$declare key uuid;begin
- select (value->>'invite_id')::uuid into key from jsonb_array_elements(public.fas_admin_email_jobs(0)) where value->>'state'='queued';
+ key:=current_setting('fas.mail.rotate_invite')::uuid;
  perform public.fas_queue_invitation_email(null,7,key,'a6000000-0000-0000-0000-000000000004');
 end;$$;
 reset role;
@@ -108,8 +111,9 @@ do $$declare key uuid;begin
  if exists(select 1 from private.email_outbox where id=key and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL expired invitation retained token';end if;
 end;$$;
 update auth.sessions set not_after=now()-interval '1 second' where id='a5000000-0000-0000-0000-000000000001';
+do $$begin perform set_config('fas.mail.expired_session_job',id::text,true) from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000004';end;$$;
 set local role service_role;
-select public.fas_claim_invitation_email(null);
+select public.fas_claim_invitation_email(current_setting('fas.mail.expired_session_job')::uuid);
 reset role;
 do $$begin
  if exists(select 1 from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000004' and (state<>'canceled' or invite_token is not null)) then raise exception 'FAIL expired session sent';end if;
