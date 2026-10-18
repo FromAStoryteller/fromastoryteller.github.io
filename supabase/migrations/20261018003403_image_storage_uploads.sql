@@ -51,7 +51,7 @@ create function public.fas_my_profile_image() returns jsonb language sql set sea
 revoke all on function public.fas_my_profile_image(),private.my_profile_image() from public,anon,authenticated,service_role;
 grant execute on function public.fas_my_profile_image(),private.my_profile_image() to authenticated;
 
-create function private.visible_profile_image(asset_key uuid) returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles p where p.image_id=asset_key and private.account_active(p.id) and (p.id=(select auth.uid()) or private.public_publishing_author(p.id,'personal') is not null));$;
+create function private.visible_profile_image(asset_key uuid) returns boolean language sql stable security definer set search_path='' as $$select exists(select 1 from public.profiles p where p.image_id=asset_key and private.account_active(p.id) and (p.id=(select auth.uid()) or private.public_publishing_author(p.id,'personal') is not null));$$;
 create function public.fas_visible_profile_image(asset_key uuid) returns boolean language sql set search_path='' as $$select private.visible_profile_image(asset_key);$$;
 revoke all on function public.fas_visible_profile_image(uuid),private.visible_profile_image(uuid) from public,anon,authenticated,service_role;
 grant execute on function public.fas_visible_profile_image(uuid),private.visible_profile_image(uuid) to anon,authenticated;
