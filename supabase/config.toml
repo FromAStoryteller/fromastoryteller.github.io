@@ -440,3 +440,11 @@ verify_jwt = false
 [functions.fas-image-cleanup]
 # No anonymous operation: each call consumes a server-generated one-use token.
 verify_jwt = false
+
+[functions.fas-contributor-email]
+# Verifies Auth/admin sessions itself, or consumes a server-generated worker token.
+verify_jwt = false
+
+[functions.fas-email-events]
+# Public provider endpoint; validates signed, timestamped Resend webhook payloads.
+verify_jwt = false

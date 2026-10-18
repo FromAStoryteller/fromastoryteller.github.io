@@ -5,7 +5,11 @@ const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8'
 const settings = JSON.parse(read('supabase/templates/production-email-settings.json'));
 
 test('Production email sources keep private credentials in the fragment and avoid redirect metadata', () => {
-  assert.equal(settings.status, 'installed-verified-no-delivery-test');
+  assert.equal(settings.status, 'installed-provider-delivery-observed');
+  assert.equal(settings.inboxAndLinkRecheck, 'pending-controlled-user-check');
+  assert.equal(settings.contributorInvitationSetup, 'pending-private-credentials-dns-and-inbox-check');
+  assert.equal(settings.tracking.open, false);
+  assert.equal(settings.tracking.click, false);
   assert.equal(settings.projectRef, 'vzdicnufhidelaoeqbza');
   assert.equal(settings.siteURL, 'https://fromastoryteller.com');
   assert.equal(settings.otpExpirySeconds, 3600);

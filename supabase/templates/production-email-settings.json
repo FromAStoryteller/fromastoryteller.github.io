@@ -1,5 +1,5 @@
 {
-  "status": "installed-verified-no-delivery-test",
+  "status": "installed-provider-delivery-observed",
   "projectRef": "vzdicnufhidelaoeqbza",
   "siteURL": "https://fromastoryteller.com",
   "otpExpirySeconds": 3600,
@@ -19,5 +19,12 @@
     "open": false,
     "click": false
   },
-  "installedOn": "2026-10-16"
+  "installedOn": "2026-10-16",
+  "providerDeliveryObservedOn": "2026-10-18",
+  "providerDeliveryDates": {
+    "confirmation": "2026-10-16",
+    "recovery": "2026-10-16"
+  },
+  "inboxAndLinkRecheck": "pending-controlled-user-check",
+  "contributorInvitationSetup": "pending-private-credentials-dns-and-inbox-check"
 }
