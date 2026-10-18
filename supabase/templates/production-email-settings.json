@@ -1,5 +1,5 @@
 {
-  "status": "installed-provider-delivery-observed",
+  "status": "configured-and-production-verified",
   "projectRef": "vzdicnufhidelaoeqbza",
   "siteURL": "https://fromastoryteller.com",
   "otpExpirySeconds": 3600,
@@ -22,9 +22,16 @@
   "installedOn": "2026-10-16",
   "providerDeliveryObservedOn": "2026-10-18",
   "providerDeliveryDates": {
-    "confirmation": "2026-10-16",
-    "recovery": "2026-10-16"
+    "confirmation": "2026-10-18",
+    "recovery": "2026-10-18",
+    "contributorInvitation": "2026-10-18"
   },
-  "inboxAndLinkRecheck": "pending-controlled-user-check",
-  "contributorInvitationSetup": "pending-private-credentials-dns-and-inbox-check"
+  "inboxAndLinkRecheck": "passed-controlled-production-check",
+  "contributorInvitationSetup": "active-verified-production",
+  "productionVerifiedOn": "2026-10-18",
+  "senderAuthentication": {
+    "spf": "verified",
+    "dkim": "verified",
+    "dmarc": "v=DMARC1; p=none;"
+  }
 }

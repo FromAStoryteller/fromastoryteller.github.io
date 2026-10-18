@@ -1,6 +1,6 @@
 # Transactional email setup
 
-Status on 18 October 2026: implementation deployed. DEV credentials are installed, its delivery webhook is enabled, and the controlled invitation was delivered and accepted. Production invitation sending remains disabled pending private credentials and a controlled inbox check. Verification and password recovery already use the verified custom SMTP sender. Recent provider records show both delivered on 16 October; this does not replace checking the links in an inbox.
+Status on 18 October 2026: configured and verified in production. DEV and production have separate restricted sending credentials and enabled signed delivery webhooks. Controlled production invitation, password recovery and email verification messages reached Inbox, and their live links completed successfully. Invitation acceptance and signed delivery events are recorded; password recovery changed the password, allowed subsequent sign-in and rejected reuse. The verification test account is confirmed and has no contributor or administrator role. The public sending-subdomain DMARC record is verified.
 
 ## Verified sender
 
@@ -55,11 +55,11 @@ Keep keys and signing secrets out of chat, screenshots, source files and termina
 Repeat the API key and secret steps with a **separate production sending key** named `FAS contributor invitations production`.
 
 - [Production secrets](https://supabase.com/dashboard/project/vzdicnufhidelaoeqbza/functions/secrets): set `FAS_RESEND_API_KEY` and `FAS_RESEND_WEBHOOK_SECRET`. Production does not use `FAS_EMAIL_TEST_TO`.
-- Production webhook: `https://vzdicnufhidelaoeqbza.supabase.co/functions/v1/fas-email-events`, ID `692b25f1-fd96-433c-b81e-1ecb4afeb8da`. Use its own signing secret, then enable it.
+- Production webhook: `https://vzdicnufhidelaoeqbza.supabase.co/functions/v1/fas-email-events`, ID `692b25f1-fd96-433c-b81e-1ecb4afeb8da`. It is enabled and its signed delivery event has been verified. For a fresh setup, use its own signing secret before enabling it.
 - Open [production admin tools](https://fromastoryteller.com/account/admin/), refresh delivery status, and send one explicitly agreed invitation to a controlled inbox. Confirm **Delivered** and correct production link behavior.
 - Both endpoints subscribe only to delivered, delivery_delayed, bounced, complained, failed and suppressed events. No open/click events or tracking pixels are used.
 
-Until setup is complete, **Send invitation email** is disabled and **Create a private link instead** continues to work. Missing configuration cannot silently create an invitation email job.
+If configuration is removed or incomplete, **Send invitation email** is disabled and **Create a private link instead** continues to work. Missing configuration cannot silently create an invitation email job.
 
 ## Runtime and recovery
 
@@ -82,6 +82,23 @@ Both projects have `fas-contributor-email` and `fas-email-events` version 1 depl
 
 Validation: 171 automated tests, actual Edge image codec checks, reference/content validation, Cloudflare build and worker bundle passed. The additional hosted DEV rollback fixture passed, including wrong-recipient acceptance, one-use/expired links, revocation, session expiry and private payload access. Desktop (1280px) and mobile (390px) browser checks passed for provider-accepted versus delivered labels, failed sends, disabled setup, manual fallback and no horizontal overflow. No real messages were sent by these tests.
 
-Still required before marking the task complete: public DNS verification of the reported DMARC addition, production key/signing-secret installation, enabling the production webhook, and controlled production inbox/link checks for invitations, verification and recovery.
+Release checks completed on 18 October 2026. No configuration or delivery blockers remain. A disposable verification-test viewer account remains for operator cleanup through Account settings; no content or privileged roles were added to it.
 
 DEV evidence: the initial controlled email reached Spam; after the recipient marked it Not spam, the next message reached Inbox. This is recipient-specific feedback, not proof of general inbox placement. The second message produced a signed delivered event, and explicit invitation acceptance was recorded. Browser checks at 1280px and 390px verify the initially signed-out journey, automatic return after sign-in, explicit acceptance, success copy, removal of the pending credential and refreshed admin summary/row counts. A hosted DEV transaction verifies that a viewer gains contributor access without administrator access; all fixture data is rolled back.
+
+
+## Production acceptance evidence — 18 October 2026
+
+| Check | Result |
+| --- | --- |
+| Sending identity | Existing verified auth subdomain, SPF/DKIM verified; open/click tracking disabled |
+| Public DNS | Exactly one `_dmarc.auth.fromastoryteller.com` TXT record, `v=DMARC1; p=none;`; authoritative Cloudflare nameservers |
+| Invitation | Inbox receipt, correct production origin, explicit acceptance saved, email Delivered; one provider attempt |
+| Recovery | Inbox receipt, explicit link confirmation, successful password change, subsequent sign-in and rejected link reuse (operator confirmed) |
+| Verification | Inbox receipt and explicit confirmation; confirmed timestamp present in production; zero contributor/admin roles |
+| Delivery notifications | Both environments enabled; production signed Delivered event recorded durably |
+| Endpoint access | Production rejects unauthenticated sends and unsigned events with HTTP 401 after credential installation |
+| Failure/retry checks | Automated network/429/5xx and permanent-provider errors, idempotent retries, invalid/stale signatures, duplicate/out-of-order events, expiry, revocation, session removal and role enforcement pass |
+| Browser flow | Signed-out sign-in continuation and explicit acceptance, success copy, pending credential cleanup and matching row/summary refresh pass at 1280px and 390px |
+
+Public read-only rollout checks passed in GitHub Actions job `117594670463`. Live checks were performed by the operator; passwords, API keys and tokenized links are not retained in this record. Inbox placement was verified only for the controlled recipient and is not a guarantee for every mailbox. DMARC remains at the documented monitoring policy; review alignment and reporting before stronger enforcement.
