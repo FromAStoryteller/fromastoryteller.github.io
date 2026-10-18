@@ -63,3 +63,7 @@ No scheduler, automatic retention pruning or automatic restore is installed.
 The accepted V1 is complete. Further usability/function refinements, source-content editing/type expansion, private-image cleanup, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
 
 Accounts do not grant contributor or FAS-publishing rights automatically. Administrators moderate rather than approve every publication. Analytics reporting is disconnected and no ads, earnings or payouts are active. Retain environment separation, safe text/image rendering, current session checks and the documented rollback procedures during future work.
+
+## Image storage release — 18 October 2026
+
+Profile images, cover management and automatic reference-aware byte cleanup are live. See [image storage](image-storage.md) for migration mappings, validation, scheduled cleanup, export/deletion coverage and rollback. Verification: 162 tests, two actual codec checks, 23 browser scenarios and 27 disposable DEV Storage checks. The user's existing instruction to defer backups until updates are finished applies to this rollout; no existing stored files were removed.
