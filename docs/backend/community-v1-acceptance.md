@@ -1,17 +1,17 @@
 # Community V1 end-to-end acceptance — 18 October 2026
 
-Status: in progress. Do not mark complete until the live direct-API run, its exact fixture cleanup and Ryan's real Studio publishing check are recorded.
+Status: automated, hosted DEV HTTP and exact fixture cleanup checks passed. In progress until Ryan's real Studio publishing check is recorded.
 
 ## Acceptance matrix
 
 | Area | Evidence in this run | Remaining |
 | --- | --- | --- |
-| Anonymous/viewer/contributor/admin boundaries | Hosted DEV rollback: studio v1/v2, admin-tools and lifecycle suites pass | Fresh HTTP/API run |
-| Two authors and ownership | Hosted DEV rollback: private drafts, distinct URLs, cover ownership, public projections and publishing identities pass | Fresh HTTP/API run |
-| Optional friend admin | Hosted DEV admin-tools grant, relinquish, independent contributor removal/regrant pass with synthetic accounts | Fresh API grant/relinquish; no real friend is granted access by testing |
+| Anonymous/viewer/contributor/admin boundaries | Hosted DEV rollback: studio v1/v2, admin-tools and lifecycle suites pass | Passed: operator HTTP run |
+| Two authors and ownership | Hosted DEV rollback: private drafts, distinct URLs, cover ownership, public projections and publishing identities pass | Passed: operator HTTP run |
+| Optional friend admin | Hosted DEV admin-tools grant, relinquish, independent contributor removal/regrant pass with synthetic accounts | Passed: synthetic HTTP grant/relinquish; no real friend granted access |
 | Policy acknowledgements | Hosted DEV community-policy fixtures pass, including stale/missing agreement and no role-inferred acceptance | None for server fixture coverage |
 | Publish/unpublish/archive/restore/delete | Hosted DEV lifecycle fixture passes, including public catalogue removal and moderation locks | Browser passed; Ryan's real content remains |
-| Images | Hosted DEV image reference/replacement/cleanup ownership fixtures pass; no real bytes targeted | Fresh actual cover upload through HTTP |
+| Images | Hosted DEV image reference/replacement/cleanup ownership fixtures pass; no real bytes targeted | Passed: actual normalized cover uploads through HTTP |
 | Failed email and retries | Hosted DEV email outbox fixtures pass: retry versions/leases, signatures/events, expiry and cancellation; existing automated provider-failure tests included in full suite | No unsolicited email or test invitation to a friend |
 | Mobile and keyboard | Isolated 1280px/390px editor acceptance passed | None for synthetic browser coverage |
 | Failed saves, offline, stale edits, reload and session expiry | Browser integration and existing service/recovery tests pass | None for synthetic coverage |
@@ -62,10 +62,18 @@ Build job 117603389246 passed all 174 automated tests, actual Edge image codecs,
 
 The apparent publishing stall during harness development was a selector reading an unrelated page state attribute; the actual UI had already confirmed publication. The harness now checks the Studio badge specifically. It also uses the actual Essential only control before testing the footer controls, rather than clicking through the storage banner.
 
-Authenticated DEV HTTP checks and exact audit-fixture cleanup remain pending the operator command above. Ryan's real story and public URL remain pending. No unresolved application blocker was reproduced by the checks completed so far; these pending acceptance steps must not be reported as passed.
+Authenticated DEV HTTP checks and exact audit-fixture cleanup have now passed, as recorded below. Ryan's real story and public URL remain pending. No unresolved application blocker was reproduced by the completed checks; the real writer acceptance must not be reported as passed.
 
 ## First operator HTTP run and fixture setup correction
 
 Ryan's fresh authenticated DEV run at main b43ab7e passed the account and Studio suites, including actual normalized cover bytes and verified fixture cleanup. Community stopped before creating any identity because its setup called the public policy requirement RPC with service_role. Hosted DEV grants confirm anon can execute that RPC and service_role cannot. The fixture now reads that public requirement through an anonymous client; production permissions remain unchanged. A read-only DEV check found zero remaining Community fixture accounts after that failure.
 
 The remaining HTTP rerun can use `node scripts/run-fas-dev-tests.mjs --community-only` after fetching and checking out the corrected main in the clean worktree. This keeps the fixed DEV target and process-only credentials. Community HTTP results, exact audit cleanup and Ryan's real publishing checklist are still pending; no fresh pass is inferred from this fixture correction.
+
+## Successful operator HTTP acceptance and independent cleanup
+
+On 18 October 2026, Ryan ran the corrected main 88356c0 with `node scripts/run-fas-dev-tests.mjs --community-only`. Community passed roles, two authors, independent friend-admin grant/relinquish, direct REST denials, private invitation acceptance, actual cover bytes, export, lifecycle and revoked sessions. Together with his immediately preceding account and Studio passes, all three authenticated DEV HTTP suites have passed. No test email or real friend role grant was needed.
+
+Independent hosted DEV inspection verified the exact 11 reported admin audit rows (IDs 167–177) against this run's synthetic invitation/account/story subject IDs and synthetic reasons. Account deletion had already nulled audit actors as designed. A transaction guarded by the expected count and exact IDs removed only those verified synthetic audit rows. Postflight returned zero for the exact audit rows, all three fixture users/profiles, both fixture stories, the fixture invitation, associated story asset rows and Storage objects under these fixture owner paths. Real accounts, content and audit records were not targeted.
+
+The fixture-setup correction's CI checks also passed: build/tests/image codecs 117604803816, desktop/mobile browser 117604803654 and production read-only 117604803543. No further API rerun is required unless a new relevant change or failure warrants it. Remaining acceptance is Ryan's real production writing, reload, preview, publish/public URL, live edit with stable URL, unpublish and archive/restore checklist above.
