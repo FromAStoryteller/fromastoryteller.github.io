@@ -88,6 +88,30 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.deepEqual(errors,[]);
   console.log('PASS Community browser '+width+'px: keyboard tabs/preview, failed save, offline retry, reload recovery, session expiry, lifecycle, conflict copy and confirmed deletion');
+  await page.goto(origin+'/tests/admin-preview/');
+  await page.locator('[data-email-invite]').waitFor();
+  await page.evaluate(()=>window.__adminEmailPreview.fail(true));
+  await page.locator('#invite-email').fill('fixture-invite@example.invalid');
+  await page.locator('[data-email-invite]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-admin-status]')?.textContent.includes('Email delivery was not confirmed'));
+  assert.equal(await page.locator('#invite-email').inputValue(),'fixture-invite@example.invalid');
+  assert.equal(await page.locator('[data-email-invite]').isEnabled(),true);
+  await page.evaluate(()=>window.__adminEmailPreview.fail(false));
+  await page.getByRole('button',{name:'Refresh delivery status',exact:true}).click();
+  await page.locator('#invite-email').fill('fixture-invite@example.invalid');
+  await page.locator('[data-email-invite]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-admin-status]')?.textContent.includes('accepted by the email provider'));
+  assert.equal(await page.evaluate(()=>window.__adminEmailPreview.jobs().length),1);
+  await page.evaluate(()=>window.__adminEmailPreview.ready(false));
+  await page.getByRole('button',{name:'Refresh delivery status',exact:true}).click();
+  assert.equal(await page.locator('[data-email-invite]').isDisabled(),true);
+  await page.getByText('Create a private link instead',{exact:true}).click();
+  await page.locator('#invite-email').fill('fallback-fixture@example.invalid');
+  await page.getByRole('button',{name:'Create invitation link',exact:true}).click();
+  await page.getByRole('heading',{name:'Invitation link ready',exact:true}).waitFor();
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  assert.deepEqual(errors,[]);
+  console.log('PASS '+width+'px admin email failure, status refresh, retry, provider-accepted label and disabled-delivery private fallback');
   await context.close();
  }
 }finally{await browser.close();}
