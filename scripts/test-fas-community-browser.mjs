@@ -17,7 +17,7 @@ async function preview(page){
 try{
  for(const width of [1280,390]){
   const context=await browser.newContext({viewport:{width,height:900}});
-  const page=await context.newPage(),errors=[];page.setDefaultTimeout(12000);page.on('pageerror',e=>errors.push(e.message));
+  const page=await context.newPage(),errors=[];page.setDefaultTimeout(12000);page.on('pageerror',e=>{errors.push(e.message);console.log('Synthetic editor error: '+e.message);});
   page.on('dialog',dialog=>dialog.accept());
   await page.goto(origin+'/tests/studio-preview/?fixture-persist');
   await openOwner(page);
@@ -61,7 +61,7 @@ try{
   assert.equal(await page.locator('[data-manuscript]').innerText(),sessionText);
   await page.locator('[data-save]').click();await saved(page);
   console.log('PASS '+width+'px session recovery');await publish.click();await page.locator('[data-publish]').click();
-  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='published');
+  await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='published').catch(async()=>{throw new Error('Publication check: '+await page.locator('[data-status]').innerText()+'; checklist: '+await page.locator('[data-checklist]').innerText());});
   assert.equal(await page.locator('[data-save]').innerText(),'Save live changes');
   await page.locator('[data-unpublish]').click();
   await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='draft');
