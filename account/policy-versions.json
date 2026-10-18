@@ -106,7 +106,16 @@
       "preparedOn": "2026-10-18",
       "previousVersion": "account-sessions-2026-10-16-v2",
       "change": "Contributor publishing rights and responsibilities; current uploads, tab recovery, invitations, moderation and removal disclosures.",
-      "documents": {}
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/community-policies-2026-10-18-v1/terms/index.html",
+          "sha256": "f0bf19cfcbc6b2b67016efa34367f9a8ca76678d36675d8f396059f725fd6bdf"
+        },
+        "privacy": {
+          "path": "/account/policy-history/community-policies-2026-10-18-v1/privacy/index.html",
+          "sha256": "5df51966e047ae11db4083b7c9afc8f19f36df369b20d6f95024a5a56fa4c803"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
