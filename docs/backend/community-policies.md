@@ -28,3 +28,13 @@ Invitation email v2 adds a direct notice of admin-supplied email collection, pur
 - Supabase function security, https://supabase.com/docs/guides/database/functions
 
 These are implementation and source-review notes, not a legal certification or a claim of universal compliance. Previously approved operator/contact choices remain as documented in policy-versioning-review.md.
+
+## Validation and staged deployment
+
+174 automated tests pass, including an actual PostgreSQL rehearsal of missing/unchecked/stale acknowledgement, invitation acceptance after explicit agreement, isolation and role non-inference. Existing deletion/export/agreement-history suites also pass. Edge codecs, references, content generation, preview build and Worker bundle pass. The synthetic browser flow passes at 1280px and 390px with no horizontal overflow or page exceptions.
+
+DEV: Edge invitation worker version 5, followed by source migration 20261018053532_community_policies.sql (hosted history 20261018053933). The hosted rollback fixture passed; both exact fixture identities and the synthetic policy release are absent afterwards, and DEV's pre-existing NULL requirement is preserved. New email jobs default to renderer v2; existing jobs retain v1. No real email, account agreement or content was created by this validation. The public invitation wrapper is now invoker; its private definer checks the live session and current agreement.
+
+Security review: private tables intentionally have RLS without browser table policies. The new private invitation function has explicit grants and an empty search path; the public wrapper is not a definer. Previously documented public projection/self-service definer advisories and DEV's disabled leaked-password protection remain outside this change; no new public definer endpoint was introduced.
+
+A later policy transition need not disable Auth signup: the release singleton is locked, Auth validates exact version/hash metadata again while recording agreement, and stale requests fail closed. The bootstrap release preparation keeps its original signup-off instruction. There can be a short registration retry interval while the server requirement and deployed runtime registry change; no stale acceptance is silently upgraded.

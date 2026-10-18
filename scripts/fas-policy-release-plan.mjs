@@ -71,7 +71,7 @@ export function policyTransitionPlan(root, registry, version, previousVersion) {
     raise exception 'Published predecessor does not match the reviewed history';
   end if;
 `;
-  return sql.replace(guard,replacement).replace(`  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`,verifyPrevious + `  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`);
+  return sql.replace('-- Keep Auth signup OFF throughout this transaction. No user agreement is inserted.',"-- Existing signup and agreement requests carry exact versions/hashes;\n-- stale requests fail closed during this locked transition. No user agreement is inserted.").replace(guard,replacement).replace(`  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`,verifyPrevious + `  if not exists(select 1 from private.account_policy_releases where release_id='${version}') then`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

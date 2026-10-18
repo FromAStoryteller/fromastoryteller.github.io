@@ -1,6 +1,7 @@
 -- PREPARED ONLY: execute after explicit publication approval and verification
 -- of the exact public snapshot bytes on https://fromastoryteller.com.
--- Keep Auth signup OFF throughout this transaction. No user agreement is inserted.
+-- Existing signup and agreement requests carry exact versions/hashes;
+-- stale requests fail closed during this locked transition. No user agreement is inserted.
 begin;
 set local lock_timeout = '3s';
 set local statement_timeout = '10s';
