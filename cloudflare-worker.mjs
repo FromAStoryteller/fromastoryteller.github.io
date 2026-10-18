@@ -75,7 +75,7 @@ export async function readingResponse(request,env,fetcher=fetch){
   const canonical=contentPath(story);if(!canonical)return fallback(404);
   if(legacy||url.pathname!==canonical){const destination=new URL(canonical,url);destination.search=url.search;destination.searchParams.delete('story');return new Response(null,{status:308,headers:{Location:destination.href,'Cache-Control':'no-store'}});}
   const image=story.cover?.asset_id?PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+encodeURIComponent(story.cover.asset_id):'';
-  let html=renderReadingMetadata(await response.text(),story,image);html=html.replace(/(<(?:article|div)[^>]*data-profile-root[^>]*>)[\s\S]*?(<\/(?:article|div)>)/,(_,open,close)=>open+storyPageMarkup({...story,image,image_alt:story.cover?.alt})+close);headers.delete('Content-Length');headers.delete('ETag');headers.set('X-Robots-Tag','index, follow');
+  let html=renderReadingMetadata(await response.text(),story,image);html=html.replace(/<!--content-layout:start-->[\s\S]*?<!--content-layout:end-->/,()=>storyPageMarkup({...story,image,image_alt:story.cover?.alt}));headers.delete('Content-Length');headers.delete('ETag');headers.set('X-Robots-Tag','index, follow');
   return new Response(request.method==='HEAD'?null:html,{status:200,headers});
  }catch{return fallback(503);}
 }

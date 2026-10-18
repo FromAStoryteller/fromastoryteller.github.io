@@ -30,3 +30,16 @@ test('trusted legacy manuscript remains byte-identical inside the reading slot',
 test('each game owns its menu source',()=>{
  for(const game of ['rally-clash','brick-blitz']){const source=readFileSync(new URL('../sources/games/'+game+'.mjs',import.meta.url),'utf8');assert.ok(source.includes('class MenuManager'));assert.ok(!source.includes('systems/games/menu/'));}
 });
+
+test('Worker renders validated prose in the shared shell without forwarding a reader session',async()=>{
+ const {readingResponse}=await import('../cloudflare-worker.mjs');
+ const shell=readFileSync(new URL('../read/index.html',import.meta.url),'utf8');
+ const config={mode:'production',enabled:true,url:'https://vzdicnufhidelaoeqbza.supabase.co',key:'sb_publishable_fixture',signup:true,lifecycle:true,policyRelease:'fixture'};
+ const env={ASSETS:{fetch:async request=>{const path=new URL(request.url).pathname;return path==='/account/runtime-config.json'?Response.json(config):new Response(shell,{status:path==='/read/'?200:404,headers:{'Content-Type':'text/html'}});}}};
+ let calls=0;
+ const fetcher=async(url,options)=>{calls++;assert.equal(options.headers.Authorization,undefined);assert.equal(options.headers.Cookie,undefined);return Response.json({...story,slug:'fixture',summary:'A safe description'});};
+ const response=await readingResponse(new Request('https://fromastoryteller.com/stories/fixture/',{headers:{Cookie:'private-cookie',Authorization:'Bearer reader-private'}}),env,fetcher);
+ const html=await response.text();assert.equal(response.status,200);assert.equal(calls,1);
+ assert.match(html,/data-content-layout="story"/);assert.match(html,/Opening &lt;script&gt;/);assert.ok(!html.includes('<script>alert(1)</script>'));assert.ok(!html.includes('Loading the story'));
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+});
