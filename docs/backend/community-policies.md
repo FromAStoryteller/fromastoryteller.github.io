@@ -1,6 +1,6 @@
 # Account and contributor policies — 18 October 2026
 
-Release candidate: community-policies-2026-10-18-v1. Predecessor: account-sessions-2026-10-16-v2.
+Published release: community-policies-2026-10-18-v1. Predecessor: account-sessions-2026-10-16-v2.
 
 The public Terms include the complete contributor policy. /terms/contributors/ repeats that exact section and points to the immutable Terms snapshot. A single explicit account Terms agreement covers the contributor rules if that person submits work; reader registration by itself grants no submission licence. This avoids a second overlapping contract and keeps existing server-validated version/time/hash records, personal exports and deletion behavior.
 
@@ -49,6 +49,16 @@ Activation changes the active registry to the published community release. The g
 
 The first activation check caught an older public runtime registry despite the registry-only main commit. The requirement was temporarily returned to the previous version so registration remained available. The new published catalog entry and original agreement history were preserved. A source/build update now makes the production build report its selected policy version and triggers the hosting build; public matching is checked again before restoring the new requirement. For future policy-only releases, verify that hosting build-watch includes account/policy-versions.json rather than relying on unrelated content changes.
 
-Production image/email foundation migration installed as hosted 20261018054316 (source 20261018053532); the invitation worker is version 4. DEV hosted mapping remains 20261018053933 / worker version 5. No new email was sent by this rollout.
+Production policy/email migration installed as hosted 20261018054316 (source 20261018053532); the invitation worker is version 4. DEV hosted mapping remains 20261018053933 / worker version 5. No new email was sent by this rollout.
 
 Policy-only deployment is now made explicit in source: site-index generation updates a generated policy-version comment on the watched Worker file from the single registry. CI checks that marker alongside generated HTML/indexes. A later active-version change must include its generated Worker update, so the same missing-trigger problem cannot silently pass release validation. This is metadata for the hosting build, not a second runtime policy source.
+
+## Completed production verification
+
+PR #48 activated the registry (5fa886be34a4308c0e9b6f6f448b0bf689326af5); PR #49 supplied the verified hosting trigger/build guard (c49dbe1325cdd2e3b314189375bc874d213125a1). After public runtime verification, the idempotent predecessor-checked transition was reapplied to require community-policies-2026-10-18-v1. Both earlier catalog releases remain, and the transition did not change the original publication timestamp or create any personal acceptance.
+
+Final public verification job 117599548835 passed: Terms and Privacy snapshot SHA-256 digests match the published registry, required public/support/agreement routes are present, the public account runtime names the new release, and the anonymous server policy requirement names the identical release with matching document hashes. The earlier isolated runtime staging check was job 117599414242. All final implementation checks passed (174 tests, image codecs, syntax/references, generated-content/Worker marker check, preview build and Worker bundle). The policy/onboarding browser flow passed at desktop 1280px and mobile 390px.
+
+A final production read confirms the new required release, two preserved historical releases, renderer default v2, and zero new individual agreements at verification time. No acceptance was recorded on anyone's behalf. The account holder must review the current linked Terms and Privacy notice and choose the unchecked confirmations on /account/agreements/ before contributing. Public reading and personal account rights remain available.
+
+The task's implementation and publication criteria are complete. No outstanding deployment or fixture-cleanup blocker remains. The operational wording reflects the current free service; it is not a certification of legal compliance or a replacement for any legal advice the operator chooses to obtain.
