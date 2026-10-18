@@ -2,8 +2,7 @@
 
 Current hosting guide. The earlier [migration plan](cloudflare-migration.md) is
 historical. Local and hosted FAS database setup is complete; see
-[backend operations](backend/operations.md) for its separate status and remaining
-community implementation work.
+[backend operations](backend/operations.md) for the current live Community status and [operational readiness](backend/community-operational-readiness.md).
 
 ## Live publishing configuration
 
@@ -18,7 +17,7 @@ The production configuration is `wrangler.production.jsonc`, including the appro
 
 Production assets are staged into `dist-production`; preview assets remain in `dist` and retain their noindex header. The staging build preserves all 139 public files and excludes repository metadata, maintenance scripts and private paths. Production omits the preview search exclusion.
 
-Commits to main now select the production build. Changes to content published through Studio must reach main to be included. A successful build is required before a change is live; check the Cloudflare build log if an update does not appear.
+Commits to main now select the production build. Source-file content and frontend changes must reach main to be included. Community stories published through Storyteller Studio are served dynamically from Supabase through the Worker and do not require a Git commit. A successful build is required before a change is live; check the Cloudflare build log if an update does not appear.
 
 ## Completed cutover and verification
 
@@ -26,7 +25,7 @@ Ryan approved the DNS handover and live hosting cutover. Nameservers are `khalid
 
 Existing tests: 16 passed. Local production verification and the deployed workers.dev candidate each passed 148 checks. Live checks confirmed 138 public files byte for byte, story-path redirects, private-path/custom 404 responses, and HTTP/www redirects without loops. The remaining public file, robots.txt, intentionally has Cloudflare's managed bot-preference prefix; retain the original allow/search and sitemap directives when reviewing this difference.
 
-Main build confirmation remains required after the first post-switch commit. Open Cloudflare Deployments and confirm its branch is main and its status is Ready, then verify the live site.
+The initial main build and subsequent Community releases have been verified. For each new release, check its exact main commit in Cloudflare Deployments and verify the live site; a successful branch preview alone is insufficient.
 
 ## Verification and rollback
 
@@ -36,6 +35,6 @@ Run `npm run build:cloudflare-production` before checking a deployment. For the 
 
 The same verifier can check the live apex, where the configured managed robots.txt prefix is an expected hash difference that must be reviewed separately. No other public-file hash differences are expected.
 
-Keep GitHub Pages, its custom-domain configuration and the original DNS values for rollback. To restore GitHub Pages hosting, detach the Worker custom domain and disable intercepting redirect rules, then restore these four apex A records as DNS-only: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`. Restore the www CNAME to `fromastoryteller.github.io` as DNS-only. A nameserver rollback is separate and is not required for a hosting rollback.
+For current Community releases, prefer rollback/redeployment of a known-good compatible production Worker together with its static assets; retain Supabase data/schema and verify current policies. See [the operational runbook](backend/community-operational-readiness.md). GitHub Pages is a historical static-only fallback and cannot provide current Community Worker routes. The original static cutover reversal procedure follows for incident planning only; it is not a full Community rollback. Keep its custom-domain configuration and original DNS values for that limited fallback. To restore GitHub Pages hosting, detach the Worker custom domain and disable intercepting redirect rules, then restore these four apex A records as DNS-only: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`. Restore the www CNAME to `fromastoryteller.github.io` as DNS-only. A nameserver rollback is separate and is not required for a hosting rollback.
 
-Preview rollback was rehearsed successfully. Record successful production website versions for later rollback; the initial Hello World version is not a usable website rollback target. Supabase dev/prod databases and operator accounts are configured. The community interface, viewer registration and end-to-end account flows remain separate implementation work. Hosting rollback does not restore or roll back database data.
+Preview rollback was rehearsed successfully. Record successful production website versions for later rollback; the initial Hello World version is not a usable website rollback target. Supabase dev/prod databases and operator accounts are configured. Community, viewer accounts, publishing and transactional email are now live; see [Community acceptance](backend/community-v1-acceptance.md) and [operational readiness](backend/community-operational-readiness.md). Hosting rollback does not restore or roll back database data.

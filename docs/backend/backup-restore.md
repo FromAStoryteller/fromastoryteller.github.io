@@ -1,5 +1,7 @@
 # FAS backup and restore
 
+Current operational closeout and exact next backup location: [Community operational readiness](community-operational-readiness.md). The last confirmed encrypted set predates the latest releases. Do not run the historical generic import example below against current account-enabled backups; use an isolated target-specific plan first.
+
 Database backups alone do not contain uploaded image bytes. Keep three things:
 the reviewed repository/migrations, confidential database exports, and image files
 with a checksum inventory. Hosted Auth/SMTP/redirect settings and secrets require

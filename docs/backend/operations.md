@@ -1,8 +1,10 @@
 # FAS current operations
 
-Updated 18 October 2026. Studio V1 is deployed and accepted. This records the current operating boundaries;
+Updated 19 October 2026. Studio V1 is deployed and accepted. This records the current operating boundaries;
 the setup and restore guides remain the repeatable procedures. No credentials or
 backup data belong in this repository.
+
+See [Community operational readiness](community-operational-readiness.md) for the current deployment checks, remaining fresh-backup confirmation, recovery/rollback and support triage. Historical preparation documents do not override that record.
 
 ## Current release
 
@@ -60,7 +62,7 @@ No scheduler, automatic retention pruning or automatic restore is installed.
 
 ## Follow-up work
 
-The accepted V1 is complete. Further usability/function refinements, source-content editing/type expansion, private-image cleanup, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
+Community end-to-end acceptance is complete. Operational readiness remains in progress until the new post-release encrypted backup is confirmed. Further usability/function refinements, source-content editing/type expansion, reporting/ads/payment setup and a full isolated hosted restore rehearsal are tracked in [the handover backlog](studio-v1-handover.md#follow-up-backlog).
 
 Accounts do not grant contributor or FAS-publishing rights automatically. Administrators moderate rather than approve every publication. Analytics reporting is disconnected and no ads, earnings or payouts are active. Retain environment separation, safe text/image rendering, current session checks and the documented rollback procedures during future work.
 
