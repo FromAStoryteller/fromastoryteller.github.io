@@ -1,0 +1,26 @@
+name: Verify image storage UI
+on:
+  push:
+    branches: [verify/image-storage-browser]
+permissions:
+  contents: read
+jobs:
+  image-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/verify-image-storage.mjs
+      - run: node scripts/verify-studio-recovery.mjs
+      - run: node scripts/verify-story-lifecycle.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: image-storage-browser
+          path: .preview-cache/
