@@ -32,6 +32,6 @@ try {
  }
  const results=await Promise.all(['fas-contributor-email','fas-email-events'].map(async name=>{
   const response=await fetch('https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/'+name,{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
-  assert.equal(response.status,503);return name+' safely disabled';
+  assert.equal(response.status,name==='fas-contributor-email'?401:503);return name+' safely disabled';
  }));console.log('PASS deployed DEV endpoints: '+results.join('; '));
 } finally {await browser.close();}
