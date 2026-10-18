@@ -29,9 +29,6 @@ Unit checks cover escaped titles/author/warnings, forbidden image/social schemes
 
 No production draft, real account, mail or invitation is created by these checks. The full website CSS/theming pass remains Ryan's later personal work.
 
-## Planning changes requested in the same session
+## Release checks
 
-The Goals & Life workbook edits are pending a functioning local workbook runtime. Do not claim the workbook has been saved:
-- T0437, “Verify onboarding and invite first two contributors”: unavailable before **1 December 2026**; December availability must not send invitations automatically.
-- Add Ryan-owned FAS theme-cohesion work for later: inventory existing CSS; establish shared spacing/colour/type/size/radius/control tokens; align element states/components; remove competing overrides; verify light/dark, mobile/keyboard and representative content/account pages. Preserve the existing visual theme.
-- Keep the current layout/template work distinct from that later personal learning/polish pass.
+The 10 legacy manuscript bodies and all four game/tool implementation areas passed byte-for-byte comparison against base 0d421483103337cbae3e107a75c8e8db70b76548. Browser job 117751115318 passed legacy/Studio widths/fonts and both games' Play/Pause/Settings/Resume at 1280px and 390px; Community browser job 117751115616 passed preview, failed saves, offline retry, reload/session recovery, conflicts and lifecycle. Visual review of fictional desktop/mobile pages found a byline link inheriting the ordinary wine link colour over the dark hero; scoped metadata links now inherit the hero's contrasting text colour and retain a full touch target. Blank-cover previews use the ordinary secondary text colour. Server-rendered prose has an explicit template slot and a safe-manuscript/reader-credential regression check. No production test story is created.

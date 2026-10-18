@@ -280,3 +280,6 @@
 .story-footer .storyteller-socials {justify-content:center;}
 
 .ss-reader-preview .story-content h2 {font:500 1.45em/1.4 var(--font-family-reading);margin:1.5em 0 .8em;}
+
+.story-meta a {color:inherit;display:inline-flex;align-items:center;min-height:var(--size-touch-target-minimum);text-decoration-color:currentColor;text-underline-offset:.18em;}
+.story-hero--no-image + .story-meta {color:var(--colour-text-secondary);}
