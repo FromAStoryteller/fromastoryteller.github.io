@@ -1,4 +1,4 @@
-import {invitationEmail,MAIL_FROM} from './invitation-email-v1.mjs';
+import {invitationEmail,MAIL_FROM} from './invitation-email.mjs';
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 export function mailRpc(config,fetcher=fetch){
  return async(name,body={},authorization=null)=>{

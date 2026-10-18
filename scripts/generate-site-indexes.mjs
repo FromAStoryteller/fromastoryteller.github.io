@@ -32,7 +32,8 @@ const STATIC_PAGE_GROUPS = [
     label: "LEGAL",
     pages: [
       "/privacy/",
-      "/terms/"
+      "/terms/",
+      "/terms/contributors/"
     ]
   }
 ];

@@ -99,9 +99,18 @@
         "approvedOn": "2026-10-16",
         "scope": "remembered-sign-in-and-matching-policy-transition"
       }
+    },
+    "community-policies-2026-10-18-v1": {
+      "status": "publication-candidate",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-18",
+      "previousVersion": "account-sessions-2026-10-16-v2",
+      "change": "Contributor publishing rights and responsibilities; current uploads, tab recovery, invitations, moderation and removal disclosures.",
+      "documents": {}
     }
   },
   "hashFormat": "sha256-utf8-lf",
   "candidateVersion": "account-launch-2026-10-16-v1",
-  "sessionUpdateVersion": "account-sessions-2026-10-16-v2"
+  "sessionUpdateVersion": "account-sessions-2026-10-16-v2",
+  "communityUpdateVersion": "community-policies-2026-10-18-v1"
 }
