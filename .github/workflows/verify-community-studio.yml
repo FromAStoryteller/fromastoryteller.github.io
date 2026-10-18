@@ -1,0 +1,33 @@
+name: Verify Community Studio release
+on:
+  push:
+    branches: [verify/community-studio-release]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify the live editor is the tested source
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import assert from 'node:assert/strict';
+          const digest=text=>createHash('sha256').update(text.replace(/\r\n/g,'\n')).digest('hex');
+          const expected=digest(readFileSync('systems/community/studio-editor.mjs','utf8'));
+          let last;
+          for(let i=0;i<12;i++){
+            try{
+              const r=await fetch('https://fromastoryteller.com/systems/community/studio-editor.mjs',{cache:'no-store',signal:AbortSignal.timeout(15000)});
+              assert.equal(r.status,200);assert.equal(digest(await r.text()),expected);
+              last=null;console.log('PASS production Studio editor exactly matches tested keyboard/recovery source');break;
+            }catch(error){last=error;if(i<11)await new Promise(resolve=>setTimeout(resolve,5000));}
+          }
+          if(last)throw last;
+          JS
+      - run: node scripts/test-fas-community-public.mjs --production-read-only
