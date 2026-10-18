@@ -14,6 +14,7 @@ Display name: ${profile.display_name}
 Welcome line: ${profile.welcome_line || '(empty)'}
 Bio: ${profile.bio || '(empty)'}
 Public profile ID: ${profile.public_id || '(not assigned)'}
+Profile image description: ${profile.image_alt || '(no profile image)'}
 Access: ${roleLabel(data.account.roles ?? (role === 'viewer' ? [] : [role]))}
 Account state: ${data.account.state}
 Profile created: ${profile.created_at}
@@ -29,7 +30,7 @@ Published policy agreements:
 ${data.account.policy_agreements?.length ? data.account.policy_agreements.map(item=>`Terms: ${item.terms_version}\nPrivacy notice: ${item.privacy_version}\nRecorded: ${item.recorded_at}\nTerms SHA-256: ${item.terms_sha256}\nPrivacy SHA-256: ${item.privacy_sha256}`).join('\n\n') : 'No published policy agreement has been recorded.'}
 
 This file contains your current account and profile details. Passwords and session
-credentials are excluded. Contributors can download stories and images separately.
+credentials are excluded. Download your stored profile images, story text and covers\nseparately using your content download in account settings.
 Game saves and multiplayer are not available yet.
 metadata/account.json contains the same data in a format suitable for software.
 For personal-data questions, contact fromastoryteller@gmail.com.

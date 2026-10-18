@@ -67,7 +67,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
         }
         addJson('metadata/story-images.json', data.assets);
         const paths = new Set(data.objects.map(o => o.path));
-        if (data.assets.some(a => !paths.has(a.object_path))) return json(409, { message: 'An original image is unavailable. The export was not completed; nothing was deleted.' });
+        if (data.assets.some(a => !paths.has(a.object_path)) || (data.profile?.image_path && !paths.has(data.profile.image_path))) return json(409, { message: 'A stored image is unavailable. The export was not completed; nothing was deleted.' });
         for (const item of data.objects) {
           if (!imagePath.test(item.path) || !item.path.startsWith(user.id + '/')) throw new Error('Invalid owned path');
           const response = await call('/storage/v1/object/authenticated/fas-story-images/' + item.path);
@@ -79,7 +79,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
         }
         const second = await rpc('fas_account_snapshot', args);
         if (first.fingerprint !== second.fingerprint) return json(409, { message: 'Your content changed while exporting. Please try again.' });
-        addJson('metadata/manifest.json', { format: 'fas-owned-content-v2', exported_at: new Date().toISOString(), stories: data.stories.length, images: data.objects.length, scope: 'Account-owned FAS Community story text, image metadata and uploaded originals. Existing static games/stories not linked to this account are not included. Future saves/multiplayer require a versioned export extension.', files: files.map(f => f.name) });
+        addJson('metadata/manifest.json', { format: 'fas-owned-content-v2', exported_at: new Date().toISOString(), stories: data.stories.length, images: data.objects.length, scope: 'Account-owned FAS Community story text, image metadata and stored uploaded crops. Existing static games/stories not linked to this account are not included. Future saves/multiplayer require a versioned export extension.', files: files.map(f => f.name) });
         return new Response(zipFiles(files), { status: 200, headers: { ...common, 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename="from-a-storyteller-content.zip"' } });
       }
       if (body.action === 'prepare-delete') {

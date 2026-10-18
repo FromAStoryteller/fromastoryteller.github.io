@@ -11,7 +11,7 @@ const headers = {
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const imagePath = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/;
-export function makeImageHandler({ base, anonKey, serviceKey }, fetcher = fetch) {
+export function makeImageHandler({ base, anonKey, serviceKey, kind='cover' }, fetcher = fetch) {
   const reply = (status, message) => new Response(message, { status, headers });
   return async (request) => {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
@@ -23,12 +23,17 @@ export function makeImageHandler({ base, anonKey, serviceKey }, fetcher = fetch)
     // readers use the anon role. Editable metadata and caller paths are ignored.
     const authorization = request.headers.get('Authorization') || `Bearer ${anonKey}`;
     const visibleAsset = async () => {
-      const response = await fetcher(`${base}/rest/v1/story_assets?id=eq.${id}&select=object_path`, {
+      const response = await fetcher(kind==='profile'?`${base}/rest/v1/rpc/fas_visible_profile_image?asset_key=${id}`:`${base}/rest/v1/story_assets?id=eq.${id}&select=object_path`, {
         headers: { apikey: anonKey, Authorization: authorization },
         redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) return null;
       const rows = await response.json();
+      if(kind==='profile'){
+        if(rows!==true)return null;
+        const resolved=await fetcher(`${base}/rest/v1/rpc/fas_profile_image_path?asset_key=${id}`,{headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`},redirect:'error',cache:'no-store',signal:AbortSignal.timeout(15000)});
+        if(!resolved.ok)return null;const path=await resolved.json();return typeof path==='string'&&imagePath.test(path)?path:null;
+      }
       return rows.length === 1 && imagePath.test(rows[0].object_path) ? rows[0].object_path : null;
     };
     try {

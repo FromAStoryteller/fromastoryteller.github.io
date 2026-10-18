@@ -69,6 +69,13 @@ export function createStudioService(client,{ownerId,checkAccount=loadProfileAcco
    if(r.data?.id!==previous.id)throw new StudioConflictError('This draft changed elsewhere, was scheduled or published, or is no longer available. Reopen it from Your work before deleting.');
   },
   async uploadCover(id,file,alt,crop){await authorize();if(!isPublicId(id)||!file||file.size>5*1024*1024||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and describe the image.');const body=new FormData();body.set('story_id',id);body.set('image',file);body.set('alt',alt.trim());body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));const r=await client.functions.invoke('fas-studio-cover',{body});if(r.error||!r.data?.asset)throw new Error('Cover upload could not finish. Try again. Existing covers are unchanged.');return r.data.asset;},
+  async changeCover(previous,assetId,alt,remove=false){
+   await authorize();if(!isPublicId(previous?.id)||!isPublicId(assetId)||!previous.updated_at)throw new Error('Reopen this content before managing covers.');
+   const r=await client.rpc('fas_change_cover_image',{target_story:previous.id,asset_key:assetId,expected_version:previous.updated_at,image_alt:alt,remove_image:remove});
+   if(r.error?.code==='P0002')throw new StudioConflictError('This content changed elsewhere. Reopen it before managing covers.');
+   if(r.error)throw new Error(remove?'This cover could not be removed. Choose and save another cover (or clear an unscheduled draft’s cover) before removing the selected image.':'The description could not be saved. Check your access and description.');
+   if(r.data?.id!==previous.id)throw new StudioConflictError('The image change was not confirmed. Reopen your content.');return r.data;
+  },
   async traffic(pageId=null,days=30){await authorize();const r=await client.rpc('fas_my_studio_traffic',{page_key:pageId,period_days:days});if(r.error)throw new Error('Traffic reports could not be loaded. Try again.');return r.data;},
  };
 }

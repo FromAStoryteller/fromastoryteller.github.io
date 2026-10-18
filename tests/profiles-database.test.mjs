@@ -35,7 +35,7 @@ test('profile ownership, public projection, attribution, pagination and account 
     assert.deepEqual(Object.keys(newContributor).sort(),Object.keys(profile).sort());
     assert.deepEqual(newContributor.stories,[]);
     assert.equal(newContributor.next_offset,null);
-    assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','next_offset','public_id','social_links','stories','welcome_line']);
+    assert.deepEqual(Object.keys(profile).sort(),['bio','display_name','image','next_offset','public_id','social_links','stories','welcome_line']);
     assert.equal(profile.stories.length,12);assert.equal(profile.next_offset,12);
     const publishedId=(await db.query("select id from public.stories where slug='profile-story-1'")).rows[0].id;
     const draftId=(await db.query("select id from public.stories where slug='profile-private-draft'")).rows[0].id;
