@@ -7,7 +7,7 @@ import {accountNavigation} from './account-navigation.mjs';
 import {createStudioService} from './studio-service.mjs';
 import {mountStudio} from './studio-editor.mjs';
 import {mountStudioLock} from './studio-lock.mjs';
-import {createRecoveryStore,clearRecoveryStorage} from './studio-recovery.mjs';
+import {createRecoveryStore,clearRecoveryStorage,downloadRecovery} from './studio-recovery.mjs';
 const root=document.querySelector('[data-studio-root]'),nav=document.querySelector('[data-studio-navigation]');
 let dispose,lockDispose,ended=false,held=null,ownerId=null,local,signingOut=false,tabStorage;
 try{tabStorage=sessionStorage;}catch{}
@@ -26,14 +26,17 @@ async function launch(account,initialRecovery=null){
  const policies=await contributionPolicyState(local.client);
  if(ended)return;
  if(!policies.accepted){
+  held=initialRecovery??held;
   ownerId=account.user.id;
-  nav.replaceChildren(accountNavigation(document,{current:'studio',publicId:account.profile.public_id,auth:local.client.auth,admin:account.admin}));
+  nav.replaceChildren(accountNavigation(document,{current:'studio',publicId:account.profile.public_id,auth:{signOut:async args=>{held=null;clearRecoveryStorage(tabStorage);return local.client.auth.signOut(args);}},admin:account.admin}));
   root.replaceChildren();
   const heading=document.createElement('h1');heading.textContent='Review the updated contributor terms';
   const message=document.createElement('p');message.textContent='Before creating, editing or uploading, review the current Terms, including your content rights and contributor responsibilities. Saved work stays private and any tab recovery copy is kept. Account downloads, deletion and support remain available.';
   const actions=document.createElement('div');actions.className='account-flow-actions';
   for(const [text,href] of [['Review and agree','/account/agreements/'],['Read contributor policy','/terms/contributors/'],['Account settings and downloads','/account/settings/']]){const a=document.createElement('a');a.className='account-secondary';a.href=href;a.textContent=text;actions.append(a);}
-  root.append(heading,message,actions);return;
+  root.append(heading,message,actions);
+  if(held){const note=document.createElement('p');note.textContent='Download the unsaved writing held in memory before leaving this tab.';root.append(note);for(const [label,plain] of [['Download unsaved text',true],['Download recovery file',false]]){const button=document.createElement('button');button.type='button';button.className='account-secondary';button.textContent=label;button.addEventListener('click',()=>downloadRecovery(document,held,plain));root.append(button);}}
+  return;
  }
  ownerId=account.user.id;clearRecoveryStorage(tabStorage,account.profile.public_id);
  const store=createRecoveryStore(tabStorage,{ownerId:account.profile.public_id});
