@@ -20,6 +20,9 @@ insert into public.story_assets(id,story_id,object_path,alt_text,pixel_width,pix
 update public.stories set cover_asset_id='96000000-0000-0000-0000-000000000001' where id=(select id from lifecycle_row);
 set local role authenticated;
 update public.stories set status='published' where id=(select id from lifecycle_row);
+update public.stories set status='draft' where id=(select id from lifecycle_row);
+do $$ begin if public.fas_public_story('lifecycle-fixture') is not null or exists(select 1 from jsonb_array_elements(public.fas_public_story_catalog()->'items') i where i->>'id'=(select id::text from lifecycle_row)) then raise exception 'FAIL unpublish discovery';end if;end $$;
+update public.stories set status='published' where id=(select id from lifecycle_row);
 update lifecycle_row set version=(select updated_at from public.stories where id=lifecycle_row.id);
 do $$ declare n integer;begin
  if not exists(select 1 from jsonb_array_elements(public.fas_public_story_catalog()->'items') i where i->>'id'=(select id::text from lifecycle_row)) then raise exception 'FAIL discovery publication';end if;
@@ -107,5 +110,23 @@ end $$;
 set local role authenticated;
 insert into public.stories(author_id,title) values(auth.uid(),'Lifecycle fixture');
 do $$ begin if exists(select 1 from public.stories where author_id=auth.uid() and slug='lifecycle-fixture') then raise exception 'FAIL deleted permanent link reassigned';end if;end $$;
+-- Trusted seed rows exercise equal-time public pagination, not contributor publication.
+reset role;
+insert into public.stories(author_id,slug,title,summary,body,status,published_at)
+ select '97000000-0000-0000-0000-000000000001','fas-lifecycle-page-97000000-'||n,'Lifecycle page '||n,'Pagination fixture','Pagination words','published',now() from generate_series(1,61)n;
+set local role anon;
+select set_config('request.jwt.claim.sub','',true);
+do $$ declare page jsonb;cursor jsonb;seen uuid[]:='{}';item jsonb;pages integer:=0;begin
+ loop
+  page:=public.fas_public_story_catalog((cursor->>'published_at')::timestamptz,(cursor->>'id')::uuid);pages:=pages+1;
+  if jsonb_array_length(page->'items')>60 or pages>100 then raise exception 'FAIL public catalog bound';end if;
+  for item in select value from jsonb_array_elements(page->'items') loop
+   if (item->>'id')::uuid=any(seen) then raise exception 'FAIL duplicated public cursor';end if;
+   seen:=array_append(seen,(item->>'id')::uuid);
+  end loop;
+  cursor:=page->'next_cursor';exit when cursor is null or cursor='null'::jsonb;
+ end loop;
+ if cardinality(seen)<61 or pages<2 then raise exception 'FAIL missing paginated public cards';end if;
+end $$;
 reset role;
 rollback;
