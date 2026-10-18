@@ -45,7 +45,7 @@ try{
   await page.getByRole('button',{name:'Accept contributor invitation',exact:true}).click();
   await page.getByRole('heading',{name:'Invitation accepted',exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>window.policyFixture.inviteCalls),1);
-  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fas-pending-invitation-v1')),null);
+  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fas-pending-contributor-invitation')),null);
   for(const path of ['/terms/','/privacy/','/terms/contributors/']){
    await page.goto('http://127.0.0.1:55410'+path);
    assert.equal(await page.locator('h1').count(),1);

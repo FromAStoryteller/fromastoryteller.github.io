@@ -28,7 +28,10 @@ do $$declare j private.email_outbox;first jsonb;second jsonb;token text;begin
  select * into j from private.email_outbox where request_id='a6000000-0000-0000-0000-000000000001';
  if (select count(*) from private.email_outbox where request_id=j.request_id)<>1 then raise exception 'FAIL duplicate job';end if;
  perform set_config('fas.mail.bounce_invite',j.invite_id::text,true);
+ if j.template_version<>2 then raise exception 'FAIL new job renderer version';end if;
+ update private.email_outbox set template_version=1 where id=j.id;
  token:=j.invite_token;first:=public.fas_claim_invitation_email(j.id);
+ if first->>'template_version'<>'1' then raise exception 'FAIL legacy renderer changed';end if;
  if first->>'token'<>token or (first->>'attempts')::int<>1 then raise exception 'FAIL first claim';end if;
  if public.fas_claim_invitation_email(j.id) is not null then raise exception 'FAIL concurrent claim';end if;
  if public.fas_finish_invitation_email(j.id,gen_random_uuid(),null,60,null) then raise exception 'FAIL wrong lease';end if;
@@ -36,6 +39,7 @@ do $$declare j private.email_outbox;first jsonb;second jsonb;token text;begin
  if not exists(select 1 from private.email_outbox where id=j.id and state='retrying' and invite_token=token and next_attempt>=now()+interval '119 seconds') then raise exception 'FAIL retry lost credential';end if;
  update private.email_outbox set next_attempt=now()-interval '1 second' where id=j.id;
  second:=public.fas_claim_invitation_email(j.id);
+ if second->>'template_version'<>first->>'template_version' then raise exception 'FAIL retry renderer changed';end if;
  if second->>'token'<>token or second->>'id'<>first->>'id' or (second->>'attempts')::int<>2 then raise exception 'FAIL retry identity';end if;
  perform public.fas_record_email_event('mail-fixture-race','a7000000-0000-0000-0000-000000000001','email.delivered',now());
  perform public.fas_finish_invitation_email(j.id,(second->>'lease')::uuid,'a7000000-0000-0000-0000-000000000001',null,null);
