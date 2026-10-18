@@ -36,7 +36,7 @@ for(const name of ['fas-profile-upload','fas-studio-cover']){
 const profileDenied=await rpc('fas_change_profile_image',{expected_version:'00000000-0000-0000-0000-000000000001',image_alt:'Untrusted',remove_image:true});assert.ok([401,403].includes(profileDenied.status));
 const cleanup=await fetch(config.url+'/functions/v1/fas-image-cleanup',{method:'POST',signal:AbortSignal.timeout(15000)});assert.equal(cleanup.status,401);
 console.log('PASS anonymous image writes and maintenance requests are denied');
-const key=files.find(item=>item.author.kind==='personal')?.author.public_id;
+const key=files[0]?.author?.public_id;assert.ok(key,'A public profile must be checked');
 if(key){
  const r=await rpc('fas_public_profile',{profile_key:key,page_offset:0});assert.ok(r.ok);const profile=await r.json();assert.ok(Object.hasOwn(profile,'image'));assert.ok(!JSON.stringify(profile).includes('image_path'));assert.ok(!Object.hasOwn(profile,'id'));console.log('PASS public profile image projection excludes private paths and account IDs');
 }
