@@ -1,0 +1,20 @@
+name: Community operational readiness
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/test-fas-operational-readiness.mjs
+      - .github/workflows/community-operational-readiness.yml
+permissions:
+  contents: read
+jobs:
+  production-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --check scripts/test-fas-operational-readiness.mjs
+      - run: node scripts/test-fas-operational-readiness.mjs --production-read-only
