@@ -1,0 +1,27 @@
+name: Verify deployed content layouts
+on:
+  push:
+    branches: [main]
+    paths:
+      - systems/content/page-layout.mjs
+      - systems/community/public-profile.mjs
+      - systems/community/studio-editor.mjs
+      - css/manuscript.css
+      - css/studio.css
+      - stories/stories.css
+      - games/rally-clash/game.js
+      - games/brick-blitz/game.js
+      - .github/workflows/verify-content-layout-release.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/verify-content-layout-release.mjs --production-read-only
