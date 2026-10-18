@@ -81,4 +81,9 @@ reset role;
 do $$begin
  if not exists(select 1 from private.image_cleanup where path like '%eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee.jpg') then raise exception 'FAIL cover bytes not queued';end if;
 end;$$;
+-- Exercise hosted INVOKER wrappers as the actual trusted service role.
+set local role service_role;
+select public.fas_claim_image_cleanup('00000000-0000-0000-0000-000000000000');
+select public.fas_consume_cleanup_token('invalid-fixture-token');
+reset role;
 rollback;
