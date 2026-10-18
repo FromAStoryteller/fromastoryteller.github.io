@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createStudioService,validateStory,storySlug,StudioAccessError,StudioConflictError,canDeleteDraft} from '../systems/community/studio-service.mjs';
+import {createStudioService,validateStory,storySlug,StudioAccessError,StudioConflictError,canDeleteDraft,canArchiveStory,canRestoreStory,canDeleteArchivedStory} from '../systems/community/studio-service.mjs';
 import {wordCount} from '../systems/community/studio-editor.mjs';
 const owner='81000000-0000-0000-0000-000000000001';
 const input={slug:'a-story',title:'A story',summary:'A description',body:'Once upon a time.',genre:'Fantasy',tags:'magic, discovery',content_warning:'',cover_asset_id:''};
 function fixture(response={data:{id:owner},error:null}) {
  const calls=[];const query={};for(const key of ['select','eq','order','range','update','insert','delete','is'])query[key]=(...args)=>{calls.push([key,...args]);return query;};query.maybeSingle=async()=>response;query.single=async()=>response;query.then=(resolve,reject)=>Promise.resolve(response).then(resolve,reject);
  let account={user:{id:owner},state:'active',contributor:true};
- const service=createStudioService({from:table=>{calls.push(['from',table]);return query;}},{ownerId:owner,checkAccount:async()=>account});return {service,calls,account:value=>{account=value;}};
+ const service=createStudioService({rpc:async(name,args)=>{calls.push(['rpc',name,args]);return response;},from:table=>{calls.push(['from',table]);return query;}},{ownerId:owner,checkAccount:async()=>account});return {service,calls,account:value=>{account=value;}};
 }
 test('story input accepts bounded metadata and rejects ownership, status, markup fields and invalid covers',()=>{
  assert.deepEqual(validateStory(input).tags,['magic','discovery']);assert.equal(storySlug('Échos in the Dark!'),'echos-in-the-dark');assert.equal(wordCount(' One\n\n two '),'2 words');
@@ -53,4 +53,35 @@ test('deletion never reports success for stale, missing, rejected or mismatched 
 });
 test('draft deletion checks current contributor identity and account state before querying',async()=>{
  for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:owner},state:'deleting',contributor:true},{user:{id:'other'},state:'active',contributor:true}]){const f=fixture();f.account(account);await assert.rejects(f.service.deleteDraft(deletable),StudioAccessError);assert.equal(f.calls.length,0);}
+});
+
+test('lifecycle eligibility separates own archives from moderation locks and file-backed pages',()=>{
+ assert.equal(canArchiveStory(deletable),true);assert.equal(canArchiveStory({...deletable,status:'published'}),true);
+ assert.equal(canArchiveStory({...deletable,source_kind:'file'}),false);
+ const archive={...deletable,status:'archived',author_archived_at:'2026-10-18'};
+ assert.equal(canRestoreStory(archive),true);assert.equal(canDeleteArchivedStory(archive),true);
+ assert.equal(canRestoreStory({...archive,author_archived_at:null}),false);assert.equal(canDeleteArchivedStory({...archive,author_archived_at:null}),false);
+});
+test('archive, restore and deletion use explicit version-bound server actions after reauthorization',async()=>{
+ const previous={...deletable,title:'A story'},archived={...previous,status:'archived',author_archived_at:'2026-10-18'};
+ for(const [action,old,data,title]of [['archive',previous,{id:owner,status:'archived',author_archived_at:'now'},'A story'],['restore',archived,{id:owner,status:'draft',author_archived_at:null},null],['delete',archived,{id:owner,deleted:true},'A story']]){
+  const f=fixture({data,error:null});await f.service.lifecycle(old,action,title);const call=f.calls.find(c=>c[0]==='rpc');
+  assert.equal(call[1],'fas_story_lifecycle');assert.deepEqual(call[2],{target_story:owner,expected_version:'previous',action,confirmation_title:title});
+ }
+});
+test('lifecycle rejects stale, failed, mismatched or unconfirmed responses and never reports success',async()=>{
+ const previous={...deletable,title:'A story'};
+ await assert.rejects(fixture({data:null,error:{code:'P0002'}}).service.lifecycle(previous,'archive','A story'),StudioConflictError);
+ await assert.rejects(fixture({data:null,error:{code:'42501'}}).service.lifecycle(previous,'archive','A story'),/could not finish/);
+ for(const data of [null,{id:'other'},{id:owner,status:'draft'}])await assert.rejects(fixture({data,error:null}).service.lifecycle(previous,'archive','A story'),StudioConflictError);
+ const f=fixture();await assert.rejects(f.service.lifecycle(previous,'archive','wrong'),/Confirm/);assert.equal(f.calls.length,0);
+});
+test('moderation, forged actions, removed roles and expired account verification cannot use lifecycle RPC',async()=>{
+ const previous={...deletable,title:'A story'};
+ for(const [old,action,title]of [[{...previous,status:'archived'},'restore',null],[{...previous,status:'archived'},'delete','A story'],[previous,'delete','A story'],[previous,'publish','A story']]){
+  const f=fixture();await assert.rejects(f.service.lifecycle(old,action,title),/eligible/);assert.equal(f.calls.length,0);
+ }
+ for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:'other'},state:'active',contributor:true},{user:{id:owner},state:'deleting',contributor:true}]){
+  const f=fixture();f.account(account);await assert.rejects(f.service.lifecycle(previous,'archive','A story'),StudioAccessError);assert.equal(f.calls.length,0);
+ }
 });

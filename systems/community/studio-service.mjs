@@ -2,7 +2,7 @@ import {loadProfileAccount} from '../../account/settings-controller.mjs';
 import {isPublicId} from './profiles.mjs';
 import {GENRES,genreLabel,metadataIssues} from './studio-catalog.mjs';
 import {validateDocument,documentText} from './manuscript.mjs';
-export const STORY_FIELDS='id,slug,title,summary,body,genre,genres,tags,content_warning,cover_asset_id,status,updated_at,published_at,content_type,body_document,scene_style,drop_caps,paragraph_style,language,scheduled_at,publication_timezone,slug_locked,metadata,metadata_version,warning_ids,warning_reviewed,publishing_identity';
+export const STORY_FIELDS='id,slug,title,summary,body,genre,genres,tags,content_warning,cover_asset_id,status,updated_at,published_at,content_type,body_document,scene_style,drop_caps,paragraph_style,language,scheduled_at,publication_timezone,slug_locked,metadata,metadata_version,author_archived_at,warning_ids,warning_reviewed,publishing_identity';
 const allowed=['slug','title','summary','body','genre','genres','tags','content_warning','cover_asset_id','content_type','body_document','scene_style','drop_caps','paragraph_style','language','scheduled_at','publication_timezone','metadata','warning_ids','warning_reviewed','publishing_identity'];
 const text=(value,name,max,required=false)=>{if(typeof value!=='string'||[...value].length>max||required&&!value.trim())throw new Error(`${name}: ${required?'enter text, up to':'use up to'} ${max.toLocaleString()} characters.`);return value;};
 export const storySlug=title=>title.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100).replace(/-$/,'')||'untitled';
@@ -29,6 +29,9 @@ export function publicationIssues(input,assets=[],type){
  const cover=assets.find(a=>a.id===input.cover_asset_id);if(!cover)issues.push('Choose a cover image');else{if(!cover.alt_text?.trim())issues.push('Describe the cover for screen readers');if(!cover.pixel_width||cover.pixel_width*9!==cover.pixel_height*16)issues.push('Use a verified 16:9 cover');}return issues;
 }
 export const canDeleteDraft=story=>!!story?.id&&story.status==='draft'&&!story.slug_locked&&!story.published_at&&!story.scheduled_at;
+export const canArchiveStory=story=>!!story?.id&&story.source_kind!=='file'&&['draft','published'].includes(story.status);
+export const canRestoreStory=story=>!!story?.id&&story.status==='archived'&&!!story.author_archived_at;
+export const canDeleteArchivedStory=canRestoreStory;
 export class StudioAccessError extends Error{constructor(message,reason='access-revoked'){super(message);this.reason=reason;}}
 export class StudioConflictError extends Error{}
 export function createStudioService(client,{ownerId,checkAccount=loadProfileAccount}={}){
@@ -44,10 +47,20 @@ export function createStudioService(client,{ownerId,checkAccount=loadProfileAcco
   async warningRequests(){await authorize();const r=await client.rpc('fas_my_warning_requests');if(r.error)throw new Error('Requests could not be loaded.');return r.data;},
   async read(id){if(!isPublicId(id))throw new Error('Content unavailable.');await authorize();const r=await client.from('stories').select(STORY_FIELDS).eq('author_id',ownerId).eq('id',id).single();if(r.error||!r.data)throw new StudioConflictError('This content is unavailable. Reopen it from your work.');const a=await client.from('story_assets').select('id,alt_text,verified_at,pixel_width,pixel_height').eq('story_id',id).order('created_at');if(a.error)throw new Error('Cover choices could not be loaded. Try opening this content again.');return {story:r.data,assets:a.data};},
   async save(input,previous,status=previous?.status??'draft'){
-   const changes=validateStory(input,genreCatalog);if(!['draft','published'].includes(status)||previous?.status==='archived')throw new Error('This content is locked for moderation.');if(status==='published'&&!changes.body.replace(/\*\*\*/g,'').trim())throw new Error('Write your manuscript before publishing.');await authorize();let q;
+   const changes=validateStory(input,genreCatalog);if(!['draft','published'].includes(status)||previous?.status==='archived')throw new Error('This archived content is locked. Restore your own archive before editing; moderation locks require an administrator.');if(status==='published'&&!changes.body.replace(/\*\*\*/g,'').trim())throw new Error('Write your manuscript before publishing.');await authorize();let q;
    if(previous){if(!isPublicId(previous.id)||!previous.updated_at)throw new Error('Reopen this content before saving.');q=client.from('stories').update({...changes,status}).eq('author_id',ownerId).eq('id',previous.id).eq('updated_at',previous.updated_at);}
    else{if(status!=='draft'||changes.cover_asset_id||changes.scheduled_at)throw new Error('Save a draft before choosing its cover or publishing.');const {cover_asset_id,...draft}=changes;q=client.from('stories').insert({...draft,author_id:ownerId});}
    const r=await q.select(STORY_FIELDS).maybeSingle();if(r.error)fail(r.error);if(!r.data)throw new StudioConflictError('This content changed elsewhere or is locked. Download your text, then reopen it.');return r.data;
+  },
+  async lifecycle(previous,action,confirmationTitle=null){
+   const permitted=action==='archive'?canArchiveStory(previous):action==='restore'?canRestoreStory(previous):action==='delete'?canDeleteArchivedStory(previous):false;
+   if(!permitted||!isPublicId(previous.id)||!previous.updated_at)throw new Error('Reopen eligible content before changing its lifecycle.');
+   if(['archive','delete'].includes(action)&&confirmationTitle!==previous.title)throw new Error('Confirm the current title.');
+   await authorize();const r=await client.rpc('fas_story_lifecycle',{target_story:previous.id,expected_version:previous.updated_at,action,confirmation_title:confirmationTitle});
+   if(r.error?.code==='P0002')throw new StudioConflictError('This content changed elsewhere or is unavailable. Reopen it from Your work.');
+   if(r.error)throw new Error('The action could not finish. Reopen this content and check your current access before trying again.');
+   if(r.data?.id!==previous.id||(action==='delete'?r.data.deleted!==true:action==='archive'?r.data.status!=='archived'||!r.data.author_archived_at:r.data.status!=='draft'||r.data.author_archived_at))throw new StudioConflictError('The action was not confirmed. Reopen this content from Your work.');
+   return r.data;
   },
   async deleteDraft(previous){
    if(!canDeleteDraft(previous)||!isPublicId(previous.id)||!previous.updated_at)throw new Error('Only saved, never-published drafts can be deleted here. Cancel any schedule first.');
