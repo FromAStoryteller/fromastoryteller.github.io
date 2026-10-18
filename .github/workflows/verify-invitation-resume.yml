@@ -1,0 +1,24 @@
+name: Verify signed-out invitation flow
+on:
+  push:
+    branches: [verify/invitation-resume]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0 vite@6.4.1
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-invitation-vite.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:55410/account/invitation/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-invitation-resume.mjs
