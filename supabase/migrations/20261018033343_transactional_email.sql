@@ -22,7 +22,7 @@ alter table private.email_events enable row level security;
 revoke all on private.email_outbox,private.email_worker_config,private.email_worker_tokens,private.email_events from public,anon,authenticated;
 create function private.admin_email_jobs(page_offset integer) returns jsonb language plpgsql security definer set search_path='' as $$begin perform private.require_admin();
  if page_offset is null or page_offset not between 0 and 1000000 then raise exception 'Invalid page';end if;
- return coalesce((select jsonb_agg(to_jsonb(x)) from (select id,invite_id,state,attempts,next_attempt,created_at,last_reason from private.email_outbox order by created_at desc,id limit 25 offset page_offset)x),'[]');
+ return coalesce((select jsonb_agg(to_jsonb(x)) from (select distinct on (invite_id) id,invite_id,state,attempts,next_attempt,created_at,last_reason from private.email_outbox where invite_id in(select id from public.invites order by created_at desc,id limit 25 offset page_offset) order by invite_id,created_at desc,id)x),'[]');
 end;$$;
 create function public.fas_admin_email_jobs(page_offset integer) returns jsonb language sql set search_path='' as $$select private.admin_email_jobs(page_offset);$$;
 revoke all on function private.admin_email_jobs(integer),public.fas_admin_email_jobs(integer) from public,anon,authenticated,service_role;
@@ -33,6 +33,7 @@ create function private.queue_invitation_email(email_address text,valid_days int
  perform pg_advisory_xact_lock(hashtextextended(caller::text,146389898));
  select * into job from private.email_outbox where actor_id=caller and request_id=request_key;
  if found then return jsonb_build_object('id',job.id,'invite_id',job.invite_id,'state',job.state);end if;
+ if (select count(*) from private.email_outbox where actor_id=caller and created_at>now()-interval '1 hour')>=20 then raise exception 'Invitation email hourly limit reached';end if;
  recipient_key:=case when target_invite is null then lower(btrim(email_address)) else (select email from public.invites where id=target_invite) end;
  if exists(select 1 from private.email_outbox where recipient=recipient_key and state in('bounced','complained','suppressed')) then raise exception 'Delivery blocked for this address';end if;
  if target_invite is null then
