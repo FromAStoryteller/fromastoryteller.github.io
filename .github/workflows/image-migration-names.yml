@@ -1,0 +1,16 @@
+name: Image migration names
+on:
+  push:
+    branches: [verify/image-migration-names]
+permissions:
+  contents: read
+jobs:
+  names:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npx --yes supabase@2.120.0 migration new image_storage_uploads
+      - run: npx --yes supabase@2.120.0 migration new image_cleanup_schedule
