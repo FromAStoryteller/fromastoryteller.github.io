@@ -130,9 +130,9 @@ export function mountStudio(root,service,{authorName='Storyteller',imageBase,aut
  async function transition(action){
   if(busy||conflicted||!current)return;if(dirty()){tell('Save your writing changes before '+(action==='archive'?'archiving.':'restoring.'),true);return;}
   if(action==='archive'&&!w.confirm('Archive “'+current.title+'”? It will be removed from public pages and listings, and any publication schedule will be cancelled. You can restore it as a private draft.'))return;
-  clearTimeout(timer);busy=deleting=true;update();
-  try{const result=await service.lifecycle(current,action,action==='archive'?current.title:null);if(disposed)return;fill({...current,...result},assets);panel('publish');showView('edit');tell(action==='archive'?'Archived. This piece is private and its schedule is cancelled.':'Restored to a private draft. Review it before publishing.');void loadList();}
-  catch(e){error(e);}finally{busy=deleting=false;update();}
+  clearTimeout(timer);busy=deleting=true;let completed=false;update();
+  try{const result=await service.lifecycle(current,action,action==='archive'?current.title:null);if(disposed)return;fill({...current,...result},assets);panel('publish');showView('edit');completed=true;tell(action==='archive'?'Archived. This piece is private and its schedule is cancelled.':'Restored to a private draft. Review it before publishing.');void loadList();}
+  catch(e){error(e);}finally{busy=deleting=false;if(!disposed&&completed)status.dataset.saveState='saved';update();}
  }
  $('[data-archive]').addEventListener('click',()=>void transition('archive'));$('[data-restore]').addEventListener('click',()=>void transition('restore'));
  $('[data-publish]').addEventListener('click',async()=>{if(busy)return;const issues=publicationIssues(input(),assets,catalog.types.find(t=>t.id===field('content_type').value));if(issues.length){tell(issues.join('. ')+'.',true);return;}if(w.confirm('Publish this piece for everyone to read?'))void save('published',false,{scheduled_at:null});});

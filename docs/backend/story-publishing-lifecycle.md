@@ -27,3 +27,7 @@ Deleted story and asset records become unavailable immediately to public/owner p
 Node/service tests, transactional PostgreSQL permission/visibility checks and fictional desktop/mobile browser rehearsals must pass before rollout. Hosted DEV fixtures run in rollback transactions. Verify unchanged production content before installing; deploy the additive database change before frontend sources that select the new column. Production installation follows the operations backup routine; no production mutation is performed by test fixtures.
 
 Implementation/release evidence: pending.
+
+## Public discovery
+
+Published Studio stories/blog posts now join file-backed cards on home, category, related-content and search surfaces. `supabase/migrations/20261018001349_story_public_listing.sql` adds a paginated, published-only card projection behind an invoker wrapper; it contains no manuscript, private account ID, email or storage path. The browser fetches without credentials or Authorization, checks cursors to prevent loops, uses bounded request timeouts and reuses the current themed card renderer. Static content remains available if discovery is unavailable. Reader pages and profile listings retain their existing public-state checks and no-store responses.

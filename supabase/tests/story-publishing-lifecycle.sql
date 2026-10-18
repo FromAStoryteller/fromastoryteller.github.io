@@ -22,6 +22,8 @@ set local role authenticated;
 update public.stories set status='published' where id=(select id from lifecycle_row);
 update lifecycle_row set version=(select updated_at from public.stories where id=lifecycle_row.id);
 do $$ declare n integer;begin
+ if not exists(select 1 from jsonb_array_elements(public.fas_public_story_catalog()->'items') i where i->>'id'=(select id::text from lifecycle_row)) then raise exception 'FAIL discovery publication';end if;
+ if (public.fas_public_story_catalog()->'items'->0)?'body' or (public.fas_public_story_catalog()->'items'->0)?'author_id' then raise exception 'FAIL discovery private fields';end if;
  if public.fas_public_story('lifecycle-fixture')->>'body'<>'Public words for lifecycle checks.' then raise exception 'FAIL approval-free publication';end if;
  begin update public.stories set author_archived_at=now() where id=(select id from lifecycle_row);raise exception 'FAIL forged owner archive';exception when insufficient_privilege then null;end;
  delete from public.stories where id=(select id from lifecycle_row);get diagnostics n=row_count;if n<>0 then raise exception 'FAIL direct published deletion';end if;
@@ -51,6 +53,7 @@ set local role anon;
 select set_config('request.jwt.claim.sub','',true);
 do $$ begin
  if public.fas_public_story('lifecycle-fixture') is not null or exists(select 1 from public.stories where slug='lifecycle-fixture') or exists(select 1 from public.story_assets where id='96000000-0000-0000-0000-000000000001') then raise exception 'FAIL archived public state';end if;
+ if exists(select 1 from jsonb_array_elements(public.fas_public_story_catalog()->'items') i where i->>'id'=(select id::text from lifecycle_row)) then raise exception 'FAIL archived discovery';end if;
  if jsonb_array_length(public.fas_public_profile((select public_id from lifecycle_row),0)->'stories')<>0 then raise exception 'FAIL archived public listing';end if;
  begin perform public.fas_story_lifecycle(null,null,'restore',null);raise exception 'FAIL anon lifecycle';exception when insufficient_privilege then null;end;
 end $$;
@@ -79,7 +82,7 @@ update lifecycle_row set version=(select updated_at from public.stories where id
 select public.fas_story_lifecycle(id,version,'restore',null) from lifecycle_row;
 do $$ begin
  if not exists(select 1 from public.stories where id=(select id from lifecycle_row) and status='draft' and author_archived_at is null and scheduled_at is null and slug_locked and slug='lifecycle-fixture') then raise exception 'FAIL private restore or stable address';end if;
- if public.fas_public_story('lifecycle-fixture') is not null then raise exception 'FAIL restore published automatically';end if;
+ if public.fas_public_story('lifecycle-fixture') is not null or jsonb_array_length(public.fas_public_story_catalog()->'items')<>0 then raise exception 'FAIL restore published automatically';end if;
 end $$;
 update public.stories set status='published' where id=(select id from lifecycle_row);
 do $$ begin if public.fas_public_story('lifecycle-fixture') is null then raise exception 'FAIL explicit republish';end if;end $$;
