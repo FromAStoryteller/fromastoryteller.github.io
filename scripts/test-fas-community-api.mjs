@@ -34,7 +34,7 @@ try{
  for(const actor of [null]){const r=await raw(actor,privatePath);assert.ok(r.ok&&Array.isArray(r.data)&&r.data.length===0);}
  const otherPrivate=await raw(viewer,'stories?id=eq.'+story.id+'&select=id,body');assert.ok(otherPrivate.ok&&otherPrivate.data.length===0);
  const escalation=await raw(viewer,'user_roles','POST',{user_id:viewer.id,role:'admin'});assert.ok([401,403].includes(escalation.status));
- const rewrite=await raw(b,'stories?id=eq.'+retained.id,'PATCH',{body:'Denied cross-author overwrite'});assert.ok(!rewrite.ok||rewrite.data.length===0);
+ const rewrite=await raw(a,'stories?id=eq.'+retained.id,'PATCH',{body:'Denied cross-author overwrite'});assert.ok(!rewrite.ok||rewrite.data.length===0);
  assert.equal(good(await viewer.client.from('stories').select('body').eq('id',retained.id).single()).body,'Retained private original '+run);
  const transfer=await raw(viewer,'stories?id=eq.'+retained.id,'PATCH',{author_id:a.id});assert.ok(!transfer.ok||transfer.data.length===0);
  const publicAdmin=await raw(null,'rpc/fas_admin_overview','POST',{});assert.ok([401,403].includes(publicAdmin.status));
