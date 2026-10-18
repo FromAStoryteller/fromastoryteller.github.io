@@ -130,16 +130,7 @@ version; Auth managed schema compatibility matters as well as the major version.
    username separately. Use the target password via `-W` prompt, not in a URL or
    command history. Replace placeholders below:
 
-```powershell
-psql -h YOUR_RESTORE_SESSION_POOLER_HOST -p 5432 -U postgres.YOUR_RESTORE_PROJECT_REF -d postgres -W --single-transaction -v ON_ERROR_STOP=1 -c "SET session_replication_role = replica" -f "$fasBackup\data.sql"
-```
-
-This imports only the saved data. Disabling triggers in that transaction prevents
-the Auth profile trigger from inserting duplicate profiles; checks still apply.
-If `psql` exits with an error, the transaction rolls back: fix version/compatibility
-issues before retrying. Do not ignore errors. Supabase's trusted database user
-must have permission to set `session_replication_role`. On exiting that connection
-the setting is gone; ordinary future writes use triggers again.
+The earlier single-file import command is intentionally omitted: it is not a current account-enabled restore plan. Prepare and rehearse a transaction against the fresh isolated target that reconciles seeded singleton/configuration rows, managed Auth compatibility and cyclic story/cover references before importing. Preserve original declarations/agreements and replay the newest deletion ledger before reopening access. A failed import must roll back; do not bypass constraints or ignore errors to continue. Do not import schema/history twice.
 
 4. Restore bytes to the target's empty private bucket using the target URL/key:
 

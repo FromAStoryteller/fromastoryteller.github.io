@@ -1,6 +1,6 @@
 # Community V1 operational readiness — 19 October 2026
 
-Status: production deployed; operational checks in progress. A fresh post-release encrypted backup and operator verification remain required before this task is marked complete. Brand's final logo is optional for functional readiness.
+Status: production deployed; read-only operational smoke and build checks passed. A fresh post-release encrypted backup and operator verification remain required before this task is marked complete. Brand's final logo is optional for functional readiness.
 
 ## Release and smoke evidence
 
@@ -13,6 +13,8 @@ Repeat the read-only smoke from a checkout of the deployed source:
     node scripts/test-fas-operational-readiness.mjs --production-read-only
 
 Or run GitHub Actions **Community operational readiness** with the deployed ref. It has no schedule or secret input. It checks policy hashes/runtime, anonymous authorization boundaries, account/support routes, six exact live JS sources, runtime no-store caching, HTTPS/www path/query redirects, every repository-indexed content page, unavailable-story behavior and unpublished maintenance paths. A source mismatch after a deliberate frontend rollback requires checking the actual deployed ref; do not suppress it.
+
+Read-only production smoke job **117744233447** passed on 19 October (Auckland): exact six deployed sources, 14 existing content pages, account/support/policy routes, redirects, private exclusions and public-policy/authorization checks. Build **117744233652** passed the 174 automated tests, actual Deno image codecs, references/index validation and Worker bundling. Source-only runbook edits do not claim a new live account/email test.
 
 ## Background jobs and server audit
 
