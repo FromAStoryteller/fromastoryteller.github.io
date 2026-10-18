@@ -9,7 +9,7 @@ export const contentLayouts=Object.freeze({
  video:{collection:'/videos/',label:'Videos',end:'',className:'video'}
 });
 function safeImage(value,{preview=false}={}){
- try{const u=new URL(value,'https://fromastoryteller.com');return u.protocol==='https:'&&!u.username&&!u.password||preview&&u.protocol==='blob:'?escapeText(value):'';}catch{return '';}
+ try{const u=new URL(value,'https://fromastoryteller.com');return ((u.protocol==='https:'||u.protocol==='http:'&&['127.0.0.1','localhost'].includes(u.hostname))&&!u.username&&!u.password)||preview&&u.protocol==='blob:'?escapeText(value):'';}catch{return '';}
 }
 function authorMarkup(author={},file=false){
  const id=/^[0-9a-f-]{36}$/i.test(author.public_id??'')?author.public_id:null;
@@ -60,7 +60,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  (item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'')+'</div>':'')+
  '<section class="story-content'+(manuscript?' fas-manuscript':'')+'" aria-label="Manuscript"'+(manuscript?' '+manuscript.attributes:'')+'>'+body+'</section>'+
  '<footer class="story-footer"><div class="story-end-mark" aria-hidden="true">✦</div>'+
- (layout.end?'<p class="story-end-text">'+layout.end+'</p>':'')+socialMarkup(item.author?.social_links)+
+ (layout.end?'<p class="story-end-text">'+layout.end+'</p>':'')+socialMarkup(item.author?.social_links)+'<!--author-socials-->'+
  '<a href="'+layout.collection+'" class="story-return-link">Browse All '+layout.label+'</a></footer></article>';
 }
 // Type-specific platform wrapper. Interactive implementations remain opaque slots.

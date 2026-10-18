@@ -34,7 +34,7 @@ export function renderFilePublishing(html,item){
  else html=html.replace('</head>',()=>schemaScript+'</head>');
 
  const social=(author.social_links??[]).filter(s=>{try{return new URL(s.url).protocol==='https:';}catch{return false;}}).map(s=>'<a href="'+escape(s.url)+'" target="_blank" rel="noopener noreferrer">'+escape(s.platform==='website'?'Website':s.platform)+'</a>').join(' ');
- if(social)html=html.replace('</main>',()=>'<nav class="file-publishing-socials" aria-label="Author social links">'+social+'</nav></main>');
+ if(social){const nav='<nav class="storyteller-socials file-publishing-socials" aria-label="Author social links">'+social+'</nav>';html=html.includes('<!--author-socials-->')?html.replace('<!--author-socials-->',()=>nav):html.replace('</main>',()=>nav+'</main>');}
  return html.replace('<body','<body data-content-id="'+escape(item.id)+'"');
 }
 export async function filePublishingResponse(request,env,response,fetcher=fetch){

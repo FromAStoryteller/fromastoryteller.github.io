@@ -278,3 +278,5 @@
 .ss-reader-preview .story-hero {aspect-ratio:16/9;}
 .ss-reader-preview .story-footer {margin-top:var(--space-6);}
 .story-footer .storyteller-socials {justify-content:center;}
+
+.ss-reader-preview .story-content h2 {font:500 1.45em/1.4 var(--font-family-reading);margin:1.5em 0 .8em;}

@@ -11,7 +11,7 @@ for(const metaPath of index){
  let html=readFileSync(page,'utf8');
  const item={id:meta.id,content_type:meta.type,title:meta.title,summary:meta.description??meta.excerpt??'',published_at:meta.datePublished,source_kind:'file',
   author:{public_id:meta.author,display_name:meta.authorDisplay},image:meta.image?.src,image_alt:meta.image?.alt,
-  subtype_label:(meta.subtype??'').split('-').map(x=>x[0]?.toUpperCase()+x.slice(1)).join(' ')};
+  tagline:meta.page?.tagline,subtype_label:(meta.subtype??'').split('-').map(x=>x[0]?.toUpperCase()+x.slice(1)).join(' ')};
  if(['story','blog'].includes(meta.type)){
   const body=storyBodyHtml(html);if(body===null)throw Error('Missing legacy manuscript '+metaPath);
   const markup=storyPageMarkup(item,{trustedBody:body});
@@ -22,8 +22,8 @@ for(const metaPath of index){
  }else if(['game','tool','video'].includes(meta.type)){
   const kind=meta.type,pattern=new RegExp('<section class="'+kind+'-hero"[^>]*>[\\s\\S]*?<\\/section>');
   const old=html.match(pattern)?.[0];if(!old)throw Error('Missing interactive header '+metaPath);
-  const tagline=old.match(new RegExp('<p class="'+kind+'-tagline">([\\s\\S]*?)<\\/p>'))?.[1]?.replace(/<[^>]*>/g,'').trim();
-  html=html.replace(pattern,()=>interactiveHeaderMarkup({...item,tagline}));
+  const tagline=meta.page?.tagline??old.match(new RegExp('<p class="'+kind+'-tagline">([\\s\\S]*?)<\\/p>'))?.[1]?.replace(/<[^>]*>/g,'').trim();
+  html=html.replace(pattern,()=>interactiveHeaderMarkup({...item,tagline,summary:meta.page?.intro??item.summary}));
  }
  if(html!==readFileSync(page,'utf8'))writeFileSync(page,html);
 }
