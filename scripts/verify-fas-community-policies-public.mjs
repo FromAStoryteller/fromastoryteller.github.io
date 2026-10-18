@@ -17,7 +17,7 @@ for(let attempt=0;attempt<12;attempt++){
    assert.ok(body.includes('/terms/contributors/'),path+' contributor navigation');
   }
   const config=await (await get('/account/runtime-config.json')).json();
-  assert.equal(config.policyRelease,process.env.FAS_EXPECTED_POLICY);
+  assert.equal(config.policyRelease,process.env.FAS_EXPECTED_RUNTIME??process.env.FAS_EXPECTED_POLICY);
   const r=await fetch(config.url+'/rest/v1/rpc/fas_current_policy_requirement',{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});
   assert.equal(r.status,200);const requirement=await r.json();assert.equal(requirement.release_id,process.env.FAS_EXPECTED_POLICY);
   if(requirement.release_id===version)for(const kind of ['terms','privacy'])assert.equal(requirement[kind+'_sha256'],entry.documents[kind].sha256);
