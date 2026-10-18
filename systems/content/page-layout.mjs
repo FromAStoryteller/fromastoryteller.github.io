@@ -54,8 +54,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  (image?'<figure class="story-feature-image image-overlay__media"><img src="'+image+'" alt="'+escapeText(item.image_alt)+'" width="1600" height="900"></figure>':'')+
  '<div class="story-hero-copy image-overlay__content"><p class="story-category">'+layout.label+(item.subtype_label?' / '+escapeText(item.subtype_label):'')+'</p><h1'+(preview?' id="ss-preview-title"':'')+'>'+title+'</h1></div></div>'+
  '<div class="story-meta">'+authorMarkup(item.author,item.source_kind==='file')+'<span data-story-reading-time><i class="fa-solid fa-clock" aria-hidden="true"></i>'+minutes+' min read</span>'+dateMarkup+'</div></header>'+
- ((item.summary||labels.length||item.content_warning)?'<div class="story-details">'+
- (item.summary?'<p class="story-summary">'+escapeText(item.summary)+'</p>':'')+
+ ((labels.length||item.content_warning)?'<div class="story-details">'+
  (labels.length?'<p class="story-taxonomy">'+escapeText(labels.join(' · '))+'</p>':'')+
  (item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'')+'</div>':'')+
  '<section class="story-content'+(manuscript?' fas-manuscript':'')+'" aria-label="Manuscript"'+(manuscript?' '+manuscript.attributes:'')+'>'+body+'</section>'+
