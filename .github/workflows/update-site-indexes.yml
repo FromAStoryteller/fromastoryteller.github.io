@@ -36,10 +36,10 @@ jobs:
       - name: Check generated files are up to date
         shell: bash
         run: |
-          if ! git diff --quiet -- content/content-index.json sitemap.xml '*.html'; then
+          if ! git diff --quiet -- content/content-index.json sitemap.xml '*.html' cloudflare-worker.mjs; then
             echo "Generated site indexes are out of date."
             echo "Commit the regenerated files before pushing."
-            git diff -- content/content-index.json sitemap.xml '*.html'
+            git diff -- content/content-index.json sitemap.xml '*.html' cloudflare-worker.mjs
             exit 1
           fi
 

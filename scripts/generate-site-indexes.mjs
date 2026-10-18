@@ -397,6 +397,16 @@ function writeIfChanged(path, content) {
 
 function main() {
   validateStaticPages();
+  // Hosting build-watch can omit registry-only updates. Keep the Worker source
+  // tied to the one policy registry so every release changes a watched source.
+  const policyRegistry = readJson(join(ROOT, 'account/policy-versions.json'));
+  const policyVersion = policyRegistry.activePublishedVersion;
+  if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(policyVersion ?? '')) fail('A published policy version is required.');
+  const workerPath = join(ROOT, 'cloudflare-worker.mjs');
+  const worker = readFileSync(workerPath, 'utf8');
+  const marker = '// Generated account policy release: ' + policyVersion + '\n';
+  if (!worker.startsWith('// Generated account policy release: ')) fail('Worker policy build marker is missing.');
+  writeIfChanged(workerPath, worker.replace(/^\/\/ Generated account policy release: [^\n]*\n/, () => marker));
 
   const publishedItems = getPublishedItems();
   const times = {};
