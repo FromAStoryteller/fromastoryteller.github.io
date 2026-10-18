@@ -11,13 +11,13 @@ async function openOwner(page){
 async function preview(page){
  const button=page.locator('[data-preview]');await button.focus();await page.keyboard.press('Enter');
  await page.locator('.ss-preview-dialog[open]').waitFor();assert.match(await page.locator('[data-page-preview]').innerText(),/lantern keeper/i);
- await page.keyboard.press('Escape');await page.locator('.ss-preview-dialog:not([open])').waitFor();
+ await page.keyboard.press('Escape');await page.locator('.ss-preview-dialog').waitFor({state:'hidden'});
  assert.equal(await button.evaluate(node=>node===document.activeElement),true,'Preview returns keyboard focus');
 }
 try{
  for(const width of [1280,390]){
   const context=await browser.newContext({viewport:{width,height:900}});
-  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await context.newPage(),errors=[];page.setDefaultTimeout(12000);page.on('pageerror',e=>errors.push(e.message));
   page.on('dialog',dialog=>dialog.accept());
   await page.goto(origin+'/tests/studio-preview/?fixture-persist');
   await openOwner(page);
@@ -28,7 +28,7 @@ try{
   await page.keyboard.press('End');assert.equal(await publish.getAttribute('aria-selected'),'true');
   await page.keyboard.press('Home');assert.equal(await details.getAttribute('aria-selected'),'true');
   assert.equal(await page.locator('[role=tab][tabindex="0"]').count(),1);
-  await preview(page);
+  await preview(page);console.log('PASS '+width+'px keyboard and private preview');
   await page.getByText('Preview test controls',{exact:true}).click();
   await page.getByRole('button',{name:'Simulate next save failure',exact:true}).click();
   const text='Recovery proof: the lantern stayed lit through a failed save.';
@@ -42,13 +42,13 @@ try{
   await page.locator('[data-manuscript]').focus();await page.keyboard.press('Control+s');await saved(page);
   assert.ok(await page.evaluate(text=>window.__studioPreview.rows().some(r=>r.body===text),text));
   // Actual browser offline mode leaves the words recoverable and does not pretend to save.
-  await context.setOffline(true);
+  console.log('PASS '+width+'px failed save and reload recovery');await context.setOffline(true);
   const offline=text+' Offline addition.';
   await page.locator('[data-manuscript]').fill(offline);await page.keyboard.press('Control+s');
   await page.waitForFunction(()=>document.querySelector('[data-status]')?.textContent.includes('You are offline'));
   assert.equal(await page.locator('[data-manuscript]').innerText(),offline);
   await context.setOffline(false);await page.keyboard.press('Control+s');await saved(page);
-  await page.getByText('Preview test controls',{exact:true}).click();
+  console.log('PASS '+width+'px offline retry');await page.getByText('Preview test controls',{exact:true}).click();
   const sessionText=offline+' Session-expiry addition.';
   await page.locator('[data-manuscript]').fill(sessionText);
   await page.getByRole('button',{name:'Expire session',exact:true}).click();
@@ -60,7 +60,7 @@ try{
   await page.locator('[data-resume-recovery]:not([hidden])').waitFor();await page.locator('[data-resume-recovery]').click();
   assert.equal(await page.locator('[data-manuscript]').innerText(),sessionText);
   await page.locator('[data-save]').click();await saved(page);
-  await publish.click();await page.locator('[data-publish]').click();
+  console.log('PASS '+width+'px session recovery');await publish.click();await page.locator('[data-publish]').click();
   await page.waitForFunction(()=>document.querySelector('[data-state]')?.dataset.state==='published');
   assert.equal(await page.locator('[data-save]').innerText(),'Save live changes');
   await page.locator('[data-unpublish]').click();
