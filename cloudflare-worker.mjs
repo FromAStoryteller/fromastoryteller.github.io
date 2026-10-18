@@ -1,3 +1,4 @@
+// Account policy versions are emitted into runtime-config.json during the production build.
 import {fileContentPath} from './systems/community/publishing-identity.mjs';
 import {contentPath,contentAddress} from './systems/community/content-address.mjs';
 import {contentMetadata} from './systems/community/content-metadata.mjs';

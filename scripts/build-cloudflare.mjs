@@ -10,6 +10,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const production = process.argv.includes('--production');
 const registry = JSON.parse(fs.readFileSync(path.join(root, 'account/policy-versions.json'), 'utf8'));
 const accountConfig = productionAccountBuildConfig(process.env, registry, production);
+if (accountConfig) console.log('Production account policy release: ' + accountConfig.policyRelease);
 if (accountConfig) verifyPolicyHistory(root, registry);
 const output = path.join(root, production ? 'dist-production' : 'dist');
 const dirs = new Set(['about', 'account', 'assets', 'blog', 'components', 'contact', 'content', 'css', 'games', 'privacy', 'read', 'search', 'stories', 'storytellers', 'systems', 'terms', 'tools', 'videos']);

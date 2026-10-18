@@ -44,3 +44,9 @@ A later policy transition need not disable Auth signup: the release singleton is
 PR #47 merged as 1295d8c215239ad94779039ca89e3cbc0af76b9d. Public verification job 117598393539 passed: both new immutable snapshot bodies exactly match their SHA-256 records; Terms, Privacy, contributor policy and agreement routes are served; the previous account runtime and database requirement still match while activation is prepared. No policy history was rewritten. The production invitation worker is version 4 with the identical verified deployment digest as DEV; it supports both persisted renderer versions before database migration.
 
 Activation changes the active registry to the published community release. The guarded transition names the exact predecessor and verifies both old and new document hashes. It inserts no acceptance for a real account. Existing contributors will see the review step before further work. Public page access and account export/removal are unaffected.
+
+## Deployment trigger verification
+
+The first activation check caught an older public runtime registry despite the registry-only main commit. The requirement was temporarily returned to the previous version so registration remained available. The new published catalog entry and original agreement history were preserved. A source/build update now makes the production build report its selected policy version and triggers the hosting build; public matching is checked again before restoring the new requirement. For future policy-only releases, verify that hosting build-watch includes account/policy-versions.json rather than relying on unrelated content changes.
+
+Production image/email foundation migration installed as hosted 20261018054316 (source 20261018053532); the invitation worker is version 4. DEV hosted mapping remains 20261018053933 / worker version 5. No new email was sent by this rollout.
