@@ -1,3 +1,4 @@
+import {storyPageMarkup} from '../content/page-layout.mjs';
 import {profileImageUrl} from './profile-image-service.mjs';
 import {fileContentPath} from './publishing-identity.mjs';
 import {contentPath} from './content-address.mjs';
@@ -50,22 +51,12 @@ export function profileStoryCard(story, { imageBase, preview = false } = {}) {
     card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 
-export function renderPublicStory(root, story, { imageBase } = {}) {
-  root.removeAttribute('data-content-id');if(isPublicId(story?.id))root.dataset.contentId=story.id;
-  const d = root.ownerDocument;
-  root.replaceChildren();
-  if (!story) { root.append(node(d, 'h1', '', 'Story unavailable'), node(d, 'p', '', 'This story may no longer be published.')); return; }
-  root.append(node(d, 'p', 'profile-eyebrow', story.content_type==='blog'?'A post from the community':'A story from the community'), node(d, 'h1', '', story.title));
-  const authorUrl = publicProfileUrl(story.author?.public_id);
-  const byline = node(d, authorUrl ? 'a' : 'p', '', `By ${story.author?.display_name || 'Storyteller'}`);
-  if (authorUrl) byline.href = authorUrl;
-  root.append(byline);
-  if (story.summary) root.append(node(d,'p','profile-welcome',story.summary));
-  const metadata = [...(story.genre?[story.genre]:story.genres?.map(genreLabel)??[]), ...(story.tags ?? [])].filter(Boolean).join(' · ');
-  if (metadata) root.append(node(d,'p','profile-muted',metadata));
-  if (story.content_warning) root.append(node(d,'p','profile-bio',`Content warning: ${story.content_warning}`));
-  const coverUrl = publicCoverUrl(story.cover,imageBase);
-  if (coverUrl) { const img=node(d,'img','community-story-cover'); img.src=coverUrl;img.alt=story.cover.alt;img.addEventListener('error',()=>img.remove(),{once:true});root.append(img); }
-  const prose=node(d,'div','');renderManuscript(prose,story.body_document??plainDocument(story.body),story);root.append(prose);
-  if(story.author?.social_links?.length){const socials=node(d,'nav','storyteller-socials');renderSocialLinks(socials,story.author.social_links);root.append(socials);}
+export function renderPublicStory(root,story,{imageBase}={}){
+ root.removeAttribute('data-content-id');root.classList.remove('community-reading');
+ if(isPublicId(story?.id))root.dataset.contentId=story.id;
+ root.replaceChildren();
+ if(!story){root.append(node(root.ownerDocument,'h1','','Story unavailable'),node(root.ownerDocument,'p','','This story may no longer be published.'));return;}
+ root.innerHTML=storyPageMarkup({...story,image:publicCoverUrl(story.cover,imageBase),image_alt:story.cover?.alt,genres:story.genres?.map(genreLabel)??[]});
+ root.dispatchEvent(new root.ownerDocument.defaultView.CustomEvent('fas:content-rendered',{bubbles:true}));
+ for(const img of root.querySelectorAll('.story-feature-image img'))img.addEventListener('error',()=>{img.closest('.story-hero').classList.add('story-hero--no-image');img.closest('figure').remove();},{once:true});
 }
