@@ -24,9 +24,9 @@ begin
 end;$$;
 revoke all on function private.public_story_catalog(timestamptz,uuid) from public,anon,authenticated;
 grant execute on function private.public_story_catalog(timestamptz,uuid) to anon,authenticated;
-create function public.fas_public_story_catalog(before_time timestamptz default null,after_id uuid default null) returns jsonb language sql stable security invoker set search_path='' as $
+create function public.fas_public_story_catalog(before_time timestamptz default null,after_id uuid default null) returns jsonb language sql stable security invoker set search_path='' as $$
  select private.public_story_catalog(before_time,after_id);
-$;
+$$;
 revoke all on function public.fas_public_story_catalog(timestamptz,uuid) from public,anon,authenticated;
 grant execute on function public.fas_public_story_catalog(timestamptz,uuid) to anon,authenticated;
 notify pgrst,'reload schema';
