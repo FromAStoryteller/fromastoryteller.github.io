@@ -28,6 +28,7 @@ try{
   assert.ok(await page.locator('.storyteller-socials a').count()>0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   assert.deepEqual(errors,[]);
+  console.log('LAYOUT_VISUAL_'+width+'='+ (await page.screenshot({type:'jpeg',quality:45})).toString('base64'));
   for(const game of ['rally-clash','brick-blitz']){
    const requests=[];const handler=r=>requests.push(new URL(r.url()).pathname);page.on('request',handler);
    await page.goto(origin+'/games/'+game+'/');await page.locator('#'+game+'-game canvas').waitFor();await page.locator('.menu-panel .menu-title').waitFor();
