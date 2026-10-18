@@ -47,5 +47,5 @@ export async function saveProfile(client, { displayName, bio }) {
 
 export async function exportAccountData(client) {
   const account = await loadAccount(client);
-  return { format: 'fas-account-data-v3', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role', 'Recorded registration declaration, if present', 'Published policy agreements, if present'], excludes: ['Passwords and session credentials', 'Contributor content (available separately)', 'Future game saves and multiplayer data (not implemented)'], account };
+  return { format: 'fas-account-data-v3', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role', 'Recorded registration declaration, if present', 'Published policy agreements, if present'], excludes: ['Passwords and session credentials', 'Uploaded profile images and contributor content (available separately)', 'Future game saves and multiplayer data (not implemented)'], account };
 }

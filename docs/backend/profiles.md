@@ -36,3 +36,7 @@ The source database still uses reviewed publication. Independent contributor pub
 Staff-profile follow-up: migration 20261016194500_staff_storyteller_profiles.sql corrects staff author-page eligibility before the first database story. Account settings separates Edit my profile from View public profile. Regression tests compare new and established contributor projections and check staff pages without stories while viewers remain private.
 
 Account settings cleanup: display name, welcome line and bio are edited only at /account/profile/. Account settings contains account details, policy history, exports and removal controls. The two profile navigation actions have separate button outlines and a wrapping layout with a 1rem gap.
+
+## Profile images
+
+Private normalized uploads, square cropping, descriptions, replacement/removal and contributor/viewer visibility are implemented in [image storage](image-storage.md). Profile text and image versions save independently.

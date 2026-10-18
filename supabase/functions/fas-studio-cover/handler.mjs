@@ -15,7 +15,7 @@ export function makeCoverHandler({base,anonKey,serviceKey,origins,kind='cover'},
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:headers(origin)});if(request.method!=='POST')return reply(405,{error:'POST required'});
   if(!base||!anonKey||!serviceKey||!request.headers.get('Authorization')?.startsWith('Bearer '))return reply(401,{error:'Sign in required'});
   const authorization=request.headers.get('Authorization'),call=async(path,{privileged=false,method='POST',body,bytes,contentType='application/json'}={})=>{const r=await fetcher(base+path,{method,redirect:'error',signal:AbortSignal.timeout(15000),headers:{apikey:privileged?serviceKey:anonKey,Authorization:privileged?`Bearer ${serviceKey}`:authorization,...(method!=='GET'?{'Content-Type':contentType}:{})},body:bytes??(body?JSON.stringify(body):undefined)});return r;};
-  let path,stored=false;
+  let path;
   try{
    const identity=await call('/auth/v1/user',{method:'GET'});if(!identity.ok)return reply(401,{error:'Sign in again'});const user=await identity.json();if(!uuid.test(user.id)||user.is_anonymous)return reply(401,{error:'Sign in required'});
    let session;try{const payload=authorization.slice(7).split('.')[1].replace(/-/g,'+').replace(/_/g,'/');session=JSON.parse(atob(payload.padEnd(Math.ceil(payload.length/4)*4,'='))).session_id;}catch{return reply(401,{error:'Session unavailable'});}if(!uuid.test(session??''))return reply(401,{error:'Session required'});
@@ -29,9 +29,9 @@ export function makeCoverHandler({base,anonKey,serviceKey,origins,kind='cover'},
    path=`${user.id}/${profile?owner.public_id:story}/${crypto.randomUUID()}.jpg`;
    const reserved=await call('/rest/v1/rpc/fas_reserve_image_upload',{privileged:true,body:{owner_key:user.id,session_key:session,image_path:path,image_kind:kind}});
    if(!reserved.ok)throw new Error('Upload reservation failed');
-   const upload=await call('/storage/v1/object/fas-story-images/'+path,{privileged:true,bytes:encoded,contentType:'image/jpeg'});if(!upload.ok)return reply(503,{error:'Cover storage unavailable'});stored=true;
+   const upload=await call('/storage/v1/object/fas-story-images/'+path,{privileged:true,bytes:encoded,contentType:'image/jpeg'});if(!upload.ok)return reply(503,{error:'Cover storage unavailable'});
    const registered=await call('/rest/v1/rpc/'+(profile?'fas_register_profile_image':'fas_register_verified_cover'),{privileged:true,body:{...(profile?{expected_version:form.get('expected_version')}:{target_story:story}),owner_key:user.id,session_key:session,image_path:path,image_alt:alt.trim()}});
-   if(!registered.ok)return reply(409,{error:'This image changed or access expired. Reload before trying again; the saved image is unchanged.'});const asset=await registered.json();stored=false;return reply(201,{asset});
+   if(!registered.ok)return reply(409,{error:'This image changed or access expired. Reload before trying again; the saved image is unchanged.'});const asset=await registered.json();return reply(201,{asset});
   }catch{return reply(400,{error:'Image could not be processed. Use a JPEG or PNG up to 5 MiB and 8 million pixels.'});}
   finally{if(path)await call('/rest/v1/rpc/fas_abandon_image_upload',{privileged:true,body:{image_path:path}}).catch(()=>{});}
  };
