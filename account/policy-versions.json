@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "account-sessions-2026-10-16-v2",
+  "activePublishedVersion": "community-policies-2026-10-18-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -101,7 +101,7 @@
       }
     },
     "community-policies-2026-10-18-v1": {
-      "status": "publication-candidate",
+      "status": "published",
       "acknowledgementKind": "published_terms_agreement",
       "preparedOn": "2026-10-18",
       "previousVersion": "account-sessions-2026-10-16-v2",
@@ -115,6 +115,11 @@
           "path": "/account/policy-history/community-policies-2026-10-18-v1/privacy/index.html",
           "sha256": "5df51966e047ae11db4083b7c9afc8f19f36df369b20d6f95024a5a56fa4c803"
         }
+      },
+      "publishedOn": "2026-10-18",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-18",
+        "scope": "Requested publication of account/privacy terms, contributor policies and necessary onboarding acknowledgements"
       }
     }
   },

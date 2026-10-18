@@ -38,3 +38,9 @@ DEV: Edge invitation worker version 5, followed by source migration 202610180535
 Security review: private tables intentionally have RLS without browser table policies. The new private invitation function has explicit grants and an empty search path; the public wrapper is not a definer. Previously documented public projection/self-service definer advisories and DEV's disabled leaked-password protection remain outside this change; no new public definer endpoint was introduced.
 
 A later policy transition need not disable Auth signup: the release singleton is locked, Auth validates exact version/hash metadata again while recording agreement, and stale requests fail closed. The bootstrap release preparation keeps its original signup-off instruction. There can be a short registration retry interval while the server requirement and deployed runtime registry change; no stale acceptance is silently upgraded.
+
+## Public snapshot publication
+
+PR #47 merged as 1295d8c215239ad94779039ca89e3cbc0af76b9d. Public verification job 117598393539 passed: both new immutable snapshot bodies exactly match their SHA-256 records; Terms, Privacy, contributor policy and agreement routes are served; the previous account runtime and database requirement still match while activation is prepared. No policy history was rewritten. The production invitation worker is version 4 with the identical verified deployment digest as DEV; it supports both persisted renderer versions before database migration.
+
+Activation changes the active registry to the published community release. The guarded transition names the exact predecessor and verifies both old and new document hashes. It inserts no acceptance for a real account. Existing contributors will see the review step before further work. Public page access and account export/removal are unaffected.
