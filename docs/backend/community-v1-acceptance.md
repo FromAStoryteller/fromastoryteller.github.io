@@ -63,3 +63,9 @@ Build job 117603389246 passed all 174 automated tests, actual Edge image codecs,
 The apparent publishing stall during harness development was a selector reading an unrelated page state attribute; the actual UI had already confirmed publication. The harness now checks the Studio badge specifically. It also uses the actual Essential only control before testing the footer controls, rather than clicking through the storage banner.
 
 Authenticated DEV HTTP checks and exact audit-fixture cleanup remain pending the operator command above. Ryan's real story and public URL remain pending. No unresolved application blocker was reproduced by the checks completed so far; these pending acceptance steps must not be reported as passed.
+
+## First operator HTTP run and fixture setup correction
+
+Ryan's fresh authenticated DEV run at main b43ab7e passed the account and Studio suites, including actual normalized cover bytes and verified fixture cleanup. Community stopped before creating any identity because its setup called the public policy requirement RPC with service_role. Hosted DEV grants confirm anon can execute that RPC and service_role cannot. The fixture now reads that public requirement through an anonymous client; production permissions remain unchanged. A read-only DEV check found zero remaining Community fixture accounts after that failure.
+
+The remaining HTTP rerun can use `node scripts/run-fas-dev-tests.mjs --community-only` after fetching and checking out the corrected main in the clean worktree. This keeps the fixed DEV target and process-only credentials. Community HTTP results, exact audit cleanup and Ryan's real publishing checklist are still pending; no fresh pass is inferred from this fixture correction.
