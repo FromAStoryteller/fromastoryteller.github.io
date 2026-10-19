@@ -6,6 +6,8 @@ on:
       - systems/community/interactive-*.mjs
       - systems/community/legacy-*.mjs
       - systems/community/studio-editor.mjs
+      - scripts/test-content-details-browser.mjs
+      - scripts/test-published-editorial-browser.mjs
       - scripts/test-content-discovery-browser.mjs
       - scripts/test-legacy-projects-browser.mjs
       - scripts/test-existing-file-editor-browser.mjs
@@ -35,6 +37,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/test-content-layout-browser.mjs
+      - run: node scripts/test-content-details-browser.mjs
+      - run: node scripts/test-published-editorial-browser.mjs
       - run: node scripts/test-content-discovery-browser.mjs
       - run: node scripts/test-legacy-projects-browser.mjs
       - run: node scripts/test-existing-file-editor-browser.mjs

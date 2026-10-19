@@ -1,0 +1,13 @@
+# Published editorial editing and player layouts
+
+Content details use centred rounded genre pills. Tags remain available for search and metadata, but are omitted from visible page badges. Games always add one mode pill: Single player or Multiplayer. Account-save capability does not add another badge.
+
+Repository game/tool instructions and About cards now live in native details/summary panels beneath the full-width player. Original player DOM and game JS are retained. Normal players are bounded by both viewport dimensions, at most roughly 80% of the screen and with fixed-header clearance. Narrow/short DOM tools can scroll within their bounded frame rather than clipping controls. Studio iframe previews use the same bounds; offline canvas exports retain their self-contained coordinate system.
+
+The ten existing file-backed stories are migrated into ordinary public.stories records using their deterministic existing page IDs, owner IDs, locked slugs and original publication timestamps. Their manuscripts are parsed into the existing validated document model, preserving text and supported emphasis. The original static manuscripts remain unchanged in Git. Existing 1600×900 covers are copied to private story-image Storage under owner/story/asset paths and registered as verified covers. No approval is invented.
+
+Migration source: supabase/seed-data/existing-editorial.json, generated once from the public repository content using scripts/prepare-existing-editorial.mjs. The migration includes that snapshot so it is portable. The private promotion function is service-only; it refuses conflicting addresses or missing covers. Unowned DEV file records are left untouched. After promotion the temporary source is removed, and ordinary Studio RLS, publication validation, version conflict detection, recovery, cover management, export and lifecycle actions apply.
+
+The private file registry marks migrated editorial rows to prevent duplicate Studio/profile entries. Original static URLs render the current published Studio manuscript and SEO through the Worker. Browser catalogues merge current Studio metadata into the existing card positions and preserve featured flags. Unpublishing/deleting a migrated story makes its static URL unavailable and hides its old card. No reader session or privileged key is sent to the public projection.
+
+Validation covers genre/mode badges, preserved player slots/manuscripts, portrait/landscape viewport bounds, expandable information, SQL promotion/ownership/publication checks, full existing-story editing on desktop/mobile, current Worker rendering, existing source ZIP round trips and the normal regression suite.

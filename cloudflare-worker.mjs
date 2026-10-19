@@ -48,7 +48,15 @@ export async function filePublishingResponse(request,env,response,fetcher=fetch)
   if(!configResponse.ok)return unavailable(503);const config=await configResponse.json();if(!isProductionAuthConfig(config))return unavailable(503);
   const result=await fetcher(PRODUCTION_AUTH_URL+'/rest/v1/rpc/fas_public_file_content',{method:'POST',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(5000),headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({content_path:new URL(request.url).pathname})});
   if(!result.ok)return unavailable(503);const item=await result.json();if(!item?.author)return unavailable(404);
-  return new Response(request.method==='HEAD'?null:renderFilePublishing(html,item),{status:response.status,headers});
+  let rendered=renderFilePublishing(html,item);
+  if(item.editorial_migrated){
+   const story=item.editorial;if(!story||story.id!==item.id||!['story','blog'].includes(story.content_type))return unavailable(404);
+   const image=story.cover?.asset_id?PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+encodeURIComponent(story.cover.asset_id):'';
+   rendered=rendered.replace(/<article\b[^>]*class="story-page"[^>]*>[\s\S]*?<\/article>/,()=>storyPageMarkup({...story,image,image_alt:story.cover?.alt}));
+   rendered=rendered.replace(/<meta\s+(?:property="og:[^"]+"|name="twitter:[^"]+")[^>]*>/gi,'').replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi,'');
+   rendered=renderReadingMetadata(rendered,story,image);
+  }
+  return new Response(request.method==='HEAD'?null:rendered,{status:response.status,headers});
  }catch{return unavailable(503);}
 }
 

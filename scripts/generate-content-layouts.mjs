@@ -1,3 +1,4 @@
+import {relocatePlayerInformation} from '../systems/content/player-information.mjs';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {storyPageMarkup,interactiveHeaderMarkup} from '../systems/content/page-layout.mjs';
 import {storyBodyHtml} from '../systems/reading/reading-time.mjs';
@@ -20,7 +21,7 @@ for(const metaPath of index){
   html=html.replace(article,()=>markup);
   if(!html.includes('/css/manuscript.css'))html=html.replace('</head>','<link rel="stylesheet" href="/css/manuscript.css">\n</head>');
  }else if(['game','tool','video'].includes(meta.type)){
-  const kind=meta.type,pattern=new RegExp('<section class="'+kind+'-hero"[^>]*>[\\s\\S]*?<\\/section>');
+  const kind=meta.type;if(['game','tool'].includes(kind))html=relocatePlayerInformation(html,kind);const pattern=new RegExp('<section class="'+kind+'-hero"[^>]*>[\\s\\S]*?<\\/section>');
   const old=html.match(pattern)?.[0];if(!old)throw Error('Missing interactive header '+metaPath);
   const tagline=meta.page?.tagline??old.match(new RegExp('<p class="'+kind+'-tagline">([\\s\\S]*?)<\\/p>'))?.[1]?.replace(/<[^>]*>/g,'').trim();
   html=html.replace(pattern,()=>interactiveHeaderMarkup({...item,tagline,summary:meta.page?.intro??item.summary}));

@@ -361,3 +361,14 @@ body.shell-open { overflow: hidden; }
   .site-footer > .footer-brand, .site-footer > .socials { grid-column: 1; }
   .footer-legal { gap: var(--space-2) var(--space-4); }
 }
+
+/* Player-first layouts. Both viewport dimensions bound the full canvas. */
+.game-shell,.tool-shell { grid-template-columns:minmax(0,1fr); justify-items:center; padding:0; }
+.game-shell .game-shell-main { width:100%; max-width:min(100%,80dvw,calc((min(80dvh, calc(100dvh - var(--size-content-top) - 1rem)) - 2rem) * 16 / 9)); margin-inline:auto; }
+.tool-shell .tool-shell-main { width:100%; max-width:min(100%,80dvw); margin-inline:auto; }
+.tool-shell .tool-shell-frame { min-height:0; max-height:min(80dvh, calc(100dvh - var(--size-content-top) - 1rem)); overflow:auto; overscroll-behavior:contain; }
+.content-information { max-width:var(--width-editorial); margin:1.5rem auto 3rem; display:grid; gap:.75rem; }
+.content-information-panel { border:1px solid var(--colour-border-default); border-radius:var(--site-card-radius); padding:.25rem 1rem; background:var(--colour-surface); }
+.content-information-panel summary { cursor:pointer; min-height:44px; padding:.6rem 0; color:var(--colour-text-primary); }
+.content-information-panel summary h2 { display:inline; margin:0; font-size:1.1rem; }
+.content-information-panel[open] summary { border-bottom:1px solid var(--colour-border-subtle); margin-bottom:.75rem; }
