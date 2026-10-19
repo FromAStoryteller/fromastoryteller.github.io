@@ -1,3 +1,4 @@
+import {relatedContent} from '../systems/content/related-content.mjs';
 import { readingTimeFromHtml, storyBodyHtml, readingTimeMarkup } from "../systems/reading/reading-time.mjs";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
@@ -280,8 +281,8 @@ function generateStaticHtml(items) {
     const relatedId = html.match(/id=["'](related-content-grid|story-related-grid)["']/)?.[1];
     if (relatedId) {
       const currentId = html.match(/data-current-content-id=["']([^"']+)["']/)?.[1] || '';
-      const related = content.filter(item => item.id !== currentId).slice(0, 6);
-      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item)).join('\n'), 'div');
+      const related = relatedContent(content, content.find(item => item.id === currentId), {limit:6});
+      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item).replace(/[ \t]+$/gm,'')).join('\n'), 'div');
       html = html.replace(new RegExp(`(id=["']${relatedId}["'][^>]*class=["'])([^"']*)`), (_, before, classes) => before + classes.replace(/\s*content-grid--compact\b/g, ''));
     }
     html = html.replace(/<body(?![^>]*\bid=)\b/, '<body id="top"');

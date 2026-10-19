@@ -4,38 +4,32 @@
   "category": "stories",
   "subtype": "short-story",
   "status": "published",
-
   "title": "Michael's Choice",
   "shortTitle": "Michael's Choice",
   "description": "After failing to defend his friend from a vicious attack, Michael must face the cost of his silence and decide what kind of man he wants to become.",
   "excerpt": "Michael has always gone along with the crowd. But when a brutal night ends in tragedy, a final message from his friend forces him to confront the person he has become.",
-
   "url": "/stories/michaels-choice/",
   "canonicalUrl": "https://fromastoryteller.com/stories/michaels-choice/",
   "slug": "michaels-choice",
-
   "datePublished": "2026-08-16",
-  "dateModified": "2026-08-16",
-
+  "dateModified": "2026-10-19",
   "author": "9acaaa0d-24ea-4c2b-a398-ead0d4231a4d",
   "authorDisplay": "Ry",
   "publisher": "From A Storyteller",
-
   "featured": true,
   "pinned": false,
   "draft": false,
-
   "image": {
-    "src": "/assets/images/stories/michaels-choice.png",
+    "src": "/assets/images/covers/michaels-choice.jpg",
     "alt": "Featured artwork for Michael's Choice",
-    "width": 1920,
-    "height": 1200
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/stories/michaels-choice.png"
   },
-
   "card": {
     "title": "Michael's Choice",
     "description": "A night of cruelty leaves Michael facing guilt, loss and a choice between following the crowd and becoming someone better.",
-    "image": "/assets/images/stories/michaels-choice.png",
+    "image": "/assets/images/covers/michaels-choice.jpg",
     "imageAlt": "Featured artwork for Michael's Choice",
     "icon": "fa-solid fa-book-open",
     "tags": [
@@ -44,7 +38,6 @@
       "Contemporary Fiction"
     ]
   },
-
   "seo": {
     "pageTitle": "Michael's Choice — Redemption Short Story | From A Storyteller",
     "metaDescription": "Read Michael's Choice, a contemporary short story about friendship, bullying, complicity and the difficult decision to break a cycle of cruelty.",
@@ -66,23 +59,20 @@
     ],
     "robots": "index, follow"
   },
-
   "openGraph": {
     "title": "Michael's Choice | From A Storyteller",
     "description": "Michael stays silent when his friend needs him most. What follows forces him to confront guilt, cruelty and the possibility of choosing a different path.",
-    "image": "https://fromastoryteller.com/assets/images/stories/michaels-choice.png",
+    "image": "/assets/images/covers/michaels-choice.jpg",
     "imageAlt": "Featured artwork for Michael's Choice",
     "type": "article"
   },
-
   "twitter": {
     "card": "summary_large_image",
     "title": "Michael's Choice | From A Storyteller",
     "description": "A friend's tragedy forces Michael to confront his silence, his choices and the person he wants to become.",
-    "image": "https://fromastoryteller.com/assets/images/stories/michaels-choice.png",
+    "image": "/assets/images/covers/michaels-choice.jpg",
     "imageAlt": "Featured artwork for Michael's Choice"
   },
-
   "taxonomy": {
     "tags": [
       "workplace",
@@ -95,8 +85,8 @@
       "cafe"
     ],
     "genres": [
-      "literary fiction",
-      "contemporary fiction"
+      "Literary fiction",
+      "Contemporary fiction"
     ],
     "themes": [
       "complicity",
@@ -107,5 +97,31 @@
       "breaking cycles of cruelty",
       "personal responsibility"
     ]
-  }
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "literary-fiction",
+    "contemporary-fiction"
+  ],
+  "warningIds": [
+    "violence",
+    "abuse",
+    "death-grief",
+    "self-harm",
+    "substance-use"
+  ],
+  "warningReviewed": true,
+  "contentWarning": "Violence; Abuse; Death or grief; Self-harm or suicide themes; Substance use",
+  "language": "en",
+  "tags": [
+    "workplace",
+    "bullying",
+    "harassment",
+    "friendship",
+    "alcohol",
+    "bar",
+    "yoga",
+    "cafe"
+  ],
+  "metadata": {}
 }

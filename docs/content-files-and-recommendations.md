@@ -1,0 +1,13 @@
+# Content metadata and editable existing players
+
+Explore next uses the shared selector in systems/content/related-content.mjs for build-time HTML and browser discovery. Tiers: same type with matching genre family, remaining same type, then other types to fill six slots. Each tier sorts by original publication date descending; featured/pinned do not affect recommendations. Drafts, private items and the current address are excluded.
+
+All 14 repository publications were reviewed against Studio metadata v1: canonical genre IDs, tags, language, reviewed warning IDs and labels, actual 1600 × 900 cover files and interactive instructions. Original artwork remains at image.originalSrc; original publication dates and manuscripts are preserved. Derived covers use the existing centered 16:9 presentation. The private DEV draft remains incomplete rather than inventing an author's choices.
+
+The four original interactive projects are built by scripts/build-legacy-projects.mjs. Bundled classic JS, CSS and local audio are exported using game.js/game.css or tool.js/tool.css, meta.json, assets/, index.html and fas-runtime.js. The manifest template identifier selects fixed platform-owned DOM; uploaded HTML and runtime are ignored. p5 1.9.0 is pinned locally and included in game exports with its license. Oversized WAVs are converted to mono 12 kHz PCM in the portable copy only; original site media is preserved.
+
+Studio opens an owned existing item, downloads its current override or bundled base project, previews the package, and saves it through a version-bound owner RPC. Tools require current admin access and FAS identity. The new player is sandboxed on the same existing address. Compatibility projects retain original local-only capabilities; account-enabled games use the newer Studio game templates. Source edits do not automatically add account saves or multiplayer to original gameplay.
+
+Database changes: private.file_interactive_overrides has RLS and no browser table privileges. Private definer implementations validate fresh account sessions, contributor/policy status, ownership, tool admin role, exact page template and compare-and-swap version. Public API wrappers are invokers with explicit grants. Public package reads expose published code only, no ownership IDs or credentials. Account export includes owned source overrides, which cascade on account deletion. A stale override cannot follow an ownership transfer.
+
+Validation: unit/SQL regression suite; all four ZIP round trips; transactional DEV ownership/conflict tests; Chromium sandbox and standalone projects at desktop/mobile sizes; original game Play/Pause/Settings/Resume; existing-item Studio download/upload/save flow. No production test accounts or content are created.

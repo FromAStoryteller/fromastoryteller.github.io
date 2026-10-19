@@ -1,3 +1,5 @@
+import {genreLabel} from '../community/studio-catalog.mjs';
+import {gameFeatureLabels} from './game-features.mjs';
 import {plainDocument,validateDocument} from '../community/manuscript.mjs';
 import {readingTimeFromHtml} from '../reading/reading-time.mjs';
 export const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -47,7 +49,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  const date=new Date(item.published_at??'');
  const dateMarkup=Number.isFinite(date.valueOf())?'<time class="story-date" datetime="'+escapeText(item.published_at)+'">'+escapeText(new Intl.DateTimeFormat('en-NZ',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(date))+'</time>':'';
  const minutes=readingTimeFromHtml(body).minutes;
- const labels=[...(item.genres??[]),...(item.tags??[])].filter(x=>typeof x==='string'&&x.trim());
+ const labels=[...(item.genres??[]).map(genreLabel),...(item.tags??[])].filter(x=>typeof x==='string'&&x.trim());
  return '<article class="story-page" data-content-layout="'+type+'"'+(item.id?' data-current-content-id="'+escapeText(item.id)+'"':'')+'>'+
  '<a href="'+layout.collection+'" class="story-back-link"><span aria-hidden="true">←</span><span>Back to '+layout.label+'</span></a>'+
  '<header class="story-header"><div class="story-hero image-overlay'+(image?'':' story-hero--no-image')+'">'+
@@ -67,5 +69,10 @@ export function interactiveHeaderMarkup(item){
  const type=item.content_type,layout=contentLayouts[type];
  if(!['game','tool','video'].includes(type))throw Error('An interactive content type is required');
  return '<section class="'+layout.className+'-hero" data-content-layout="'+type+'"><p class="'+layout.className+'-eyebrow">'+layout.label+(item.subtype_label?' / '+escapeText(item.subtype_label):'')+'</p><h1>'+escapeText(item.title)+'</h1>'+authorMarkup(item.author,true)+
- (item.tagline?'<p class="'+layout.className+'-tagline">'+escapeText(item.tagline)+'</p>':'')+'<p class="'+layout.className+'-intro">'+escapeText(item.summary)+'</p></section>';
+ (item.tagline?'<p class="'+layout.className+'-tagline">'+escapeText(item.tagline)+'</p>':'')+'<p class="'+layout.className+'-intro">'+escapeText(item.summary)+'</p>'+contentPageDetailsMarkup(item)+'</section>';
+}
+
+export function contentPageDetailsMarkup(item){
+ const labels=[...(item.genres??item.taxonomy?.genres??[]).map(genreLabel),...(item.content_type==='game'?gameFeatureLabels(item.gameFeatures??item.game_features):[])];
+ return (labels.length?'<p class="content-page-details" aria-label="Content details">'+labels.map(label=>'<span>'+escapeText(label)+'</span>').join('<span aria-hidden="true">·</span>')+'</p>':'')+(item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'');
 }

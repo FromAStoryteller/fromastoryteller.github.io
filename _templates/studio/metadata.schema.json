@@ -28,7 +28,15 @@
     "seo",
     "openGraph",
     "twitter",
-    "taxonomy"
+    "taxonomy",
+    "metadataVersion",
+    "genres",
+    "tags",
+    "warningIds",
+    "warningReviewed",
+    "contentWarning",
+    "language",
+    "metadata"
   ],
   "properties": {
     "id": {
@@ -112,6 +120,9 @@
         },
         "height": {
           "type": "number"
+        },
+        "originalSrc": {
+          "type": "string"
         }
       }
     },
@@ -261,6 +272,47 @@
           }
         }
       }
+    },
+    "metadataVersion": {
+      "const": 1
+    },
+    "genres": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warningIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warningReviewed": {
+      "const": true
+    },
+    "contentWarning": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "page": {
+      "type": "object"
+    },
+    "gameFeatures": {
+      "type": "object"
     }
   }
 }

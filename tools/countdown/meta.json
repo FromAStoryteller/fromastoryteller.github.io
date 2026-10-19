@@ -12,7 +12,7 @@
   "canonicalUrl": "https://fromastoryteller.com/tools/countdown/",
   "slug": "countdown",
   "datePublished": "2026-05-21",
-  "dateModified": "2026-09-13",
+  "dateModified": "2026-10-19",
   "author": "fa500000-0000-4000-8000-000000000001",
   "authorDisplay": "From A Storyteller",
   "publisher": "From A Storyteller",
@@ -20,15 +20,16 @@
   "pinned": false,
   "draft": false,
   "image": {
-    "src": "/assets/images/tools/countdown.jpg",
+    "src": "/assets/images/covers/countdown.jpg",
     "alt": "Countdown tool artwork",
-    "width": 0,
-    "height": 0
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/tools/countdown.jpg"
   },
   "card": {
     "title": "Countdown",
     "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
-    "image": "/assets/images/tools/countdown.jpg",
+    "image": "/assets/images/covers/countdown.jpg",
     "imageAlt": "Countdown tool artwork",
     "icon": "fa-solid fa-feather-pointed",
     "tags": [
@@ -53,7 +54,7 @@
   "openGraph": {
     "title": "Countdown | From A Storyteller",
     "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
-    "image": "/assets/images/tools/countdown.jpg",
+    "image": "/assets/images/covers/countdown.jpg",
     "imageAlt": "Countdown tool artwork",
     "type": "website"
   },
@@ -61,7 +62,7 @@
     "card": "summary_large_image",
     "title": "Countdown | From A Storyteller",
     "description": "Set a focused countdown timer for writing, coding, planning, or creative work.",
-    "image": "/assets/images/tools/countdown.jpg",
+    "image": "/assets/images/covers/countdown.jpg",
     "imageAlt": "Countdown tool artwork"
   },
   "taxonomy": {
@@ -71,7 +72,7 @@
       "Countdown"
     ],
     "genres": [
-      "Focus"
+      "Productivity"
     ],
     "themes": [
       "Countdown",
@@ -82,5 +83,21 @@
   "page": {
     "tagline": "Set a focused countdown timer for your writing, coding, planning, or creative work.",
     "intro": "Choose an amount of time, press start, then work on your project until the timer reaches zero."
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "productivity"
+  ],
+  "warningIds": [],
+  "warningReviewed": true,
+  "contentWarning": "",
+  "language": "en",
+  "tags": [
+    "Tool",
+    "Focus",
+    "Countdown"
+  ],
+  "metadata": {
+    "instructions": "Set the hours, minutes and seconds, then choose Start. Pause, resume or reset using the controls. The optional alarm sounds when the countdown finishes. Keep this tab open; background tabs may delay alerts."
   }
 }

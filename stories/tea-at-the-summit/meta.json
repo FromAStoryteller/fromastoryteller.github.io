@@ -4,38 +4,32 @@
   "category": "stories",
   "subtype": "short-story",
   "status": "published",
-
   "title": "Tea at the Summit",
   "shortTitle": "Tea at the Summit",
   "description": "Eleanor climbs through the snow toward a mountain summit, carrying tea, an urn, and the promise of one final moment with someone she loved.",
   "excerpt": "Eleanor has spent two days climbing toward the summit. At the top, with a flask of rose tea and a small urn beside her, the true reason for her journey is revealed.",
-
   "url": "/stories/tea-at-the-summit/",
   "canonicalUrl": "https://fromastoryteller.com/stories/tea-at-the-summit/",
   "slug": "tea-at-the-summit",
-
   "datePublished": "2026-08-14",
-  "dateModified": "2026-08-14",
-
+  "dateModified": "2026-10-19",
   "author": "9acaaa0d-24ea-4c2b-a398-ead0d4231a4d",
   "authorDisplay": "Ry",
   "publisher": "From A Storyteller",
-
   "featured": false,
   "pinned": false,
   "draft": false,
-
   "image": {
-    "src": "/assets/images/stories/tea-at-the-summit.png",
+    "src": "/assets/images/covers/tea-at-the-summit.jpg",
     "alt": "Featured artwork for Tea at the Summit",
-    "width": 1200,
-    "height": 630
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/stories/tea-at-the-summit.png"
   },
-
   "card": {
     "title": "Tea at the Summit",
     "description": "Eleanor climbs a snow-covered mountain carrying tea and a precious companion, determined to reach the summit for one final moment together.",
-    "image": "/assets/images/stories/tea-at-the-summit.png",
+    "image": "/assets/images/covers/tea-at-the-summit.jpg",
     "imageAlt": "Featured artwork for Tea at the Summit",
     "icon": "fa-solid fa-book-open",
     "tags": [
@@ -44,7 +38,6 @@
       "Emotional Fiction"
     ]
   },
-
   "seo": {
     "pageTitle": "Tea at the Summit — Emotional Short Story | From A Storyteller",
     "metaDescription": "Read Tea at the Summit, an emotional short story about Eleanor's snowy mountain climb and the deeply personal reason she is determined to reach the top.",
@@ -64,23 +57,20 @@
     ],
     "robots": "index, follow"
   },
-
   "openGraph": {
     "title": "Tea at the Summit | From A Storyteller",
     "description": "Eleanor climbs through snow toward a mountain summit, carrying tea and something precious for one final moment with the person she loved.",
-    "image": "https://fromastoryteller.com/assets/images/stories/tea-at-the-summit.png",
+    "image": "/assets/images/covers/tea-at-the-summit.jpg",
     "imageAlt": "Featured artwork for Tea at the Summit",
     "type": "article"
   },
-
   "twitter": {
     "card": "summary_large_image",
     "title": "Tea at the Summit | From A Storyteller",
     "description": "Eleanor is determined to reach the snowy summit. Only when she arrives is the deeply personal reason for her journey revealed.",
-    "image": "https://fromastoryteller.com/assets/images/stories/tea-at-the-summit.png",
+    "image": "/assets/images/covers/tea-at-the-summit.jpg",
     "imageAlt": "Featured artwork for Tea at the Summit"
   },
-
   "taxonomy": {
     "tags": [
       "mountain",
@@ -92,8 +82,8 @@
       "remembrance"
     ],
     "genres": [
-      "literary fiction",
-      "emotional fiction"
+      "Literary fiction",
+      "Adventure"
     ],
     "themes": [
       "grief",
@@ -104,5 +94,26 @@
       "fulfilling a promise",
       "farewell"
     ]
-  }
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "literary-fiction",
+    "adventure"
+  ],
+  "warningIds": [
+    "death-grief"
+  ],
+  "warningReviewed": true,
+  "contentWarning": "Death or grief",
+  "language": "en",
+  "tags": [
+    "mountain",
+    "summit",
+    "snow",
+    "tea",
+    "urn",
+    "climbing",
+    "remembrance"
+  ],
+  "metadata": {}
 }

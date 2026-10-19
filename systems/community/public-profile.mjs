@@ -60,7 +60,7 @@ export function renderPublicStory(root,story,{imageBase}={}){
  if(isPublicId(story?.id))root.dataset.contentId=story.id;
  root.replaceChildren();
  if(!story){root.append(node(root.ownerDocument,'h1','','Story unavailable'),node(root.ownerDocument,'p','','This story may no longer be published.'));return;}
- if(isInteractive(story.content_type)){root.innerHTML=interactivePageMarkup(story);players.set(root,mountPublicPlayer(root,story));return;}
+ if(isInteractive(story.content_type)){root.innerHTML=interactivePageMarkup(story);players.set(root,mountPublicPlayer(root,story));root.dispatchEvent(new root.ownerDocument.defaultView.CustomEvent('fas:content-rendered',{bubbles:true}));return;}
  root.innerHTML=storyPageMarkup({...story,image:publicCoverUrl(story.cover,imageBase),image_alt:story.cover?.alt,genres:story.genres?.map(genreLabel)??[]});
  root.dispatchEvent(new root.ownerDocument.defaultView.CustomEvent('fas:content-rendered',{bubbles:true}));
  for(const img of root.querySelectorAll('.story-feature-image img'))img.addEventListener('error',()=>{img.closest('.story-hero').classList.add('story-hero--no-image');img.closest('figure').remove();},{once:true});

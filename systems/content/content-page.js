@@ -1,5 +1,6 @@
 import { initRelatedContentSection } from "/systems/content/content-system.js"
 
+function init(){
 const relatedSection = document.querySelector("[data-current-content-id]")
 
 if (relatedSection) {
@@ -12,3 +13,6 @@ if (relatedSection) {
         emptyMessage: "More content is coming soon."
     })
 }
+}
+init();
+document.addEventListener("fas:content-rendered",init);
