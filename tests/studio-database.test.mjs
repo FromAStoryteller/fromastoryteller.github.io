@@ -22,5 +22,6 @@ test('Studio metadata bounds, private drafts, public projections, moderation loc
   await db.exec(readFileSync(new URL('../supabase/tests/image-storage.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/interactive-uploads.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/game-accounts-multiplayer.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/tests/editable-file-players.sql',import.meta.url),'utf8'));
  }finally{await db.close();}
 });

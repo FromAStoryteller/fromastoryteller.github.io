@@ -12,7 +12,7 @@
   "canonicalUrl": "https://fromastoryteller.com/games/brick-blitz/",
   "slug": "brick-blitz",
   "datePublished": "2026-03-31",
-  "dateModified": "2026-03-31",
+  "dateModified": "2026-10-19",
   "author": "9acaaa0d-24ea-4c2b-a398-ead0d4231a4d",
   "authorDisplay": "Ry",
   "publisher": "From A Storyteller",
@@ -20,15 +20,16 @@
   "pinned": false,
   "draft": false,
   "image": {
-    "src": "/assets/images/games/brick-blitz.jpg",
+    "src": "/assets/images/covers/brick-blitz.jpg",
     "alt": "Arcade Brick Blitz artwork",
-    "width": 0,
-    "height": 0
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/games/brick-blitz.jpg"
   },
   "card": {
     "title": "Arcade: Brick Blitz",
     "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
-    "image": "/assets/images/games/brick-blitz.jpg",
+    "image": "/assets/images/covers/brick-blitz.jpg",
     "imageAlt": "Arcade Brick Blitz artwork",
     "icon": "fa-solid fa-gamepad",
     "tags": [
@@ -51,7 +52,7 @@
   "openGraph": {
     "title": "Arcade: Brick Blitz | From A Storyteller",
     "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
-    "image": "/assets/images/games/brick-blitz.jpg",
+    "image": "/assets/images/covers/brick-blitz.jpg",
     "imageAlt": "Arcade Brick Blitz artwork",
     "type": "website"
   },
@@ -59,7 +60,7 @@
     "card": "summary_large_image",
     "title": "Arcade: Brick Blitz | From A Storyteller",
     "description": "A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.",
-    "image": "/assets/images/games/brick-blitz.jpg",
+    "image": "/assets/images/covers/brick-blitz.jpg",
     "imageAlt": "Arcade Brick Blitz artwork"
   },
   "taxonomy": {
@@ -82,5 +83,20 @@
   "gameFeatures": {
     "multiplayer": "off",
     "saves": false
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "arcade"
+  ],
+  "warningIds": [],
+  "warningReviewed": true,
+  "contentWarning": "",
+  "language": "en",
+  "tags": [
+    "Arcade",
+    "Retro"
+  ],
+  "metadata": {
+    "instructions": "Use the on-screen menu to start, pause or restart. Move the paddle with the arrow keys, mouse or touch; keep the ball in play and clear the bricks. Sound is optional."
   }
 }

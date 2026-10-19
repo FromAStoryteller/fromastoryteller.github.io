@@ -4,38 +4,32 @@
   "category": "stories",
   "subtype": "short-story",
   "status": "published",
-
   "title": "Moon HOC Meeting",
   "shortTitle": "Moon HOC Meeting",
   "description": "After being removed from the Moon Sector C homeowners committee, Tyson leaves behind one final message—and an explosive objection to its rules.",
   "excerpt": "The Moon Sector C homeowners committee expects another routine meeting. Their recently expelled neighbour, Tyson, has other plans.",
-
   "url": "/stories/moon-hoc-meeting/",
   "canonicalUrl": "https://fromastoryteller.com/stories/moon-hoc-meeting/",
   "slug": "moon-hoc-meeting",
-
   "datePublished": "2026-08-04",
-  "dateModified": "2026-08-04",
-
+  "dateModified": "2026-10-19",
   "author": "9acaaa0d-24ea-4c2b-a398-ead0d4231a4d",
   "authorDisplay": "Ry",
   "publisher": "From A Storyteller",
-
   "featured": false,
   "pinned": false,
   "draft": false,
-
   "image": {
-    "src": "/assets/images/stories/moon-hoc-meeting.png",
+    "src": "/assets/images/covers/moon-hoc-meeting.jpg",
     "alt": "Featured artwork for Moon HOC Meeting",
-    "width": 1200,
-    "height": 630
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/stories/moon-hoc-meeting.png"
   },
-
   "card": {
     "title": "Moon HOC Meeting",
     "description": "When a routine Moon Sector C committee meeting reveals a message from expelled resident Tyson, its rules are about to be challenged explosively.",
-    "image": "/assets/images/stories/moon-hoc-meeting.png",
+    "image": "/assets/images/covers/moon-hoc-meeting.jpg",
     "imageAlt": "Featured artwork for Moon HOC Meeting",
     "icon": "fa-solid fa-book-open",
     "tags": [
@@ -44,7 +38,6 @@
       "Dark Comedy"
     ]
   },
-
   "seo": {
     "pageTitle": "Moon HOC Meeting — Short Story | From A Storyteller",
     "metaDescription": "Read Moon HOC Meeting, a darkly comic science-fiction short story about a lunar homeowners committee, one rebellious resident and an explosive complaint.",
@@ -61,23 +54,20 @@
     ],
     "robots": "index, follow"
   },
-
   "openGraph": {
     "title": "Moon HOC Meeting | From A Storyteller",
     "description": "A routine lunar homeowners committee meeting is interrupted by an expelled resident's explosive objection to the rules.",
-    "image": "https://fromastoryteller.com/assets/images/stories/moon-hoc-meeting.png",
+    "image": "/assets/images/covers/moon-hoc-meeting.jpg",
     "imageAlt": "Featured artwork for Moon HOC Meeting",
     "type": "article"
   },
-
   "twitter": {
     "card": "summary_large_image",
     "title": "Moon HOC Meeting | From A Storyteller",
     "description": "An expelled lunar resident leaves his homeowners committee one final, explosive objection.",
-    "image": "https://fromastoryteller.com/assets/images/stories/moon-hoc-meeting.png",
+    "image": "/assets/images/covers/moon-hoc-meeting.jpg",
     "imageAlt": "Featured artwork for Moon HOC Meeting"
   },
-
   "taxonomy": {
     "tags": [
       "moon colony",
@@ -88,9 +78,8 @@
       "revenge"
     ],
     "genres": [
-      "science fiction",
-      "dark comedy",
-      "satire"
+      "Science fiction",
+      "Humour"
     ],
     "themes": [
       "rebellion against authority",
@@ -99,5 +88,25 @@
       "petty revenge",
       "the consequences of exclusion"
     ]
-  }
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "science-fiction",
+    "humour"
+  ],
+  "warningIds": [
+    "violence"
+  ],
+  "warningReviewed": true,
+  "contentWarning": "Violence",
+  "language": "en",
+  "tags": [
+    "moon colony",
+    "homeowners committee",
+    "lunar dome",
+    "rebellion",
+    "vandalism",
+    "revenge"
+  ],
+  "metadata": {}
 }

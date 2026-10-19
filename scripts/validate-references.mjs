@@ -46,6 +46,9 @@ for (const file of files) {
     syntax++;
     const result = spawnSync(process.execPath, ['--check', path.join(root, file)], { encoding: 'utf8', windowsHide: true });
     if (result.status !== 0) errors.push(`${file}: syntax error ${result.stderr || result.error}`);
+    // Vendored, pinned dependencies are syntax checked; their bundled internals
+    // are not site imports or local fetch references.
+    if(file.startsWith('assets/vendor/'))continue;
     for (const match of text.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*)["']([^"']+)["']/g)) {
       if (/^[./]/.test(match[1])) check(file, match[1]);
       if (file.startsWith('systems/') && /^\/(?:games|tools|stories)\/(?!shared\/)/.test(match[1])) errors.push(`${file}: shared system imports content ${match[1]}`);

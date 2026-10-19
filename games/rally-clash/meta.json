@@ -12,7 +12,7 @@
   "canonicalUrl": "https://fromastoryteller.com/games/rally-clash/",
   "slug": "rally-clash",
   "datePublished": "2026-03-22",
-  "dateModified": "2026-03-29",
+  "dateModified": "2026-10-19",
   "author": "9acaaa0d-24ea-4c2b-a398-ead0d4231a4d",
   "authorDisplay": "Ry",
   "publisher": "From A Storyteller",
@@ -20,15 +20,16 @@
   "pinned": false,
   "draft": false,
   "image": {
-    "src": "/assets/images/games/rally-clash.jpg",
+    "src": "/assets/images/covers/rally-clash.jpg",
     "alt": "Arcade Rally Clash artwork",
-    "width": 0,
-    "height": 0
+    "width": 1600,
+    "height": 900,
+    "originalSrc": "/assets/images/games/rally-clash.jpg"
   },
   "card": {
     "title": "Arcade: Rally Clash",
     "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
-    "image": "/assets/images/games/rally-clash.jpg",
+    "image": "/assets/images/covers/rally-clash.jpg",
     "imageAlt": "Arcade Rally Clash artwork",
     "icon": "fa-solid fa-gamepad",
     "tags": [
@@ -50,7 +51,7 @@
   "openGraph": {
     "title": "Arcade: Rally Clash | From A Storyteller",
     "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
-    "image": "/assets/images/games/rally-clash.jpg",
+    "image": "/assets/images/covers/rally-clash.jpg",
     "imageAlt": "Arcade Rally Clash artwork",
     "type": "website"
   },
@@ -58,7 +59,7 @@
     "card": "summary_large_image",
     "title": "Arcade: Rally Clash | From A Storyteller",
     "description": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.",
-    "image": "/assets/images/games/rally-clash.jpg",
+    "image": "/assets/images/covers/rally-clash.jpg",
     "imageAlt": "Arcade Rally Clash artwork"
   },
   "taxonomy": {
@@ -81,5 +82,20 @@
   "gameFeatures": {
     "multiplayer": "off",
     "saves": false
+  },
+  "metadataVersion": 1,
+  "genres": [
+    "arcade"
+  ],
+  "warningIds": [],
+  "warningReviewed": true,
+  "contentWarning": "",
+  "language": "en",
+  "tags": [
+    "Arcade",
+    "Retro"
+  ],
+  "metadata": {
+    "instructions": "Use the on-screen menu to start, pause or restart. Move your paddle with the arrow keys, mouse or touch. Return the ball against the computer; first to five points wins. Sound is optional."
   }
 }

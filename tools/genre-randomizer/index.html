@@ -22,17 +22,17 @@
     <meta name="theme-color" content="#000000" />
 
     <!-- FONTS -->
-    
-    
-    
+
+
+
 
     <!-- STYLES -->
-    
-    
-    
+
+
+
 
     <!-- FONT AWESOME ICONS -->
-    
+
     <script src="/systems/themes/theme.js"></script>
     <link rel="stylesheet" href="/css/foundations.css">
     <link rel="stylesheet" href="/css/layout.css">
@@ -44,7 +44,7 @@
 
     <!-- SCRIPTS -->
     <script type="module" src="/systems/core/site-shell.js"></script>
-    <script type="module" src="/tools/genre-randomizer/tool.js"></script>
+    <script type="module" src="/tools/genre-randomizer/player.mjs"></script>
     <script type="module" src="/systems/content/content-page.js"></script>
 
   <meta name="author" content="From A Storyteller">
@@ -162,8 +162,8 @@
       <!-- MAIN CONTENT AREA -->
       <main id="main-content" tabindex="-1" class="page-content tool-page">
 
-        <section class="tool-hero" data-content-layout="tool"><p class="tool-eyebrow">Tools / Writing</p><h1>Genre Randomizer</h1><span class="file-publishing-author" data-file-publishing><a href="/storytellers/?author=fa500000-0000-4000-8000-000000000001">By From A Storyteller</a></span><p class="tool-tagline">A simple genre picker to help spark your next story idea.</p><p class="tool-intro">Click the button to generate a genre.</p></section>
-        
+        <section class="tool-hero" data-content-layout="tool"><p class="tool-eyebrow">Tools / Writing</p><h1>Genre Randomizer</h1><span class="file-publishing-author" data-file-publishing><a href="/storytellers/?author=fa500000-0000-4000-8000-000000000001">By From A Storyteller</a></span><p class="tool-tagline">A simple genre picker to help spark your next story idea.</p><p class="tool-intro">Click the button to generate a genre.</p><p class="content-page-details" aria-label="Content details"><span>Writing tool</span><span aria-hidden="true">·</span><span>Creative tool</span></p></section>
+
         <section class="tool-play-section" aria-labelledby="tool-heading">
           <div class="tool-shell">
 
@@ -209,23 +209,9 @@
 <!-- static:related-content-grid:start -->
 
         <article class="content-grid-card content-card--standard">
-            <a href="/stories/michaels-choice/" class="content-grid-card-link image-overlay" aria-label="Michael&#039;s Choice, 22 min read">
-                <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/michaels-choice.png" alt="Featured artwork for Michael&#039;s Choice">
-                </div>
-                <div class="content-grid-card-body image-overlay__content">
-                    <span class="image-overlay__label">Story · 22 min read</span>
-                    <h3>Michael&#039;s Choice</h3>
-                    <p class="content-grid-card-excerpt">A night of cruelty leaves Michael facing guilt, loss and a choice between following the crowd and becoming someone better.</p>
-                </div>
-            </a>
-        </article>
-    
-
-        <article class="content-grid-card content-card--standard">
             <a href="/tools/countdown/" class="content-grid-card-link image-overlay" aria-label="Countdown">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/tools/countdown.jpg" alt="Countdown tool artwork">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/countdown.jpg" alt="Countdown tool artwork">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Tool</span>
@@ -234,27 +220,26 @@
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
-            <a href="/games/brick-blitz/" class="content-grid-card-link image-overlay" aria-label="Arcade: Brick Blitz, Single player">
+            <a href="/stories/michaels-choice/" class="content-grid-card-link image-overlay" aria-label="Michael&#039;s Choice, 22 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/games/brick-blitz.jpg" alt="Arcade Brick Blitz artwork">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/michaels-choice.jpg" alt="Featured artwork for Michael&#039;s Choice">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
-                    <span class="image-overlay__label">Game</span>
-                    <h3>Arcade: Brick Blitz</h3>
-                    <div class="content-game-features"><span class="content-game-feature">Single player</span></div>
-                    <p class="content-grid-card-excerpt">A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.</p>
+                    <span class="image-overlay__label">Story · 22 min read</span>
+                    <h3>Michael&#039;s Choice</h3>
+                    <p class="content-grid-card-excerpt">A night of cruelty leaves Michael facing guilt, loss and a choice between following the crowd and becoming someone better.</p>
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/tea-at-the-summit/" class="content-grid-card-link image-overlay" aria-label="Tea at the Summit, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/tea-at-the-summit.png" alt="Featured artwork for Tea at the Summit">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/tea-at-the-summit.jpg" alt="Featured artwork for Tea at the Summit">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -263,12 +248,12 @@
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/date-night-jigsaw/" class="content-grid-card-link image-overlay" aria-label="Date Night Jigsaw, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/date-night-jigsaw.png" alt="Featured artwork for Date Night Jigsaw">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/date-night-jigsaw.jpg" alt="Featured artwork for Date Night Jigsaw">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -277,12 +262,12 @@
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/crypt-of-the-blood-jewel/" class="content-grid-card-link image-overlay" aria-label="Crypt of the Blood Jewel, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/crypt-of-the-blood-jewel.jpg" alt="Featured artwork for Crypt of the Blood Jewel">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/crypt-of-the-blood-jewel.jpg" alt="Featured artwork for Crypt of the Blood Jewel">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -291,7 +276,21 @@
                 </div>
             </a>
         </article>
-    
+
+
+        <article class="content-grid-card content-card--standard">
+            <a href="/stories/sunset-at-the-lighthouse/" class="content-grid-card-link image-overlay" aria-label="Sunset at the Lighthouse, 2 min read">
+                <div class="content-grid-card-image image-overlay__media">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/sunset-at-the-lighthouse.jpg" alt="Featured artwork for Sunset at the Lighthouse">
+                </div>
+                <div class="content-grid-card-body image-overlay__content">
+                    <span class="image-overlay__label">Story · 2 min read</span>
+                    <h3>Sunset at the Lighthouse</h3>
+                    <p class="content-grid-card-excerpt">For nearly a year, Erin has watched every sunset from the lighthouse, waiting for the person who promised she would return.</p>
+                </div>
+            </a>
+        </article>
+
 <!-- static:related-content-grid:end -->
 </div>
         </section>

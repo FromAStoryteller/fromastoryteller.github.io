@@ -52,19 +52,20 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
       if (['export','prepare-delete'].includes(body.action) && !await rpc('fas_claim_account_action', { ...args, requested_action: body.action })) return json(429, { message: 'Too many account requests. Wait a few minutes, then try again.' });
       if (body.action === 'export') {
         const first = await rpc('fas_account_snapshot', args); const data = first.data;
-        if (!(data.game_saves??[]).length && !(data.game_participation??[]).length && !data.stories.length && !data.assets.length && !data.objects.length && !['member', 'admin'].includes(data.role)) return json(403, { message: 'There is no owned Community content to download. You can download your personal account data in settings.' });
+        if (!(data.file_players??[]).length && !(data.game_saves??[]).length && !(data.game_participation??[]).length && !data.stories.length && !data.assets.length && !data.objects.length && !['member', 'admin'].includes(data.role)) return json(403, { message: 'There is no owned Community content to download. You can download your personal account data in settings.' });
         if (data.objects.length > 500 || data.stories.length > 300) return json(413, { message: 'Your content is too large for this download. Contact support for a complete export. Nothing was deleted.' });
         let total = 0;
         const files = [];
         const addJson = (name, value) => { const bytes = encoder.encode(JSON.stringify(value, null, 2) + '\n'); total += bytes.length; if (total > 32 * 1024 * 1024) throw new AccountError('Your content is too large for this download. Contact support for a complete export. Nothing was deleted.', 413); files.push({ name, bytes }); };
         const addText = (name, text) => { const bytes = encoder.encode(text); total += bytes.length; if (total > 32 * 1024 * 1024) throw new AccountError('Your content is too large for this download. Contact support for a complete export. Nothing was deleted.', 413); files.push({ name, bytes }); };
-        addText('README.txt', 'From A Storyteller — your contributor content\n\nOpen the .txt files in stories to read your stories. Original image files are in images.\nThe metadata folder contains JSON files for software, with story IDs, image associations and account details.\nStory text is preserved as entered; any formatting markup remains visible.\nOnly your owned Community content is included. Unlinked static content, other players’ private data and room codes are excluded. Private saves and your room state are in metadata/game-saves.json and metadata/game-participation.json.\nKeep this archive private and check it opens before deleting anything.\n');
+        addText('README.txt', 'From A Storyteller — your contributor content\n\nOpen the .txt files in stories to read your stories. Original image files are in images.\nThe metadata folder contains JSON files for software, with story IDs, image associations and account details.\nStory text is preserved as entered; any formatting markup remains visible.\nOnly your owned Community content is included. Unlinked static content, other players’ private data and room codes are excluded. Private saves and your room state are in metadata/game-saves.json and metadata/game-participation.json.\nEdits to owned existing game/tool players are in metadata/file-players.json. Download the working ZIP from Studio to edit and re-upload them.\nKeep this archive private and check it opens before deleting anything.\n');
         addJson('metadata/account.json', { id: user.id, email: user.email, created_at: user.created_at, profile: data.profile, role: data.role });
         for (const story of data.stories) {
           const name = /^[a-z0-9-]+$/.test(story.slug ?? '') ? story.slug + '-' + story.id : story.id;
           addText(`stories/${name}.txt`, `${story.title}\n\nStatus: ${story.status}\nStory ID: ${story.id}\n\n${story.summary || ''}\n\n${story.body || ''}\n`);
           addJson(`metadata/stories/${story.id}.json`, story);
         }
+        addJson('metadata/file-players.json',data.file_players??[]);
         addJson('metadata/game-saves.json',data.game_saves??[]);
         addJson('metadata/game-participation.json',data.game_participation??[]);
         addJson('metadata/story-images.json', data.assets);

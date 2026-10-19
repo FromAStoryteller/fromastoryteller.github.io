@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {relatedContent} from '../systems/content/related-content.mjs';
+const row=(id,type,date,genres=[],extra={})=>({id,url:'/'+id+'/',type,status:'published',datePublished:date,genres,...extra});
+test('same type and genre first, latest release within each tier, other types fill gaps',()=>{
+ const current=row('current','story','2026-10-01',['fantasy']);const items=[current,row('old-fantasy','story','2020-01-01',['Dark fantasy'],{featured:true,pinned:true}),row('new-fiction','story','2026-09-30',['literary-fiction']),row('new-fantasy','story','2026-09-01',['high-fantasy']),row('new-tool','tool','2026-10-01',['productivity']),row('old-game','game','2025-01-01',['fantasy']),row('draft','story','2026-10-02',['fantasy'],{draft:true}),row('private','story','2026-10-03',['fantasy'],{status:'draft'})];
+ assert.deepEqual(relatedContent(items,current).map(x=>x.id),['new-fantasy','old-fantasy','new-fiction','new-tool','old-game']);assert.deepEqual(relatedContent(items,current,{limit:2}).map(x=>x.id),['new-fantasy','old-fantasy']);assert.deepEqual(relatedContent(items,null),[]);
+});
+test('same-type nonmatching releases precede cross-type matches and no duplicates or current route',()=>{const current=row('game','game','2026-01-01',['arcade']);assert.deepEqual(relatedContent([current,row('same','game','2026-01-02',['puzzle']),row('other','tool','2026-02-01',['arcade']),row('alias','game','2026-03-01',['arcade'],{url:current.url})],current).map(x=>x.id),['same','other']);});

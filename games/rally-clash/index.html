@@ -22,14 +22,14 @@
     <meta name="theme-color" content="#000000" />
 
     <!-- FONTS -->
-    
-    
-    
+
+
+
 
     <!-- STYLES -->
-    
-    
-    
+
+
+
     <script src="/systems/themes/theme.js"></script>
     <link rel="stylesheet" href="/css/foundations.css">
     <link rel="stylesheet" href="/css/layout.css">
@@ -44,11 +44,8 @@
     <link rel="stylesheet" href="/assets/fontawesome/css/solid.min.css">
 
     <!-- SCRIPTS -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
-    
     <script type="module" src="/systems/core/site-shell.js"></script>
-    <script type="module" src="/games/rally-clash/game.js"></script>
+    <script type="module" src="/games/rally-clash/player.mjs"></script>
     <script type="module" src="/systems/content/content-page.js"></script>
 
   <meta name="author" content="Ry">
@@ -166,8 +163,8 @@
       <!-- MAIN CONTENT AREA -->
       <main id="main-content" tabindex="-1" class="page-content game-page">
 
-        <section class="game-hero" data-content-layout="game"><p class="game-eyebrow">Games / Arcade</p><h1>Arcade: Rally Clash</h1><span class="file-publishing-author" data-file-publishing><a href="/storytellers/?author=9acaaa0d-24ea-4c2b-a398-ead0d4231a4d">By Ry</a></span><p class="game-tagline">A fast-paced paddle duel where every rally matters.</p><p class="game-intro">Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.</p></section>
-        
+        <section class="game-hero" data-content-layout="game"><p class="game-eyebrow">Games / Arcade</p><h1>Arcade: Rally Clash</h1><span class="file-publishing-author" data-file-publishing><a href="/storytellers/?author=9acaaa0d-24ea-4c2b-a398-ead0d4231a4d">By Ry</a></span><p class="game-tagline">A fast-paced paddle duel where every rally matters.</p><p class="game-intro">Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points.</p><p class="content-page-details" aria-label="Content details"><span>Arcade</span><span aria-hidden="true">·</span><span>Single player</span></p></section>
+
         <section class="game-play-section" aria-labelledby="play-heading">
           <div class="game-shell">
 
@@ -227,9 +224,23 @@
 <!-- static:related-content-grid:start -->
 
         <article class="content-grid-card content-card--standard">
+            <a href="/games/brick-blitz/" class="content-grid-card-link image-overlay" aria-label="Arcade: Brick Blitz">
+                <div class="content-grid-card-image image-overlay__media">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/brick-blitz.jpg" alt="Arcade Brick Blitz artwork">
+                </div>
+                <div class="content-grid-card-body image-overlay__content">
+                    <span class="image-overlay__label">Game</span>
+                    <h3>Arcade: Brick Blitz</h3>
+                    <p class="content-grid-card-excerpt">A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.</p>
+                </div>
+            </a>
+        </article>
+
+
+        <article class="content-grid-card content-card--standard">
             <a href="/stories/michaels-choice/" class="content-grid-card-link image-overlay" aria-label="Michael&#039;s Choice, 22 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/michaels-choice.png" alt="Featured artwork for Michael&#039;s Choice">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/michaels-choice.jpg" alt="Featured artwork for Michael&#039;s Choice">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 22 min read</span>
@@ -238,41 +249,12 @@
                 </div>
             </a>
         </article>
-    
 
-        <article class="content-grid-card content-card--standard">
-            <a href="/tools/countdown/" class="content-grid-card-link image-overlay" aria-label="Countdown">
-                <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/tools/countdown.jpg" alt="Countdown tool artwork">
-                </div>
-                <div class="content-grid-card-body image-overlay__content">
-                    <span class="image-overlay__label">Tool</span>
-                    <h3>Countdown</h3>
-                    <p class="content-grid-card-excerpt">Set a focused countdown timer for writing, coding, planning, or creative work.</p>
-                </div>
-            </a>
-        </article>
-    
-
-        <article class="content-grid-card content-card--standard">
-            <a href="/games/brick-blitz/" class="content-grid-card-link image-overlay" aria-label="Arcade: Brick Blitz, Single player">
-                <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/games/brick-blitz.jpg" alt="Arcade Brick Blitz artwork">
-                </div>
-                <div class="content-grid-card-body image-overlay__content">
-                    <span class="image-overlay__label">Game</span>
-                    <h3>Arcade: Brick Blitz</h3>
-                    <div class="content-game-features"><span class="content-game-feature">Single player</span></div>
-                    <p class="content-grid-card-excerpt">A Breakout-inspired browser arcade game. It focuses on fast reactions, satisfying rebounds, and chasing a highscore.</p>
-                </div>
-            </a>
-        </article>
-    
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/tea-at-the-summit/" class="content-grid-card-link image-overlay" aria-label="Tea at the Summit, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/tea-at-the-summit.png" alt="Featured artwork for Tea at the Summit">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/tea-at-the-summit.jpg" alt="Featured artwork for Tea at the Summit">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -281,12 +263,12 @@
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/date-night-jigsaw/" class="content-grid-card-link image-overlay" aria-label="Date Night Jigsaw, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/date-night-jigsaw.png" alt="Featured artwork for Date Night Jigsaw">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/date-night-jigsaw.jpg" alt="Featured artwork for Date Night Jigsaw">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -295,12 +277,12 @@
                 </div>
             </a>
         </article>
-    
+
 
         <article class="content-grid-card content-card--standard">
             <a href="/stories/crypt-of-the-blood-jewel/" class="content-grid-card-link image-overlay" aria-label="Crypt of the Blood Jewel, 2 min read">
                 <div class="content-grid-card-image image-overlay__media">
-                    <img loading="lazy" decoding="async" src="/assets/images/stories/crypt-of-the-blood-jewel.jpg" alt="Featured artwork for Crypt of the Blood Jewel">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/crypt-of-the-blood-jewel.jpg" alt="Featured artwork for Crypt of the Blood Jewel">
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">Story · 2 min read</span>
@@ -309,7 +291,21 @@
                 </div>
             </a>
         </article>
-    
+
+
+        <article class="content-grid-card content-card--standard">
+            <a href="/stories/sunset-at-the-lighthouse/" class="content-grid-card-link image-overlay" aria-label="Sunset at the Lighthouse, 2 min read">
+                <div class="content-grid-card-image image-overlay__media">
+                    <img loading="lazy" decoding="async" src="/assets/images/covers/sunset-at-the-lighthouse.jpg" alt="Featured artwork for Sunset at the Lighthouse">
+                </div>
+                <div class="content-grid-card-body image-overlay__content">
+                    <span class="image-overlay__label">Story · 2 min read</span>
+                    <h3>Sunset at the Lighthouse</h3>
+                    <p class="content-grid-card-excerpt">For nearly a year, Erin has watched every sunset from the lighthouse, waiting for the person who promised she would return.</p>
+                </div>
+            </a>
+        </article>
+
 <!-- static:related-content-grid:end -->
 </div>
         </section>

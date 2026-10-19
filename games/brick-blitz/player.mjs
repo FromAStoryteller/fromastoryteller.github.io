@@ -1,0 +1,2 @@
+import {mountLegacyPage} from '/systems/community/legacy-page.mjs';
+void mountLegacyPage('brick-blitz',()=>import('./game.js')).catch(error=>{const host=document.querySelector('.game-shell-main');const message=document.createElement('p');message.setAttribute('role','status');message.textContent='The player could not start. Reload this page to try again.';host?.prepend(message);console.error(error);});
