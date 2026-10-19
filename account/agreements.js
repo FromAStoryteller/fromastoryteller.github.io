@@ -1,9 +1,11 @@
+import {signInHref} from './return-path.mjs';
 import {pendingInvitation} from './invitation-storage.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
 import { currentPolicyRequirement, acceptCurrentPolicies } from './published-policies.mjs';
 import { restoreSession } from './session-controller.mjs';
 import { watchSessionEnd } from './session-events.mjs';
+document.querySelector('[data-agreement-sign-in] a').href=signInHref(location.pathname);
 const status=document.querySelector('[data-agreement-status]');
 const form=document.querySelector('[data-agreement-form]');
 let local,requirement,busy=false;

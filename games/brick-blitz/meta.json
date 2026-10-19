@@ -78,5 +78,9 @@
   "page": {
     "tagline": "Smash through the wall of bricks and keep the ball alive.",
     "intro": "Take on a fast-paced brick breaker challenge in this browser arcade game. Clear the bricks and see how long you can stay alive."
+  },
+  "gameFeatures": {
+    "multiplayer": "off",
+    "saves": false
   }
 }

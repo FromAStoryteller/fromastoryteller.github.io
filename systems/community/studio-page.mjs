@@ -1,3 +1,4 @@
+import {signInHref} from '/account/return-path.mjs';
 import {contributionPolicyState} from '/account/contribution-policies.mjs';
 import {loadLocalAuthClient} from '/account/local-auth-client.mjs';
 import {restoreSession} from '/account/session-controller.mjs';
@@ -11,7 +12,7 @@ import {createRecoveryStore,clearRecoveryStorage,downloadRecovery} from './studi
 const root=document.querySelector('[data-studio-root]'),nav=document.querySelector('[data-studio-navigation]');
 let dispose,lockDispose,ended=false,held=null,ownerId=null,local,signingOut=false,tabStorage;
 try{tabStorage=sessionStorage;}catch{}
-function unavailable(message,{preserve=false,forget=false}={}){
+function unavailable(message,{preserve=false,forget=false,signIn=true}={}){
  if(preserve&&!forget){held=dispose?.recovery?.()??held;}
  if(forget){held=null;dispose?.forgetRecovery?.();clearRecoveryStorage(tabStorage);}
  dispose?.();dispose=null;lockDispose?.();lockDispose=null;nav.replaceChildren();root.replaceChildren();
@@ -20,7 +21,7 @@ function unavailable(message,{preserve=false,forget=false}={}){
   lockDispose=mountStudioLock(root,{snapshot:held,ownerId,auth:local.client.auth,verify:()=>loadProfileAccount(local.client),
    onResume:(snapshot,account)=>{held=null;lockDispose=null;ended=false;launch(account,snapshot).catch(error=>unavailable(error.message,{preserve:true}));},
    onForget:()=>{held=null;unavailable('Recovery discarded. Reopen Studio to continue with the current account.',{forget:true});}});
- }else{const link=document.createElement('a');link.href='/account/sign-in/';link.className='account-secondary';link.textContent='Sign in';root.append(link);}
+ }else{const link=document.createElement('a');link.href=signIn?signInHref(location.pathname):'/account/settings/';link.className='account-secondary';link.textContent=signIn?'Sign in':'Account settings';root.append(link);}
 }
 async function launch(account,initialRecovery=null){
  const policies=await contributionPolicyState(local.client);
@@ -50,7 +51,7 @@ try{
  const switched=local.client.auth.onAuthStateChange((_event,session)=>{if(ownerId&&session?.user?.id&&session.user.id!==ownerId){ended=true;unavailable('Your account changed. Reopen Studio to continue.',{forget:true});}}).data.subscription;
  const session=await restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear());
  if(session.state!=='signed-in')unavailable('Sign in with a contributor account to write here.');
- else{const account=await loadProfileAccount(local.client,{useRestoredSession:true});if(!ended){if(!account.contributor||account.state!=='active')unavailable('Storyteller Studio is available to active contributors. Your saved work remains available through your account download.');else await launch(account);}}
+ else{const account=await loadProfileAccount(local.client,{useRestoredSession:true});if(!ended){if(!account.contributor||account.state!=='active')unavailable('Storyteller Studio is available to active contributors. Your saved work remains available through your account download.',{signIn:false});else await launch(account);}}
  addEventListener('pagehide',()=>{dispose?.();lockDispose?.();held=null;stop();switched.unsubscribe();},{once:true});
  addEventListener('beforeunload',event=>{if(held){event.preventDefault();event.returnValue='';}});
 }catch(error){if(!ended)unavailable(error.message,{preserve:true});}

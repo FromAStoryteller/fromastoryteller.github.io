@@ -1,3 +1,4 @@
+import {signInHref} from '/account/return-path.mjs';
 import {contentAddress} from './content-address.mjs';
 import { loadLocalAuthClient } from '/account/local-auth-client.mjs';
 import { restoreSession } from '/account/session-controller.mjs';
@@ -18,7 +19,7 @@ function message(title, detail, signIn = false) {
   const h = document.createElement('h1'); h.textContent = title;
   const p = document.createElement('p'); p.textContent = detail; p.setAttribute('role','status');
   root.append(h,p);
-  if (signIn) { const link = document.createElement('a');link.className='account-secondary profile-sign-in';link.href='/account/sign-in/';link.textContent='Sign in';root.append(link); }
+  if (signIn) { const link = document.createElement('a');link.className='account-secondary profile-sign-in';link.href=signInHref(location.pathname);link.textContent='Sign in';root.append(link); }
 }
 try {
   const local = await loadLocalAuthClient();

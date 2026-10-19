@@ -1,3 +1,4 @@
+import { returnPathFromSearch } from './return-path.mjs';
 import { pendingInvitation, showPendingInvitation } from './invitation-storage.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
@@ -18,6 +19,7 @@ const eye = form.querySelector('[data-password-toggle]');
 const registerPanel = document.querySelector('.account-register');
 const retryButton = document.querySelector('[data-session-retry]');
 const rememberInput = form.querySelector('[data-remember-session]');
+const returnPath = returnPathFromSearch(location.search);
 let local;
 let checking = false;
 let controller;
@@ -101,6 +103,7 @@ function render({ state, message, email }) {
   if (state === 'signed-in') {
     signedInEmail.textContent = email;
     if (pendingInvitation()) { location.replace('/account/invitation/'); return; }
+    if (returnPath) { location.replace(returnPath); return; }
     showPendingInvitation(signedInPanel.querySelector('.account-signed-in-actions') || signedInPanel);
     document.querySelector('[data-signed-in-home]').focus({ preventScroll: true });
   }

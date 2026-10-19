@@ -1,3 +1,4 @@
+import {signInHref} from './return-path.mjs';
 import { roleLabel } from './roles.mjs';
 import { accountEnvironmentNote } from './environment-copy.mjs';
 import { loadLocalAuthClient } from './local-auth-client.mjs';
@@ -8,6 +9,7 @@ import { clearPendingEmail } from './pending-email.mjs';
 import { accountDataArchive } from './account-data-download.mjs';
 import { watchSessionEnd } from './session-events.mjs';
 import { accountNavigation } from '../systems/community/account-navigation.mjs';
+document.querySelector('[data-settings-sign-in] a').href=signInHref(location.pathname);
 const status = document.querySelector('[data-auth-status]');
 const panel = document.querySelector('[data-account-settings]');
 const signInPrompt = document.querySelector('[data-settings-sign-in]');

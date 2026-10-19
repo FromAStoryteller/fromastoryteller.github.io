@@ -4,6 +4,7 @@ on:
     paths:
       - systems/community/**
       - account/**
+      - scripts/test-community-usability-browser.mjs
       - scripts/test-game-*.mjs
       - supabase/migrations/*game_accounts_multiplayer.sql
       - scripts/test-interactive-browser.mjs
@@ -29,6 +30,7 @@ jobs:
       - run: node scripts/test-fas-community-browser.mjs
       - run: node scripts/test-interactive-browser.mjs
       - run: node scripts/test-game-starters-browser.mjs
+      - run: node scripts/test-community-usability-browser.mjs
   production-read-only:
     runs-on: ubuntu-latest
     steps:

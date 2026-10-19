@@ -19,6 +19,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','93000000-0000-0000-0000-000000000003',true);
 select set_config('request.jwt.claims','{"session_id":"94000000-0000-0000-0000-000000000003"}',true);
 do $$declare r jsonb;begin
+ select value into r from jsonb_array_elements(public.fas_public_story_catalog()->'items') where value->>'id'=current_setting('fas.fixture.game');if r->'game_features' is distinct from '{"saves":true,"multiplayer":"realtime"}'::jsonb or r ? 'executable_package' or r ? 'author_id' then raise exception 'FAIL public game badges or private package fields';end if;
  r:=pg_temp.ok(pg_temp.game_call('status'));if r->>'saves' is distinct from 'true' or r->>'policyCurrent' is distinct from 'true' then raise exception 'FAIL viewer online feature status';end if;
  r:=pg_temp.ok(pg_temp.game_call('save.put','{"slot":"main","revision":0,"version":1,"data":{"level":1,"score":5}}'));if r->>'revision' is distinct from '1' then raise exception 'FAIL viewer save';end if;
  begin perform pg_temp.game_call('save.put','{"slot":"main","revision":1,"version":1,"data":{"level":2,"score":7}}');raise exception 'FAIL save rate limit';exception when raise_exception then if SQLERRM not like 'Too many game requests%' then raise;end if;end;
