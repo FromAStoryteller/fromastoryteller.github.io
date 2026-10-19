@@ -27,15 +27,15 @@ try{
  const denied=await clients[2].from('game_player_state').select('*').eq('room_id',room.id);assert.deepEqual(denied.data,[]);
  const direct=await clients[1].from('game_player_state').update({payload:{forged:true}}).eq('room_id',room.id);assert.ok(direct.error);
  assert.ok((await call(1,'room.shared',{room:room.id,revision:0,data:{forged:true}})).error);
- let events=0,outsiderEvents=0;
+ let events=0,outsiderEvents=0;const deleteEvents=[];
  const subscribe=(i,fn)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Realtime subscription timed out')),12000);const c=clients[i].channel('dev-'+crypto.randomUUID()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'game_player_state',filter:'room_id=eq.'+room.id},fn).subscribe(status=>{if(status==='SUBSCRIBED'){clearTimeout(timer);resolve(c);}if(status==='CHANNEL_ERROR'){clearTimeout(timer);reject(Error('Realtime channel error'));}});channels.push([clients[i],c]);});
- await subscribe(0,e=>{if(e.new.payload?.x===42)events++;});await subscribe(2,()=>outsiderEvents++);
+ await subscribe(0,e=>{if(e.new.payload?.x===42)events++;});await subscribe(2,()=>outsiderEvents++);const deletion=clients[2].channel('delete-audit-'+crypto.randomUUID()).on('postgres_changes',{event:'DELETE',schema:'public',table:'game_player_state'},e=>deleteEvents.push(e.old)).subscribe();channels.push([clients[2],deletion]);await sleep(1500);
  assert.equal((await call(1,'room.player',{room:room.id,revision:0,data:{x:42,y:17}})).revision,1);
  for(let i=0;i<40&&!events;i++)await sleep(250);assert.equal(events,1,'real authenticated Realtime update reaches room member');assert.equal(outsiderEvents,0,'outsider receives no state');
  await clients[1].rpc('fas_leave_game_room',{room_key:room.id});assert.deepEqual((await clients[1].from('game_player_state').select('*').eq('room_id',room.id)).data,[]);
- const save=await clients[1].rpc('fas_my_game_data');assert.equal(save.data.saves.length,1,'leaving room preserves saves');
+ await sleep(1500);for(const old of deleteEvents)assert.deepEqual(Object.keys(old),['event_id'],'deleted event contains no room, player or gameplay data');const save=await clients[1].rpc('fas_my_game_data');assert.equal(save.data.saves.length,1,'leaving room preserves saves');
  await clients[1].auth.signOut();assert.ok((await clients[1].rpc('fas_my_game_data')).error);
- console.log('PASS real DEV sessions: private saves, forged account rejection, room capacity, host-only shared state, Realtime delivery/RLS, leave and sign-out');
+ console.log('PASS real DEV sessions: private saves, forged account rejection, room capacity, host-only shared state, Realtime delivery/RLS, leave/sign-out and unlinkable deletion identifiers');
 }finally{
  for(const [client,c] of channels)await client.removeChannel(c);
  if(game)await query("delete from public.stories where id='"+game.id+"'");
