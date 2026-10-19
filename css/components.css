@@ -1596,6 +1596,11 @@ html, body, button, input, textarea, select,
 .storage-dialog input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--colour-accent-primary); }
 .storage-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 .storage-actions button { flex: 1 1 10rem; min-height: var(--size-touch-target-minimum); padding: .6rem .8rem; border: 1px solid var(--colour-accent-primary); border-radius: var(--radius-md); background: var(--colour-control-background); color: var(--colour-control-text); font: inherit; cursor: pointer; }
+.storage-actions [data-allow] { background: var(--colour-button-primary-background); color: var(--colour-button-primary-text); border-color: var(--colour-button-primary-background); }
+.storage-actions [data-allow]:hover { background: var(--colour-button-primary-hover); border-color: var(--colour-button-primary-hover); }
+.storage-actions [data-essential], .storage-actions [data-decline] { background: transparent; }
+.storage-details { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; }
+.storage-details a { display: inline-flex; align-items: center; min-height: var(--size-touch-target-minimum); }
 .storage-settings-link { min-height: var(--size-touch-target-minimum); padding: .25rem 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 .footer-legal a:active, .socials a:active { background: var(--state-current-background); }
 #contact-email { scroll-margin-top: 6rem; }

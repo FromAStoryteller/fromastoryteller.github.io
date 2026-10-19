@@ -7,7 +7,7 @@ try{
   const context=await browser.newContext({viewport:{width,height:900}}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(20000);
   await page.goto(origin+'/stories/the-deal/');
-  const essential=page.getByRole('button',{name:'Essential only',exact:true});if(await essential.isVisible())await essential.click();
+  const essential=page.getByRole('button',{name:'Essentials only',exact:true});if(await essential.isVisible())await essential.click();
   const before=await page.locator('.story-hero').boundingBox();assert.ok(before.width>200);
   assert.equal(await page.locator('[data-content-layout="story"] h1').textContent(),'The Deal');
   const original=await page.locator('.story-content').textContent();assert.ok(original.includes('Dina'));
