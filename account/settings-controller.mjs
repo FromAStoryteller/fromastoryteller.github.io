@@ -12,12 +12,22 @@ async function verifiedIdentity(client, useRestoredSession = false) {
   return user;
 }
 
-export async function loadAccount(client, { useRestoredSession = false, includePolicyHistory = true } = {}) {
+// Navigation depends on verified access, not biographies, covers or policy history.
+// It is presentation only; each destination still verifies its own permissions.
+async function loadNavigationAccess(rolesRequest, stateRequest, onNavigation) {
+  const [roles, state] = await Promise.all([rolesRequest, stateRequest]);
+  if (!roles.error && !state.error && state.data === 'active') onNavigation?.({...accountRoles(roles.data), state: state.data});
+  return {roles, state};
+}
+
+export async function loadAccount(client, { useRestoredSession = false, includePolicyHistory = true, onNavigation } = {}) {
   const user = await verifiedIdentity(client, useRestoredSession);
-  const [profile, roles, state, declaration, agreements] = await Promise.all([
+  const rolesRequest = client.from('user_roles').select('role').eq('user_id', user.id);
+  const stateRequest = client.rpc('fas_my_account_state');
+  const access = loadNavigationAccess(rolesRequest, stateRequest, onNavigation);
+  const [profile, {roles, state}, declaration, agreements] = await Promise.all([
     client.from('profiles').select('id,display_name,bio,welcome_line,public_id,social_links,image_id,image_alt,created_at').eq('id', user.id).single(),
-    client.from('user_roles').select('role').eq('user_id', user.id),
-    client.rpc('fas_my_account_state'),
+    access,
     client.rpc('fas_my_registration_declaration'),
     includePolicyHistory ? client.rpc('fas_my_policy_agreements') : Promise.resolve({ data: [], error: null }),
   ]);
@@ -25,12 +35,12 @@ export async function loadAccount(client, { useRestoredSession = false, includeP
   return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, ...accountRoles(roles.data), state: state.data, registration: declaration.data, policy_agreements: agreements.data };
 }
 
-export async function loadProfileAccount(client, { useRestoredSession = false } = {}) {
+export async function loadProfileAccount(client, { useRestoredSession = false, onNavigation } = {}) {
   const user = await verifiedIdentity(client, useRestoredSession);
-  const [profile, roles, state] = await Promise.all([
+  const access = loadNavigationAccess(client.from('user_roles').select('role').eq('user_id', user.id), client.rpc('fas_my_account_state'), onNavigation);
+  const [profile, {roles, state}] = await Promise.all([
     client.from('profiles').select('display_name,bio,welcome_line,public_id,social_links').eq('id', user.id).single(),
-    client.from('user_roles').select('role').eq('user_id', user.id),
-    client.rpc('fas_my_account_state'),
+    access,
   ]);
   if (profile.error || !profile.data || roles.error || state.error) throw new Error('Your profile could not be loaded. Please try again.');
   return { user, profile: profile.data, ...accountRoles(roles.data), state: state.data };

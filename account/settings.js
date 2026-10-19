@@ -149,7 +149,9 @@ try {
       show(session.message || 'Sign in to view your account settings.', session.state === 'session-unavailable');
       signInPrompt.hidden = false;
     }
-    else render(await loadAccount(local.client,{useRestoredSession:true,includePolicyHistory:false}));
+    else render(await loadAccount(local.client,{useRestoredSession:true,includePolicyHistory:false,onNavigation:access=>{
+      if (!sessionEnded) document.querySelector('[data-account-navigation]').replaceChildren(accountNavigation(document,{current:'settings',auth:local.client.auth,contributor:access.contributor,admin:access.admin}));
+    }}));
   }
 } catch {
   document.querySelector('[data-account-navigation]').replaceChildren(accountNavigation(document, { current: 'settings' }));

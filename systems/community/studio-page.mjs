@@ -24,6 +24,8 @@ function unavailable(message,{preserve=false,forget=false,signIn=true}={}){
  }else{const link=document.createElement('a');link.href=signIn?signInHref(location.pathname):'/account/settings/';link.className='account-secondary';link.textContent=signIn?'Sign in':'Account settings';root.append(link);}
 }
 async function launch(account,initialRecovery=null){
+ // Keep navigation usable while the separate contributor-policy request loads.
+ nav.replaceChildren(accountNavigation(document,{current:'studio',publicId:account.profile.public_id,auth:local.client.auth,admin:account.admin,beforeSignOut:()=>dispose?.canLeave?.()??!held}));
  const policies=await contributionPolicyState(local.client);
  if(ended)return;
  if(!policies.accepted){
@@ -51,7 +53,9 @@ try{
  const switched=local.client.auth.onAuthStateChange((_event,session)=>{if(ownerId&&session?.user?.id&&session.user.id!==ownerId){ended=true;unavailable('Your account changed. Reopen Studio to continue.',{forget:true});}}).data.subscription;
  const session=await restoreSession(local.client.auth,local.hadSession,()=>local.storage.clear());
  if(session.state!=='signed-in')unavailable('Sign in with a contributor account to write here.');
- else{const account=await loadProfileAccount(local.client,{useRestoredSession:true});if(!ended){if(!account.contributor||account.state!=='active')unavailable('Storyteller Studio is available to active contributors. Your saved work remains available through your account download.',{signIn:false});else await launch(account);}}
+ else{const account=await loadProfileAccount(local.client,{useRestoredSession:true,onNavigation:access=>{
+  if(!ended)nav.replaceChildren(accountNavigation(document,{current:'studio',auth:local.client.auth,contributor:access.contributor,admin:access.admin,beforeSignOut:()=>dispose?.canLeave?.()??!held}));
+ }});if(!ended){if(!account.contributor||account.state!=='active')unavailable('Storyteller Studio is available to active contributors. Your saved work remains available through your account download.',{signIn:false});else await launch(account);}}
  addEventListener('pagehide',()=>{dispose?.();lockDispose?.();held=null;stop();switched.unsubscribe();},{once:true});
  addEventListener('beforeunload',event=>{if(held){event.preventDefault();event.returnValue='';}});
 }catch(error){if(!ended)unavailable(error.message,{preserve:true});}
