@@ -20,7 +20,7 @@ try{
   const page=await context.newPage(),errors=[];page.setDefaultTimeout(12000);page.on('pageerror',e=>{errors.push(e.message);console.log('Synthetic editor error: '+e.message);});
   page.on('dialog',dialog=>dialog.accept());
   await page.goto(origin+'/tests/studio-preview/?fixture-persist');
-  const essential=page.getByRole('button',{name:'Essential only',exact:true});await essential.waitFor();await essential.focus();await page.keyboard.press('Enter');
+  const essential=page.getByRole('button',{name:'Essentials only',exact:true});await essential.waitFor();await essential.focus();await page.keyboard.press('Enter');
   await openOwner(page);
   const details=page.getByRole('tab',{name:'Details',exact:true}),cover=page.getByRole('tab',{name:'Cover',exact:true}),publish=page.getByRole('tab',{name:'Publish',exact:true});
   await details.focus();await page.keyboard.press('ArrowRight');

@@ -8,7 +8,7 @@ const browser=await chromium.launch(),origin='http://127.0.0.1:55410';
 try{
  for(const width of [1440,390]){
   const context=await browser.newContext({viewport:{width,height:950}}),page=await context.newPage(),errors=[];page.setDefaultTimeout(8000);page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(origin+'/tests/studio-preview/');const essential=page.getByRole('button',{name:'Essential only',exact:true});if(await essential.isVisible())await essential.click();await page.getByRole('button',{name:'Add content',exact:false}).click();
+  await page.goto(origin+'/tests/studio-preview/');const essential=page.getByRole('button',{name:'Essentials only',exact:true});if(await essential.isVisible())await essential.click();await page.getByRole('button',{name:'Add content',exact:false}).click();
   await page.locator('[data-type-choices]').getByRole('button',{name:'Game',exact:true}).click();
   assert.equal(await page.locator('.ss-writing').isVisible(),false);
   assert.equal(await page.locator('.ss-creation-switcher #ss-type').inputValue(),'game');
