@@ -1,5 +1,6 @@
 // Deterministic compatibility projects: editable JS/CSS, fixed platform DOM,
 // local audio, and the pinned p5 dependency. No authenticated files are exported.
+import {playerSlot} from '../systems/content/player-information.mjs';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
 import {build,transform} from 'esbuild';
 import {defaultGameSettings} from '../systems/community/game-contract.mjs';
@@ -18,8 +19,7 @@ writeFileSync('assets/vendor/p5-1.9.0.runtime.txt',readFileSync('assets/vendor/p
 const defs={};mkdirSync('content/legacy-projects',{recursive:true});
 for(const slug of ['brick-blitz','rally-clash','countdown','genre-randomizer']){
  const type=['brick-blitz','rally-clash'].includes(slug)?'game':'tool',folder=(type==='game'?'games/':'tools/')+slug,html=readFileSync(folder+'/index.html','utf8');
- const opening='<div class="'+type+'-shell-main">',start=html.indexOf(opening),end=html.indexOf('<aside class="'+type+'-shell-sidebar"',start);if(start<0||end<0)throw Error('Missing legacy player slot '+slug);
- defs[slug]=html.slice(start,end).trim().replace(/<\/div>\s*$/,'');
+ defs[slug]=playerSlot(html,type);
  let js;if(type==='game'){const result=await build({entryPoints:['sources/games/'+slug+'.mjs'],bundle:true,write:false,format:'iife',platform:'browser',target:'es2022',legalComments:'none'});js=result.outputFiles[0].text;}else js=readFileSync(folder+'/tool.js','utf8');
  const assets=[];for(const match of [...js.matchAll(/["'](\/assets\/sounds\/[^"']+\.wav)["']/g)]){const url=match[1],name=slug+'-'+url.split('/').pop();if(!assets.some(a=>a.name===name))assets.push({name,type:'audio/wav',data:portableWav(readFileSync('.'+url)).toString('base64')});js=js.replaceAll(JSON.stringify(url),'FAS.asset('+JSON.stringify(name)+')');}
  const cssFiles=['css/foundations.css',...(type==='game'?['games/games.css','games/shared/menu/menu.css']:slug==='countdown'?['tools/countdown/tool.css']:[])];

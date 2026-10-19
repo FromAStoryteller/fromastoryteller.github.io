@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
+import {playerSlot} from '../systems/content/player-information.mjs';
 import {storyBodyHtml} from '../systems/reading/reading-time.mjs';
 const base=process.env.FAS_LAYOUT_BASE;
 if(!/^[a-f0-9]{40}$/.test(base??''))throw Error('Exact base commit required');
@@ -18,7 +19,7 @@ for(const metaPath of index){
  const path=metaPath.slice(1).replace(/meta\.json$/,'index.html'),previous=execFileSync('git',['show',base+':'+path],{encoding:'utf8'}),current=readFileSync(path,'utf8');
  const meta=JSON.parse(readFileSync(metaPath.slice(1),'utf8'));
  if(['story','blog'].includes(meta.type)){assert.equal(storyBodyHtml(current),storyBodyHtml(previous),'Legacy manuscript changed: '+path);stories++;}
- if(['game','tool'].includes(meta.type)){assert.equal(section(current,meta.type),section(previous,meta.type),'Interactive implementation changed: '+path);interactive++;}
+ if(['game','tool'].includes(meta.type)){assert.equal(playerSlot(current,meta.type),playerSlot(previous,meta.type),'Interactive player changed: '+path);interactive++;}
  assert.ok(current.includes('data-content-layout="'+meta.type+'"'));
 }
-console.log('PASS preserved '+stories+' legacy manuscripts and '+interactive+' interactive implementation slots byte-for-byte against '+base);
+console.log('PASS preserved '+stories+' legacy manuscripts and '+interactive+' interactive player slots byte-for-byte against '+base);

@@ -47,3 +47,10 @@ test('production and preview run public attribution for every supported content 
   for(const route of ['/stories/*','/blog/*','/games/*','/tools/*','/videos/*'])assert.ok(config.assets.run_worker_first.includes(route),route+' must reach the publishing worker');
  }
 });
+
+ test('migrated original routes render saved manuscripts and fresh metadata in the existing themed shell',async()=>{
+ const base=readFileSync(new URL('../stories/a-place-left-behind/index.html',import.meta.url),'utf8'),author=item.author,story={id:item.id,slug:'a-place-left-behind',content_type:'story',title:'Updated <safe> title',summary:'An updated saved description.',genres:['fantasy'],tags:['Hidden tag'],published_at:'2026-08-09T00:00:00Z',updated_at:'2026-10-20T00:00:00Z',body_document:{version:1,blocks:[{type:'paragraph',text:'Saved revised words <script>literal</script>.'}]},author,cover:{asset_id:item.id,alt:'Updated cover'}};
+ const projected={...item,url:'/stories/a-place-left-behind/',slug:story.slug,title:story.title,summary:story.summary,content_type:'story',editorial_migrated:true,editorial:story};
+ const result=await filePublishingResponse(new Request('https://fromastoryteller.com'+projected.url),{ASSETS:{fetch:async()=>Response.json(config)}},new Response(base),async()=>Response.json(projected)),rendered=await result.text();assert.equal(result.status,200);assert.ok(rendered.includes('<h1>Updated &lt;safe&gt; title</h1>'));assert.ok(rendered.includes('Saved revised words &lt;script&gt;literal&lt;/script&gt;.'));assert.ok(!rendered.match(/<p class="content-page-details[^>]*>[\s\S]*?<\/p>/)?.[0]?.includes('Hidden tag'));assert.equal((rendered.match(/property="og:title"/g)||[]).length,1);assert.ok(rendered.includes('https://fromastoryteller.com/stories/a-place-left-behind/'));assert.equal((rendered.match(/aria-label="Author social links"/g)||[]).length,1);
+ const hidden=await filePublishingResponse(new Request('https://fromastoryteller.com'+projected.url),{ASSETS:{fetch:async()=>Response.json(config)}},new Response(base),async()=>Response.json({...projected,editorial:null}));assert.equal(hidden.status,404);
+ });

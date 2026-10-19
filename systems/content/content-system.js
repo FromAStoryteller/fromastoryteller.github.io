@@ -127,10 +127,12 @@ async function loadAllContent() {
     const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
     const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
     const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog().catch(()=>[])]);
-    const authors=new Map(fileAuthors.map(item=>[item.url,item.author]));
+    const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
+    const unavailable=new Set(fileAuthors.filter(item=>item.unavailable).map(item=>item.url));
+    const live=new Map(community.map(item=>[item.url,item]));
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
     if (metaPaths.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
-    const files=loaded.map(item => ({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
+    const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
     const paths=new Set(files.map(item=>item.url));
     return [...files,...community.filter(item=>!paths.has(item.url))]
 }
@@ -671,7 +673,7 @@ export async function initRelatedContentSection(config) {
     try {
         const loadedContent = await loadAllContent()
         const publishedContent = getPublishedContent(loadedContent)
-        const current = publishedContent.find(item => item.id === currentContentId) ?? config.currentContent
+        const current = publishedContent.find(item => item.id === currentContentId || item.slug === currentContentId) ?? config.currentContent
         const relatedItems = relatedContent(publishedContent, current, {limit})
 
         renderGrid(gridSelector, relatedItems, emptyMessage)

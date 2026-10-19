@@ -1,5 +1,5 @@
 import {genreLabel} from '../community/studio-catalog.mjs';
-import {gameFeatureLabels} from './game-features.mjs';
+import {normalizeGameFeatures} from './game-features.mjs';
 import {plainDocument,validateDocument} from '../community/manuscript.mjs';
 import {readingTimeFromHtml} from '../reading/reading-time.mjs';
 export const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,7 +49,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  const date=new Date(item.published_at??'');
  const dateMarkup=Number.isFinite(date.valueOf())?'<time class="story-date" datetime="'+escapeText(item.published_at)+'">'+escapeText(new Intl.DateTimeFormat('en-NZ',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(date))+'</time>':'';
  const minutes=readingTimeFromHtml(body).minutes;
- const labels=[...(item.genres??[]).map(genreLabel),...(item.tags??[])].filter(x=>typeof x==='string'&&x.trim());
+ const labels=(item.genres??[]).filter(x=>typeof x==='string'&&x.trim());
  return '<article class="story-page" data-content-layout="'+type+'"'+(item.id?' data-current-content-id="'+escapeText(item.id)+'"':'')+'>'+
  '<a href="'+layout.collection+'" class="story-back-link"><span aria-hidden="true">←</span><span>Back to '+layout.label+'</span></a>'+
  '<header class="story-header"><div class="story-hero image-overlay'+(image?'':' story-hero--no-image')+'">'+
@@ -57,7 +57,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  '<div class="story-hero-copy image-overlay__content"><p class="story-category">'+layout.label+(item.subtype_label?' / '+escapeText(item.subtype_label):'')+'</p><h1'+(preview?' id="ss-preview-title"':'')+'>'+title+'</h1></div></div>'+
  '<div class="story-meta">'+authorMarkup(item.author,item.source_kind==='file')+'<span data-story-reading-time><i class="fa-solid fa-clock" aria-hidden="true"></i>'+minutes+' min read</span>'+dateMarkup+'</div></header>'+
  ((labels.length||item.content_warning)?'<div class="story-details">'+
- (labels.length?'<p class="story-taxonomy">'+escapeText(labels.join(' · '))+'</p>':'')+
+ (labels.length?contentBadgesMarkup(item):'')+
  (item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'')+'</div>':'')+
  '<section class="story-content'+(manuscript?' fas-manuscript':'')+'" aria-label="Manuscript"'+(manuscript?' '+manuscript.attributes:'')+'>'+body+'</section>'+
  '<footer class="story-footer"><div class="story-end-mark" aria-hidden="true">✦</div>'+
@@ -73,6 +73,11 @@ export function interactiveHeaderMarkup(item){
 }
 
 export function contentPageDetailsMarkup(item){
- const labels=[...(item.genres??item.taxonomy?.genres??[]).map(genreLabel),...(item.content_type==='game'?gameFeatureLabels(item.gameFeatures??item.game_features):[])];
- return (labels.length?'<p class="content-page-details" aria-label="Content details">'+labels.map(label=>'<span>'+escapeText(label)+'</span>').join('<span aria-hidden="true">·</span>')+'</p>':'')+(item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'');
+ return contentBadgesMarkup(item)+(item.content_warning?'<p class="story-warning"><strong>Content warning:</strong> '+escapeText(item.content_warning)+'</p>':'');
+}
+
+export function contentBadgesMarkup(item){
+ const mode=normalizeGameFeatures(item.gameFeatures??item.game_features);
+ const labels=[...new Set((item.genres??item.taxonomy?.genres??[]).filter(x=>typeof x==='string'&&x.trim()).map(genreLabel)),...(item.content_type==='game'?[mode?.multiplayer&&mode.multiplayer!=='off'?'Multiplayer':'Single player']:[])];
+ return labels.length?'<p class="content-page-details'+(['story','blog'].includes(item.content_type??'story')?' story-taxonomy':'')+'" aria-label="Content details">'+labels.map(label=>'<span class="content-detail-badge">'+escapeText(label)+'</span>').join('')+'</p>':'';
 }

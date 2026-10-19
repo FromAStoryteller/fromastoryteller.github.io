@@ -4,10 +4,10 @@ import {normalizeGameFeatures,gameFeatureLabels,gameFeatureMarkup} from '../syst
 import {normalizeContentMeta,createCardMarkup,createFeaturedPanelMarkup,searchPublishedContent} from '../systems/content/content-system.js';
 import {interactiveHeaderMarkup} from '../systems/content/page-layout.mjs';
 import {publicStoryCard} from '../systems/community/public-story-catalog.mjs';
-test('badges reflect verified capability flags and do not invent capabilities for missing data',()=>{
+test('page details use one verified player-mode badge and do not invent capabilities for missing data',()=>{
  assert.deepEqual(gameFeatureLabels({saves:false,multiplayer:'off'}),['Single player']);for(const multiplayer of ['casual','realtime'])assert.deepEqual(gameFeatureLabels({saves:true,multiplayer}),['Multiplayer','Account saves']);
  for(const value of [null,{},'<script>',{saves:'true',multiplayer:'off'},{saves:true,multiplayer:'<script>'}]){assert.equal(normalizeGameFeatures(value),null);assert.equal(gameFeatureMarkup(value),'');}
- const item=normalizeContentMeta({id:'fixture',type:'game',category:'games',title:'Test game',card:{title:'Test game'},gameFeatures:{saves:true,multiplayer:'casual'}});for(const render of [createCardMarkup,createFeaturedPanelMarkup]){const html=render(item);assert.ok(!html.includes('content-game-features'));assert.ok(!html.includes('Account saves'));}const header=interactiveHeaderMarkup({...item,content_type:'game',genres:['arcade']});assert.match(header,/Multiplayer/);assert.match(header,/Account saves/);assert.match(header,/Arcade/);assert.equal(searchPublishedContent([item],'multiplayer').length,1);
+ const item=normalizeContentMeta({id:'fixture',type:'game',category:'games',title:'Test game',card:{title:'Test game'},gameFeatures:{saves:true,multiplayer:'casual'}});for(const render of [createCardMarkup,createFeaturedPanelMarkup]){const html=render(item);assert.ok(!html.includes('content-game-features'));assert.ok(!html.includes('Account saves'));}const header=interactiveHeaderMarkup({...item,content_type:'game',genres:['arcade']});assert.match(header,/Multiplayer/);assert.ok(!header.includes('Account saves'));assert.match(header,/Arcade/);assert.equal(searchPublishedContent([item],'multiplayer').length,1);
  const story=normalizeContentMeta({...item,type:'story',category:'stories'});assert.equal(story.gameFeatures,null);assert.ok(!createCardMarkup(story).includes('content-game-features'));
 });
 test('community cards retain public game flags without retaining executable or private data',()=>{
