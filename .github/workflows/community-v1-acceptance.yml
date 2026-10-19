@@ -4,6 +4,8 @@ on:
     paths:
       - systems/community/**
       - account/**
+      - scripts/test-game-*.mjs
+      - supabase/migrations/*game_accounts_multiplayer.sql
       - scripts/test-interactive-browser.mjs
       - supabase/migrations/*interactive_uploads.sql
       - scripts/test-fas-community-browser.mjs
@@ -26,6 +28,7 @@ jobs:
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-community-vite.log 2>&1 &
       - run: node scripts/test-fas-community-browser.mjs
       - run: node scripts/test-interactive-browser.mjs
+      - run: node scripts/test-game-starters-browser.mjs
   production-read-only:
     runs-on: ubuntu-latest
     steps:

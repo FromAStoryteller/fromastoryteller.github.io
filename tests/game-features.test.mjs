@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {deflateRawSync} from 'node:zlib';
 import {defaultGameSettings,validateGameSettings,validateSaveData,validateSaveSchema} from '../systems/community/game-contract.mjs';
 import {packageFromFiles,packageZip,starterPackage} from '../systems/community/interactive-package.mjs';
 import {createGameService} from '../systems/community/game-service.mjs';
@@ -32,4 +33,8 @@ test('the trusted game adapter requires explicit enablement and binds every writ
 
 test('game notice release freezes the data controls and exact predecessor',async()=>{
  const {readFileSync}=await import('node:fs');const {policyTransitionPlan}=await import('../scripts/fas-policy-release-plan.mjs');const root=new URL('../',import.meta.url),r=JSON.parse(readFileSync(new URL('account/policy-versions.json',root)));const v=r.gameUpdateVersion;assert.equal(r.activePublishedVersion,v);for(const kind of ['privacy','terms']){const live=readFileSync(new URL(kind+'/index.html',root),'utf8'),frozen=readFileSync(new URL(r.versions[v].documents[kind].path.slice(1),root),'utf8');assert.equal(live,frozen);assert.match(live,/private multiplayer/i);assert.match(live,/account\/games/);}const {fileURLToPath}=await import('node:url');assert.equal(readFileSync(new URL('supabase/ops/'+v+'.sql',root),'utf8'),policyTransitionPlan(fileURLToPath(root),r,v,r.versions[v].previousVersion));
+});
+
+test('ordinary DEFLATE ZIPs import with the same canonical package',async()=>{
+ const source=Buffer.from(packageZip(starterPackage())),locals=[],directory=[];let p=0,offset=0;while(source.readUInt32LE(p)===0x04034b50){const size=source.readUInt32LE(p+18),n=source.readUInt16LE(p+26),extra=source.readUInt16LE(p+28),start=p+30+n+extra,head=Buffer.from(source.subarray(p,start)),data=deflateRawSync(source.subarray(start,start+size));head.writeUInt16LE(8,8);head.writeUInt32LE(data.length,18);locals.push(head,data);directory.push({offset,size:data.length});p=start+size;}const entries=[];for(const entry of directory){const length=46+source.readUInt16LE(p+28)+source.readUInt16LE(p+30)+source.readUInt16LE(p+32),head=Buffer.from(source.subarray(p,p+length));head.writeUInt16LE(8,10);head.writeUInt32LE(entry.size,20);head.writeUInt32LE(offset,42);entries.push(head);offset+=locals[(entries.length-1)*2].length+entry.size;p+=length;}const end=Buffer.from(source.subarray(p));end.writeUInt32LE(entries.reduce((n,b)=>n+b.length,0),12);end.writeUInt32LE(offset,16);const loaded=await packageFromFiles([new File([Buffer.concat([...locals,...entries,end])],'compressed.zip')]);assert.equal(loaded.js,starterPackage().js);
 });
