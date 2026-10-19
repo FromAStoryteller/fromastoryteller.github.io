@@ -13,4 +13,23 @@ try{
   await page.goto(origin+'/tests/studio-preview/');await page.getByRole('button',{name:'Add content',exact:false}).click();await page.locator('[data-type-choices]').getByRole('button',{name:'Game',exact:true}).click();assert.deepEqual(await page.locator('.ss-upload-steps li').allTextContents(),['Download template','Edit','Upload','Preview','Publish']);const guide=page.getByRole('link',{name:'Read the upload guide',exact:false});assert.equal(await guide.getAttribute('target'),'_blank');const popupEvent=page.waitForEvent('popup');await guide.click();const popup=await popupEvent;await popup.getByRole('heading',{name:'Game and tool upload guide',exact:true}).waitFor();assert.ok((await popup.locator('main').innerText()).includes('README.txt'));await popup.close();assert.equal(await page.locator('.ss-package-panel').isVisible(),true);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await context.close();console.log('PASS '+width+'px: sign-in return, themed cards/page details and upload guide without leaving editor');
  }
  const context=await browser.newContext();await fakeAccount(context);const page=await context.newPage();page.setDefaultTimeout(8000);await page.goto(origin+'/account/sign-in/?next=https%3A%2F%2Fevil.invalid%2F');await dismiss(page);await page.locator('#account-email').fill('browser-fixture@example.invalid');await page.locator('#account-password').fill('SyntheticOnly9!');await page.locator('[data-sign-in-form]').getByRole('button',{name:'Sign in',exact:false}).click();await page.locator('[data-signed-in]').waitFor();assert.ok(page.url().startsWith(origin+'/account/sign-in/'));await context.close();console.log('PASS external return target ignored');
+
+ // Delay unrelated account data indefinitely: verified navigation must still work.
+ for(const destination of ['settings','profile','studio']){
+  const context=await browser.newContext({viewport:{width:1440,height:1000}});
+  await context.route('**/account/local-auth-client.mjs',route=>route.fulfill({contentType:'text/javascript',body:`
+   const user={id:'81000000-0000-0000-0000-000000000001',email:'navigation@example.invalid'};
+   const auth={getSession:async()=>({data:{session:{}}}),refreshSession:async()=>({data:{session:{}}}),getUser:async()=>({data:{user}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})};
+   const stalled=()=>new Promise(()=>{});
+   const client={auth,from(table){return {select(){return this;},eq(){return this;},single:stalled,then(resolve,reject){return Promise.resolve({data:[{role:'member'}]}).then(resolve,reject);}};},rpc:async name=>name==='fas_my_account_state'?{data:'active'}:stalled()};
+   export async function loadLocalAuthClient(){return {mode:'local',hadSession:true,storage:{clear(){}},client};}
+  `}));
+  const page=await context.newPage();await page.goto(origin+'/account/'+destination+'/');
+  const nav=page.locator('.account-navigation').last();await nav.getByRole('link',{name:'Storyteller Studio',exact:true}).waitFor({timeout:5000});
+  assert.equal(await nav.getByRole('link',{name:'Storyteller Studio',exact:true}).getAttribute('href'),'/account/studio/');
+  assert.equal(await nav.getByRole('link',{name:'Admin tools',exact:true}).count(),0);
+  assert.equal(await nav.getByRole('button',{name:'Sign out',exact:true}).isEnabled(),true);
+  await context.close();console.log('PASS '+destination+' navigation appears while unrelated account data is stalled');
+ }
+
 }finally{await browser.close();}
