@@ -1,3 +1,4 @@
+import {normalizeGameFeatures,gameFeatureLabels,gameFeatureMarkup} from './game-features.mjs'
 import {publicStoryCatalog} from '../community/public-story-catalog.mjs'
 import {publicFileCatalog} from '../community/publishing-identity.mjs'
 import { readingTimeLabel } from "../reading/reading-time.mjs"
@@ -93,6 +94,7 @@ function normalizeContentMeta(meta) {
         seo: meta.seo || {},
         openGraph: meta.openGraph || {},
         twitter: meta.twitter || {},
+        gameFeatures: meta.type === "game" ? normalizeGameFeatures(meta.gameFeatures) : null,
         taxonomy: meta.taxonomy || {}
     }
 }
@@ -215,7 +217,8 @@ function getSearchableText(item) {
         item.subtype,
         item.author,
         item.authorDisplay,
-        ...(item.card?.tags || [])
+        ...(item.card?.tags || []),
+        ...gameFeatureLabels(item.gameFeatures)
     ]
 
     return parts
@@ -314,7 +317,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
     if (!item) return ""
     const type = cardTypeLabel(item)
     return `
-        <a class="content-featured-link image-overlay" href="${escapeHtml(item.url)}" aria-label="${escapeHtml(getPrimaryActionLabel(item) + ': ' + item.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
+        <a class="content-featured-link image-overlay" href="${escapeHtml(item.url)}" aria-label="${escapeHtml(getPrimaryActionLabel(item) + ': ' + item.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : "") + (item.category === "games" && gameFeatureLabels(item.gameFeatures).length ? ", " + gameFeatureLabels(item.gameFeatures).join(", ") : ""))}">
             <div class="content-featured-media image-overlay__media">
                 <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}" fetchpriority="high" decoding="async">
             </div>
@@ -322,7 +325,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
                 <div class="content-featured-text-inner">
                     <p class="content-featured-label image-overlay__label">Featured · ${escapeHtml(type)}</p>
                     <h2>${escapeHtml(item.title)}</h2>
-                    <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>
+                    <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>${item.category === "games" && gameFeatureLabels(item.gameFeatures).length ? '\n                    ' + gameFeatureMarkup(item.gameFeatures) : ""}
                     <span class="content-featured-action"><span class="content-featured-action-label">${escapeHtml(getPrimaryActionLabel(item))}</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
                 </div>
             </div>
@@ -334,13 +337,13 @@ function createCardMarkup(item, variant = "standard") {
     const cardVariant = "standard"
     return `
         <article class="content-grid-card content-card--${cardVariant}">
-            <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
+            <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : "") + (item.category === "games" && gameFeatureLabels(item.gameFeatures).length ? ", " + gameFeatureLabels(item.gameFeatures).join(", ") : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
                     ${item.card.image ? `<img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">` : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">${escapeHtml(cardTypeLabel(item))}</span>
-                    <h3>${escapeHtml(item.card.title)}</h3>
+                    <h3>${escapeHtml(item.card.title)}</h3>${item.category === "games" && gameFeatureLabels(item.gameFeatures).length ? '\n                    ' + gameFeatureMarkup(item.gameFeatures) : ""}
                     ${cardVariant === "standard" ? `<p class="content-grid-card-excerpt">${escapeHtml(item.card.description || item.excerpt || item.description)}</p>` : ""}
                 </div>
             </a>

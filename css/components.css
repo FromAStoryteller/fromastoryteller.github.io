@@ -1611,3 +1611,7 @@ html, body, button, input, textarea, select,
 .file-publishing-author a:hover{color:var(--colour-accent-primary);}
 .file-publishing-socials{display:flex;flex-wrap:wrap;gap:.75rem;margin-block:1.5rem;}
 .file-publishing-socials a{display:inline-flex;align-items:center;min-height:var(--size-touch-target-minimum);text-transform:capitalize;}
+
+/* Published game capabilities share the card’s readable overlay colors. */
+.content-game-features { display: flex; flex-wrap: wrap; gap: .375rem; margin-block: .5rem; }
+.content-game-feature { display: inline-block; padding: .15rem .5rem; border: 1px solid currentColor; border-radius: 999px; font: 600 .75rem/1.4 var(--font-family-interface); }

@@ -77,5 +77,9 @@
   "page": {
     "tagline": "A fast-paced paddle duel where every rally matters.",
     "intro": "Take on the computer in this Pong-inspired browser arcade game. Stay sharp, return the ball, and be the first to reach 5 points."
+  },
+  "gameFeatures": {
+    "multiplayer": "off",
+    "saves": false
   }
 }
