@@ -282,7 +282,7 @@ function generateStaticHtml(items) {
     if (relatedId) {
       const currentId = html.match(/data-current-content-id=["']([^"']+)["']/)?.[1] || '';
       const related = relatedContent(content, content.find(item => item.id === currentId), {limit:6});
-      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item)).join('\n'), 'div');
+      html = replaceGenerated(html, relatedId, related.map(item => createCardMarkup(item).replace(/[ \t]+$/gm,'')).join('\n'), 'div');
       html = html.replace(new RegExp(`(id=["']${relatedId}["'][^>]*class=["'])([^"']*)`), (_, before, classes) => before + classes.replace(/\s*content-grid--compact\b/g, ''));
     }
     html = html.replace(/<body(?![^>]*\bid=)\b/, '<body id="top"');

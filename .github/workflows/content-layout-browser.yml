@@ -2,6 +2,13 @@ name: Shared content layout browser checks
 on:
   pull_request:
     paths:
+      - systems/content/**
+      - systems/community/interactive-*.mjs
+      - systems/community/legacy-*.mjs
+      - systems/community/studio-editor.mjs
+      - scripts/test-content-discovery-browser.mjs
+      - scripts/test-legacy-projects-browser.mjs
+      - scripts/test-existing-file-editor-browser.mjs
       - systems/content/page-layout.mjs
       - scripts/test-content-layout-browser.mjs
       - .github/workflows/content-layout-browser.yml
@@ -28,3 +35,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/test-content-layout-browser.mjs
+      - run: node scripts/test-content-discovery-browser.mjs
+      - run: node scripts/test-legacy-projects-browser.mjs
+      - run: node scripts/test-existing-file-editor-browser.mjs
+      - run: node scripts/test-community-usability-browser.mjs
