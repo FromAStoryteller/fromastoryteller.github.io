@@ -9,7 +9,8 @@ test('public cards use safe reading addresses, public author IDs and the shared 
  const card=publicStoryCard(row,base);assert.equal(card.url,'/stories/a-quiet-story/');assert.equal(card.author,author);assert.equal(card.category,'stories');assert.equal(card.readingMinutes,2);
  const html=createCardMarkup(card);assert.match(html,/A &lt;quiet&gt; story/);assert.ok(!html.includes('<script>'));assert.match(card.image.src,/fas-story-image\?asset_id=/);
  assert.equal(publicStoryCard({...row,content_type:'blog'},base).url,'/blog/a-quiet-story/');
- for(const changed of [{status:'draft'},{status:'archived'},{content_type:'game'},{slug:'../../private'},{author:{public_id:'private'}},{published_at:'invalid'}])assert.equal(publicStoryCard({...row,...changed},base),null);
+ for(const [type,category] of [['game','games'],['tool','tools']]){const c=publicStoryCard({...row,content_type:type},base);assert.equal(c.url,'/'+category+'/a-quiet-story/');assert.equal(c.category,category);}
+ for(const changed of [{status:'draft'},{status:'archived'},{content_type:'video'},{slug:'../../private'},{author:{public_id:'private'}},{published_at:'invalid'}])assert.equal(publicStoryCard({...row,...changed},base),null);
 });
 test('public discovery follows distinct cursors, deduplicates IDs and never sends account credentials',async()=>{
  const calls=[],cursor={id,published_at:when};

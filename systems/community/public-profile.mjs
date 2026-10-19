@@ -1,6 +1,8 @@
 import {storyPageMarkup} from '../content/page-layout.mjs';
 import {profileImageUrl} from './profile-image-service.mjs';
 import {fileContentPath} from './publishing-identity.mjs';
+import {isInteractive} from './interactive-package.mjs';
+import {interactivePageMarkup,mountPublicPlayer} from './interactive-page.mjs';
 import {contentPath} from './content-address.mjs';
 import { initials } from './profile-editor.mjs';
 import { publicProfileUrl, publicCoverUrl, isPublicId } from './profiles.mjs';
@@ -51,11 +53,14 @@ export function profileStoryCard(story, { imageBase, preview = false } = {}) {
     card:{title:story.title,description:story.summary,image:publicCoverUrl(story.cover,imageBase)||localImage,imageAlt:story.cover?.alt || story.preview_alt || ''} });
 }
 
+const players=new WeakMap();
 export function renderPublicStory(root,story,{imageBase}={}){
+ players.get(root)?.();players.delete(root);
  root.removeAttribute('data-content-id');root.classList.remove('community-reading');
  if(isPublicId(story?.id))root.dataset.contentId=story.id;
  root.replaceChildren();
  if(!story){root.append(node(root.ownerDocument,'h1','','Story unavailable'),node(root.ownerDocument,'p','','This story may no longer be published.'));return;}
+ if(isInteractive(story.content_type)){root.innerHTML=interactivePageMarkup(story);players.set(root,mountPublicPlayer(root,story));return;}
  root.innerHTML=storyPageMarkup({...story,image:publicCoverUrl(story.cover,imageBase),image_alt:story.cover?.alt,genres:story.genres?.map(genreLabel)??[]});
  root.dispatchEvent(new root.ownerDocument.defaultView.CustomEvent('fas:content-rendered',{bubbles:true}));
  for(const img of root.querySelectorAll('.story-feature-image img'))img.addEventListener('error',()=>{img.closest('.story-hero').classList.add('story-hero--no-image');img.closest('figure').remove();},{once:true});

@@ -1,5 +1,7 @@
 // Stable IDs are stored; labels can evolve without changing saved work.
 export const GENRE_GROUPS = {
+  Games:['Arcade','Action','Puzzle','Strategy','Simulation'],
+  Tools:['Creative tool','Writing tool','Productivity'],
   Fantasy: ['Fantasy','High fantasy','Low fantasy','Dark fantasy','Urban fantasy','Fairy tale','Magical realism'],
   'Science fiction': ['Science fiction','Cyberpunk','Dystopian','Artificial intelligence','Time travel','Space opera'],
   'Mystery & suspense': ['Mystery','Crime','Thriller','Psychological thriller','Cosy mystery'],
@@ -14,7 +16,7 @@ export const SUGGESTED_TAGS = ['Atmospheric','Found family','Folklore','Friendsh
 export const CONTENT_TYPES = [
  {id:'story',label:'Story',enabled:true,metadata_version:1,required_fields:['title','summary','body','genres','cover','warnings'],metadata_fields:[],genre_ids:GENRES.filter(g=>g.parent!=='Blog & nonfiction').map(g=>g.id)},
  {id:'blog',label:'Blog post',enabled:true,metadata_version:1,required_fields:['title','summary','body','genres','cover','warnings'],metadata_fields:[],genre_ids:GENRES.map(g=>g.id)},
- ...['game','tool','video'].map(id=>({id,label:id[0].toUpperCase()+id.slice(1),enabled:false,metadata_version:1,required_fields:['title','summary','cover','warnings'],metadata_fields:[],genre_ids:[]}))];
+ ...['game','tool'].map(id=>({id,label:id[0].toUpperCase()+id.slice(1),enabled:true,metadata_version:1,required_fields:['title','summary','genres','cover','warnings'],metadata_fields:[{key:'instructions',label:'Controls and instructions',type:'text',required:true,max_length:2000}],genre_ids:GENRES.filter(g=>['Games','Tools','Blog & nonfiction'].includes(g.parent)).map(g=>g.id)})),{id:'video',label:'Video',enabled:false,metadata_version:1,required_fields:[],metadata_fields:[],genre_ids:[]}];
 export const CONTENT_WARNINGS = ['Violence','Graphic violence / gore','Death or grief','Abuse','Sexual content','Strong language','Self-harm or suicide themes','Discrimination','Substance use','Flashing lights'].map((label,i)=>({id:['violence','graphic-violence','death-grief','abuse','sexual-content','strong-language','self-harm','discrimination','substance-use','flashing-lights'][i],label,active:true}));
 export function metadataIssues(input,type){
  const issues=[];

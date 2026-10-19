@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "community-policies-2026-10-18-v1",
+  "activePublishedVersion": "game-features-2026-10-19-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -121,10 +121,32 @@
         "approvedOn": "2026-10-18",
         "scope": "Requested publication of account/privacy terms, contributor policies and necessary onboarding acknowledgements"
       }
+    },
+    "game-features-2026-10-19-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-19",
+      "previousVersion": "community-policies-2026-10-18-v1",
+      "change": "Optional private game saves and private casual/realtime rooms, visibility, retention and account data controls.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-19",
+        "scope": "Requested account saves and multiplayer with necessary notices; production push explicitly authorised after backup confirmation."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/game-features-2026-10-19-v1/terms/index.html",
+          "sha256": "236cd5e08e965f9265d423a259343f30c8a8f2f7f77617457957e4d78ef1e738"
+        },
+        "privacy": {
+          "path": "/account/policy-history/game-features-2026-10-19-v1/privacy/index.html",
+          "sha256": "b5e4a9cc86bd6cceb1bf7f5b57ad7d067bd4241a0be39c47e49573c0358947a4"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
   "candidateVersion": "account-launch-2026-10-16-v1",
   "sessionUpdateVersion": "account-sessions-2026-10-16-v2",
-  "communityUpdateVersion": "community-policies-2026-10-18-v1"
+  "communityUpdateVersion": "community-policies-2026-10-18-v1",
+  "gameUpdateVersion": "game-features-2026-10-19-v1"
 }

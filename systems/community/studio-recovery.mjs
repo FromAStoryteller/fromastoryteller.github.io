@@ -2,7 +2,7 @@ import {validateStory,storySlug} from './studio-service.mjs';
 import {isPublicId} from './profiles.mjs';
 import {GENRES} from './studio-catalog.mjs';
 import {documentText} from './manuscript.mjs';
-const PREFIX='fas-studio-recovery-v1:',MAX=1024*1024,AGE=24*60*60*1000;
+const PREFIX='fas-studio-recovery-v1:',MAX=6*1024*1024,AGE=24*60*60*1000;
 export function recoveryRecord(values,{ownerId,story=null,now=Date.now(),genres=GENRES}={}){
  if(!isPublicId(ownerId))throw new Error('A verified owner is required for recovery.');
  const title=values.title??'',clean=validateStory({...values,...(Array.isArray(values.genres)?{genres:[...new Set(values.genres)]}:{}),title:title.trim()?title:'Untitled recovery'},genres);clean.title=title;
@@ -11,7 +11,7 @@ export function recoveryRecord(values,{ownerId,story=null,now=Date.now(),genres=
  return record;
 }
 export function parseRecovery(raw,{ownerId,now=Date.now(),genres=GENRES,checkAge=true}={}){
- if(typeof raw!=='string'||(raw.length>MAX||new TextEncoder().encode(raw).length>MAX))throw new Error('Choose a Studio recovery file up to 1 MiB.');
+ if(typeof raw!=='string'||(raw.length>MAX||new TextEncoder().encode(raw).length>MAX))throw new Error('Choose a Studio recovery file up to 6 MiB.');
  let record;try{record=JSON.parse(raw);}catch{throw new Error('This recovery file could not be read.');}
  if(record?.format!=='fas-studio-recovery-v1'||record.owner!==ownerId||!record.values||!Number.isFinite(Date.parse(record.saved_at))||record.source_id!==null&&!isPublicId(record.source_id)||record.base_version!==null&&typeof record.base_version!=='string')throw new Error('This recovery copy does not belong to this account or is unsupported.');
  if(checkAge&&(now-Date.parse(record.saved_at)>AGE||Date.parse(record.saved_at)>now+60000))throw new Error('This tab recovery copy has expired.');

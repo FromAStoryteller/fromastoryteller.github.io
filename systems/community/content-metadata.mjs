@@ -4,7 +4,7 @@ export function contentMetadata(story,imageUrl=''){
  const canonical='https://fromastoryteller.com'+contentPath(story);
  const description=story.summary.trim().replace(/\s+/g,' ').slice(0,160);
  return {title:`${story.title} | From A Storyteller`,description,canonical,language:story.language??'en',image:imageUrl,
-  structured:{'@context':'https://schema.org','@type':story.content_type==='blog'?'BlogPosting':'Article',headline:story.title,description,url:canonical,
+  structured:{'@context':'https://schema.org','@type':({game:'VideoGame',tool:'SoftwareApplication',blog:'BlogPosting'})[story.content_type]??'Article',headline:story.title,description,url:canonical,
    inLanguage:story.language??'en',datePublished:story.published_at,dateModified:story.updated_at,
    author:{'@type':story.author?.kind==='organization'?'Organization':'Person',name:story.author?.display_name??'Storyteller',url:`https://fromastoryteller.com/storytellers/?author=${encodeURIComponent(story.author?.public_id??'')}`},
    publisher:{'@type':'Organization',name:'From A Storyteller',url:'https://fromastoryteller.com/'},
