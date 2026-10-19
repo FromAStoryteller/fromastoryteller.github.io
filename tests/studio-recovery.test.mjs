@@ -15,7 +15,7 @@ test('recovery roundtrip preserves safe manuscript/metadata, including untitled 
 test('untrusted or other-account recovery files cannot grant access or inject manuscript HTML',()=>{
  const record=recoveryRecord(values,{ownerId:owner,story,now});
  for(const raw of ['{broken',JSON.stringify({...record,owner:other}),JSON.stringify({...record,format:'other'}),JSON.stringify({...record,source_id:'not-a-uuid'}),JSON.stringify({...record,values:{...record.values,body_document:{version:1,blocks:[{type:'paragraph',html:'<script>bad()</script>'}]}}})])assert.throws(()=>parseRecovery(raw,{ownerId:owner,now}));
- assert.throws(()=>parseRecovery('x'.repeat(1024*1024+1),{ownerId:owner,now}),/1 MiB/);
+ assert.throws(()=>parseRecovery('x'.repeat(6*1024*1024+1),{ownerId:owner,now}),/6 MiB/);
 });
 test('only an unchanged unscheduled draft can be resumed in place; published/stale work requires a copy',()=>{
  const record=recoveryRecord(values,{ownerId:owner,story,now});assert.equal(canResumeRecovery(record,story),true);

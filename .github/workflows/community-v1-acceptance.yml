@@ -4,6 +4,8 @@ on:
     paths:
       - systems/community/**
       - account/**
+      - scripts/test-interactive-browser.mjs
+      - supabase/migrations/*interactive_uploads.sql
       - scripts/test-fas-community-browser.mjs
       - scripts/test-fas-community-api.mjs
       - .github/workflows/community-v1-acceptance.yml
@@ -23,6 +25,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-community-vite.log 2>&1 &
       - run: node scripts/test-fas-community-browser.mjs
+      - run: node scripts/test-interactive-browser.mjs
   production-read-only:
     runs-on: ubuntu-latest
     steps:
