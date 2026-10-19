@@ -21,7 +21,7 @@ test('upload bounds reject traversal, duplicate assets, unsupported types and ov
 test('offline ZIP preserves source files, dimensions, resource helpers and user assets',()=>{
  for(const orientation of ['landscape','portrait']){const p={...starterPackage(orientation),assets:[{name:'one.png',type:'image/png',data:'aGVsbG8='}]},bytes=Buffer.from(packageZip(p)),files=new Map();let offset=0;
   while(bytes.readUInt32LE(offset)===0x04034b50){const size=bytes.readUInt32LE(offset+18),n=bytes.readUInt16LE(offset+26),extra=bytes.readUInt16LE(offset+28),name=bytes.subarray(offset+30,offset+30+n).toString(),start=offset+30+n+extra;files.set(name,bytes.subarray(start,start+size).toString());offset=start+size;}
-  assert.deepEqual([...files.keys()],['index.html','main.js','style.css','fas-runtime.js','fas.json','README.txt','assets/one.png']);assert.equal(files.get('main.js'),p.js);assert.equal(files.get('assets/one.png'),'hello');assert.match(files.get('index.html'),/fas-canvas/);assert.match(files.get('fas-runtime.js'),/ctx.setTransform/);assert.equal(JSON.parse(files.get('fas.json')).orientation,orientation);new Script(files.get('fas-runtime.js'));new Script(files.get('main.js'));
+  assert.deepEqual([...files.keys()],['index.html','game.js','game.css','fas-runtime.js','meta.json','README.txt','assets/one.png']);assert.equal(files.get('game.js'),p.js);assert.equal(files.get('assets/one.png'),'hello');assert.match(files.get('index.html'),/fas-canvas/);assert.match(files.get('fas-runtime.js'),/ctx.setTransform/);assert.equal(JSON.parse(files.get('meta.json')).orientation,orientation);new Script(files.get('fas-runtime.js'));new Script(files.get('game.js'));
  }
 });
 test('game source survives portable recovery and cannot attach executable files to stories',()=>{

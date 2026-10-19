@@ -1,4 +1,4 @@
-// Generated account policy release: community-policies-2026-10-18-v1
+// Generated account policy release: game-features-2026-10-19-v1
 // Regenerated with site indexes so policy-only releases also refresh the hosting build.
 import {interactivePageMarkup} from './systems/community/interactive-page.mjs';
 import {isInteractive} from './systems/community/interactive-package.mjs';

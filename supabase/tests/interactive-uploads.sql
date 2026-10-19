@@ -43,8 +43,8 @@ end;$$;
 reset role;
 set local role anon;
 do $$declare result jsonb;begin
- if public.fas_public_interactive_package('interactive-game-fixture')->>'js'<>'window.fixture=1;' then raise exception 'FAIL published game package missing';end if;
- if public.fas_public_interactive_package('interactive-tool-fixture')->>'orientation'<>'portrait' then raise exception 'FAIL portrait tool missing';end if;
+ if public.fas_public_interactive_package('interactive-game-fixture')->'package'->>'js'<>'window.fixture=1;' then raise exception 'FAIL published game package missing';end if;
+ if public.fas_public_interactive_package('interactive-tool-fixture')->'package'->>'orientation'<>'portrait' then raise exception 'FAIL portrait tool missing';end if;
  result:=public.fas_public_story('interactive-tool-fixture');if result->'author'->>'kind'<>'organization' or result->'metadata'->>'instructions'<>'Use the controls.' or result ? 'executable_package' then raise exception 'FAIL tool metadata/byline projection';end if;
  if result::text like '%93000000-%' then raise exception 'FAIL private author key leaked';end if;
  if jsonb_array_length(public.fas_public_story_catalog()->'items')<>2 then raise exception 'FAIL published discovery';end if;

@@ -1,38 +1,44 @@
 # Games and tools in Storyteller Studio
 
-Implementation branch: feat/game-tool-upload-studio. Production remains unchanged until the release steps below are completed.
-
 ## Creator workflow
 
-1. Open Storyteller Studio, choose Add content, then Game or (administrators only) Tool.
-2. Content type and Publish as are visible above the editor. Administrators can choose their personal name or From A Storyteller; tools always use From A Storyteller. The existing explicit FAS publisher capability also remains available for other content. Account ownership, addresses and reporting stay unchanged.
-3. Choose Landscape (1920 × 1080, 16:9) or Portrait (1080 × 1920, 9:16). Download the starter ZIP. Open index.html directly or use your editor’s local server. Work in main.js and style.css; keep local media in assets/.
-4. Use FAS.canvas, FAS.ctx, FAS.width and FAS.height. Coordinates stay constant while the backing canvas supports up to 2× device density. Use FAS.pointer(event) for correct pointer coordinates after scaling. Use FAS.asset("name.png") for images/audio. CSS url(assets/name.png) references are rewritten to the included file inside the player. FAS.ui provides an optional DOM layer for tools.
-5. Upload main.js, style.css and all media files together. This replaces the complete package. The optional fas.json restores the exported orientation; index.html, fas-runtime.js and README.txt are local development files and are not uploaded as executable entry points. Preview uploaded files, then Start. Restart, Stop and Fullscreen controls are provided by the platform.
-6. Enter a title, description, controls/instructions, category and reviewed warnings. Save a draft, add a cover with alt text, then publish or schedule. Live file replacements take effect only after saving live changes. Failed saves retain the previously published package.
-7. Download current files to return to your local editor. Automatic tab recovery and portable recovery include the package. Account content exports include the package in its content JSON metadata. Archive, restoration, account removal and public visibility use the existing content lifecycle.
+1. Open Studio → Add content → Game or Tool (admins only). The content type and Publish as selectors stay above the editor. Admins can easily switch personal/FAS identities; tools always publish as FAS. Multiplayer requires the existing FAS publishing capability and switches the game to FAS. Server checks enforce these rules on every write.
+2. Choose Landscape (1920 × 1080, 16:9) or Portrait (1080 × 1920, 9:16). These are logical coordinates; adaptive canvas backing resolution supports up to 2× density without requiring larger artwork for every device.
+3. Choose account saves and/or Casual or Realtime multiplayer. Download starter ZIP. Extract it and open index.html in your editor’s local server. Single-player files can also open directly. Two-tab multiplayer demos require the same local server URL.
+4. Edit game.js/game.css or tool.js/tool.css; keep local media in assets/. Each folder contains index.html, fas-runtime.js, meta.json and README.txt. The HTML is a standalone canvas plus optional DOM controls. The site owns its actual page shell; creator HTML cannot replace it. Preserve meta.json for orientation, entry filenames, save schema/version and multiplayer mode.
+5. Upload the ZIP, select the extracted folder, or select source/metadata/media files together. Preview → Start. Enter title, description, controls, category and reviewed warnings; save a draft, add a cover/alt text, then publish or schedule. Replacements are atomic: a failed save keeps the previously published files.
+6. Download current files whenever returning to your editor. Tab recovery, portable recovery, account export, archive and deletion include the executable package. Legacy main.js/style.css/fas.json imports remain accepted; exports always use canonical game/tool names.
 
-## Boundaries and limits
+## Runtime and account SDK
 
-- A self-contained, classic main.js (256 KiB), optional style.css (64 KiB), and up to 24 PNG/JPEG/WebP/GIF/MP3/OGG/WAV files (1 MiB each); complete encoded package up to 4 MiB. SVG, HTML, arbitrary URLs, remote modules and external dependencies are not executable uploads. Bundle dependencies into main.js in your own editor.
-- Uploaded code runs only in a sandboxed iframe with allow-scripts and no allow-same-origin. Its CSP blocks network connections, frames, workers, forms and external scripts. No account tokens, privileged callbacks, cookies or storage access are passed to it. Messages are limited to displayed diagnostic text and checked against the exact frame and channel.
-- CSS and JS strings are encoded as escaped JSON and applied as text inside the player, never inserted into the authenticated page. Player loading is on demand. Code is public when published: never include secrets.
-- Offline games/tools are supported. Multiplayer, server APIs, account-based saves and durable browser storage require a future platform integration. Sandbox isolation is not a CPU/memory quota; creator code still needs performance testing.
-- Admin and contributor permissions remain separate. An administrator uses Studio when they also have contributor access and current contribution agreements. Tools are admin-only on every write, including changes to an existing tool. The server forces the FAS byline. UI visibility alone is not authorization.
-- Executable packages are bounded JSON in the existing story row. This first release keeps metadata, files and optimistic version checks atomic and inherits export/deletion/backup behavior. Larger asset libraries should move to versioned private object storage before increasing the limits. The account export size guard now includes executable bytes.
+Use FAS.canvas, FAS.ctx, FAS.width/FAS.height, FAS.pointer(event), FAS.asset("sprite.png") and FAS.ui. CSS url(assets/sprite.png) resolves included media. Bundle dependencies into the classic JS entry file; remote modules/network access are unavailable inside uploaded code.
+
+A published game shows a trusted Enable account features control outside its sandbox. The player must explicitly connect a verified account and review current policies. Session credentials stay in the parent; requests bind the exact published game/version and verified account. Game code receives neither emails nor account IDs. Stop/restart, disconnect, auth changes and room expiry end participation.
+
+- FAS.account.get() reports enablement and demo mode.
+- FAS.saves.load(slot), save(slot,data,{revision,version}), remove(slot,{revision}) use revision checks. Save data must match the declared bounded JSON schema. Load before overwriting. An incompatible schema/version must be migrated explicitly by the creator; do not silently discard old progress.
+- FAS.multiplayer.create({capacity}), join(code), leave(), get(), updatePlayer(data), updateShared(data), onChange(callback) and lerp(from,to,amount) are included in the README.
+- Casual sessions use turn/state updates; the starter is host-controlled noughts and crosses. Realtime sessions use authenticated state events with interpolation; the starter shows moving players. Shared state is host-owned, each participant writes their own player state, and the server enforces membership/revisions/limits. This is small-room host-authoritative play, without competitive anti-cheat or a physics server.
+- Downloaded projects use explicit local demo saves and BroadcastChannel rooms. These are editor tests, separate from live account data and production security.
+
+## Limits and privacy
+
+- JS 256 KiB; CSS 64 KiB; up to 24 PNG/JPEG/WebP/GIF/MP3/OGG/WAV files, 1 MiB each; complete encoded package 4 MiB. ZIP imports are bounded, CRC checked, and reject unsafe paths, encryption, links and unsupported entries.
+- Opaque iframe sandbox allows scripts only; CSP blocks direct network, frames, workers, forms and external code. Parent messages require the exact frame, fresh nonce, allowed methods and bounded JSON. Public code must contain no secrets. Creators still need performance testing; isolation is not a CPU/memory quota.
+- Saves: five slots per game, 64 KiB per slot, 2 MiB per account. Strict schema validation and compare-and-swap revisions protect prior data. Saves survive removal of their game so the owner can export/delete them.
+- Rooms: 2–8 players, one active room per account, 16-hex-character invitation codes stored hashed, exact game/version binding, two-hour expiry. Room data exposes seat IDs/gameplay only to current members. No chat, voice, public leaderboard or match history. Host departure closes the room. The five-minute cron removes expired/changed games and hosts inactive over three minutes. Operational counters expire after one day.
+- /account/games/ provides own save download/deletion and room leave. Account JSON and content ZIP exports include only the owner’s saves/participation. Account deletion removes these records and closes hosted rooms without deleting other players’ persistent saves. Manual backup retention remains 30 days.
+
+## Deployment sequence
+
+The operator confirmed a current backup and authorised production publication on 19 October 2026.
+
+1. Preserve existing migration timestamp mappings. Apply only 20261019043825_interactive_uploads and 20261019050833_game_accounts_multiplayer, recording each exact source once. Do not blind-push/repair historical migrations. Game services initially stay disabled.
+2. Deploy fas-account-lifecycle with the updated export handler. Install supabase/ops/game-room-cleanup.sql without changing unrelated jobs. Verify grants, publication and security advisors.
+3. Merge PR #60 after all checks pass. Existing main/Cloudflare integration deploys the website. Verify new public frozen policy bytes against account/policy-versions.json, existing games/tools, Studio, account/games and private/missing routes.
+4. Apply the guarded game-features-2026-10-19-v1 policy transition, then enable private.game_services_config. Existing players/contributors review the new policies; no acceptance is invented. Do not create production test accounts/content.
+5. Rollback: disable game_services_config, restore the previous frontend deployment/revert the release, retain additive schema and user data. Disable new types in studio_content_types if needed; never delete packages/saves or rewrite migration history.
 
 ## Verification
 
-- 186 automated checks passed, including PostgreSQL migrations and package isolation/escaping, bounds, ZIP source preservation, portable recovery, public routing and discovery.
-- Local Chromium checks passed at 1440px and 390px: game creation, prominent identity switching, ZIP download, landscape/portrait scaling, denied parent-page, network and browser-storage access, stop/restart, FAS-only tools and contributor-hidden controls. Downloaded ZIPs were extracted and their HTML opened successfully as local files. Creator variables cannot collide with the player bootstrap, hidden previews stop, and draft conversions warn before replacing manuscript/files. Existing story/recovery/lifecycle and shipped-game browser checks also passed at 1280px and 390px.
-- Hosted DEV oqmmvjjycpyxvxipcyli: installed migration 20261019043825_interactive_uploads. The exact source is recorded in migration history. Named transactional SQL fixtures passed for game/tool publication, metadata, privacy, anonymous/viewer/cross-owner denials, FAS identity and revoked administrator access. All fixtures roll back. The anonymous hosted HTTP package RPC also returned null for unpublished content. Security advisors report no error-level findings. Existing DEV accounts/content are preserved.
-- Reference/syntax validation and content generation passed. Existing repository game/tool pages and slots are retained; no existing games are converted to uploaded packages.
-
-## Production release
-
-1. Complete the documented fresh encrypted backup and off-site verification for this release, following backup-restore.md. Keep the encryption password private. Capture the current Cloudflare deployment as rollback target. The existing production release procedure requires operator confirmation before database changes.
-2. Read production migration history and check that executable_package is absent. Apply only the reviewed additive interactive_uploads migration to vzdicnufhidelaoeqbza. Preserve existing timestamp mappings: do not use blind db push or repair historical migrations. Record this new migration and its exact source once, after success.
-3. Verify new columns, constraints, role grants, function definitions and catalog configuration with read-only checks. Run security advisors. No production fixture accounts/content should be created.
-4. Merge the reviewed PR after its checks pass; the existing Cloudflare main integration deploys the site. The new frontend selects executable_package, so the database migration must precede deployment.
-5. Verify live assets, existing game/tool pages, Studio and missing/private dynamic routes. Test a real creator upload with the operator when ready.
-6. Roll back the frontend deployment or revert the release if needed. Retain additive database schema and uploaded data. Disable game/tool creation in studio_content_types if necessary while investigating; do not delete user packages or rewrite historical migration rows.
+Automated regression tests cover PostgreSQL permissions/lifecycle, package and schema bounds, ZIP round trips/corruption, account binding, exported source execution and existing site behavior. Chromium checks exercise desktop/mobile upload workflows and sandbox isolation, plus both editable multiplayer starters in two local tabs. Hosted DEV tests use disposable confirmed accounts and verify private saves, forged-account rejection, room capacity, host-only state, real Realtime delivery and outsider RLS, leave/sign-out and complete fixture cleanup. No production fixtures are used.

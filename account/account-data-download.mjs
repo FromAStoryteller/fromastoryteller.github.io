@@ -31,7 +31,9 @@ ${data.account.policy_agreements?.length ? data.account.policy_agreements.map(it
 
 This file contains your current account and profile details. Passwords and session
 credentials are excluded. Download your stored profile images, story text and covers\nseparately using your content download in account settings.
-Game saves and multiplayer are not available yet.
+Private game saves: ${data.game_data?.saves?.length ?? 0}
+Your own transient room records: ${data.game_data?.participation?.length ?? 0}
+These records are included in metadata/account.json. Other players’ data and room codes are excluded.
 metadata/account.json contains the same data in a format suitable for software.
 For personal-data questions, contact fromastoryteller@gmail.com.
 `;
