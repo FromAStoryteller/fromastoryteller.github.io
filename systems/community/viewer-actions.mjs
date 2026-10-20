@@ -69,8 +69,10 @@ function initViewerActions({ document: d = document, window: w = window, connect
       path.setAttribute("d", action === "experienced" ? "m5 12 4 4L19 6" : action === "loved" ? "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" : ["game", "tool"].includes(host.dataset.viewerType) ? "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" : "M6 3h12v18l-6-4-6 4Z");
       icon.append(path);
       b.replaceChildren(icon, node("span", labels[action][on ? 1 : 0]));
+      const nextLabel=action==="saved"&&on?(["game","tool"].includes(host.dataset.viewerType)?"Remove from favourites":"Remove from saved"):labels[action][on?1:0];
+      b.title=nextLabel;b.setAttribute("aria-label",nextLabel);
       if (host.classList.contains("viewer-card-actions")) {
-        const label = labels[action][on ? 1 : 0];
+        const label = nextLabel;
         b.setAttribute("aria-label", label + " — " + (host.closest("article")?.querySelector("h2,h3")?.textContent ?? "content"));
         b.title = label;
       }
@@ -243,6 +245,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
       return;
     }
     if (pending.has(key)) return;
+    const hadFocus = d.activeElement === b;
     pending.add(key);
     for (const h of hosts) if (h.dataset.viewerKey === key) {
       paint(h);
@@ -263,7 +266,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
       publishViewerChanges(w);
       states.set(key, r.data);
       for (const [alias, value] of states) if (value.id === r.data.id) states.set(alias, { ...r.data, key: alias });
-      w.dispatchEvent(new CustomEvent("fas-viewer-action-change", { detail: { key, ...r.data } }));
+      w.dispatchEvent(new CustomEvent("fas-viewer-action-change", { detail: { key, ...r.data, restoreFocus:hadFocus && (d.activeElement===d.body||d.activeElement===b) } }));
       for (const h of hosts) if (states.get(h.dataset.viewerKey)?.id === r.data.id) {
         paint(h);
         status(h, "Saved.");

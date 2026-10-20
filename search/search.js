@@ -1,3 +1,4 @@
+import {createBrowseHistory} from '/systems/content/browse-state.mjs'
 import {
     getAllPublishedContent,
     searchPublishedContent,
@@ -11,6 +12,7 @@ const suggestionsContainer = document.querySelector("#search-suggestions")
 const resultsSelector = "#search-results-grid"
 
 let allItems = []
+const browsing=createBrowseHistory()
 
 function getQueryFromUrl() {
     const params = new URLSearchParams(window.location.search)
@@ -26,7 +28,7 @@ function setQueryInUrl(query) {
         url.searchParams.delete("q")
     }
 
-    window.history.replaceState({}, "", url)
+    window.history.replaceState({...window.history.state}, "", url)
 }
 
 function updateSummary(query, resultsCount) {
@@ -90,13 +92,9 @@ function showSuggestions(suggestions) {
         return
     }
 
-    suggestionsContainer.innerHTML = suggestions.map(suggestion => `
-        <button
-            type="button"
-            class="search-suggestion-button"
-            data-suggestion="${suggestion.replace(/"/g, "&quot;")}"
-        >${suggestion}</button>
-    `).join("")
+    suggestionsContainer.replaceChildren(...suggestions.map(suggestion=>{
+        const button=document.createElement('button');button.type='button';button.className='search-suggestion-button';button.dataset.suggestion=suggestion;button.textContent=suggestion;return button;
+    }))
 
     suggestionsContainer.classList.add("is-visible")
 
@@ -109,8 +107,18 @@ function showSuggestions(suggestions) {
             setQueryInUrl(suggestion)
             runSearch(suggestion)
             hideSuggestions()
+            browsing.remember()
         })
     })
+}
+
+function showRecovery(query){
+    const grid=document.querySelector(resultsSelector),section=document.createElement('section');section.className='content-grid-empty search-recovery';
+    const hint=document.createElement('p');hint.textContent=query?'Try another word, or browse a category.':'You can also browse by category.';section.append(hint);
+    if(query){const clear=document.createElement('button');clear.type='button';clear.className='content-filter';clear.textContent='Clear search';clear.addEventListener('click',()=>{input.value='';setQueryInUrl('');runSearch('');hideSuggestions();browsing.remember();input.focus({preventScroll:true});});section.append(clear);}
+    const nav=document.createElement('nav');nav.setAttribute('aria-label','Browse content categories');
+    for(const [label,path]of [['Stories','/stories/'],['Games','/games/'],['Tools','/tools/'],['Videos','/videos/'],['Blog','/blog/']]){const a=document.createElement('a');a.className='content-filter';a.href=path;a.textContent=label;nav.append(a);}
+    section.append(nav);grid.querySelector('.content-grid-empty')?.replaceWith(section);
 }
 
 function runSearch(query) {
@@ -119,12 +127,14 @@ function runSearch(query) {
     if (!trimmedQuery) {
         updateSummary("", 0)
         renderContentGrid(resultsSelector, [], "Start typing to search the site.")
+        showRecovery("")
         return
     }
 
     const results = searchPublishedContent(allItems, trimmedQuery)
     updateSummary(trimmedQuery, results.length)
-    renderContentGrid(resultsSelector, results, `No results found for "${trimmedQuery}".`)   
+    renderContentGrid(resultsSelector, results, `No results found for "${trimmedQuery}".`)
+    if(!results.length)showRecovery(trimmedQuery)
 }
 
 async function initSearchPage() {
@@ -134,6 +144,7 @@ async function initSearchPage() {
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery
         runSearch(initialQuery)
+        browsing.restore()
 
         form.addEventListener("submit", event => {
             event.preventDefault()
@@ -142,6 +153,7 @@ async function initSearchPage() {
             setQueryInUrl(query)
             runSearch(query)
             hideSuggestions()
+            browsing.remember()
         })
 
         input.addEventListener("input", () => {
@@ -151,6 +163,7 @@ async function initSearchPage() {
 
             const suggestions = getSuggestions(query, allItems)
             showSuggestions(suggestions)
+            browsing.remember()
         })
 
         input.addEventListener("focus", () => {

@@ -2,6 +2,9 @@ name: Shared content layout browser checks
 on:
   pull_request:
     paths:
+      - search/**
+      - systems/community/public-profile.mjs
+      - scripts/test-viewer-details-browser.mjs
       - systems/content/**
       - systems/community/interactive-*.mjs
       - systems/community/legacy-*.mjs
@@ -72,5 +75,6 @@ jobs:
       - run: node scripts/test-social-account-polish-browser.mjs
       - run: node scripts/test-viewer-actions-browser.mjs
       - run: node scripts/test-viewer-sync-browser.mjs
+      - run: node scripts/test-viewer-details-browser.mjs
       - run: node scripts/test-publish-review-browser.mjs
       - run: node scripts/test-stable-viewport-browser.mjs

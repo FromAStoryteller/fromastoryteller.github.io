@@ -87,7 +87,9 @@ try{
  hold('collection','fas_my_viewer_collection');await collection.evaluate(()=>dispatchEvent(new Event('focus')));await reached('collection','fas_my_viewer_collection');
  await grid.locator('article').first().locator('[data-viewer-action=saved]').click();await collection.waitForFunction(()=>document.querySelectorAll('.viewer-collection-grid article').length===49);release('collection','fas_my_viewer_collection');
  await collection.waitForTimeout(250);assert.equal(await grid.locator('article').count(),49);assert.equal(await grid.locator('article[data-viewer-content="'+removalKey+'"]').count(),0);
- console.log('PASS collection additions/removals, retained pagination/focus and no stale card resurrection');
+ const flags={experienced:state('alice',removalKey).experienced,loved:state('alice',removalKey).loved};
+ await collection.locator('[data-viewer-undo]').click();await collection.waitForFunction(()=>document.querySelectorAll('.viewer-collection-grid article').length===50);assert.equal(state('alice',removalKey).saved,true);assert.deepEqual({experienced:state('alice',removalKey).experienced,loved:state('alice',removalKey).loved},flags);
+ console.log('PASS collection additions/removals, retained pagination/focus, Undo and no stale card resurrection');
  hold('collection','fas_my_viewer_collection');await collection.evaluate(()=>dispatchEvent(new Event('focus')));await reached('collection','fas_my_viewer_collection');await collection.evaluate(()=>window.endViewerFixture());release('collection','fas_my_viewer_collection');await collection.waitForTimeout(150);assert.equal(await collection.locator('.viewer-collection-grid').count(),0);assert.match(await collection.locator('[data-viewer-collection]').textContent(),/account changed/);
  console.log('PASS collection session changes cannot restore private cards from a late response');
  const game='/games/rally-clash/';catalog.set(game,item(game,'game'));
@@ -97,5 +99,8 @@ try{
  await favourites.waitForFunction(()=>document.querySelectorAll('.viewer-collection-grid article').length===1);
  await favourites.waitForFunction(()=>document.querySelector('.viewer-collection-grid [data-viewer-action=saved]')?.getAttribute('aria-pressed')==='true');
  await action(gamePage,'saved').click();await selected(gamePage,'saved',false);await favourites.waitForFunction(()=>!document.querySelector('.viewer-collection-grid article'));
- console.log('PASS an empty Favourites page gains and removes games from another tab');
+ await action(gamePage,'saved').click();await selected(gamePage,'saved',true);await favourites.waitForFunction(()=>document.querySelector('.viewer-collection-grid [data-viewer-action=saved]')?.getAttribute('aria-pressed')==='true');
+ await favourites.locator('.viewer-collection-grid [data-viewer-action=saved]').click();await selected(gamePage,'saved',false);await favourites.locator('[data-viewer-undo]').click();await selected(gamePage,'saved',true);await favourites.waitForFunction(()=>document.querySelector('.viewer-collection-grid [data-viewer-action=saved]')?.getAttribute('aria-pressed')==='true');
+ await favourites.locator('.viewer-collection-grid [data-viewer-action=saved]').click();await favourites.locator('[data-viewer-undo]').waitFor();hold('favourites','fas_set_viewer_action');await favourites.locator('[data-viewer-undo]').click();await reached('favourites','fas_set_viewer_action');await favourites.evaluate(()=>window.endViewerFixture());release('favourites','fas_set_viewer_action');await favourites.waitForTimeout(150);assert.equal(await favourites.locator('.viewer-collection-grid').count(),0);assert.match(await favourites.locator('[data-viewer-collection]').textContent(),/account changed/);
+ console.log('PASS Favourites updates and Undo sync across tabs; late Undo cannot reopen a signed-out collection');
 }finally{for(const gate of held.values())gate.release();await context.close();await browser.close();}
