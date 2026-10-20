@@ -182,7 +182,8 @@ a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px 
 @media (max-width: 37.5rem) {
   .content-featured-pause { bottom: calc(-1 * (var(--size-touch-target-minimum) + var(--space-2))); right: 0; color: var(--colour-accent-primary); }
   .content-featured-pause i { background: transparent; }
-  .content-featured-controls { padding-inline-end: var(--size-touch-target-minimum); }
+  /* Equal side allowances keep slide controls centred beside the separate pause button. */
+  .content-featured-controls { padding-inline: var(--size-touch-target-minimum); }
   .content-featured-text { padding: var(--space-4); }
   .content-featured-text-inner { gap: var(--space-1); }
   .content-featured-description { font-size: var(--font-size-sm); }
