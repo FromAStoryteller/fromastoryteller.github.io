@@ -1,3 +1,4 @@
+import {createBrowseHistory} from './browse-state.mjs'
 import {relatedContent} from './related-content.mjs'
 import {normalizeGameFeatures,gameFeatureLabels} from './game-features.mjs'
 import {publicStoryCatalog} from '../community/public-story-catalog.mjs'
@@ -576,6 +577,7 @@ export async function initCategoryPage(config) {
     let allItems = []
     let activeFilter = "all"
     let filters = []
+    const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory(()=>({filter:activeFilter})) : null
 
     function updatePage() {
         const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
@@ -583,6 +585,7 @@ export async function initCategoryPage(config) {
         renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
             activeFilter = nextFilter
             updatePage()
+            browsing?.remember()
         })
 
         renderGrid(gridSelector, filteredItems, emptyMessage)
@@ -596,10 +599,13 @@ export async function initCategoryPage(config) {
         allItems = sortContent(categoryItems)
         filters = getFilterValues(allItems, filterMode)
 
+        if(filters.includes(browsing?.state?.filter))activeFilter=browsing.state.filter
+
         const featuredItem = getFeaturedItem(allItems)
 
         renderFeaturedItem(featuredSelector, featuredItem, featuredLabel)
         updatePage()
+        browsing?.restore()
     } catch (error) {
         console.error("Error loading category page:", error)
 
@@ -630,6 +636,7 @@ export async function initHomePage(config) {
     let allItems = []
     let activeFilter = "all"
     let filters = []
+    const browsing = typeof window!=="undefined" ? createBrowseHistory(()=>({filter:activeFilter})) : null
 
     function updatePage() {
         const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
@@ -637,6 +644,7 @@ export async function initHomePage(config) {
         renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
             activeFilter = nextFilter
             updatePage()
+            browsing?.remember()
         })
 
         renderGrid(gridSelector, filteredItems, emptyMessage)
@@ -647,10 +655,13 @@ export async function initHomePage(config) {
         allItems = sortContent(getPublishedContent(loadedContent))
         filters = getFilterValues(allItems, filterMode)
 
+        if(filters.includes(browsing?.state?.filter))activeFilter=browsing.state.filter
+
         const featuredItems = getHomeFeaturedItems(allItems)
 
         initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
         updatePage()
+        browsing?.restore()
     } catch (error) {
         console.error("Error loading home page:", error)
 

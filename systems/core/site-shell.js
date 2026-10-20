@@ -1,3 +1,4 @@
+import {initContentShare} from '../content/content-share.mjs';
 import {initViewerActions} from '../community/viewer-actions.mjs';
 import {initHeaderAccount} from './header-account.mjs';
 import {restoreFocus} from "/systems/core/focus.js"
@@ -30,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initStorageChoices();
     initAudienceInsights();
     initViewerActions();
+    initContentShare();
   } catch (err) {
     console.error("Error loading components:", err);
   } 

@@ -1,3 +1,4 @@
+import {createBrowseHistory} from '../content/browse-state.mjs';
 import {storyPageMarkup} from '../content/page-layout.mjs';
 import {profileImageUrl} from './profile-image-service.mjs';
 import {fileContentPath} from './publishing-identity.mjs';
@@ -17,8 +18,12 @@ const node = (document, tag, className, text) => {
   return element;
 };
 
+const profileBrowsers=new WeakMap();
 export function renderPublicProfile(root, profile, { imageBase, preview = false } = {}) {
   const d = root.ownerDocument;
+  profileBrowsers.get(root)?.dispose();
+  const browsing=!preview&&d.defaultView?.history?.replaceState?createBrowseHistory(()=>({}),{window:d.defaultView,document:d}):null;
+  if(browsing)profileBrowsers.set(root,browsing);
   root.removeAttribute('data-profile-public-id');
   root.replaceChildren();
   if (!profile) { root.append(node(d, 'h1', '', 'Storyteller page unavailable'), node(d, 'p', 'profile-muted', 'This page may no longer be public.')); return; }
@@ -47,6 +52,7 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
   if (!list.children.length) section.append(node(d, 'p', 'profile-muted', 'No published work yet.'));
   else section.append(list);
   root.append(header, section);
+  browsing?.restore();
 }
 
 export function profileStoryCard(story, { imageBase, preview = false } = {}) {

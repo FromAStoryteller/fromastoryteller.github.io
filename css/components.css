@@ -1670,3 +1670,22 @@ html, body, button, input, textarea, select,
 .viewer-collection-page h1,.viewer-collection-page>p { text-align:center; }
 .viewer-collection-navigation { margin-block:1.5rem; }
 .viewer-collection-grid { margin-block:1.5rem; }
+
+/* Quiet sharing, recovery and reversible collection removal. */
+.content-copy-link { min-inline-size:7rem; }
+.content-copy-fallback { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:flex-end; gap:.5rem; flex-basis:100%; }
+.content-copy-fallback label { display:grid; gap:.3rem; width:min(100%,30rem); font-family:var(--font-family-interface); font-size:.875rem; text-align:left; }
+.content-copy-fallback input { width:100%; min-width:0; min-height:2.75rem; padding:.5rem .7rem; border:1px solid var(--colour-border-default); border-radius:var(--radius-md); background:var(--colour-control-background); color:var(--colour-text-primary); font:inherit; }
+.viewer-action[data-viewer-action="saved"][aria-pressed="true"]:is(:hover,:focus-visible):not(:disabled) { color:var(--colour-error-text); background:var(--colour-error-background); border-color:var(--colour-error-text); }
+.search-recovery p { margin-top:0; }
+.search-recovery nav { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+.search-recovery a { text-decoration:none; }
+.viewer-notice { position:fixed; z-index:90; left:50%; bottom:max(1rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(38rem,calc(100% - 2rem)); display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:.5rem; padding:.65rem .75rem; border:var(--surface-standard-border); border-radius:var(--radius-md); background:var(--surface-standard-background); color:var(--colour-text-primary); box-shadow:var(--surface-standard-shadow); font:.875rem/1.4 var(--font-family-interface); }
+.viewer-notice[hidden] { display:none; }
+.viewer-notice [role="status"] { overflow-wrap:anywhere; }
+.viewer-notice button { min-width:2.75rem; min-height:2.75rem; padding:.4rem .75rem; border:1px solid var(--colour-control-border); border-radius:var(--radius-md); background:var(--colour-control-background); color:var(--colour-control-text); font:inherit; cursor:pointer; }
+.viewer-notice button:hover:not(:disabled) { background:var(--state-hover-background); color:var(--state-hover-colour); }
+.viewer-notice button:focus-visible { outline:2px solid var(--colour-focus-ring); outline-offset:2px; }
+.viewer-notice button:disabled { opacity:.65; cursor:wait; }
+.viewer-notice .viewer-notice-close { padding:.3rem; border-color:transparent; background:transparent; font-size:1.4rem; }
+@media print { .viewer-notice,.content-copy-link,.content-copy-fallback {display:none;} }

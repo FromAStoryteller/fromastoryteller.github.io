@@ -2,16 +2,20 @@ import { connectViewerAccount } from './viewer-actions.mjs';
 import { createCardMarkup } from '../content/content-system.js';
 import { publicCoverUrl } from './profiles.mjs';
 import { signInHref } from '../../account/return-path.mjs';
-import { watchViewerChanges } from './viewer-sync.mjs';
+import { watchViewerChanges,publishViewerChanges } from './viewer-sync.mjs';
+import {createBrowseHistory} from '../content/browse-state.mjs';
 
 async function mountViewerCollection(root, { connect = connectViewerAccount } = {}) {
   const d = root.ownerDocument, w = d.defaultView, kind = root.dataset.viewerCollection;
   const title = kind === 'favourites' ? 'Favourites' : 'Saved for later';
-  let account, ended = false, cursor = null, loading = false, stop, stopSync;
-  let loadedPages = 0, revision = 0, refreshQueued = false, retryRefresh = false;
+  let account, ended = false, cursor = null, loading = false, stop, stopSync, notice;
+  let loadedPages = 0, revision = 0, refreshQueued = false, retryRefresh = false, browseRestored=false, undoing=false, undoEntry=null;
+  const browsing=createBrowseHistory(()=>({pages:loadedPages}),{window:w,document:d});
+  const initialPages=Number.isInteger(browsing.state?.pages)?Math.max(1,Math.min(50,browsing.state.pages)):1;
   w.addEventListener('pageshow', event => { if (event.persisted) w.location.reload(); });
   const node = (tag, text) => { const n = d.createElement(tag); n.textContent = text; return n; };
   function fail(text, signIn = false) {
+    notice?.remove();
     root.replaceChildren(node('h1',title),node('p',text));
     const link = node('a',signIn ? 'Sign in' : 'Reload this collection');
     link.className = 'account-secondary';
@@ -22,7 +26,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
     account = await connect();
     if (!account) { fail('Sign in to see your private '+title.toLowerCase()+'.',true); return; }
     stop = account.subscribe(() => {
-      ended = true; stopSync?.();
+      ended = true; stopSync?.();browsing.clear();browsing.dispose();undoEntry=null;
       fail('Your account changed. Sign in again to view this collection.',true);
     });
     root.replaceChildren(node('h1',title),node('p',kind === 'favourites'
@@ -39,6 +43,24 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
     const status = node('p','Loading your collection…'); status.setAttribute('role','status');
     const more = node('button','Load more'); more.type = 'button'; more.className = 'account-secondary'; more.hidden = true;
     root.append(nav,status,grid,more);
+    notice=node('div','');notice.className='viewer-notice';notice.hidden=true;
+    const noticeText=node('span','');noticeText.setAttribute('role','status');
+    const undo=node('button','Undo');undo.type='button';undo.className='viewer-notice-undo';undo.dataset.viewerUndo='';
+    const dismiss=node('button','×');dismiss.type='button';dismiss.className='viewer-notice-close';dismiss.setAttribute('aria-label','Dismiss message');
+    notice.append(noticeText,undo,dismiss);d.body.append(notice);
+    dismiss.onclick=()=>{undoEntry=null;notice.hidden=true;(grid.querySelector('a,button')??nav.querySelector('[aria-current]'))?.focus({preventScroll:true});};
+    undo.onclick=async()=>{
+      if(ended||undoing||!undoEntry)return;
+      const entry=undoEntry;undoing=true;revision++;undo.disabled=true;noticeText.textContent='Restoring…';let restored=false;
+      try{
+        const r=await account.client.rpc('fas_set_viewer_action',{content_key:entry.key,action_key:'saved',enabled:true});
+        if(ended)return;
+        if(r.error||r.data?.saved!==true)throw Error('Could not restore this piece. Please try again.');
+        revision++;restored=true;publishViewerChanges(w);
+        if(undoEntry===entry){undoEntry=null;noticeText.textContent=kind==='favourites'?'Restored to favourites.':'Restored to saved for later.';if(d.activeElement===undo)dismiss.focus({preventScroll:true});undo.hidden=true;}
+      }catch(e){if(!ended&&undoEntry===entry)noticeText.textContent=e.message;}
+      finally{undoing=false;undo.disabled=false;if(!ended&&(restored||refreshQueued)){refreshQueued=false;void load(true);}}
+    };
     function makeCard(item) {
       const image = item.source === 'file' ? item.image : publicCoverUrl(item.cover,account.imageBase);
       const template = d.createElement('template');
@@ -66,10 +88,11 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
     }
     async function load(refresh = false) {
       if (ended) return;
+      if (undoing) { refreshQueued=true;return; }
       if (loading) { if (refresh) refreshQueued = true; return; }
       loading = true; more.disabled = true; retryRefresh = refresh;
       if (!refresh) status.textContent = 'Loading your collection…';
-      const before = revision, limit = refresh ? Math.max(1,loadedPages) : 1;
+      const before = revision, limit = refresh ? Math.max(1,loadedPages) : loadedPages===0?initialPages:1;
       let next = refresh ? null : cursor, fetched = 0;
       const items = new Map();
       try {
@@ -86,6 +109,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
         loadedPages = refresh ? fetched : loadedPages+fetched;
         cursor = next; more.hidden = !cursor; more.textContent = 'Load more'; retryRefresh = false;
         status.textContent = grid.children.length ? '' : 'Nothing here yet. Use the save or favourite button on a piece or card to add it. Published pieces appear here while they are available.';
+        if(!browseRestored){browseRestored=true;browsing.restore();}
       } catch (e) {
         if (!ended) { status.textContent = e.message; more.hidden = false; more.textContent = 'Try again'; }
       } finally {
@@ -98,18 +122,17 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
       revision++;
       const card = [...grid.children].find(c=>c.dataset.viewerContent === event.detail.key);
       if (!card) return;
-      const next = card.nextElementSibling ?? card.previousElementSibling;
-      card.remove();
-      if (next) next.querySelector('button,a')?.focus({preventScroll:true});
-      else {
-        nav.querySelector('[aria-current]')?.focus({preventScroll:true});
+      const title=card.querySelector('h3')?.textContent??'this piece';
+      undoEntry={key:event.detail.key,title};noticeText.textContent='Removed “'+title+'”.';notice.hidden=false;undo.hidden=false;undo.disabled=undoing;
+      const focused=card.contains(d.activeElement)||event.detail.restoreFocus;card.remove();if(focused)undo.focus({preventScroll:true});
+      if (!grid.children.length) {
         status.textContent = cursor ? 'Removed. Load more to see other saved pieces.' : 'Nothing here yet. Use the save or favourite button on a piece or card to add it.';
       }
     };
     w.addEventListener('fas-viewer-action-change',changed);
     stopSync = watchViewerChanges(()=>void load(true),{window:w,document:d});
     more.onclick = () => void load(retryRefresh);
-    w.addEventListener('pagehide',()=>{ended = true;stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
+    w.addEventListener('pagehide',()=>{ended = true;undoEntry=null;notice.remove();browsing.dispose();stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
     await load();
   } catch (e) { if (!ended) fail(e.message); }
 }
