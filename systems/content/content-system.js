@@ -317,10 +317,15 @@ function cardTypeLabel(item) {
     return time ? type + " · " + time : type
 }
 
+function viewerCardAttributes(item) {
+    return 'data-viewer-content="'+escapeHtml(item.url)+'" data-viewer-content-type="'+escapeHtml(item.type || ({stories:'story',games:'game',tools:'tool',videos:'video'})[item.category] || 'story')+'"'
+}
+
 function createFeaturedPanelMarkup(item, label = "Featured") {
     if (!item) return ""
     const type = cardTypeLabel(item)
     return `
+        <article class="content-featured-card" ${viewerCardAttributes(item)}>
         <a class="content-featured-link image-overlay" href="${escapeHtml(item.url)}" aria-label="${escapeHtml(getPrimaryActionLabel(item) + ': ' + item.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
             <div class="content-featured-media image-overlay__media">
                 <img src="${escapeHtml(item.image.src || item.card.image)}" alt="${escapeHtml(item.image.alt || item.card.imageAlt)}" fetchpriority="high" decoding="async">
@@ -334,13 +339,14 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
                 </div>
             </div>
         </a>
+        </article>
     `
 }
 
 function createCardMarkup(item, variant = "standard") {
     const cardVariant = "standard"
     return `
-        <article class="content-grid-card content-card--${cardVariant}" data-viewer-content="${escapeHtml(item.url)}" data-viewer-content-type="${escapeHtml(item.type || ({stories:"story",games:"game",tools:"tool",videos:"video"})[item.category] || "story")}">
+        <article class="content-grid-card content-card--${cardVariant}" ${viewerCardAttributes(item)}>
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
                     ${item.card.image ? `<img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">` : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
@@ -451,7 +457,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
         select(event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : index + (event.key === "ArrowRight" ? 1 : -1))
     })
     viewport.addEventListener("pointerdown", event => {
-        if (event.pointerType === "mouse" || !event.isPrimary || event.target.closest(".content-featured-pause")) return
+        if (event.pointerType === "mouse" || !event.isPrimary || event.target.closest("button, [data-viewer-action]")) return
         gesture = {x: event.clientX, y: event.clientY, id: event.pointerId}
     })
     viewport.addEventListener("pointerup", event => {

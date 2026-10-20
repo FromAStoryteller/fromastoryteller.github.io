@@ -45,7 +45,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   function status(host, text) {
     const label = host.querySelector("[data-viewer-status]");
     label.textContent = text;
-    label.classList.toggle("visually-hidden", text === "Saved." || text === "Saving…");
+    label.classList.toggle("visually-hidden", text === "Saved." || text === "Saving…" || host.classList.contains("viewer-card-actions") && !host.dataset.viewerInteracted);
   }
   function paint(host) {
     const key = host.dataset.viewerKey, s = states.get(key), labels = viewerLabels(host.dataset.viewerType);
@@ -53,15 +53,38 @@ function initViewerActions({ document: d = document, window: w = window, connect
       const action = b.dataset.viewerAction, on = s?.[action] === true;
       b.setAttribute("aria-pressed", String(on));
       b.disabled = ended || pending.has(key) || !ready;
-      const icon = node("i", "");
-      icon.className = "fa-solid " + { saved: ["game", "tool"].includes(host.dataset.viewerType) ? "fa-star" : "fa-bookmark", experienced: "fa-check", loved: "fa-heart" }[action];
+      const icon = d.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
       icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("focusable", "false");
+      icon.dataset.viewerIcon = action;
+      icon.setAttribute("fill", on && action !== "experienced" ? "currentColor" : "none");
+      icon.setAttribute("stroke", "currentColor");
+      icon.setAttribute("stroke-width", "1.7");
+      icon.setAttribute("stroke-linecap", "round");
+      icon.setAttribute("stroke-linejoin", "round");
+      const path = d.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", action === "experienced" ? "m5 12 4 4L19 6" : action === "loved" ? "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" : ["game", "tool"].includes(host.dataset.viewerType) ? "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" : "M6 3h12v18l-6-4-6 4Z");
+      icon.append(path);
       b.replaceChildren(icon, node("span", labels[action][on ? 1 : 0]));
-      if (host.classList.contains("viewer-card-actions")) b.setAttribute("aria-label", labels[action][on ? 1 : 0] + " — " + (host.closest("article")?.querySelector("h3")?.textContent ?? "content"));
+      if (host.classList.contains("viewer-card-actions")) {
+        const label = labels[action][on ? 1 : 0];
+        b.setAttribute("aria-label", label + " — " + (host.closest("article")?.querySelector("h2,h3")?.textContent ?? "content"));
+        b.title = label;
+      }
     }
     const badge = host.querySelector("[data-viewer-experienced]");
     if (badge) {
-      badge.textContent = s?.experienced ? "✓ " + labels.experienced[1] : "";
+      badge.replaceChildren();
+      if (s?.experienced) {
+        const icon = node("i", "");
+        icon.className = "fa-solid fa-check";
+        icon.setAttribute("aria-hidden", "true");
+        const label = node("span", labels.experienced[1]);
+        label.className = "visually-hidden";
+        badge.append(icon, label);
+        badge.title = labels.experienced[1];
+      }
       badge.hidden = !s?.experienced;
     }
   }
@@ -97,7 +120,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   function scan() {
     scheduled = false;
     for (const host of hosts) if (!host.isConnected) hosts.delete(host);
-    for (const card of d.querySelectorAll(".content-grid-card[data-viewer-content]")) if (!card.querySelector(".viewer-card-actions")) mount(card, card.dataset.viewerContent, card.dataset.viewerContentType, ["saved"], true);
+    for (const card of d.querySelectorAll(".content-grid-card[data-viewer-content],.content-featured-card[data-viewer-content]")) if (!card.querySelector(".viewer-card-actions")) mount(card, card.dataset.viewerContent, card.dataset.viewerContentType, ["saved"], true);
     if (!w.location.pathname.startsWith("/account/") && !w.location.pathname.startsWith("/tests/")) {
       const hero = d.querySelector("main .story-header,main .game-hero,main .tool-hero,main .video-hero");
       if (hero && !hero.dataset.viewerSaveMounted) {
@@ -185,6 +208,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     if (!hosts.has(host)) return;
     event.preventDefault();
     event.stopPropagation();
+    host.dataset.viewerInteracted = "true";
     const key = host.dataset.viewerKey, action = b.dataset.viewerAction;
     if (ended) return;
     if (error) {

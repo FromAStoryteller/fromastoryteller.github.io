@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const origin=process.argv[2]??'http://127.0.0.1:55410',browser=await chromium.launch();
 try{
  for(const width of [1440,390,320])for(const theme of ['light','dark']){
-  const context=await browser.newContext({viewport:{width,height:950}}),page=await context.newPage(),errors=[];
+  const context=await browser.newContext({viewport:{width,height:950},hasTouch:width<600}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/systems/core/site-shell.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace(/\binitViewerActions\(\);/g,'/* manual fictional account below */')});});
   await page.goto(origin+'/stories/onto-the-stage/');
@@ -27,18 +27,23 @@ try{
   },theme);
   const save=page.locator('.story-header + .viewer-content-actions [data-viewer-action=saved]');
   await save.waitFor();await page.waitForFunction(()=>!document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').disabled);
-  assert.equal(await save.getAttribute('aria-pressed'),'false');await save.click();await page.waitForFunction(()=>document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
-  await page.waitForTimeout(200);assert.equal(await save.getAttribute('aria-pressed'),'true','late initial reads preserve a confirmed save');if(process.env.FAS_VIEWER_SCREENSHOT_DIR){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-top-'+width+'-'+theme+'.png'});}
+  assert.equal(await save.getAttribute('aria-pressed'),'false');assert.equal(await save.locator('svg').getAttribute('fill'),'none');await save.click();await page.waitForFunction(()=>document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
+  await page.waitForTimeout(200);assert.equal(await save.getAttribute('aria-pressed'),'true','late initial reads preserve a confirmed save');assert.equal(await save.locator('svg').getAttribute('fill'),'currentColor');if(process.env.FAS_VIEWER_SCREENSHOT_DIR){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-top-'+width+'-'+theme+'.png'});}
   const read=page.locator('.story-footer [data-viewer-action=experienced]'),love=page.locator('.story-footer [data-viewer-action=loved]');
   assert.match(await read.textContent(),/Mark as read/);assert.equal(await read.getAttribute('aria-pressed'),'false');
   await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='true');
   await love.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=loved]').getAttribute('aria-pressed')==='true');
   await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='false');
   assert.equal(await love.getAttribute('aria-pressed'),'true','undoing acknowledgement preserves appreciation');
+  const colours=await page.evaluate(()=>{const probe=document.createElement('span');document.body.append(probe);const resolve=value=>{probe.style.color=value;return getComputedStyle(probe).color;};const pink=resolve('var(--colour-appreciation-text)'),green=resolve('var(--colour-success-text)');probe.remove();return {pink,green};});
+  assert.equal(await love.locator('[data-viewer-icon]').evaluate(el=>getComputedStyle(el).color),colours.pink);
+  await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='true');assert.equal(await read.locator('[data-viewer-icon]').evaluate(el=>getComputedStyle(el).color),colours.green);
+  assert.equal(await love.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)','page appreciation stays quiet');if(process.env.FAS_VIEWER_SCREENSHOT_DIR)await page.locator('.story-footer').screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-footer-'+width+'-'+theme+'.png'});
   await page.evaluate(()=>{window.viewerFail=true;});await love.click();await page.waitForFunction(()=>[...document.querySelectorAll('[data-viewer-status]')].some(n=>n.textContent.includes('could not be saved')));
   assert.equal(await love.getAttribute('aria-pressed'),'true','failed writes retain confirmed state');
   await page.evaluate(()=>{window.viewerFail=false;});
-  const card=page.locator('.content-grid-card').first(),bookmark=card.locator('[data-viewer-action=saved]');await bookmark.waitFor();const url=page.url();await bookmark.click();await page.waitForFunction(()=>document.querySelector('.content-grid-card [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');assert.equal(page.url(),url,'card save does not navigate');
+  const card=page.locator('.content-grid-card').first(),bookmark=card.locator('[data-viewer-action=saved]');await bookmark.waitFor();const circle=await bookmark.evaluate(el=>{const b=el.getBoundingClientRect(),card=el.closest('article').getBoundingClientRect(),text=el.closest('article').querySelector('.content-grid-card-excerpt').getBoundingClientRect();return {width:b.width,height:b.height,right:card.right-b.right,bottom:card.bottom-b.bottom,gap:b.left-text.right,radius:parseFloat(getComputedStyle(el).borderRadius),clip:getComputedStyle(el.querySelector('span')).clip};});assert.equal(circle.width,44);assert.equal(circle.height,44);assert.ok(circle.right>=8&&circle.right<=24&&circle.bottom>=8&&circle.bottom<=24&&circle.gap>=8);assert.ok(circle.radius>=22);assert.notEqual(circle.clip,'auto');
+  const url=page.url();await bookmark.click();await page.waitForFunction(()=>document.querySelector('.content-grid-card [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');assert.equal(page.url(),url,'card save does not navigate');
   const positions=await page.evaluate(()=>({save:document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').getBoundingClientRect().top+scrollY,body:document.querySelector('.story-content').getBoundingClientRect().top+scrollY,bottom:document.querySelector('.story-footer [data-viewer-action=loved]').getBoundingClientRect().top+scrollY,bodyEnd:document.querySelector('.story-content').getBoundingClientRect().bottom+scrollY,overflow:document.documentElement.scrollWidth>innerWidth+1}));
   assert.ok(positions.save<positions.body&&positions.bottom>=positions.bodyEnd);assert.equal(positions.overflow,false);
   if(process.env.FAS_VIEWER_SCREENSHOT_DIR)await card.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-card-'+width+'-'+theme+'.png'});
@@ -52,6 +57,29 @@ try{
    assert.ok(await ack.evaluate(el=>el.getBoundingClientRect().top<document.querySelector('.content-next-section').getBoundingClientRect().top));
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   }
+
+  await page.goto(origin+'/');await page.locator('.content-featured-card').waitFor();await page.waitForLoadState('networkidle');
+  const pause=page.getByRole('button',{name:'Pause carousel',exact:true});if(await pause.isVisible())await pause.click();
+  await page.evaluate(async theme=>{
+   document.documentElement.dataset.theme=theme;const {initViewerActions}=await import('/systems/community/viewer-actions.mjs'),states=new Map();
+   const state=key=>{if(!states.has(key))states.set(key,{id:key,key,saved:false,experienced:true,loved:false});return states.get(key);};
+   initViewerActions({connect:async()=>({subscribe(){return ()=>{};},client:{rpc:async(name,args)=>{
+    if(name==='fas_my_viewer_actions')return {data:args.content_keys.map(key=>({...state(key)}))};
+    const value=state(args.content_key);value[args.action_key]=args.enabled;return {data:{...value}};
+   }}})});
+  },theme);
+  const featured=page.locator('.content-featured-card'),featureSave=featured.locator('[data-viewer-action=saved]'),firstTitle=await featured.locator('h2').textContent(),home=page.url();
+  await page.waitForFunction(()=>!document.querySelector('.content-featured-card [data-viewer-action=saved]').disabled);
+  if(width<600)await featureSave.tap();else await featureSave.click();
+  await page.waitForFunction(()=>document.querySelector('.content-featured-card [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
+  assert.equal(page.url(),home);assert.equal(await featured.locator('h2').textContent(),firstTitle,'saving never advances the featured slide');
+  const featureGeometry=await featureSave.evaluate(el=>{const b=el.getBoundingClientRect(),card=el.closest('article').getBoundingClientRect();return {width:b.width,height:b.height,right:card.right-b.right,bottom:card.bottom-b.bottom};});
+  assert.equal(featureGeometry.width,44);assert.equal(featureGeometry.height,44);assert.ok(featureGeometry.right>=8&&featureGeometry.right<=24&&featureGeometry.bottom>=8&&featureGeometry.bottom<=24);
+  await page.getByRole('button',{name:'Next featured item',exact:true}).click();await page.waitForFunction(title=>document.querySelector('.content-featured-card h2').textContent!==title,firstTitle);
+  await page.getByRole('button',{name:'Previous featured item',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.content-featured-card [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
+  assert.equal(await featured.locator('[data-viewer-experienced]').textContent(),'Read');
+  if(process.env.FAS_VIEWER_SCREENSHOT_DIR)await featured.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-featured-'+width+'-'+theme+'.png'});
+
   assert.deepEqual(errors,[]);await context.close();console.log('PASS viewer actions '+width+' '+theme);
  }
 
@@ -79,7 +107,7 @@ try{
    await mountViewerCollection(document.querySelector('[data-viewer-collection]'),{connect:async()=>account});initViewerActions({connect:async()=>account});
   });
   const card=page.locator('.viewer-collection-grid .content-grid-card');await card.waitFor();await page.waitForFunction(()=>document.querySelector('.viewer-collection-grid [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
-  assert.equal(await card.locator('[data-viewer-experienced]').textContent(),path.includes('favourites')?'✓ Played':'✓ Read');
+  assert.equal(await card.locator('[data-viewer-experienced]').textContent(),path.includes('favourites')?'Played':'Read');
   await card.locator('[data-viewer-action=saved]').click();await page.waitForFunction(()=>!document.querySelector('.viewer-collection-grid .content-grid-card'));assert.match(await page.locator('[data-viewer-collection]').textContent(),/Nothing here yet/);
   await page.close();
  }

@@ -5,6 +5,10 @@ async function dismiss(page){const b=page.getByRole('button',{name:'Essentials o
 try{
  for(const viewport of [{width:1920,height:1040},{width:1024,height:768},{width:390,height:844},{width:844,height:390}]){
   const page=await browser.newPage({viewport});await page.goto(origin+'/tools/countdown/');await dismiss(page);
+  // Initial HTML includes Stop; initialization hides it for the setup state.
+  // Wait before taking indexed control locators so that the list cannot shrink.
+  await page.locator('#tool-stop-button[hidden]').waitFor({state:'attached'});
+  await page.evaluate(()=>document.fonts.ready);
   const controls=page.locator('.countdown-preset,.countdown-add,.countdown-action-button:visible');
   assert.ok(await controls.count()>=11);
   for(const e of await controls.all()){const r=await e.boundingBox();assert.ok(r.width>=43&&r.height>=43,'controls retain usable touch targets');assert.ok(await e.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'button labels fit');}
