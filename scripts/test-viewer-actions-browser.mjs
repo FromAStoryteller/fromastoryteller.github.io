@@ -59,8 +59,11 @@ try{
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   }
 
-  await page.goto(origin+'/');await page.locator('.content-featured-card').waitFor();await page.waitForLoadState('networkidle');
-  const pause=page.getByRole('button',{name:'Pause carousel',exact:true});if(await pause.isVisible())await pause.click();
+  await page.goto(origin+'/');
+  // Background account checks can remain active; wait for the initialized carousel.
+  await page.locator('.content-featured-slide .content-featured-card').waitFor();
+  await page.getByRole('button',{name:'Pause carousel',exact:true}).click();
+  await page.getByRole('button',{name:'Play carousel',exact:true}).waitFor();
   await page.evaluate(async theme=>{
    document.documentElement.dataset.theme=theme;const {initViewerActions}=await import('/systems/community/viewer-actions.mjs'),states=new Map();
    const state=key=>{if(!states.has(key))states.set(key,{id:key,key,saved:false,experienced:true,loved:false});return states.get(key);};
