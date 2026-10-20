@@ -1615,3 +1615,12 @@ html, body, button, input, textarea, select,
 
 .content-page-details { display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin:1rem auto; color:var(--colour-text-secondary); font-size:.95rem; text-align:center; }
 .content-detail-badge { display:inline-flex; align-items:center; padding:.3rem .85rem; border:1px solid var(--colour-border-default); border-radius:999px; background:var(--colour-surface); }
+
+/* Keep controls aligned without reserving unpaintable root gutter space. */
+.site-header { --shell-scrollbar-space: max(0px, calc(var(--size-native-scrollbar, 0px) - (100vw - 100%))); }
+.header-inner { position: relative; margin-right: var(--shell-scrollbar-space); }
+.site-header::before { width: calc((100% - var(--size-centre-rule-gap) - var(--shell-scrollbar-space)) / 2); }
+.site-header::after { width: calc((100% - var(--size-centre-rule-gap) + var(--shell-scrollbar-space)) / 2); }
+.site-header:has(.header-brand[hidden])::before { width: 100%; }
+.site-footer { position: relative; border-top: 0; }
+.site-footer::before { content: ''; position: absolute; inset: 0 auto auto 0; width: 100vw; height: 1px; background: var(--colour-divider); pointer-events: none; }

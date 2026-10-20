@@ -28,7 +28,13 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   const bio = form.elements.namedItem('bio');
   const welcome = form.elements.namedItem('welcome_line');
   const socials=viewer?null:mountSocialEditor(root.querySelector('[data-social-editor]'));
-  let savedSocials=[];
+  let savedSocials=[],savedSignature=null;
+  const w=root.ownerDocument.defaultView;
+  const signature=()=>JSON.stringify({name:name.value.trim(),bio:bio?.value.trim()??'',welcome:welcome?.value.trim()??'',socials:socials?.value()??[]});
+  const dirty=()=>{if(savedSignature===null)return false;try{return signature()!==savedSignature;}catch{return true;}};
+  const beforeSignOut=()=>{if(busy){status.textContent='Wait for your profile to finish saving before signing out.';return false;}return !dirty()||w.confirm('Sign out and discard your unsaved profile changes?');};
+  const unload=event=>{if(!disposed&&(busy||dirty())){event.preventDefault();event.returnValue='';}};
+  w.addEventListener('beforeunload',unload);
   if (!viewer) root.querySelector('#preview-title').textContent = contributor ? 'A glimpse for your readers' : 'Your profile preview';
   else root.querySelector('.profile-intro > p:not(.profile-eyebrow)').textContent = 'Choose the name you will use around the site.';
   root.querySelector('[data-visibility]').textContent = contributor
@@ -47,7 +53,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
     if(viewer)return;const monogram=root.querySelector('[data-monogram]');let img=root.querySelector('[data-avatar-preview]');
     if(!image){img?.remove();monogram.hidden=false;return;}if(!img){img=root.ownerDocument.createElement('img');img.className='profile-avatar';img.setAttribute('data-avatar-preview','');monogram.after(img);}img.src=image.url;img.alt=image.alt;monogram.hidden=true;
   }});
-  const dispose = () => { disposed = true; disposeImage(); root.replaceChildren(); };
+  const dispose = () => { if(disposed)return; disposed = true; w.removeEventListener('beforeunload',unload); disposeImage(); root.replaceChildren(); };
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (busy || disposed) return;
@@ -61,9 +67,10 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   });
   function fill(profile) {
     name.value = profile.display_name;
-    root.querySelector('nav').replaceWith(accountNavigation(root.ownerDocument, { current: 'profile', auth: client.auth, publicId: contributor ? profile.public_id : null, admin }));
+    root.querySelector('nav').replaceWith(accountNavigation(root.ownerDocument, { current: 'profile', auth: client.auth, publicId: contributor ? profile.public_id : null, admin, beforeSignOut }));
     if (!viewer) { bio.value = profile.bio; welcome.value = profile.welcome_line; }
     savedSocials=profile.social_links??[];socials?.fill(savedSocials);
+    savedSignature=signature();
     preview(); status.dataset.state = '';
     if (viewer) return;
     root.querySelector('[data-preview-note]').textContent = contributor ? 'Your saved public profile text.' : viewer ? 'Only you can see your viewer profile.' : 'Your saved private profile text.';

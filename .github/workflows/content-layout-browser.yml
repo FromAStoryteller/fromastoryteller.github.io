@@ -6,6 +6,10 @@ on:
       - systems/community/interactive-*.mjs
       - systems/community/legacy-*.mjs
       - systems/community/studio-editor.mjs
+      - systems/community/content-history.mjs
+      - systems/community/profile-*.mjs
+      - scripts/test-profile-history-browser.mjs
+      - scripts/test-stable-viewport-browser.mjs
       - account/**
       - css/**
       - tools/**
@@ -54,3 +58,5 @@ jobs:
       - run: node scripts/test-studio-library-browser.mjs
       - run: node scripts/test-player-account-polish-browser.mjs
       - run: node scripts/test-header-portrait-browser.mjs
+      - run: node scripts/test-profile-history-browser.mjs
+      - run: node scripts/test-stable-viewport-browser.mjs

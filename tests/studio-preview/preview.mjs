@@ -42,6 +42,10 @@ function showLock(message,error){
  const p=document.createElement('p');p.textContent=message;root.append(p);
  if(snapshot)lockDispose=mountStudioLock(root,{snapshot,ownerId:owner,auth:previewAuth,verify:async()=>{if(!sessionValid)throw Error('Sign in');return {user:{id:previewUser},state:'active',contributor:access};},onResume:record=>{lockDispose=null;launch(record);},onForget:()=>{clearRecoveryStorage(sessionStorage);lockDispose?.();root.textContent='Recovery discarded.';}});
 }
+const historical=new Map();
+service.history=async(item,id=null)=>{await authorize();const versions=historical.get(item.id)??[];if(id){const r=versions.find(x=>x.id===id);if(!r)throw Error('Version unavailable.');return copy(r);}return versions.map(({id,saved_at,snapshot})=>({id,saved_at,title:snapshot.title}));};
+const fixtureSave=service.save;service.save=async(input,previous,status)=>{const prior=previous&&copy(rows.find(x=>x.id===previous.id));const saved=await fixtureSave(input,previous,status);if(prior?.slug_locked){historical.set(prior.id,[{id:crypto.randomUUID(),saved_at:prior.updated_at,snapshot:prior},...(historical.get(prior.id)??[])].slice(0,20));}return saved;};
+service.restoreRevision=async(item,id)=>{const r=await service.history(item,id);const values=Object.fromEntries(Object.keys(validateStory({title:'Schema keys'})).map(k=>[k,r.snapshot[k]]));return service.save(values,item,item.status);};
 function launch(initialRecovery=null){
  dispose=mountStudio(root,service,{authorName:'Mara Ellis',publicId:owner,preview:true,admin:fixtureAdmin,initialRecovery,socialLinks:[{platform:'instagram',url:'https://instagram.com/example'},{platform:'website',url:'https://example.com/'}],onAccessLost:showLock});
 }
