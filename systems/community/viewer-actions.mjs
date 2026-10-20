@@ -1,3 +1,4 @@
+import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
 import { loadLocalAuthClient } from "../../account/local-auth-client.mjs";
 import { restoreSession } from "../../account/session-controller.mjs";
 import { watchSessionEnd } from "../../account/session-events.mjs";
@@ -36,7 +37,8 @@ function initViewerActions({ document: d = document, window: w = window, connect
   d.documentElement.dataset.viewerActionsMounted = "true";
   const writes = /* @__PURE__ */ new Map();
   const states = /* @__PURE__ */ new Map(), pending = /* @__PURE__ */ new Set(), requested = /* @__PURE__ */ new Set(), hosts = /* @__PURE__ */ new Set();
-  let account, ready = false, ended = false, epoch = 0, loading, error = "", scheduled = false, stop;
+  let account, ready = false, ended = false, epoch = 0, loading, error = "", scheduled = false, stop, stopSync, refreshing = false, refreshQueued = false, readSequence = 0;
+  const reads = new Map();
   const node = (tag, text) => {
     const el = d.createElement(tag);
     el.textContent = text;
@@ -155,6 +157,8 @@ function initViewerActions({ document: d = document, window: w = window, connect
         ended = true;
         epoch++;
         account = null;
+        stopSync?.();
+        reads.clear();
         states.clear();
         writes.clear();
         requested.clear();
@@ -164,6 +168,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
           status(h, "Your account changed. Reload to continue.");
         }
       });
+      if (account && !ended) stopSync = watchViewerChanges(() => void refresh(), {window:w,document:d});
       for (const h of hosts) {
         paint(h);
         status(h, "");
@@ -186,21 +191,37 @@ function initViewerActions({ document: d = document, window: w = window, connect
     const version = epoch;
     try {
       for (let i = 0; i < keys.length; i += 100) {
-        const batch = keys.slice(i, i + 100), r = await account.client.rpc("fas_my_viewer_actions", { content_keys: batch });
-        if (r.error) throw Error("Your saved status could not load. Select an action to retry.");
+        const batch = keys.slice(i, i + 100), sequence = ++readSequence, before = new Map(writes);
+        batch.forEach(key => reads.set(key,sequence));
+        const r = await account.client.rpc("fas_my_viewer_actions", { content_keys: batch });
+        if (r.error || !Array.isArray(r.data)) throw Error("Your saved status could not load. Select an action to retry.");
         if (ended || version !== epoch) return;
-        for (const s of r.data ?? []) if (!pending.has(s.key)) states.set(s.key, { ...writes.get(s.id) ?? s, key: s.key });
-        for (const h of hosts) if (batch.includes(h.dataset.viewerKey)) {
+        // A response may replace an earlier local write, but never a write or
+        // newer read that started after this request.
+        const applied = new Set();
+        for (const s of r.data ?? []) if (!pending.has(s.key) && reads.get(s.key) === sequence && writes.get(s.id) === before.get(s.id)) {
+          states.set(s.key,s); applied.add(s.key);
+        }
+        for (const h of hosts) if (applied.has(h.dataset.viewerKey)) {
           paint(h);
           status(h, "");
         }
       }
     } catch (e) {
-      if (!ended) {
+      if (!ended && version === epoch) {
         for (const h of hosts) if (keys.includes(h.dataset.viewerKey)) status(h, e.message);
       }
     }
   }
+  async function refresh() {
+    if (!ready || !account || ended) return;
+    if (refreshing || pending.size) { refreshQueued = true; return; }
+    refreshing = true; refreshQueued = false;
+    try { await hydrate([...new Set([...hosts].filter(h=>h.isConnected).map(h=>h.dataset.viewerKey))]); }
+    finally { refreshing = false; if (refreshQueued && !pending.size && !ended) void refresh(); }
+  }
+  const collectionRendered = () => { schedule(); queueMicrotask(() => void refresh()); };
+  w.addEventListener('fas-viewer-collection-rendered',collectionRendered);
   d.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-viewer-action]");
     if (!b) return;
@@ -239,6 +260,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
       if (r.error || !r.data) throw Error("Your change could not be saved. Please try again.");
       if (ended) return;
       writes.set(r.data.id, r.data);
+      publishViewerChanges(w);
       states.set(key, r.data);
       for (const [alias, value] of states) if (value.id === r.data.id) states.set(alias, { ...r.data, key: alias });
       w.dispatchEvent(new CustomEvent("fas-viewer-action-change", { detail: { key, ...r.data } }));
@@ -253,6 +275,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     } finally {
       pending.delete(key);
       for (const h of hosts) if (h.dataset.viewerKey === key) paint(h);
+      if (refreshQueued && !pending.size) void refresh();
     }
   });
   w.addEventListener("pageshow", (event) => {
@@ -266,6 +289,9 @@ function initViewerActions({ document: d = document, window: w = window, connect
     epoch++;
     observer.disconnect();
     stop?.();
+    stopSync?.();
+    reads.clear();
+    w.removeEventListener('fas-viewer-collection-rendered',collectionRendered);
     for (const h of hosts) {
       states.delete(h.dataset.viewerKey);
       paint(h);
