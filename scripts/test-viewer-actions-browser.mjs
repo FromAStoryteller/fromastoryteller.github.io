@@ -64,6 +64,8 @@ try{
   await page.locator('.content-featured-slide .content-featured-card').waitFor();
   await page.getByRole('button',{name:'Pause carousel',exact:true}).click();
   await page.getByRole('button',{name:'Play carousel',exact:true}).waitFor();
+  const carouselLayout=await page.locator('.content-featured').evaluate(shell=>{const slide=shell.querySelector('.content-featured-card').getBoundingClientRect(),arrows=[...shell.querySelectorAll('.content-featured-controls .content-featured-arrow')].map(b=>b.getBoundingClientRect()),pause=shell.querySelector('.content-featured-pause').getBoundingClientRect();return {offset:(arrows[0].left+arrows.at(-1).right-slide.left-slide.right)/2,overlap:arrows.some(r=>r.left<pause.right&&r.right>pause.left&&r.top<pause.bottom&&r.bottom>pause.top)};});
+  assert.ok(Math.abs(carouselLayout.offset)<1,'slide arrows and markers stay centred on the slide');assert.equal(carouselLayout.overlap,false,'play/pause does not overlap slide controls');
   await page.evaluate(async theme=>{
    document.documentElement.dataset.theme=theme;const {initViewerActions}=await import('/systems/community/viewer-actions.mjs'),states=new Map();
    const state=key=>{if(!states.has(key))states.set(key,{id:key,key,saved:false,experienced:true,loved:false});return states.get(key);};
