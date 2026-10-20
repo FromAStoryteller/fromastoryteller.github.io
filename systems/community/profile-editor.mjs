@@ -31,9 +31,9 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   let savedSocials=[],savedSignature=null;
   const w=root.ownerDocument.defaultView;
   const signature=()=>JSON.stringify({name:name.value.trim(),bio:bio?.value.trim()??'',welcome:welcome?.value.trim()??'',socials:socials?.value()??[]});
-  const dirty=()=>{if(savedSignature===null)return false;try{return signature()!==savedSignature;}catch{return true;}};
-  const beforeSignOut=()=>{if(busy){status.textContent='Wait for your profile to finish saving before signing out.';return false;}return !dirty()||w.confirm('Sign out and discard your unsaved profile changes?');};
-  const unload=event=>{if(!disposed&&(busy||dirty())){event.preventDefault();event.returnValue='';}};
+  const dirty=()=>{try{return (savedSignature!==null&&signature()!==savedSignature)||disposeImage.dirty();}catch{return true;}};
+  const beforeSignOut=()=>{if(busy||disposeImage.pending()){status.textContent='Wait for your profile to finish saving before signing out.';return false;}return !dirty()||w.confirm('Sign out and discard your unsaved profile changes?');};
+  const unload=event=>{if(!disposed&&(busy||disposeImage.pending()||dirty())){event.preventDefault();event.returnValue='';}};
   w.addEventListener('beforeunload',unload);
   if (!viewer) root.querySelector('#preview-title').textContent = contributor ? 'A glimpse for your readers' : 'Your profile preview';
   else root.querySelector('.profile-intro > p:not(.profile-eyebrow)').textContent = 'Choose the name you will use around the site.';
