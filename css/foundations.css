@@ -367,6 +367,7 @@
 
   --colour-success-background: #E4EFE7;
   --colour-success-text: #245537;
+  --colour-appreciation-text: #A82F69;
 
   --colour-warning-background: #F5E5B6;
   --colour-warning-text: #62490F;
@@ -458,6 +459,7 @@
 
   --colour-success-background: #182E24;
   --colour-success-text: #B9DEC3;
+  --colour-appreciation-text: #F0A2CA;
 
   --colour-warning-background: #352D18;
   --colour-warning-text: #E5C96B;
@@ -547,6 +549,7 @@
 
     --colour-success-background: #182E24;
     --colour-success-text: #B9DEC3;
+  --colour-appreciation-text: #F0A2CA;
 
     --colour-warning-background: #352D18;
     --colour-warning-text: #E5C96B;
