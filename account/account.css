@@ -110,3 +110,7 @@
 .account-navigation:has(a[href='/account/studio/']) { grid-template-columns: repeat(5,minmax(0,1fr)); max-width: 54rem; }
 .account-navigation--admin:has(a[href='/account/studio/']) { grid-template-columns: repeat(6,minmax(0,1fr)); max-width: 66rem; }
 @media(max-width:46rem) { .account-navigation:has(a[href='/account/studio/']) { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+
+/* Selected account buttons keep the same solid treatment in every state. */
+.account-secondary[aria-pressed="true"], .account-secondary[aria-current="page"] { background: var(--colour-button-primary-background); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary); }
+.account-secondary[aria-pressed="true"]:hover:not(:disabled), .account-secondary[aria-pressed="true"]:focus-visible, .account-navigation .account-secondary[aria-current="page"]:hover, .account-navigation .account-secondary[aria-current="page"]:focus-visible { background: var(--colour-accent-primary-hover); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary-hover); }

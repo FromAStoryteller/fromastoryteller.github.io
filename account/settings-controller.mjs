@@ -1,3 +1,4 @@
+import { clearNavigationSnapshot } from './navigation-shell.mjs';
 import { accountRoles } from './roles.mjs';
 import { takeRestoredIdentity } from './session-controller.mjs';
 
@@ -17,6 +18,7 @@ async function verifiedIdentity(client, useRestoredSession = false) {
 async function loadNavigationAccess(rolesRequest, stateRequest, onNavigation) {
   const [roles, state] = await Promise.all([rolesRequest, stateRequest]);
   if (!roles.error && !state.error && state.data === 'active') onNavigation?.({...accountRoles(roles.data), state: state.data});
+  else clearNavigationSnapshot();
   return {roles, state};
 }
 

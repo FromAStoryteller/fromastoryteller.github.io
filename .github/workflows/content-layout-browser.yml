@@ -6,6 +6,10 @@ on:
       - systems/community/interactive-*.mjs
       - systems/community/legacy-*.mjs
       - systems/community/studio-editor.mjs
+      - account/**
+      - css/**
+      - tools/**
+      - scripts/test-player-account-polish-browser.mjs
       - scripts/test-content-details-browser.mjs
       - scripts/test-published-editorial-browser.mjs
       - scripts/test-content-discovery-browser.mjs
@@ -45,3 +49,4 @@ jobs:
       - run: node scripts/test-existing-file-editor-browser.mjs
       - run: node scripts/test-community-usability-browser.mjs
       - run: node scripts/test-studio-library-browser.mjs
+      - run: node scripts/test-player-account-polish-browser.mjs
