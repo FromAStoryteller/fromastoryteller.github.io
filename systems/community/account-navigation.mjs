@@ -1,10 +1,11 @@
-import { rememberNavigationSnapshot, clearNavigationSnapshot } from '../../account/navigation-shell.mjs';
+import { rememberNavigationSnapshot, clearNavigationSnapshot, navigationSnapshot } from '../../account/navigation-shell.mjs';
 import { showPendingInvitation } from '../../account/invitation-storage.mjs';
 import { publicProfileUrl } from './profiles.mjs';
 
 export function accountNavigation(document, { current, publicId, auth, admin = false, contributor = Boolean(publicId), beforeSignOut } = {}) {
   if (auth) rememberNavigationSnapshot({admin,contributor,publicId});
   else clearNavigationSnapshot();
+  if (auth && contributor && !publicId) publicId = navigationSnapshot()?.publicId;
   const nav = document.createElement('nav');
   nav.className = 'account-navigation';
   nav.setAttribute('aria-label', 'Your profile and account');

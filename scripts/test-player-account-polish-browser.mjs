@@ -29,7 +29,7 @@ try{
     const client={auth,from(){return {select(){return this},eq(){return this},single:stalled,then(resolve,reject){return Promise.resolve({data:[{role:'member'}]}).then(resolve,reject)}}},rpc:async name=>name==='fas_my_account_state'?{data:'active'}:stalled()};
     export async function loadLocalAuthClient(){return {mode:'local',hadSession:true,storage:{clear(){}},client};}
    `}));
-   await page.goto(origin+'/account/settings/');await page.locator('.account-navigation:not([data-navigation-shell])').getByRole('button',{name:'Sign out',exact:true}).waitFor();assert.equal(await page.locator('.account-navigation').getByRole('link',{name:'Admin tools',exact:true}).count(),0);assert.equal(await page.evaluate(async()=>{const{navigationSnapshot}=await import('/account/navigation-shell.mjs');return navigationSnapshot().admin;}),false);console.log('PASS fresh verification removes a stale admin presentation hint');
+   await page.goto(origin+'/account/settings/');await page.locator('.account-navigation:not([data-navigation-shell])').getByRole('button',{name:'Sign out',exact:true}).waitFor();assert.equal(await page.locator('.account-navigation').getByRole('link',{name:'Admin tools',exact:true}).count(),0);assert.equal(await page.locator('.account-navigation').getByRole('link',{name:'View public profile',exact:true}).count(),1);assert.equal(await page.evaluate(async()=>{const{navigationSnapshot}=await import('/account/navigation-shell.mjs');return navigationSnapshot().admin;}),false);console.log('PASS fresh verification removes a stale admin presentation hint');
   }
   await context.close();console.log('PASS immediate '+destination+' navigation before account SDK is ready');
  }
