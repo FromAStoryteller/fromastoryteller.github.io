@@ -165,3 +165,5 @@
 .ss-template-downloads label { display: grid; gap: .5rem; margin-block: .75rem; }
 .ss-template-downloads fieldset { min-width: 0; }
 .ss-template-downloads input[type="checkbox"] { justify-self: start; }
+
+.ss-heading-actions { flex-wrap: wrap; min-width: 0; }
