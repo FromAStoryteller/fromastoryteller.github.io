@@ -25,13 +25,14 @@ else {
   const client = { auth: { signOut: async () => {signOuts++;return {error:null};}, getUser: async () => ({ data: { user: { id: 'preview-only' } } }) }, from: () => {
     const query = {select: () => query,eq: () => query,update: changes => { profile = {...profile,...changes}; return query; },single: async () => {if(profileDelay)await new Promise(r=>setTimeout(r,profileDelay));return profileFail?{error:{message:'Sample save failure'}}:{data:profile,error:null};}}; return query;
   }};
+  let imageDelay=0;
   let image={asset_id:null,alt:'',version:'83000000-0000-0000-0000-000000000001'},fail=false,uploads=[];
   const imageService={
     read:async()=>({...image}),
-    upload:async(file,alt,crop,version)=>{if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');const bitmap=await createImageBitmap(file);uploads.push({width:bitmap.width,height:bitmap.height,type:file.type,alt,crop});bitmap.close();image={asset_id:crypto.randomUUID(),alt,version:crypto.randomUUID()};return {...image};},
-    change:async(version,alt,remove)=>{if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');image={asset_id:remove?null:image.asset_id,alt:remove?'':alt,version:crypto.randomUUID()};return {...image};}
+    upload:async(file,alt,crop,version)=>{if(imageDelay)await new Promise(r=>setTimeout(r,imageDelay));if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');const bitmap=await createImageBitmap(file);uploads.push({width:bitmap.width,height:bitmap.height,type:file.type,alt,crop});bitmap.close();image={asset_id:crypto.randomUUID(),alt,version:crypto.randomUUID()};return {...image};},
+    change:async(version,alt,remove)=>{if(imageDelay)await new Promise(r=>setTimeout(r,imageDelay));if(fail||version!==image.version)throw new Error('Image changed or session expired. Reload its saved state.');image={asset_id:remove?null:image.asset_id,alt:remove?'':alt,version:crypto.randomUUID()};return {...image};}
   };
-  window.__profilePreview={image:()=>({...image}),uploads:()=>uploads,fail:value=>fail=value,profileFail:value=>profileFail=value,profileDelay:value=>profileDelay=value,signOuts:()=>signOuts,dispose:()=>dispose?.()};
+  window.__profilePreview={image:()=>({...image}),uploads:()=>uploads,fail:value=>fail=value,profileFail:value=>profileFail=value,profileDelay:value=>profileDelay=value,imageDelay:value=>imageDelay=value,signOuts:()=>signOuts,dispose:()=>dispose?.()};
   client.auth.getSession=async()=>({data:{session:{access_token:'fictional-preview-token'}}});
   dispose = mountProfileEditor(root, client, { contributor: mode !== 'viewer',imageBase:'https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-story-image',imageService });
   // Keep the test preview inside its own clearly marked fictional screens.
