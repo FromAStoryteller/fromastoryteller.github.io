@@ -1,6 +1,6 @@
 # Social links and account actions
 
-The supported public social catalogue is Instagram, Facebook, TikTok, YouTube and X. Each platform has one optional HTTPS link, with an allowlisted platform hostname. Website and other platform links are not offered. The same catalogue filters profile, story, game/tool and file-backed server-rendered bylines.
+The supported public social catalogue is Instagram, Facebook, TikTok, YouTube and X. Each platform has one optional HTTPS link, with an allowlisted platform hostname. TikTok /@handle paths are accepted; credentials in the URL authority remain blocked. Website and other platform links are not offered. The same catalogue filters profile, story, game/tool and file-backed server-rendered bylines.
 
 An additive database trigger rejects newly changed unsupported social links. Existing stored legacy links are retained in private account exports and may remain unchanged during unrelated profile updates. Public projections hide unsupported entries, and the profile editor explains that its next save replaces older links with the supported entries shown. No existing saved profile text or image is removed by the migration.
 
