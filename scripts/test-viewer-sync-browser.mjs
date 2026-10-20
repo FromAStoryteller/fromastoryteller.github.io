@@ -29,17 +29,18 @@ await context.route('**/__fas_viewer_sync_fixture/**',async route=>{
  if(name==='fas_set_viewer_action'){const s=state(owner,args.content_key);s[args.action_key]=args.enabled;if(args.action_key==='saved'&&args.enabled)s.order=++order;data={...s};}
  await route.fulfill({contentType:'application/json',body:JSON.stringify(failures.has(tab)?{error:{message:'fixture offline'}}:{data})});
 });
-async function open(tab,owner,path=story,{channel=true}={}){
+async function open(tab,owner,path=story,{channel=true,settled=true}={}){
  const page=await context.newPage();page.setDefaultTimeout(8000);
  if(!channel)await page.addInitScript(()=>Object.defineProperty(window,'BroadcastChannel',{value:undefined,configurable:true}));
  await page.goto(origin+path);const consent=page.getByRole('button',{name:'Essentials only',exact:true});if(await consent.isVisible())await consent.click();
  await page.evaluate(async({tab,owner,path})=>{
-  window.viewerEndCallbacks=[];window.endViewerFixture=()=>window.viewerEndCallbacks.forEach(fn=>fn());
-  const account={imageBase:'https://example.invalid/image',subscribe(fn){window.viewerEndCallbacks.push(fn);return ()=>{};},client:{rpc:async(name,args)=>(await fetch(['','__fas_viewer_sync_fixture',owner,tab,name].join('/'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(args)})).json()}};
+  window.viewerLoadedKeys=new Set();window.viewerEndCallbacks=[];window.endViewerFixture=()=>window.viewerEndCallbacks.forEach(fn=>fn());
+  const account={imageBase:'https://example.invalid/image',subscribe(fn){window.viewerEndCallbacks.push(fn);return ()=>{};},client:{rpc:async(name,args)=>{const result=await(await fetch(['','__fas_viewer_sync_fixture',owner,tab,name].join('/'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(args)})).json();if(name==='fas_my_viewer_actions'&&!result.error)args.content_keys.forEach(key=>window.viewerLoadedKeys.add(key));return result;}}};
   if(path.startsWith('/account/')){const {mountViewerCollection}=await import('/systems/community/viewer-collections.mjs');await mountViewerCollection(document.querySelector('[data-viewer-collection]'),{connect:async()=>account});}
   const {initViewerActions}=await import('/systems/community/viewer-actions.mjs');initViewerActions({connect:async()=>account});
  },{tab,owner,path});
  if(!path.startsWith('/account/'))await page.waitForFunction(()=>{const b=document.querySelector('main .viewer-content-actions [data-viewer-action=saved]');return b&&!b.disabled;});
+ if(settled&&!path.startsWith('/account/')){await page.locator('#related-content-grid article').first().waitFor();await page.waitForFunction(()=>[...document.querySelectorAll('[data-viewer-key]')].every(h=>window.viewerLoadedKeys.has(h.dataset.viewerKey)));}
  return page;
 }
 const action=(page,name)=>page.locator('main .viewer-content-actions [data-viewer-action='+name+']');
@@ -68,7 +69,7 @@ try{
  failures.add('fallback');state('alice',story).loved=false;await fallback.evaluate(()=>dispatchEvent(new Event('focus')));await fallback.waitForFunction(()=>document.querySelector('.story-header + .viewer-content-actions [data-viewer-status]')?.textContent.includes('could not load'));await selected(fallback,'loved',true);
  failures.delete('fallback');await fallback.evaluate(()=>dispatchEvent(new Event('online')));await selected(fallback,'loved',false);
  console.log('PASS visibility/reconnect fallback and confirmed-state preservation after failed reads');
- hold('late','fas_my_viewer_actions');const late=await open('late','alice');await reached('late','fas_my_viewer_actions');
+ hold('late','fas_my_viewer_actions');const late=await open('late','alice',story,{settled:false});await reached('late','fas_my_viewer_actions');
  state('alice',story).loved=true;await signal(left);await selected(late,'loved',true);release('late','fas_my_viewer_actions');await late.waitForTimeout(150);await selected(late,'loved',true);
  console.log('PASS a late initial read cannot replace a newer refresh');
  hold('right','fas_my_viewer_actions');await right.evaluate(()=>dispatchEvent(new Event('focus')));await reached('right','fas_my_viewer_actions');await right.evaluate(()=>window.endViewerFixture());release('right','fas_my_viewer_actions');await right.waitForTimeout(150);await selected(right,'saved',false);assert.equal(await action(right,'saved').isDisabled(),true);const endedCount=count('right','fas_my_viewer_actions');await signal(left);await right.evaluate(()=>dispatchEvent(new Event('focus')));await right.waitForTimeout(150);assert.equal(count('right','fas_my_viewer_actions'),endedCount);
