@@ -121,4 +121,4 @@
 /* Destructive controls share the wine/red treatment across account surfaces. */
 .account-danger { color: var(--colour-error-text); border-color: var(--colour-error-text); background: transparent; }
 .account-secondary.account-danger:hover:not(:disabled), .account-submit.account-danger:hover:not(:disabled) { background: var(--colour-wine); border-color: var(--colour-wine); color: var(--colour-parchment); }
-.account-secondary.account-danger:focus-visible, .account-submit.account-danger:focus-visible { outline-color: var(--colour-error-text); }
+:root .account-secondary.account-danger:focus-visible, :root .account-submit.account-danger:focus-visible { outline-color: var(--colour-error-text); }
