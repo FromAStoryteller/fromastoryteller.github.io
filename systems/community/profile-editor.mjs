@@ -38,7 +38,7 @@ export function mountProfileEditor(root, client, { contributor = false, viewer =
   if (!viewer) root.querySelector('#preview-title').textContent = contributor ? 'A glimpse for your readers' : 'Your profile preview';
   else root.querySelector('.profile-intro > p:not(.profile-eyebrow)').textContent = 'Choose the name you will use around the site.';
   root.querySelector('[data-visibility]').textContent = contributor
-    ? 'These words are public on your storyteller page. Add a profile picture and social or website links below. Your email and account settings stay private.'
+    ? 'These words are public on your storyteller page. Add a profile picture and social links below. Your email and account settings stay private.'
     : viewer ? 'Your display name identifies you around the site. Your email and account details stay private.' : 'Your profile is private until you publish work. Your email and account settings stay private.';
   const preview = () => {
     if (viewer) return;

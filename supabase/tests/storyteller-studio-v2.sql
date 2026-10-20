@@ -20,8 +20,9 @@ do $$ begin
  begin update public.stories set body_document='{"version":1,"blocks":[{"type":"paragraph","html":"<script>bad()</script>"}]}' where slug='studio-v2-fixture';raise exception 'FAIL arbitrary HTML';exception when raise_exception then if SQLERRM not like 'Unsupported manuscript%' then raise;end if;end;
  begin perform private.publish_due_content();raise exception 'FAIL caller invokes scheduler';exception when insufficient_privilege then null;end;
 end $$;
-update public.profiles set social_links='[{"platform":"instagram","url":"https://instagram.com/example"},{"platform":"website","url":"https://example.com/"}]' where id=auth.uid();
+update public.profiles set social_links='[{"platform":"instagram","url":"https://instagram.com/example"},{"platform":"facebook","url":"https://facebook.com/example"}]' where id=auth.uid();
 do $$ begin
+ begin update public.profiles set social_links='[{"platform":"website","url":"https://example.com/"}]' where id=auth.uid();raise exception 'FAIL unsupported website';exception when check_violation then null;end;
  begin update public.profiles set social_links='[{"platform":"website","url":"javascript:alert(1)"}]' where id=auth.uid();raise exception 'FAIL unsafe social URL';exception when check_violation then null;end;
  begin update public.profiles set social_links='[{"platform":"website"}]' where id=auth.uid();raise exception 'FAIL missing social URL';exception when check_violation then null;end;
 end $$;

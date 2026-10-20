@@ -18,7 +18,15 @@ test('profile ownership, public projection, attribution, pagination and account 
       alter table storage.objects enable row level security;
       grant select,insert,update,delete on storage.objects to anon,authenticated;`);
     const migrations=new URL('../supabase/migrations/',import.meta.url);
-    for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')).sort()) await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+    for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')).sort()) {
+      if(file.endsWith('_simplify_contributor_social_links.sql'))await db.exec(`insert into auth.users(id,email,email_confirmed_at)values('a5700000-0000-4000-8000-000000000001','legacy-social-fixture@example.invalid',now());insert into public.user_roles(user_id,role)values('a5700000-0000-4000-8000-000000000001','member');update public.profiles set social_links='[{"platform":"website","url":"https://example.com/"},{"platform":"instagram","url":"https://instagram.com/fixture"}]' where id='a5700000-0000-4000-8000-000000000001';`);
+      await db.exec(readFileSync(new URL(file,migrations),'utf8'));
+    }
+    const legacy=(await db.query("select public_id,social_links from public.profiles where id='a5700000-0000-4000-8000-000000000001'")).rows[0];assert.equal(legacy.social_links.length,2,'migration retains private legacy links');
+    assert.deepEqual((await db.query(`select public.fas_public_profile('${legacy.public_id}') as data`)).rows[0].data.social_links,[{platform:'instagram',url:'https://instagram.com/fixture'}]);
+    await db.exec("update public.profiles set display_name='Updated legacy writer' where id='a5700000-0000-4000-8000-000000000001'");
+    await assert.rejects(db.exec(`update public.profiles set social_links='[{"platform":"website","url":"https://example.com/new"}]' where id='a5700000-0000-4000-8000-000000000001'`),/Choose Instagram/);
+
     const owner='81000000-0000-0000-0000-000000000001',other='81000000-0000-0000-0000-000000000002',viewer='81000000-0000-0000-0000-000000000003';
     await db.exec(`insert into auth.users(id,email,email_confirmed_at) values('${owner}','private-owner@example.invalid',now()),('${other}','private-other@example.invalid',now()),('${viewer}','private-viewer@example.invalid',now());
       insert into public.user_roles(user_id,role) values('${owner}','member'),('${other}','member');

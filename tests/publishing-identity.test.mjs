@@ -5,7 +5,7 @@ import {fileContentPath,publishingName} from '../systems/community/publishing-id
 import {validateStory} from '../systems/community/studio-service.mjs';
 import {filePublishingResponse,renderFilePublishing} from '../cloudflare-worker.mjs';
 import {contentMetadata} from '../systems/community/content-metadata.mjs';
-const item={id:'fa500000-0000-4000-8000-000000000002',url:'/games/brick-blitz/',author:{public_id:'fa500000-0000-4000-8000-000000000001',display_name:'From A Storyteller',kind:'organization',social_links:[{platform:'website',url:'https://example.com/'}]}};
+const item={id:'fa500000-0000-4000-8000-000000000002',url:'/games/brick-blitz/',author:{public_id:'fa500000-0000-4000-8000-000000000001',display_name:'From A Storyteller',kind:'organization',social_links:[{platform:'instagram',url:'https://instagram.com/example/'}]}};
 const config={mode:'production',enabled:true,url:'https://vzdicnufhidelaoeqbza.supabase.co',key:'sb_publishable_fixture',signup:true,lifecycle:true,policyRelease:'fixture'};
 const html='<html><head><meta name="author" content="Ry"><script type="application/ld+json">{"@type":"Article","author":{"name":"Ry"}}</script></head><body><main><span class="file-publishing-author" data-file-publishing>Ry</span></main></body></html>';
 test('publishing choices are bounded and personal by default',()=>{

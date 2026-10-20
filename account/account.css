@@ -114,3 +114,11 @@
 /* Selected account buttons keep the same solid treatment in every state. */
 .account-secondary[aria-pressed="true"], .account-secondary[aria-current="page"] { background: var(--colour-button-primary-background); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary); }
 .account-secondary[aria-pressed="true"]:hover:not(:disabled), .account-secondary[aria-pressed="true"]:focus-visible, .account-navigation .account-secondary[aria-current="page"]:hover, .account-navigation .account-secondary[aria-current="page"]:focus-visible { background: var(--colour-accent-primary-hover); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary-hover); }
+
+.account-action-group { display: grid; gap: 1rem; }
+.account-action-group > :is(.account-submit, .account-secondary) { margin: 0; }
+
+/* Destructive controls share the wine/red treatment across account surfaces. */
+.account-danger { color: var(--colour-error-text); border-color: var(--colour-error-text); background: transparent; }
+.account-secondary.account-danger:hover:not(:disabled), .account-submit.account-danger:hover:not(:disabled) { background: var(--colour-wine); border-color: var(--colour-wine); color: var(--colour-parchment); }
+.account-danger:focus-visible { outline-color: var(--colour-error-text); }

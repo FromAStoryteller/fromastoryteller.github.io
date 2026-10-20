@@ -53,3 +53,5 @@
 .profile-image-editor input[type=range]{display:block;width:100%;min-height:2.75rem;accent-color:var(--colour-accent-primary);}
 .profile-image-editor [data-status]{min-height:1.6em;}
 .profile-monogram[hidden],.profile-image-editor [hidden]{display:none;}
+
+.profile-social-row > .account-secondary { width: auto; }
