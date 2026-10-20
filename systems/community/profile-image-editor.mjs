@@ -69,5 +69,5 @@ export function mountProfileImage(root,client,{ownerId,imageBase,contributor,get
  for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>drag=null);
  $('[data-upload]').addEventListener('click',()=>void act('upload'));$('[data-alt]').addEventListener('click',()=>void act('alt'));$('[data-remove]').addEventListener('click',()=>void act('remove'));$('[data-reload]').addEventListener('click',()=>void load());
  void load();
- return ()=>{disposed=true;reset();controller?.abort();if(displayURL)URL.revokeObjectURL(displayURL);root.replaceChildren();};
+ return ()=>{if(disposed)return;disposed=true;reset();controller?.abort();if(displayURL)URL.revokeObjectURL(displayURL);root.replaceChildren();};
 }

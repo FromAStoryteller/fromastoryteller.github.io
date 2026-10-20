@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "game-features-2026-10-19-v1",
+  "activePublishedVersion": "studio-history-2026-10-20-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -142,11 +142,33 @@
           "sha256": "b5e4a9cc86bd6cceb1bf7f5b57ad7d067bd4241a0be39c47e49573c0358947a4"
         }
       }
+    },
+    "studio-history-2026-10-20-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-20",
+      "previousVersion": "game-features-2026-10-19-v1",
+      "change": "Private bounded saved-content history, downloadable working versions, restore behavior, account exports and deletion.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-20",
+        "scope": "Requested implementation of unsaved profile protection and published content version history and restore, with standing authorization to push completed changes."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/studio-history-2026-10-20-v1/terms/index.html",
+          "sha256": "85bbf23711d7f10293568672b77e28604b9e993d4018f031435d7f1befb9668b"
+        },
+        "privacy": {
+          "path": "/account/policy-history/studio-history-2026-10-20-v1/privacy/index.html",
+          "sha256": "40b0e9d1b82880b11059d89c84d50a6b61799bc58ba47c128884098110f29fe3"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
   "candidateVersion": "account-launch-2026-10-16-v1",
   "sessionUpdateVersion": "account-sessions-2026-10-16-v2",
   "communityUpdateVersion": "community-policies-2026-10-18-v1",
-  "gameUpdateVersion": "game-features-2026-10-19-v1"
+  "gameUpdateVersion": "game-features-2026-10-19-v1",
+  "historyUpdateVersion": "studio-history-2026-10-20-v1"
 }

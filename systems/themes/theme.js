@@ -13,6 +13,22 @@
     auto: '<rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8m-4-4v4M8 13l4-7 4 7m-6.5-2h5"/>'
   };
   const root = document.documentElement;
+  // Measure native scrollbar space before first paint. Reserve it in content,
+  // while full-width shell surfaces remain free to paint to the viewport edge.
+  const measureScrollbar = () => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;overflow:scroll;width:100px;height:100px;contain:strict;border:0;padding:0';
+    root.append(probe);
+    const width = probe.offsetWidth - probe.clientWidth;
+    probe.remove();
+    root.style.setProperty('--size-native-scrollbar', width + 'px');
+  };
+  measureScrollbar();
+  let scrollbarFrame;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(scrollbarFrame);
+    scrollbarFrame = requestAnimationFrame(measureScrollbar);
+  }, {passive:true});
   const system = window.matchMedia('(prefers-color-scheme: dark)');
   let preference = null;
   function allowed() {

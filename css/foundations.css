@@ -626,10 +626,15 @@
 }
 
 html {
+  overflow-x: clip;
+  background: var(--background-page);
   font-family: var(--font-family-interface);
   color-scheme: var(--theme-colour-scheme);
   scroll-padding-top: var(--size-content-top);
 }
+
+/* Content keeps a native scrollbar allowance; embedded players use full width. */
+body:has(.site-header) { padding-right: max(0px, calc(var(--size-native-scrollbar, 0px) - (100vw - 100%))); }
 
 body {
   margin: 0;

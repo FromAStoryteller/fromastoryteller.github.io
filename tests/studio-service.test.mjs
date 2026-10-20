@@ -97,3 +97,12 @@ test('library requests keep their server-checked scope and pagination together',
  const f=fixture({data:{items:[]},error:null});await f.service.list({scope:'fas',search:'Timer',type:'tool',cursor:{id:owner,updated_at:'previous'}});
  const rpc=f.calls.find(c=>c[0]==='rpc');assert.equal(rpc[1],'fas_studio_library');assert.deepEqual(rpc[2],{library_scope:'fas',search_text:'Timer',type_filter:'tool',state_filter:'',before_time:'previous',after_id:owner});
 });
+
+test('version restoration keeps current ownership, address, cover, publication and account-save contracts',async()=>{
+ const id='82000000-0000-0000-0000-000000000001',previous={...validateStory(input),id:owner,author_id:owner,updated_at:'current',slug:'permanent-address',status:'published',cover_asset_id:id,publishing_identity:'fas'},snapshot={title:'Earlier title',body:'Earlier manuscript',body_document:null};
+ const calls=[],q={update(v){calls.push(['update',v]);return this;},eq(...v){calls.push(['eq',...v]);return this;},select(){return this;},maybeSingle:async()=>({data:{...previous,title:snapshot.title}})};
+ const client={from:()=>q,rpc:async(name,args)=>{calls.push([name,args]);return {data:{id,snapshot}};}};
+ const service=createStudioService(client,{ownerId:owner,checkAccount:async()=>({user:{id:owner},state:'active',contributor:true,admin:true})});await service.restoreRevision(previous,id);
+ const changed=calls.find(c=>c[0]==='update')[1];assert.equal(changed.title,snapshot.title);assert.equal(changed.body,snapshot.body);assert.equal(changed.cover_asset_id,previous.cover_asset_id);assert.equal(changed.publishing_identity,'fas');assert.equal(changed.status,'published');assert.equal('slug' in changed,false);assert.equal('author_id' in changed,false);assert.ok(calls.some(c=>c[0]==='eq'&&c[1]==='updated_at'&&c[2]==='current'));
+ const {starterPackage}=await import('../systems/community/interactive-package.mjs');previous.content_type='game';previous.executable_package=starterPackage();snapshot.executable_package=starterPackage();snapshot.executable_package.settings.saves=true;calls.length=0;await assert.rejects(service.restoreRevision(previous,id),/different account-save/);assert.ok(!calls.some(c=>c[0]==='update'));
+});

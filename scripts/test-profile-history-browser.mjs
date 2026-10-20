@@ -1,0 +1,29 @@
+import {chromium} from 'playwright';import assert from 'node:assert/strict';
+const browser=await chromium.launch(),origin=process.argv[2]??'http://127.0.0.1:55410';
+async function cookies(page){const b=page.getByRole('button',{name:'Essentials only',exact:true});if(await b.isVisible())await b.click();}
+try{
+ for(const width of [1920,390]){
+  const context=await browser.newContext({viewport:{width,height:900}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.stack));
+  for(const mode of ['contributor','viewer']){
+   await page.goto(origin+'/tests/profile-preview/?mode='+mode);await cookies(page);const input=page.locator('[name=display_name]');await input.waitFor();await page.waitForFunction(()=>!document.querySelector('form fieldset').disabled);
+   const original=await input.inputValue();await input.fill(original+' changed');
+   let prompts=0;const dismiss=async dialog=>{prompts++;await dialog.dismiss();};page.on('dialog',dismiss);
+   await page.locator('main [data-account-sign-out]').click();assert.equal(prompts,1);assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0);
+   await page.evaluate(()=>__profilePreview.profileFail(true));await page.locator('form.profile-editor [type=submit]').click();await page.getByText('Your profile could not be saved. Please try again.',{exact:true}).waitFor();
+   await page.locator('main [data-account-sign-out]').click();assert.equal(prompts,2,'failed saves remain protected');
+   await page.evaluate(()=>__profilePreview.profileFail(false));await page.locator('form.profile-editor [type=submit]').click();await page.getByText('Your profile was saved.',{exact:true}).waitFor();
+   // Synthetic beforeunload checks avoid navigating away from the fixture.
+   assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),false);
+   await input.fill(original+' another');assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),true);
+   await page.evaluate(()=>__profilePreview.profileDelay(500));await page.evaluate(()=>{document.querySelector('form.profile-editor').requestSubmit();document.querySelector('main [data-account-sign-out]').click();});assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0,'pending save blocks signout');await page.getByText('Your profile was saved.',{exact:true}).waitFor();
+   await page.evaluate(()=>__profilePreview.dispose());assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),false,'dispose removes guard');page.off('dialog',dismiss);
+  }
+  await page.goto(origin+'/tests/studio-preview/');await cookies(page);await page.locator('[data-library] button').filter({hasText:'Writing the spaces between'}).click();await page.locator('[data-workspace]:not([hidden])').waitFor();
+  const old=await page.locator('[name=title]').inputValue();await page.locator('[name=title]').fill('A revised published title');await page.locator('[data-save]').click();await page.waitForFunction(()=>document.querySelector('[data-status]')?.dataset.saveState==='saved');
+  await page.locator('.ss-content-history:visible summary').click();await page.locator('.ss-content-history:visible [data-history-load]').click();await page.getByRole('button',{name:'Restore this version',exact:true}).waitFor();
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download this version',exact:true}).click();assert.match((await download).suggestedFilename(),/writing-the-spaces-between.txt/);
+  page.on('dialog',d=>d.accept());await page.getByRole('button',{name:'Restore this version',exact:true}).click();await page.waitForFunction(t=>document.querySelector('[name=title]')?.value===t,old);
+  assert.equal(await page.locator('[name=title]').inputValue(),old);await page.locator('.ss-content-history:visible summary').click();await page.locator('.ss-content-history:visible [data-history-load]').click();await page.getByText(/A revised published title/,{exact:false}).first().waitFor();assert.deepEqual(errors,[]);
+  console.log('PASS '+width+'px profile guards, failed/pending saves, downloadable versions, live restore and undo history');await context.close();
+ }
+}finally{await browser.close();}

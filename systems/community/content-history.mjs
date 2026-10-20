@@ -1,0 +1,21 @@
+import {downloadPackage} from './interactive-package.mjs';
+export function mountContentHistory(host,{service,target,canRestore,onRestore,downloadText}){
+ const d=host.ownerDocument,w=d.defaultView;let generation=0,pending=false;
+ host.className='ss-subsection ss-content-history';
+ host.innerHTML='<details><summary>Version history</summary><p>Keep up to 20 previous saved versions of published work from the introduction of this feature. New edits replace the oldest versions. History is private to the owner and authorised FAS admins, and is removed with the content or account.</p><p>Restore changes the saved content immediately, including its live page when published. Its current cover, address, ownership, publishing name and visibility stay in place. A copy of the replaced content is kept here. Game versions with different account-save or multiplayer settings must be downloaded and adapted before uploading.</p><button type="button" class="account-secondary" data-history-load>Load saved versions</button><p role="status" data-history-status></p><ol data-history-list></ol></details>';
+ const status=host.querySelector('[data-history-status]'),list=host.querySelector('ol'),load=host.querySelector('button');
+ const active=(token,item)=>token===generation&&target()?.id===item.id;
+ async function version(item,id){return service.history(item,id);}
+ load.addEventListener('click',async()=>{
+  const item=target();if(!item||pending)return;const token=++generation;pending=true;load.disabled=true;list.replaceChildren();status.textContent='Loading saved versions…';
+  try{const rows=await service.history(item);if(!active(token,item))return;
+   for(const row of rows){const li=d.createElement('li'),label=d.createElement('p'),actions=d.createElement('div'),download=d.createElement('button'),restore=d.createElement('button');
+    label.textContent=new Date(row.saved_at).toLocaleString()+' · '+(row.title||item.title);actions.className='ss-save-actions';download.type=restore.type='button';download.className=restore.className='account-secondary';download.textContent='Download this version';restore.textContent='Restore this version';restore.disabled=!canRestore();
+    download.addEventListener('click',async()=>{if(pending)return;pending=true;download.disabled=true;try{const r=await version(item,row.id);if(!active(token,item))return;let source=r.snapshot;if(item.source_kind==='file'){if(!source){const response=await fetch('/content/legacy-projects/'+item.slug+'.json',{credentials:'omit',cache:'no-store'});if(!response.ok)throw Error('Original working files could not load.');source=await response.json();}await downloadPackage(d,source,{type:item.content_type,name:'fas-'+item.slug+'-version'});}else if(source?.executable_package)await downloadPackage(d,source.executable_package,{type:item.content_type,name:'fas-'+item.slug+'-version'});else downloadText(d,source);status.textContent='Version downloaded.';}catch(e){if(active(token,item))status.textContent=e.message;}finally{pending=false;download.disabled=false;}});
+    restore.addEventListener('click',async()=>{if(pending||!active(token,item)||!canRestore())return;if(!w.confirm('Restore this saved version? This immediately updates published content. The current saved version will be kept in history.'))return;pending=true;restore.disabled=true;status.textContent='Restoring…';try{await onRestore(row.id);if(active(token,item)){list.replaceChildren();status.textContent='Version restored. Load history again to see the replaced version.';}}catch(e){if(active(token,item))status.textContent=e.message;}finally{pending=false;restore.disabled=!canRestore();}});
+    actions.append(download,restore);li.append(label,actions);list.append(li);
+   }status.textContent=rows.length?'Save or discard unsaved changes before restoring a version.':'No previous saved versions yet. Your current saved content is already available in the editor.';
+  }catch(e){if(active(token,item))status.textContent=e.message;}finally{pending=false;load.disabled=false;}
+ });
+ return {reset(){++generation;list.replaceChildren();status.textContent='';host.querySelector('details').open=false;host.hidden=!target();},dispose(){++generation;host.replaceChildren();}};
+}

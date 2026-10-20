@@ -65,6 +65,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
           addText(`stories/${name}.txt`, `${story.title}\n\nStatus: ${story.status}\nStory ID: ${story.id}\n\n${story.summary || ''}\n\n${story.body || ''}\n`);
           addJson(`metadata/stories/${story.id}.json`, story);
         }
+        addJson('metadata/content-revisions.json',data.content_revisions??[]);
         addJson('metadata/file-players.json',data.file_players??[]);
         addJson('metadata/game-saves.json',data.game_saves??[]);
         addJson('metadata/game-participation.json',data.game_participation??[]);
@@ -82,7 +83,7 @@ export function makeLifecycleHandler({ base, anonKey, serviceKey, enabled = fals
         }
         const second = await rpc('fas_account_snapshot', args);
         if (first.fingerprint !== second.fingerprint) return json(409, { message: 'Your content changed while exporting. Please try again.' });
-        addJson('metadata/manifest.json', { format: 'fas-owned-content-v3', exported_at: new Date().toISOString(), stories: data.stories.length, images: data.objects.length, scope: 'Account-owned FAS Community content, executable packages, private game saves, your own transient room state, image metadata and stored uploaded crops. Existing static games/stories not linked to this account are not included. Other players’ private data and room codes are excluded.', files: files.map(f => f.name) });
+        addJson('metadata/manifest.json', { format: 'fas-owned-content-v3', exported_at: new Date().toISOString(), stories: data.stories.length, images: data.objects.length, scope: 'Account-owned FAS Community content, executable packages and retained saved versions, private game saves, your own transient room state, image metadata and stored uploaded crops. Existing static games/stories not linked to this account are not included. Other players’ private data and room codes are excluded.', files: files.map(f => f.name) });
         return new Response(zipFiles(files), { status: 200, headers: { ...common, 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename="from-a-storyteller-content.zip"' } });
       }
       if (body.action === 'prepare-delete') {
