@@ -5,7 +5,7 @@ import {wordCount} from '../systems/community/studio-editor.mjs';
 const owner='81000000-0000-0000-0000-000000000001';
 const input={slug:'a-story',title:'A story',summary:'A description',body:'Once upon a time.',genre:'Fantasy',tags:'magic, discovery',content_warning:'',cover_asset_id:''};
 function fixture(response={data:{id:owner},error:null}) {
- const calls=[];const query={};for(const key of ['select','eq','order','range','update','insert','delete','is'])query[key]=(...args)=>{calls.push([key,...args]);return query;};query.maybeSingle=async()=>response;query.single=async()=>response;query.then=(resolve,reject)=>Promise.resolve(response).then(resolve,reject);
+ const calls=[];const query={};for(const key of ['select','eq','or','order','range','update','insert','delete','is'])query[key]=(...args)=>{calls.push([key,...args]);return query;};query.maybeSingle=async()=>response;query.single=async()=>response;query.then=(resolve,reject)=>Promise.resolve(response).then(resolve,reject);
  let account={user:{id:owner},state:'active',contributor:true};
  const service=createStudioService({rpc:async(name,args)=>{calls.push(['rpc',name,args]);return response;},from:table=>{calls.push(['from',table]);return query;}},{ownerId:owner,checkAccount:async()=>account});return {service,calls,account:value=>{account=value;}};
 }
@@ -84,4 +84,16 @@ test('moderation, forged actions, removed roles and expired account verification
  for(const account of [{user:{id:owner},state:'active',contributor:false},{user:{id:'other'},state:'active',contributor:true},{user:{id:owner},state:'deleting',contributor:true}]){
   const f=fixture();f.account(account);await assert.rejects(f.service.lifecycle(previous,'archive','A story'),StudioAccessError);assert.equal(f.calls.length,0);
  }
+});
+
+test('admin shared-FAS saves retain the original author and cannot reattribute personal work',async()=>{
+ const other='81000000-0000-0000-0000-000000000002',f=fixture({data:{id:owner,author_id:other,publishing_identity:'fas'},error:null});f.account({user:{id:owner},state:'active',contributor:true,admin:true});
+ await f.service.save({...input,publishing_identity:'fas'},{id:owner,author_id:other,publishing_identity:'fas',updated_at:'previous'});
+ assert.ok(f.calls.some(c=>c[0]==='eq'&&c[1]==='author_id'&&c[2]===other));
+ await assert.rejects(f.service.save(input,{id:owner,author_id:other,publishing_identity:'personal',updated_at:'previous'}),StudioAccessError);
+ await assert.rejects(f.service.save(input,{id:owner,author_id:other,publishing_identity:'fas',updated_at:'previous'}),StudioAccessError);
+});
+test('library requests keep their server-checked scope and pagination together',async()=>{
+ const f=fixture({data:{items:[]},error:null});await f.service.list({scope:'fas',search:'Timer',type:'tool',cursor:{id:owner,updated_at:'previous'}});
+ const rpc=f.calls.find(c=>c[0]==='rpc');assert.equal(rpc[1],'fas_studio_library');assert.deepEqual(rpc[2],{library_scope:'fas',search_text:'Timer',type_filter:'tool',state_filter:'',before_time:'previous',after_id:owner});
 });

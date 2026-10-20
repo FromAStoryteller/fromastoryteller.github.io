@@ -43,3 +43,4 @@ jobs:
       - run: node scripts/test-legacy-projects-browser.mjs
       - run: node scripts/test-existing-file-editor-browser.mjs
       - run: node scripts/test-community-usability-browser.mjs
+      - run: node scripts/test-studio-library-browser.mjs
