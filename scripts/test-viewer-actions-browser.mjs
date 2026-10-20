@@ -27,8 +27,8 @@ try{
   },theme);
   const save=page.locator('.story-header + .viewer-content-actions [data-viewer-action=saved]');
   await save.waitFor();await page.waitForFunction(()=>!document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').disabled);
-  assert.equal(await save.getAttribute('aria-pressed'),'false');await save.click();await page.waitForFunction(()=>document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
-  await page.waitForTimeout(200);assert.equal(await save.getAttribute('aria-pressed'),'true','late initial reads preserve a confirmed save');if(process.env.FAS_VIEWER_SCREENSHOT_DIR){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-top-'+width+'-'+theme+'.png'});}
+  assert.equal(await save.getAttribute('aria-pressed'),'false');assert.equal(await save.locator('svg').getAttribute('fill'),'none');await save.click();await page.waitForFunction(()=>document.querySelector('.story-header + .viewer-content-actions [data-viewer-action=saved]').getAttribute('aria-pressed')==='true');
+  await page.waitForTimeout(200);assert.equal(await save.getAttribute('aria-pressed'),'true','late initial reads preserve a confirmed save');assert.equal(await save.locator('svg').getAttribute('fill'),'currentColor');if(process.env.FAS_VIEWER_SCREENSHOT_DIR){await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-top-'+width+'-'+theme+'.png'});}
   const read=page.locator('.story-footer [data-viewer-action=experienced]'),love=page.locator('.story-footer [data-viewer-action=loved]');
   assert.match(await read.textContent(),/Mark as read/);assert.equal(await read.getAttribute('aria-pressed'),'false');
   await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='true');
@@ -36,8 +36,8 @@ try{
   await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='false');
   assert.equal(await love.getAttribute('aria-pressed'),'true','undoing acknowledgement preserves appreciation');
   const colours=await page.evaluate(()=>{const probe=document.createElement('span');document.body.append(probe);const resolve=value=>{probe.style.color=value;return getComputedStyle(probe).color;};const pink=resolve('var(--colour-appreciation-text)'),green=resolve('var(--colour-success-text)');probe.remove();return {pink,green};});
-  assert.equal(await love.locator('i').evaluate(el=>getComputedStyle(el).color),colours.pink);
-  await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='true');assert.equal(await read.locator('i').evaluate(el=>getComputedStyle(el).color),colours.green);
+  assert.equal(await love.locator('[data-viewer-icon]').evaluate(el=>getComputedStyle(el).color),colours.pink);
+  await read.click();await page.waitForFunction(()=>document.querySelector('.story-footer [data-viewer-action=experienced]').getAttribute('aria-pressed')==='true');assert.equal(await read.locator('[data-viewer-icon]').evaluate(el=>getComputedStyle(el).color),colours.green);
   assert.equal(await love.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)','page appreciation stays quiet');if(process.env.FAS_VIEWER_SCREENSHOT_DIR)await page.locator('.story-footer').screenshot({path:process.env.FAS_VIEWER_SCREENSHOT_DIR+'/viewer-footer-'+width+'-'+theme+'.png'});
   await page.evaluate(()=>{window.viewerFail=true;});await love.click();await page.waitForFunction(()=>[...document.querySelectorAll('[data-viewer-status]')].some(n=>n.textContent.includes('could not be saved')));
   assert.equal(await love.getAttribute('aria-pressed'),'true','failed writes retain confirmed state');

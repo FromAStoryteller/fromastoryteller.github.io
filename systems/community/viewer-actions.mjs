@@ -53,9 +53,19 @@ function initViewerActions({ document: d = document, window: w = window, connect
       const action = b.dataset.viewerAction, on = s?.[action] === true;
       b.setAttribute("aria-pressed", String(on));
       b.disabled = ended || pending.has(key) || !ready;
-      const icon = node("i", "");
-      icon.className = "fa-solid " + { saved: ["game", "tool"].includes(host.dataset.viewerType) ? "fa-star" : "fa-bookmark", experienced: "fa-check", loved: "fa-heart" }[action];
+      const icon = d.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
       icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("focusable", "false");
+      icon.dataset.viewerIcon = action;
+      icon.setAttribute("fill", on && action !== "experienced" ? "currentColor" : "none");
+      icon.setAttribute("stroke", "currentColor");
+      icon.setAttribute("stroke-width", "1.7");
+      icon.setAttribute("stroke-linecap", "round");
+      icon.setAttribute("stroke-linejoin", "round");
+      const path = d.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", action === "experienced" ? "m5 12 4 4L19 6" : action === "loved" ? "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" : ["game", "tool"].includes(host.dataset.viewerType) ? "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" : "M6 3h12v18l-6-4-6 4Z");
+      icon.append(path);
       b.replaceChildren(icon, node("span", labels[action][on ? 1 : 0]));
       if (host.classList.contains("viewer-card-actions")) {
         const label = labels[action][on ? 1 : 0];
