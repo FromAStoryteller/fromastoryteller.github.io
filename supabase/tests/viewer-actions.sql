@@ -57,17 +57,26 @@ end;$$;
 reset role;
 -- A different contributor receives no totals for the owner.
 insert into public.user_roles(user_id,role)values('a5800000-0000-4000-8000-000000000003','member');
+
+-- UUIDs can be supplied by a contributor using the API. A colliding Studio row
+-- must never claim a legacy game's choices or hide it from saved collections.
+insert into public.stories(id,author_id,slug,title,body,status,published_at)values
+('a5830000-0000-4000-8000-000000000001','a5800000-0000-4000-8000-000000000003','viewer-colliding-fixture','Collision fixture','Prose','published',now());
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub','a5800000-0000-4000-8000-000000000003',true);
 select set_config('request.jwt.claims','{"session_id":"a5810000-0000-4000-8000-000000000003"}',true);
-do $$begin if public.fas_my_studio_acknowledgements()->>'loved'<>'0' then raise exception 'FAIL other contributor totals';end if;end;$$;
+do $$begin
+ if public.fas_my_studio_acknowledgements()->>'loved'<>'0' or public.fas_my_studio_acknowledgements()->>'experienced'<>'0' then raise exception 'FAIL other contributor totals';end if;
+ begin perform public.fas_set_viewer_action('/stories/viewer-colliding-fixture/','saved',true);raise exception 'FAIL collision accepted';exception when raise_exception then if SQLERRM<>'Content unavailable' then raise;end if;end;
+end;$$;
 reset role;
 -- Hidden work is omitted, but the viewer's own choices remain exportable.
 update public.stories set status='archived' where id='a5820000-0000-4000-8000-000000000001';
 set local role authenticated;
 select set_config('request.jwt.claim.sub','a5800000-0000-4000-8000-000000000002',true);
 select set_config('request.jwt.claims','{"session_id":"a5810000-0000-4000-8000-000000000002"}',true);
-do $$begin if public.fas_my_viewer_collection('later')->'items'<>'[]'::jsonb then raise exception 'FAIL hidden collection content';end if;end;$$;
+do $$begin if public.fas_my_viewer_collection('later')->'items'<>'[]'::jsonb then raise exception 'FAIL hidden collection content';end if;if jsonb_array_length(public.fas_my_viewer_collection('favourites')->'items')<>1 or public.fas_my_viewer_collection('favourites')->'items'->0->>'type'<>'game' then raise exception 'FAIL collision hid original game';end if;end;$$;
 reset role;
 do $$begin
  if jsonb_array_length(public.fas_account_snapshot('a5800000-0000-4000-8000-000000000002','a5810000-0000-4000-8000-000000000002')->'data'->'viewer_actions')<>2 then raise exception 'FAIL snapshot export';end if;

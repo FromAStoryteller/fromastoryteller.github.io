@@ -58,8 +58,8 @@ export function profileStoryCard(story, { imageBase, preview = false } = {}) {
 const players=new WeakMap();
 export function renderPublicStory(root,story,{imageBase}={}){
  players.get(root)?.();players.delete(root);
- root.removeAttribute('data-content-id');root.classList.remove('community-reading');
- if(isPublicId(story?.id))root.dataset.contentId=story.id;
+ root.removeAttribute('data-content-id');root.removeAttribute('data-viewer-content-path');root.classList.remove('community-reading');
+ if(isPublicId(story?.id)){root.dataset.contentId=story.id;const path=story.source_kind==='file'?fileContentPath(story.url):contentPath(story);if(path)root.dataset.viewerContentPath=path;}
  root.replaceChildren();
  if(!story){root.append(node(root.ownerDocument,'h1','','Story unavailable'),node(root.ownerDocument,'p','','This story may no longer be published.'));return;}
  if(isInteractive(story.content_type)){root.innerHTML=interactivePageMarkup(story);players.set(root,mountPublicPlayer(root,story));root.dispatchEvent(new root.ownerDocument.defaultView.CustomEvent('fas:content-rendered',{bubbles:true}));return;}

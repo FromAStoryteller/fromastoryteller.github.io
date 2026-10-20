@@ -101,7 +101,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     if (!w.location.pathname.startsWith("/account/") && !w.location.pathname.startsWith("/tests/")) {
       const hero = d.querySelector("main .story-header,main .game-hero,main .tool-hero,main .video-hero");
       if (hero && !hero.dataset.viewerSaveMounted) {
-        const article = hero.closest("[data-current-content-id]"), type = article?.dataset.contentLayout ?? article?.dataset.contentType ?? hero.dataset.contentLayout ?? "story", key = /^[0-9a-f-]{36}$/i.test(article?.dataset.currentContentId ?? "") ? article.dataset.currentContentId : w.location.pathname.replace(/index\.html$/, "");
+        const article = hero.closest("[data-current-content-id]"), type = article?.dataset.contentLayout ?? article?.dataset.contentType ?? hero.dataset.contentLayout ?? "story", key = /^\/(stories|games|tools|blog|videos)\/[a-z0-9][a-z0-9-]{0,119}\/$/.test(w.location.pathname) ? w.location.pathname : hero.closest("[data-viewer-content-path]")?.dataset.viewerContentPath ?? (/^[0-9a-f-]{36}$/i.test(article?.dataset.currentContentId ?? "") ? article.dataset.currentContentId : w.location.pathname.replace(/index\.html$/, ""));
         hero.dataset.viewerSaveMounted = "true";
         const save = mount(hero, key, type, ["saved"]);
         hero.after(save);
