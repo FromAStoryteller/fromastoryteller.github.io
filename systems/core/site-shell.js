@@ -1,3 +1,4 @@
+import {initHeaderAccount} from './header-account.mjs';
 import {restoreFocus} from "/systems/core/focus.js"
 import { initStorageChoices } from '../privacy/storage-banner.js';
 
@@ -18,7 +19,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       loadComponent("/components/footer.html", "footer-placeholder"),
     ]);
 
-    initSidebarToggle();
+    const shell=initSidebarToggle();
+    initHeaderAccount({closeOther:()=>shell?.close()});
     setActiveSidebarLink();
     syncHeaderSearchQuery();
     initHeaderSearch();
@@ -86,6 +88,7 @@ function initSidebarToggle() {
   function setMode(next, returnFocus = true, silent = false) {
     const previous = mode;
     mode = next;
+    document.dispatchEvent(new CustomEvent('fas-shell-open',{detail:next}));
     const navOpen = mode === 'nav';
     const searchOpen = mode === 'search';
     sidebar.classList.toggle('is-expanded', navOpen);
@@ -133,6 +136,7 @@ function initSidebarToggle() {
   compact.addEventListener('change', () => setMode(null));
   setMode(null, false);
   document.querySelectorAll('[data-copyright-year]').forEach(el => { el.textContent = new Date().getFullYear(); });
+  return {close:()=>setMode(null,false)};
 }
 
 function setActiveSidebarLink() {
