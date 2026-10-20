@@ -48,7 +48,7 @@ service.history=async(item,id=null)=>{await authorize();const versions=historica
 const fixtureSave=service.save;service.save=async(input,previous,status)=>{const prior=previous&&copy(rows.find(x=>x.id===previous.id));const saved=await fixtureSave(input,previous,status);if(prior?.slug_locked){historical.set(prior.id,[{id:crypto.randomUUID(),saved_at:prior.updated_at,snapshot:prior},...(historical.get(prior.id)??[])].slice(0,20));}return saved;};
 service.restoreRevision=async(item,id)=>{const r=await service.history(item,id);const values=Object.fromEntries(Object.keys(validateStory({title:'Schema keys'})).map(k=>[k,r.snapshot[k]]));return service.save(values,item,item.status);};
 function launch(initialRecovery=null){
- dispose=mountStudio(root,service,{authorName:'Mara Ellis',publicId:owner,preview:true,admin:fixtureAdmin,initialRecovery,socialLinks:[{platform:'instagram',url:'https://instagram.com/example'},{platform:'website',url:'https://example.com/'}],onAccessLost:showLock});
+ dispose=mountStudio(root,service,{authorName:'Mara Ellis',publicId:owner,preview:true,admin:fixtureAdmin,initialRecovery,socialLinks:[{platform:'instagram',url:'https://instagram.com/example'}],onAccessLost:showLock});
 }
 launch();
 window.__studioPreview={rows:()=>copy(rows),expire:()=>{sessionValid=false;document.dispatchEvent(new Event('visibilitychange'));}};

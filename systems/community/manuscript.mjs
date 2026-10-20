@@ -1,3 +1,4 @@
+import {publicSocialLinks,socialLabel} from './studio-catalog.mjs';
 const blockTypes=new Set(['paragraph','heading','quote','scene']);
 export function plainDocument(body='') {
   return {version:1,blocks:String(body).split(/\n\s*\n/).map(text=>text.trim()==='***'?{type:'scene'}:{type:'paragraph',text})};
@@ -53,8 +54,8 @@ export function readManuscript(root) {
 }
 export function renderSocialLinks(root,links=[]) {
   const d=root.ownerDocument;root.replaceChildren();root.setAttribute('aria-label','Find this storyteller elsewhere');
-  for(const link of links){let url;try{url=new URL(link.url);}catch{continue;}if(url.protocol!=='https:'||url.username||url.password)continue;
-    const a=d.createElement('a');a.href=url.href;a.rel='me noopener noreferrer';a.target='_blank';a.textContent=({x:'X',linkedin:'LinkedIn',github:'GitHub',youtube:'YouTube',tiktok:'TikTok',bluesky:'Bluesky'})[link.platform]||link.platform[0].toUpperCase()+link.platform.slice(1);root.append(a);}
+  for(const link of publicSocialLinks(links)){let url;try{url=new URL(link.url);}catch{continue;}if(url.protocol!=='https:'||url.username||url.password)continue;
+    const a=d.createElement('a');a.href=url.href;a.rel='me noopener noreferrer';a.target='_blank';a.textContent=socialLabel(link.platform);root.append(a);}
 }
 
 export function refreshParagraphLayout(root){let previous=null;for(const element of root.children){element.dataset.indent=String(['P','DIV'].includes(element.tagName)&&!!element.textContent.trim()&&['P','DIV'].includes(previous?.tagName)&&!!previous.textContent.trim());previous=element;}}

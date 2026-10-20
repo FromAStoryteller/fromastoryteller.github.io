@@ -1,4 +1,4 @@
-import {genreLabel} from '../community/studio-catalog.mjs';
+import {genreLabel,publicSocialLinks,socialLabel} from '../community/studio-catalog.mjs';
 import {normalizeGameFeatures} from './game-features.mjs';
 import {plainDocument,validateDocument} from '../community/manuscript.mjs';
 import {readingTimeFromHtml} from '../reading/reading-time.mjs';
@@ -20,7 +20,7 @@ function authorMarkup(author={},file=false){
  return '<span class="'+(file?'file-publishing-author':'story-author')+'"'+(file?' data-file-publishing':'')+'>'+byline+'</span>';
 }
 export function socialMarkup(links=[]){
- const valid=links.flatMap(link=>{try{const u=new URL(link.url);if(u.protocol!=='https:'||u.username||u.password)return [];return ['<a href="'+escapeText(u.href)+'" target="_blank" rel="me noopener noreferrer">'+escapeText(link.platform==='website'?'Website':link.platform)+'</a>'];}catch{return [];}});
+ const valid=publicSocialLinks(links).flatMap(link=>{try{const u=new URL(link.url);if(u.protocol!=='https:'||u.username||u.password)return [];return ['<a href="'+escapeText(u.href)+'" target="_blank" rel="me noopener noreferrer">'+escapeText(socialLabel(link.platform))+'</a>'];}catch{return [];}});
  return valid.length?'<nav class="storyteller-socials" aria-label="Author social links">'+valid.join('')+'</nav>':'';
 }
 export function manuscriptMarkup(value,options={}){

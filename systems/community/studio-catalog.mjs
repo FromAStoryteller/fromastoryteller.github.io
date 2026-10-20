@@ -25,13 +25,15 @@ export function metadataIssues(input,type){
 }
 export const SCENE_STYLES = [{id:'space',label:'Space only (no ornament)'},{id:'dots',label:'Three dots'},{id:'diamond',label:'Diamond'},{id:'rule',label:'Fine rule'}];
 export const SOCIAL_PLATFORMS = [
- ['website','Website',null],['instagram','Instagram',['instagram.com']],['facebook','Facebook',['facebook.com']],
- ['tiktok','TikTok',['tiktok.com']],['youtube','YouTube',['youtube.com','youtu.be']],['bluesky','Bluesky',['bsky.app']],
- ['threads','Threads',['threads.net','threads.com']],['x','X',['x.com','twitter.com']],['linkedin','LinkedIn',['linkedin.com']],
- ['github','GitHub',['github.com']],['twitch','Twitch',['twitch.tv']],['mastodon','Mastodon',null],
- ];
+ ['instagram','Instagram',['instagram.com']],['facebook','Facebook',['facebook.com']],
+ ['tiktok','TikTok',['tiktok.com']],['youtube','YouTube',['youtube.com','youtu.be']],['x','X',['x.com','twitter.com']],
+];
+export const socialLabel=key=>SOCIAL_PLATFORMS.find(row=>row[0]===key)?.[1]??'';
+export function publicSocialLinks(links=[]){
+ const result=[],seen=new Set();for(const link of Array.isArray(links)?links:[]){try{const [safe]=validateSocialLinks([link]);if(!seen.has(safe.platform)){seen.add(safe.platform);result.push(safe);}}catch{}}return result;
+}
 export function validateSocialLinks(links) {
-  if(!Array.isArray(links)||links.length>10)throw new Error('Use up to 10 social or website links.');
+  if(!Array.isArray(links)||links.length>SOCIAL_PLATFORMS.length)throw new Error('Use one link for each supported social platform.');
   const seen=new Set();
   return links.map(link=>{
     const platform=SOCIAL_PLATFORMS.find(row=>row[0]===link?.platform);
