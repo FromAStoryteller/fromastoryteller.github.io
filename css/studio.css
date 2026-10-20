@@ -198,3 +198,8 @@
 .ss-change-review h3 { overflow-wrap: anywhere; }
 
 html:has(.ss-change-review[open]) { overflow-y: hidden; scroll-behavior: auto; }
+
+.ss-stat-grid.ss-acknowledgement-metrics {grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));}
+.ss-acknowledgements {table-layout:fixed;}
+.ss-acknowledgements :is(th,td) {padding:.5rem;overflow-wrap:anywhere;}
+.ss-acknowledgements :is(th,td):first-child {width:50%;}

@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "contributor-insights-2026-10-20-v1",
+  "activePublishedVersion": "viewer-actions-2026-10-20-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -184,6 +184,27 @@
           "sha256": "31b2712121a167cd40b2c42d259a74a63de0d565b3f27c67d5ed1215ca9b2070"
         }
       }
+    },
+    "viewer-actions-2026-10-20-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-20",
+      "previousVersion": "contributor-insights-2026-10-20-v1",
+      "change": "Private saved lists and game/tool favourites, voluntary acknowledgements and Loved it; private contributor totals, account export and deletion.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-20",
+        "scope": "Requested implementation of agreed viewer actions and collections, with standing authorization to push completed changes."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/viewer-actions-2026-10-20-v1/terms/index.html",
+          "sha256": "6fbd0d3178796bccbaf1911ec28f860a336ce8768a27d1f9af490afc260a9e7b"
+        },
+        "privacy": {
+          "path": "/account/policy-history/viewer-actions-2026-10-20-v1/privacy/index.html",
+          "sha256": "08b40fd2cd9e22c7a677e9b2570c3defbac4a2a9ba67396c2fbe8c7e8860b17d"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
@@ -192,5 +213,6 @@
   "communityUpdateVersion": "community-policies-2026-10-18-v1",
   "gameUpdateVersion": "game-features-2026-10-19-v1",
   "historyUpdateVersion": "studio-history-2026-10-20-v1",
-  "insightsUpdateVersion": "contributor-insights-2026-10-20-v1"
+  "insightsUpdateVersion": "contributor-insights-2026-10-20-v1",
+  "viewerUpdateVersion": "viewer-actions-2026-10-20-v1"
 }

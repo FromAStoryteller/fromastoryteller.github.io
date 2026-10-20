@@ -8,7 +8,7 @@ export function initHeaderAccount({closeOther=()=>{}}={}) {
  const current=location.pathname.replace(/index\.html$/,'');
  function render(access=known){
   const active=panel.contains(document.activeElement)?{href:document.activeElement.getAttribute('href'),text:document.activeElement.textContent}:null;
-  const links=access?[['Edit my profile','/account/profile/'],...(access.contributor&&access.publicId&&/^[0-9a-f-]{36}$/i.test(access.publicId)?[['View public profile','/storytellers/?author='+encodeURIComponent(access.publicId)]]:[]),...(access.contributor?[['Storyteller Studio','/account/studio/']]:[]),['Game saves','/account/games/'],['Account settings','/account/settings/'],...(access.admin?[['Admin tools','/account/admin/']]:[])]:[['Sign in',signInHref(location.pathname+location.search)],['Create account','/account/sign-up/'],['Account settings','/account/settings/']];
+  const links=access?[['Edit my profile','/account/profile/'],...(access.contributor&&access.publicId&&/^[0-9a-f-]{36}$/i.test(access.publicId)?[['View public profile','/storytellers/?author='+encodeURIComponent(access.publicId)]]:[]),...(access.contributor?[['Storyteller Studio','/account/studio/']]:[]),['Saved for later','/account/saved/'],['Favourites','/account/favourites/'],['Game saves','/account/games/'],['Account settings','/account/settings/'],...(access.admin?[['Admin tools','/account/admin/']]:[])]:[['Sign in',signInHref(location.pathname+location.search)],['Create account','/account/sign-up/'],['Account settings','/account/settings/']];
   const signature=JSON.stringify([links,Boolean(auth)]);
   if(signature===rendered){panel.querySelectorAll('[role=status],[data-header-retry]').forEach(e=>e.remove());return;}
   rendered=signature;panel.replaceChildren();

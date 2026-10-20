@@ -13,6 +13,8 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     ['profile', 'Edit my profile', '/account/profile/'],
     ['public', 'View public profile', publicProfileUrl(publicId)],
     ['studio', 'Storyteller Studio', contributor ? '/account/studio/' : null],
+    ['saved', 'Saved for later', '/account/saved/'],
+    ['favourites', 'Favourites', '/account/favourites/'],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;

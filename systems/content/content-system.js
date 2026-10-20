@@ -340,7 +340,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
 function createCardMarkup(item, variant = "standard") {
     const cardVariant = "standard"
     return `
-        <article class="content-grid-card content-card--${cardVariant}">
+        <article class="content-grid-card content-card--${cardVariant}" data-viewer-content="${escapeHtml(item.url)}" data-viewer-content-type="${escapeHtml(item.type || ({stories:"story",games:"game",tools:"tool",videos:"video"})[item.category] || "story")}">
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
                     ${item.card.image ? `<img loading="lazy" decoding="async" src="${escapeHtml(item.card.image)}" alt="${escapeHtml(item.card.imageAlt)}">` : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
