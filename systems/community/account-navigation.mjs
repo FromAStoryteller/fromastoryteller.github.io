@@ -1,7 +1,10 @@
+import { rememberNavigationSnapshot, clearNavigationSnapshot } from '../../account/navigation-shell.mjs';
 import { showPendingInvitation } from '../../account/invitation-storage.mjs';
 import { publicProfileUrl } from './profiles.mjs';
 
 export function accountNavigation(document, { current, publicId, auth, admin = false, contributor = Boolean(publicId), beforeSignOut } = {}) {
+  if (auth) rememberNavigationSnapshot({admin,contributor,publicId});
+  else clearNavigationSnapshot();
   const nav = document.createElement('nav');
   nav.className = 'account-navigation';
   nav.setAttribute('aria-label', 'Your profile and account');
@@ -37,6 +40,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
       try {
         const result = await auth.signOut({ scope: 'local' });
         if (result?.error) throw result.error;
+        clearNavigationSnapshot();
         nav.replaceChildren();
         const link = document.createElement('a');
         link.className = 'account-secondary';
