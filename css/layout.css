@@ -427,3 +427,25 @@ body.shell-open { overflow: hidden; }
 .content-information-panel summary { cursor: pointer; min-height: 44px; padding: .6rem 0; color: var(--colour-text-primary); }
 .content-information-panel summary h2 { display: inline; margin: 0; font-size: 1.1rem; }
 .content-information-panel[open] summary { border-bottom: 1px solid var(--colour-border-subtle); margin-bottom: .75rem; }
+
+/* Tools reflow into a portrait surface on upright phones. */
+.tool-page, .fas-tool-player, .fas-interactive-page[data-content-type="tool"] {
+  --tool-player-ratio: 16 / 9;
+  --player-width: min(100%, 80dvw, calc(var(--player-height, min(80dvh, calc(100dvh - var(--size-content-top) - 1rem))) * var(--tool-player-ratio)));
+}
+.tool-shell .tool-shell-frame { aspect-ratio: var(--tool-player-ratio); container-type: size; overflow: hidden; }
+@media (max-width: 48rem) and (orientation: portrait) {
+  .tool-page, .fas-tool-player, .fas-interactive-page[data-content-type="tool"] { --tool-player-ratio: 9 / 16; }
+}
+/* Keep all three header controls clear of the wordmark on small screens. */
+@media (max-width: 32rem) {
+  .header-brand { left: calc((100% - 5.5rem) / 2); }
+  .header-quill { left: calc((100% - 5.5rem) / 2 + var(--size-wordmark) * .1); }
+}
+.header-account { position: relative; }
+.header-account-panel { position: absolute; inset: calc(100% + .4rem) 0 auto auto; width: min(17rem, calc(100vw - 1.5rem)); padding: .5rem; box-sizing: border-box; display: grid; gap: .2rem; border: var(--surface-standard-border); border-radius: var(--site-card-radius); background: var(--surface-standard-background); color: var(--colour-text-primary); box-shadow: var(--surface-standard-shadow); max-height: calc(100dvh - var(--size-header-height) - 1rem); overflow-y: auto; }
+.header-account-panel :is(a,button) { display: flex; align-items: center; min-height: 44px; box-sizing: border-box; width: 100%; padding: .65rem .8rem; border: 0; border-radius: var(--radius-md); color: inherit; background: transparent; font: inherit; font-size: .95rem; text-align: left; text-decoration: none; cursor: pointer; }
+.header-account-panel :is(a,button):hover { background: var(--state-hover-background); color: var(--state-hover-colour); }
+.header-account-panel [aria-current="page"] { background: var(--state-current-background); color: var(--state-current-colour); }
+.header-account-panel :is(a,button):focus-visible { outline-offset: -3px; }
+.header-account-panel [role="status"] { margin: .4rem .8rem; font-size: .85rem; }

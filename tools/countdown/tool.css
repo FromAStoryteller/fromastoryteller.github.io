@@ -500,3 +500,20 @@
     max-width: 15rem;
   }
 }
+/* Short landscape screens retain every control without an inner scroll area. */
+@container countdown (max-height: 22rem) {
+  .tool-widget { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); grid-template-rows: 44px minmax(3rem, 1fr) 44px; grid-template-areas: "state divider quick" "state divider message" "state divider actions"; gap: .5rem; }
+  .tool-widget::after { display: block; height: 10.75rem; }
+  .countdown-setup, .countdown-active { height: 10.75rem; min-height: 0; }
+  .countdown-setup:not([hidden]) { grid-template-rows: auto auto; row-gap: .5rem; }
+  .countdown-presets { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .25rem; }
+  .countdown-time-controls { gap: .25rem; }
+  .countdown-time-field { gap: .25rem; }
+  .countdown-time-field label { font-size: .75rem; }
+  .countdown-time-field input { padding-inline: 0; }
+  .countdown-quick-add { gap: .25rem; }
+  .countdown-add { white-space: normal; line-height: 1.15; font-size: .75rem; }
+  .countdown-actions { gap: .5rem; }
+  #tool-message { font-size: .75rem; line-height: 1.3; }
+  .countdown-progress { width: min(10rem, 90%); }
+}

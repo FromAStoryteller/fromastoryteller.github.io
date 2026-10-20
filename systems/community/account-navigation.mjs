@@ -32,6 +32,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
   if (auth) {
     const signOut = document.createElement('button');
     signOut.type = 'button';
+    signOut.setAttribute('data-account-sign-out','');
     signOut.className = 'account-secondary';
     signOut.textContent = 'Sign out';
     signOut.addEventListener('click', async () => {
