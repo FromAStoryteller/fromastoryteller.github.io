@@ -39,4 +39,4 @@ Account settings cleanup: display name, welcome line and bio are edited only at 
 
 ## Profile images
 
-Private normalized uploads, square cropping, descriptions, replacement/removal and contributor/viewer visibility are implemented in [image storage](image-storage.md). Profile text and image versions save independently.
+Private normalized uploads, square cropping, descriptions, replacement/removal and contributor visibility are implemented in [image storage](image-storage.md). Profile text and image versions save independently. Photo uploading is restricted to current contributors in both UI and server checks. Social/website links and a direct private profile-insights shortcut are available in the contributor editor; see [contributor insights](contributor-insights.md).

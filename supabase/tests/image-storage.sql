@@ -51,12 +51,14 @@ do $$begin
  begin perform public.fas_change_profile_image((select (public.fas_my_profile_image()->>'version')::uuid),'Tampered',true);raise exception 'FAIL remove absent own image';exception when no_data_found then null;end;
 end;$$;
 reset role;
--- A viewer image is private even when its ID is known.
+-- A former contributor's retained image stays private after contributor removal.
+insert into public.user_roles(user_id,role) values('98000000-0000-0000-0000-000000000003','member');
 do $$declare key uuid;v uuid;asset jsonb;path text;begin
  select public_id,image_version into key,v from public.profiles where id='98000000-0000-0000-0000-000000000003';
  path:='98000000-0000-0000-0000-000000000003/'||key::text||'/cccccccc-cccc-cccc-cccc-cccccccccccc.jpg';
  perform public.fas_reserve_image_upload('98000000-0000-0000-0000-000000000003','98100000-0000-0000-0000-000000000003',path,'profile');
  asset:=public.fas_register_profile_image('98000000-0000-0000-0000-000000000003','98100000-0000-0000-0000-000000000003',path,'Viewer portrait',v);
+ delete from public.user_roles where user_id='98000000-0000-0000-0000-000000000003' and role='member';
  perform set_config('request.jwt.claim.sub','',true);
  if public.fas_visible_profile_image((asset->>'asset_id')::uuid) is true then raise exception 'FAIL viewer image public';end if;
  perform set_config('request.jwt.claim.sub','98000000-0000-0000-0000-000000000003',true);

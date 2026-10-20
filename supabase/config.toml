@@ -448,3 +448,6 @@ verify_jwt = false
 [functions.fas-email-events]
 # Public provider endpoint; validates signed, timestamped Resend webhook payloads.
 verify_jwt = false
+
+[functions.fas-page-view]
+verify_jwt = false # Handler verifies public API keys; supports modern non-JWT publishable keys.
