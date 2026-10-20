@@ -1623,7 +1623,8 @@ html, body, button, input, textarea, select,
 .site-header::after { width: calc((100% - var(--size-centre-rule-gap) + var(--shell-scrollbar-space)) / 2); }
 .site-header:has(.header-brand[hidden])::before { width: 100%; }
 .site-footer { position: relative; border-top: 0; }
-.site-footer::before { content: ''; position: absolute; inset: 0 auto auto 0; width: 100vw; height: 1px; background: var(--colour-divider); pointer-events: none; }
+/* Paint across the reserved scrollbar allowance without widening scrollable layout. */
+.site-footer::before { content: ''; position: absolute; inset: 0 auto auto 0; width: 100%; height: 1px; background: var(--colour-divider); box-shadow: var(--size-native-scrollbar, 0px) 0 0 var(--colour-divider); pointer-events: none; }
 
 /* Account-only viewer actions. Cards share the same quiet overlay treatment. */
 .viewer-content-actions,.viewer-collection-navigation { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.75rem 1.5rem; }
