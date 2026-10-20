@@ -1643,23 +1643,26 @@ html, body, button, input, textarea, select,
 .story-header + .viewer-content-actions { width:min(100%,var(--width-story-hero)); justify-content:flex-end; margin-top:0; margin-bottom:1.25rem; }
 :is(.game-hero,.tool-hero,.video-hero) + .viewer-content-actions { justify-content:flex-end; max-width:var(--width-featured); margin-top:0; margin-bottom:1rem; }
 .story-footer .viewer-content-actions { margin:.5rem auto 1rem; }
-.content-grid-card,.content-featured-card { position:relative; min-width:0; }
+.content-grid-card,.content-featured-card { position:relative; min-width:0; container-type:inline-size; --viewer-control-size:clamp(1.75rem,9cqi,2.25rem); --viewer-control-inset:clamp(.5rem,2.5cqi,.75rem); }
 .viewer-card-actions { position:absolute; inset:0; z-index:3; pointer-events:none; }
-.viewer-card-actions .viewer-action { position:absolute; right:.75rem; bottom:.75rem; width:2.75rem; height:2.75rem; min-height:2.75rem; padding:0; border-color:var(--colour-overlay-text); background:var(--colour-overlay-scrim); color:var(--colour-overlay-text); pointer-events:auto; }
+.viewer-card-actions .viewer-action { position:absolute; right:var(--viewer-control-inset); bottom:var(--viewer-control-inset); width:var(--viewer-control-size); height:var(--viewer-control-size); min-height:0; padding:0; border-color:var(--colour-overlay-text); background:var(--colour-overlay-scrim); color:var(--colour-overlay-text); pointer-events:auto; }
+/* The quieter circle keeps a 44px tap target without consuming text space. */
+.viewer-card-actions .viewer-action::after { content:""; position:absolute; width:2.75rem; height:2.75rem; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:50%; }
+.viewer-card-actions .viewer-action > svg { width:calc(var(--viewer-control-size) * .45); height:calc(var(--viewer-control-size) * .45); }
 .viewer-card-actions .viewer-action:hover:not(:disabled) { border-color:var(--colour-gold); background:var(--colour-midnight); color:var(--colour-parchment); }
 .viewer-card-actions .viewer-action[aria-pressed="true"] { border-color:var(--colour-gold); background:var(--colour-midnight); color:var(--colour-gold); }
 .viewer-card-actions .viewer-action > span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .viewer-card-actions .viewer-action-status:not(:empty):not(.visually-hidden) { position:absolute; inset:auto 4rem .75rem .75rem; border-radius:var(--radius-md); background:var(--colour-overlay-scrim); color:var(--colour-overlay-text); padding:.3rem .5rem; pointer-events:auto; text-align:left; }
-.viewer-experienced { position:absolute; top:.75rem; right:.75rem; display:inline-flex; align-items:center; justify-content:center; width:1.75rem; height:1.75rem; border:1px solid var(--colour-border-default); border-radius:50%; color:var(--colour-success-text); background:var(--colour-surface); }
+.viewer-experienced { position:absolute; top:var(--viewer-control-inset); right:var(--viewer-control-inset); display:inline-flex; align-items:center; justify-content:center; width:clamp(1.25rem,6cqi,1.5rem); height:clamp(1.25rem,6cqi,1.5rem); font-size:.75rem; border:1px solid var(--colour-border-default); border-radius:50%; color:var(--colour-success-text); background:var(--colour-surface); }
 .viewer-experienced[hidden] { display:none; }
-.content-grid-card-excerpt { margin-inline-end:3.5rem; }
-.content-featured-description { margin-inline-end:3.5rem; }
-.content-featured-action { padding-inline-end:3.5rem; }
+.content-grid-card-excerpt { margin-inline-end:calc(var(--viewer-control-size) + .5rem); }
+.content-featured-description { margin-inline-end:calc(var(--viewer-control-size) + .5rem); }
+.content-featured-action { padding-inline-end:calc(var(--viewer-control-size) + .5rem); }
 .content-featured-pause { top:var(--space-3); bottom:auto; right:var(--space-3); z-index:4; }
 .content-featured-card:has(.viewer-experienced:not([hidden])) .viewer-experienced { right:3.75rem; }
 @media (max-width:37.5rem) {
  .content-featured-pause { top:auto; bottom:calc(-1 * (var(--size-touch-target-minimum) + var(--space-2))); right:0; }
- .content-featured-card:has(.viewer-experienced:not([hidden])) .viewer-experienced { right:.75rem; }
+ .content-featured-card:has(.viewer-experienced:not([hidden])) .viewer-experienced { right:var(--viewer-control-inset); }
 }
 @media print { .viewer-content-actions,.viewer-card-actions {display:none;} }
 .viewer-collection-page { width:min(100%,80rem); margin-inline:auto; }
