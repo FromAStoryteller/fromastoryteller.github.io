@@ -27,5 +27,6 @@ test('Studio metadata bounds, private drafts, public projections, moderation loc
   await db.exec(readFileSync(new URL('../supabase/tests/shared-fas-studio.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/content-history.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/contributor-audience.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/tests/viewer-actions.sql',import.meta.url),'utf8'));
  }finally{await db.close();}
 });

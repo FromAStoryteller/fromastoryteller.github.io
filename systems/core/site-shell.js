@@ -1,3 +1,4 @@
+import {initViewerActions} from '../community/viewer-actions.mjs';
 import {initHeaderAccount} from './header-account.mjs';
 import {restoreFocus} from "/systems/core/focus.js"
 import {initAudienceInsights} from '../privacy/audience-insights.mjs';
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initContentDetailEnhancements();
     initStorageChoices();
     initAudienceInsights();
+    initViewerActions();
   } catch (err) {
     console.error("Error loading components:", err);
   } 

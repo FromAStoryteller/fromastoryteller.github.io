@@ -59,6 +59,6 @@ export async function saveProfile(client, { displayName, bio }) {
 
 export async function exportAccountData(client) {
   const account = await loadAccount(client);
-  const games=await client.rpc('fas_my_game_data');if(games.error||!games.data)throw new Error('Game data could not be included. Retry your complete account download.');
-  return { game_data:games.data,format: 'fas-account-data-v4', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role', 'Recorded registration declaration, if present', 'Published policy agreements, if present','Private game saves and your own transient room state'], excludes: ['Passwords and session credentials', 'Uploaded profile images and contributor content (available separately)', 'Other players’ private data and room invitation codes'], account };
+  const [games,viewer]=await Promise.all([client.rpc('fas_my_game_data'),client.rpc('fas_my_viewer_data')]);if(games.error||!games.data||viewer.error||!Array.isArray(viewer.data))throw new Error('Your saved data could not be included. Retry your complete account download.');
+  return { viewer_actions:viewer.data,game_data:games.data,format: 'fas-account-data-v5', exported_at: new Date().toISOString(), includes: ['Account details', 'Profile', 'Role', 'Recorded registration declaration, if present', 'Published policy agreements, if present','Private game saves and your own transient room state','Private saved/favourite, acknowledgement and Loved it choices'], excludes: ['Passwords and session credentials', 'Uploaded profile images and contributor content (available separately)', 'Other players’ private data and room invitation codes'], account };
 }

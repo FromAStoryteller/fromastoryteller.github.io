@@ -2,7 +2,7 @@
 // callbacks, absolute URLs or another authentication page.
 export function safeReturnPath(value){
  if(typeof value!=='string'||value.length>180)return null;
- return /^(?:\/|\/account\/(?:games|studio|settings|profile|agreements|admin)\/|\/(?:games|tools|stories|blog)\/(?:[a-z0-9][a-z0-9-]{0,119}\/)?)$/.test(value)?value:null;
+ return /^(?:\/|\/account\/(?:saved|favourites|games|studio|settings|profile|agreements|admin)\/|\/(?:games|tools|stories|blog)\/(?:[a-z0-9][a-z0-9-]{0,119}\/)?)$/.test(value)?value:null;
 }
 export function returnPathFromSearch(search=''){
  if(typeof search!=='string'||search.length>1024)return null;
