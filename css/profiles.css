@@ -21,13 +21,13 @@
 .profile-welcome { font: italic 1.05rem/1.7 var(--font-family-reading); color: var(--colour-accent-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
 .profile-bio { line-height: 1.85; color: var(--colour-text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
 .profile-preview a { font-size: .9rem; }
-.storyteller-home { max-width: 64rem; margin: 1rem auto 4rem; }
+.storyteller-home { max-width: var(--width-wide); margin: 1rem auto 4rem; }
 .storyteller-header { padding: clamp(1.5rem,5vw,4rem) 0 2rem; border-bottom: 1px solid var(--colour-border-default); background: radial-gradient(ellipse at 20% 0%, color-mix(in srgb,var(--colour-wine) 10%,transparent),transparent 65%); }
 .storyteller-header h1 { font: 400 clamp(2rem,5vw,3.75rem)/1.2 var(--font-family-reading); margin: .5rem 0 1.5rem; overflow-wrap: anywhere; }
 .storyteller-header .profile-bio { max-width: 42rem; }
 .storyteller-stories { margin-top: 2.5rem; }
 .storyteller-stories > h2 { font: 400 1.7rem var(--font-family-reading); margin-bottom: 1.5rem; }
-.profile-story-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; }
+
 .profile-story { padding-block: 1.5rem; border-top: 1px solid var(--colour-border-default); min-width: 0; }
 .profile-story h3 { font: 400 1.5rem/1.4 var(--font-family-reading); margin: 0 0 .8rem; overflow-wrap: anywhere; }
 .profile-story p { color: var(--colour-text-secondary); line-height: 1.7; overflow-wrap: anywhere; }
@@ -39,7 +39,7 @@
 .profile-preview-banner { border-bottom: 1px solid var(--colour-border-default); margin: 0 0 1.5rem; padding: .7rem 0; font-size: .85rem; color: var(--colour-text-secondary); }
 .profile-preview-banner a { margin-left: 1rem; }
 @media (max-width: 75rem) { .profile-workspace { grid-template-columns: minmax(18rem,1.5fr) minmax(13rem,1fr); } .profile-intro { grid-column: 1/-1; padding-top: 0; } .profile-intro h1 br { display:none; } .profile-intro h1 { margin-bottom:.6rem; } .profile-intro > p:not(.profile-eyebrow) { max-width: 38rem; } .profile-intro a { display:none; } }
-@media (max-width: 48rem) { .profile-workspace,.profile-story-list { grid-template-columns: minmax(0,1fr); } .profile-preview { margin-top: .5rem; } .profile-intro { padding-top:.5rem; } }
+@media (max-width: 48rem) { .profile-workspace { grid-template-columns: minmax(0,1fr); } .profile-preview { margin-top: .5rem; } .profile-intro { padding-top:.5rem; } }
 
 .community-story-cover{width:100%;aspect-ratio:16/9;object-fit:cover;}
 

@@ -157,3 +157,13 @@
 [data-recovery-status]:empty{display:none;}
 
 .ss-paper>.fas-manuscript{max-width:var(--width-reading);}
+
+.ss-library-scopes { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem; }
+.ss-library-scopes [aria-pressed="true"] { background: var(--colour-button-primary-background); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary); }
+
+.ss-template-downloads { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+.ss-template-downloads label { display: grid; gap: .5rem; margin-block: .75rem; }
+.ss-template-downloads fieldset { min-width: 0; }
+.ss-template-downloads input[type="checkbox"] { justify-self: start; }
+
+.ss-heading-actions { flex-wrap: wrap; min-width: 0; }

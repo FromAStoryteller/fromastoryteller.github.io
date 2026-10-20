@@ -390,22 +390,25 @@ body.shell-open { overflow: hidden; }
   background: var(--surface-inset-background);
   border-radius: var(--site-card-radius);
 }
-/* Proportional insets preserve 16:9 for both the canvas and its outer frame. */
+.game-shell .game-shell-frame:not(.is-game-fullscreen) { border: 0; border-radius: 0; background: transparent; }
+/* The game canvas is the only visible player surface. */
 .game-shell-frame:not(.is-game-fullscreen) .game-canvas {
   position: absolute;
-  inset: 1.25%;
+  inset: 0;
+  border: 0;
   width: auto;
   height: auto;
   margin: 0;
   box-sizing: border-box;
 }
+.game-shell-frame:not(.is-game-fullscreen) .game-canvas > canvas { width: 100% !important; height: 100% !important; }
 .tool-shell .tool-shell-frame {
   overflow: auto;
   overscroll-behavior: contain;
   display: block;
   padding: clamp(.5rem, 1.25vw, 1rem);
 }
-.tool-shell-frame > .tool-widget { min-height: 100%; box-sizing: border-box; align-content: center; }
+.tool-shell-frame > .tool-widget { width: 100%; max-width: none; min-height: 100%; padding: 0; box-sizing: border-box; align-content: center; }
 .content-information { width: var(--player-width, 100%); max-width: none; margin: 1.5rem auto 3rem; display: grid; gap: .75rem; }
 .content-information-panel {
   min-width: 0;

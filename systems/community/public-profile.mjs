@@ -31,7 +31,7 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
   if(profile.social_links?.length){const socials=node(d,'nav','storyteller-socials');renderSocialLinks(socials,profile.social_links);header.append(socials);}
   const section = node(d, 'section', 'storyteller-stories');
   section.append(node(d, 'h2', '', 'Published work'));
-  const list = node(d, 'div', 'profile-story-list');
+  const list = node(d, 'div', 'content-grid profile-story-list');
   for (const story of profile.stories ?? []) {
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(story.slug ?? '')) continue;
     const frame = node(d, 'template');

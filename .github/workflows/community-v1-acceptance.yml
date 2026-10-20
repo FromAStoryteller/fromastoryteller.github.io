@@ -27,6 +27,7 @@ jobs:
       - run: npm install --no-save playwright@1.58.0
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-community-vite.log 2>&1 &
+      - run: node scripts/wait-for-preview.mjs
       - run: node scripts/test-fas-community-browser.mjs
       - run: node scripts/test-interactive-browser.mjs
       - run: node scripts/test-game-starters-browser.mjs
