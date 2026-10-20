@@ -679,7 +679,7 @@ var OPTIONAL_KEYS = {
 function parseChoice(value, now = Date.now()) {
   try {
     const d = JSON.parse(value);
-    return d?.version === 1 && typeof d.preferences === "boolean" && typeof d.gameRecords === "boolean" && Number.isFinite(d.expiresAt) && d.expiresAt > now && d.expiresAt <= now + CHOICE_DAYS * 864e5 ? d : null;
+    return [1, 2].includes(d?.version) && typeof d.preferences === "boolean" && typeof d.gameRecords === "boolean" && Number.isFinite(d.expiresAt) && d.expiresAt > now && d.expiresAt <= now + CHOICE_DAYS * 864e5 && (d.version === 1 || typeof d.analytics === "boolean") ? { ...d, analytics: d.version === 2 && d.analytics === true } : null;
   } catch {
     return null;
   }

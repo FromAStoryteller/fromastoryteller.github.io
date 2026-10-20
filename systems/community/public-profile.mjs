@@ -19,8 +19,10 @@ const node = (document, tag, className, text) => {
 
 export function renderPublicProfile(root, profile, { imageBase, preview = false } = {}) {
   const d = root.ownerDocument;
+  root.removeAttribute('data-profile-public-id');
   root.replaceChildren();
   if (!profile) { root.append(node(d, 'h1', '', 'Storyteller page unavailable'), node(d, 'p', 'profile-muted', 'This page may no longer be public.')); return; }
+  if(!preview&&isPublicId(profile.public_id))root.dataset.profilePublicId=profile.public_id;
   const header = node(d, 'header', 'storyteller-header');
   header.append(node(d, 'div', 'profile-monogram', initials(profile.display_name)), node(d, 'h1', '', profile.display_name));
   const avatarUrl=profileImageUrl(profile.image,imageBase);

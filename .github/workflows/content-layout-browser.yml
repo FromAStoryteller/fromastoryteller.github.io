@@ -16,6 +16,9 @@ on:
       - css/**
       - tools/**
       - systems/core/**
+      - systems/privacy/**
+      - systems/community/audience-report.mjs
+      - scripts/test-contributor-insights-browser.mjs
       - components/**
       - scripts/test-header-portrait-browser.mjs
       - scripts/test-player-account-polish-browser.mjs
@@ -61,5 +64,6 @@ jobs:
       - run: node scripts/test-player-account-polish-browser.mjs
       - run: node scripts/test-header-portrait-browser.mjs
       - run: node scripts/test-profile-history-browser.mjs
+      - run: node scripts/test-contributor-insights-browser.mjs
       - run: node scripts/test-publish-review-browser.mjs
       - run: node scripts/test-stable-viewport-browser.mjs

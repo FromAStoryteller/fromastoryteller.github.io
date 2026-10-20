@@ -34,7 +34,7 @@
   function allowed() {
     if (window.fasOptionalStorageAllowed) return window.fasOptionalStorageAllowed(key);
     // Synchronous first-paint gate, matching storage-choice.mjs.
-    try { const c = JSON.parse(localStorage.getItem('fas-site-storage-choice')); const now = Date.now(); return c?.version === 1 && c.preferences === true && typeof c.gameRecords === 'boolean' && Number.isFinite(c.expiresAt) && c.expiresAt > now && c.expiresAt <= now + 180 * 86400000; } catch { return false; }
+    try { const c = JSON.parse(localStorage.getItem('fas-site-storage-choice')); const now = Date.now(); return [1,2].includes(c?.version) && c.preferences === true && typeof c.gameRecords === 'boolean' && Number.isFinite(c.expiresAt) && c.expiresAt > now && c.expiresAt <= now + 180 * 86400000; } catch { return false; }
   }
   try { if (allowed()) { const saved = localStorage.getItem(key); if (saved === 'light' || saved === 'dark' || saved === 'auto') preference = saved; } } catch (_) {}
   const effective = () => preference && preference !== 'auto' ? preference : (system.matches ? 'dark' : 'light');

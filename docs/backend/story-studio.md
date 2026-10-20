@@ -46,7 +46,7 @@ studio_content_types defines enabled types, metadata versions, required built-in
 
 Content warnings use a shared dropdown, removable choices and an explicit reviewed/none confirmation. Contributors can request a warning and see its decision. An audited admin queue approves/declines catalog requests; this is separate from publishing/upload approval. Pending requests are limited to five and request text is erased on account deletion. No request emails are sent.
 
-Insights support own content/profile/all-page aggregate imports, views, engagement/completion, dates, devices, sources and future ad impressions/revenue. Provider reports use stable content/profile IDs and beneficiary attribution; imports cannot be reassigned. No analytics provider is connected, so the interface reports that honestly. Advertising delivery, revenue-sharing terms, payable balances, payment providers and payouts are not activated. No raw visitor identity is collected here.
+Insights support own content/profile/all-page aggregate imports, views, engagement/completion, dates, devices, sources and future ad impressions/revenue. Provider reports use stable content/profile IDs and beneficiary attribution; imports cannot be reassigned. Consent-based FAS first-party page-view reporting is connected; see [contributor insights](contributor-insights.md). It reports only measured page views, sources and screen-size groups. Engagement/completion are not collected. Advertising delivery, revenue-sharing terms, payable balances, payment providers and payouts are not activated. No raw visitor identity is collected here.
 
 ## DEV installation
 

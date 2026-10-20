@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "studio-history-2026-10-20-v1",
+  "activePublishedVersion": "contributor-insights-2026-10-20-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -163,6 +163,27 @@
           "sha256": "40b0e9d1b82880b11059d89c84d50a6b61799bc58ba47c128884098110f29fe3"
         }
       }
+    },
+    "contributor-insights-2026-10-20-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-20",
+      "previousVersion": "studio-history-2026-10-20-v1",
+      "change": "Contributor-only profile pictures and optional consent-based anonymous audience insights with private owner reports and 90-day aggregate retention.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-20",
+        "scope": "Requested contributor social links, profile pictures and private profile/content insights; standing authorization to push completed changes."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/contributor-insights-2026-10-20-v1/terms/index.html",
+          "sha256": "429913e852e7906cfbf8198be4c401fd37faf08d7997deb5ffe241f8e47cc2cd"
+        },
+        "privacy": {
+          "path": "/account/policy-history/contributor-insights-2026-10-20-v1/privacy/index.html",
+          "sha256": "31b2712121a167cd40b2c42d259a74a63de0d565b3f27c67d5ed1215ca9b2070"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
@@ -170,5 +191,6 @@
   "sessionUpdateVersion": "account-sessions-2026-10-16-v2",
   "communityUpdateVersion": "community-policies-2026-10-18-v1",
   "gameUpdateVersion": "game-features-2026-10-19-v1",
-  "historyUpdateVersion": "studio-history-2026-10-20-v1"
+  "historyUpdateVersion": "studio-history-2026-10-20-v1",
+  "insightsUpdateVersion": "contributor-insights-2026-10-20-v1"
 }

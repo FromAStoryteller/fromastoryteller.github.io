@@ -1,5 +1,6 @@
 import {initHeaderAccount} from './header-account.mjs';
 import {restoreFocus} from "/systems/core/focus.js"
+import {initAudienceInsights} from '../privacy/audience-insights.mjs';
 import { initStorageChoices } from '../privacy/storage-banner.js';
 
 // =======================================
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initHeaderSearch();
     initContentDetailEnhancements();
     initStorageChoices();
+    initAudienceInsights();
   } catch (err) {
     console.error("Error loading components:", err);
   } 
