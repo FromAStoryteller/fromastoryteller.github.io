@@ -171,3 +171,30 @@
 .ss-template-downloads label.ss-check { display: flex; align-items: center; gap: .65rem; }
 .ss-template-downloads .ss-check input { align-self: center; flex: 0 0 auto; width: 1.1rem; height: 1.1rem; margin: 0; }
 .ss-template-downloads .ss-check span { line-height: 1.5; }
+
+/* Saved/proposed review uses the site surfaces and stays usable on phones. */
+.ss-change-review { width: min(72rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); padding: 0; overflow: hidden; }
+.ss-change-review[open] { display: flex; flex-direction: column; }
+.ss-change-review > header, .ss-review-body, .ss-review-actions { padding: clamp(1rem, 3vw, 1.5rem); }
+.ss-change-review > header { flex: 0 0 auto; border-bottom: var(--surface-standard-border); }
+.ss-change-review h2, .ss-change-review h3, .ss-change-review h4 { margin: 0 0 .5rem; }
+.ss-change-review header p { margin: .35rem 0 0; }
+.ss-review-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.ss-review-change { margin-top: 1rem; padding: 1rem; min-width: 0; border: var(--surface-standard-border); border-radius: var(--radius-md); }
+.ss-review-values { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 1rem; }
+.ss-review-values > div { min-width: 0; }
+.ss-review-values p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.ss-review-values h4 { color: var(--colour-text-muted); font-family: var(--font-family-interface); font-size: .85rem; }
+.ss-review-diff { max-height: 24rem; overflow: auto; margin-block: .75rem; padding: .75rem; border: var(--surface-standard-border); border-radius: var(--radius-sm); background: var(--surface-inset-background); font-size: .85rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ss-review-diff > span { display: block; min-height: 1.5em; }
+.ss-diff-remove { background: color-mix(in srgb, var(--colour-text-primary) 8%, transparent); text-decoration: line-through; }
+.ss-diff-add { background: color-mix(in srgb, var(--colour-accent-primary) 18%, transparent); font-weight: 600; }
+.ss-diff-gap { color: var(--colour-text-muted); font-style: italic; }
+.ss-review-actions { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: .75rem; margin: 0; border-top: var(--surface-standard-border); background: var(--background-page); }
+.ss-review-actions > button { flex: 1 1 10rem; min-width: 0; width: auto; margin: 0; white-space: normal; }
+.ss-review-change .ss-save-actions { flex-wrap: wrap; }
+@media(max-width:38rem) { .ss-review-values { grid-template-columns: minmax(0,1fr); } .ss-review-change { padding: .75rem; } .ss-change-review header [data-review-version] { font-size: .8rem; } }
+
+.ss-change-review h3 { overflow-wrap: anywhere; }
+
+html:has(.ss-change-review[open]) { overflow-y: hidden; scroll-behavior: auto; }
