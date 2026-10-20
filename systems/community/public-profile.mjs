@@ -22,7 +22,7 @@ export function renderPublicProfile(root, profile, { imageBase, preview = false 
   root.replaceChildren();
   if (!profile) { root.append(node(d, 'h1', '', 'Storyteller page unavailable'), node(d, 'p', 'profile-muted', 'This page may no longer be public.')); return; }
   const header = node(d, 'header', 'storyteller-header');
-  header.append(node(d, 'p', 'profile-eyebrow', 'From, a storyteller'), node(d, 'div', 'profile-monogram', initials(profile.display_name)), node(d, 'h1', '', profile.display_name));
+  header.append(node(d, 'div', 'profile-monogram', initials(profile.display_name)), node(d, 'h1', '', profile.display_name));
   const avatarUrl=profileImageUrl(profile.image,imageBase);
   if(avatarUrl){const img=node(d,'img','profile-avatar');img.src=avatarUrl;img.alt=profile.image.alt;img.width=img.height=96;
     const monogram=header.querySelector('.profile-monogram');monogram.hidden=true;monogram.after(img);img.addEventListener('error',()=>{img.remove();monogram.hidden=false;},{once:true});}
