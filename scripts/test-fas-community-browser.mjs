@@ -63,7 +63,7 @@ try{
   await page.locator('[data-save]').click();await saved(page);
   console.log('PASS '+width+'px session recovery');await publish.click();await page.locator('[data-publish]').click();
   await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='published').catch(async()=>{throw new Error('Publication check: '+await page.locator('[data-status]').innerText()+'; checklist: '+await page.locator('[data-checklist]').innerText());});
-  assert.equal(await page.locator('[data-save]').innerText(),'Save live changes');
+  assert.equal(await page.locator('[data-save]').innerText(),'Review & publish changes');
   await page.locator('[data-unpublish]').click();
   await page.waitForFunction(()=>document.querySelector('[data-studio-root] .ss-badge[data-state]')?.dataset.state==='draft');
   await page.getByText('Archive & restore',{exact:true}).click();await page.locator('[data-archive]').click();

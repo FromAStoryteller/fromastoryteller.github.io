@@ -29,10 +29,10 @@ try{
    await page.evaluate(()=>__profilePreview.dispose());assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),false,'dispose removes guard');page.off('dialog',dismiss);
   }
   await page.goto(origin+'/tests/studio-preview/');await cookies(page);await page.locator('[data-library] button').filter({hasText:'Writing the spaces between'}).click();await page.locator('[data-workspace]:not([hidden])').waitFor();
-  const old=await page.locator('[name=title]').inputValue();await page.locator('[name=title]').fill('A revised published title');await page.locator('[data-save]').click();await page.waitForFunction(()=>document.querySelector('[data-status]')?.dataset.saveState==='saved');
+  const old=await page.locator('[name=title]').inputValue();await page.locator('[name=title]').fill('A revised published title');await page.locator('[data-save]').click();await page.locator('[data-review-confirm]').click();await page.waitForFunction(()=>document.querySelector('[data-status]')?.dataset.saveState==='saved');
   await page.locator('.ss-content-history:visible summary').click();await page.locator('.ss-content-history:visible [data-history-load]').click();await page.getByRole('button',{name:'Restore this version',exact:true}).waitFor();
   const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download this version',exact:true}).click();assert.match((await download).suggestedFilename(),/writing-the-spaces-between.txt/);
-  page.on('dialog',d=>d.accept());await page.getByRole('button',{name:'Restore this version',exact:true}).click();await page.waitForFunction(t=>document.querySelector('[name=title]')?.value===t,old);
+  page.on('dialog',d=>d.accept());await page.getByRole('button',{name:'Restore this version',exact:true}).click();await page.locator('[data-review-confirm]').click();await page.waitForFunction(t=>document.querySelector('[name=title]')?.value===t,old);
   assert.equal(await page.locator('[name=title]').inputValue(),old);await page.locator('.ss-content-history:visible summary').click();await page.locator('.ss-content-history:visible [data-history-load]').click();await page.getByText(/A revised published title/,{exact:false}).first().waitFor();assert.deepEqual(errors,[]);
   console.log('PASS '+width+'px profile guards, failed/pending saves, downloadable versions, live restore and undo history');await context.close();
  }
