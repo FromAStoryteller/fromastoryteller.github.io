@@ -23,6 +23,7 @@ on:
       - systems/community/viewer-*.mjs
       - scripts/test-viewer-actions-browser.mjs
       - scripts/test-viewer-sync-browser.mjs
+      - scripts/test-viewer-collection-search-browser.mjs
       - systems/community/audience-report.mjs
       - scripts/test-contributor-insights-browser.mjs
       - scripts/test-social-account-polish-browser.mjs
@@ -76,5 +77,6 @@ jobs:
       - run: node scripts/test-viewer-actions-browser.mjs
       - run: node scripts/test-viewer-sync-browser.mjs
       - run: node scripts/test-viewer-details-browser.mjs
+      - run: node scripts/test-viewer-collection-search-browser.mjs
       - run: node scripts/test-publish-review-browser.mjs
       - run: node scripts/test-stable-viewport-browser.mjs

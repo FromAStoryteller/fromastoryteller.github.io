@@ -1689,3 +1689,16 @@ html, body, button, input, textarea, select,
 .viewer-notice button:disabled { opacity:.65; cursor:wait; }
 .viewer-notice .viewer-notice-close { padding:.3rem; border-color:transparent; background:transparent; font-size:1.4rem; }
 @media print { .viewer-notice,.content-copy-link,.content-copy-fallback {display:none;} }
+
+/* Private collection search stays compact alongside the existing account controls. */
+.viewer-collection-filters { display:flex; flex-wrap:wrap; align-items:flex-end; gap:.75rem; margin-block:1.25rem; font-family:var(--font-family-interface); }
+.viewer-collection-filters .viewer-collection-field { display:grid; gap:.35rem; min-width:0; }
+.viewer-collection-filters label { margin:0; font-size:.875rem; }
+.viewer-collection-filters .viewer-collection-field:first-child { flex:1 1 16rem; }
+.viewer-collection-filters .viewer-collection-field:nth-child(2) { flex:0 1 11rem; }
+.viewer-collection-filters :is(input,select) { width:100%; min-width:0; min-height:2.75rem; padding:.6rem .75rem; border:1px solid var(--colour-control-border); border-radius:var(--radius-md); background:var(--colour-control-background); color:var(--colour-control-text); font:inherit; }
+.viewer-collection-filters input::placeholder { color:var(--colour-text-secondary); opacity:1; }
+.viewer-collection-filters :is(input,select):focus-visible { outline:2px solid var(--colour-focus-ring); outline-offset:2px; }
+.viewer-collection-filters .account-secondary { min-height:2.75rem; width:auto; margin:0; }
+.viewer-collection-filters [hidden] { display:none; }
+@media (max-width:30rem) { .viewer-collection-filters .viewer-collection-field:nth-child(2) { flex:1 1 10rem; } }
