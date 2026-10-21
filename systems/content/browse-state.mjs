@@ -1,4 +1,4 @@
-// Per-history-entry navigation state only: no saved choices or account data.
+// Per-history-entry navigation state only; never persisted in account or local storage.
 const KEY='fas-browse-v1';
 export function createBrowseHistory(snapshot=()=>({}),{window:w=window,document:d=w.document}={}) {
   const path=()=>w.location.pathname+w.location.search;
@@ -9,6 +9,7 @@ export function createBrowseHistory(snapshot=()=>({}),{window:w=window,document:
     if(!ready||disposed)return;
     try{const value=snapshot(),state={path:path(),y:Math.max(0,w.scrollY)};
       if(typeof value.filter==='string'&&value.filter.length<=120)state.filter=value.filter;
+      if(typeof value.query==='string'&&value.query.length<=160)state.query=value.query;
       if(Number.isInteger(value.pages)&&value.pages>0)state.pages=Math.min(50,value.pages);
       w.history.replaceState({...w.history.state,[KEY]:state},'');
     }catch{}
