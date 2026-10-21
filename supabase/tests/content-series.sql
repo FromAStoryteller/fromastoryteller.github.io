@@ -14,11 +14,16 @@ insert into public.stories(id,author_id,slug,title,body,status,published_at) val
 ('a5920000-0000-4000-8000-000000000002','a5900000-0000-4000-8000-000000000001','series-next-fixture','Secret next part','Secret','draft',null),
 ('a5920000-0000-4000-8000-000000000003','a5900000-0000-4000-8000-000000000001','series-third-fixture','Third part','Text','draft',null),
 ('a5920000-0000-4000-8000-000000000004','a5900000-0000-4000-8000-000000000003','series-foreign-fixture','Other writer secret','Secret','draft',null);
+-- Service-created future schedule, read only by the authorised editor below.
+update public.stories set scheduled_at=now()+interval '10 days' where id='a5920000-0000-4000-8000-000000000003';
+do $$begin if not exists(select 1 from public.studio_content_types where id='gallery' and not enabled) then raise exception 'FAIL Gallery must remain coming soon';end if;end;$$;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','a5900000-0000-4000-8000-000000000001',true);
 select set_config('request.jwt.claims','{"session_id":"a5910000-0000-4000-8000-000000000001"}',true);
 do $$declare result jsonb;version timestamptz;begin
  result:=public.fas_series_editor('a5920000-0000-4000-8000-000000000002','studio');
+ if not exists(select 1 from jsonb_array_elements(result->'items') i where i->>'title'='First part' and i->>'published_at' is not null and i->>'updated_at' is not null and i?'scheduled_at') then raise exception 'FAIL editor publication dates missing';end if;
+ if not exists(select 1 from jsonb_array_elements(result->'items') i where i->>'title'='Third part' and i->>'scheduled_at' is not null and i->>'status'='draft') then raise exception 'FAIL authorised schedule date missing';end if;
  if result::text like '%Other writer secret%' then raise exception 'FAIL foreign draft exposed in choices';end if;
  result:=public.fas_save_content_series('a5920000-0000-4000-8000-000000000002','studio','Moon world','Moon story','studio:a5920000-0000-4000-8000-000000000001');version:=(result->>'updated_at')::timestamptz;
  if public.fas_series_editor('a5920000-0000-4000-8000-000000000001','studio')->'current'->>'series_name'<>'Moon story' then raise exception 'FAIL previous part not automatically enrolled';end if;
