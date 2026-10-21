@@ -1,8 +1,10 @@
 # Series, collections and published navigation
 
 Open **Series & collection** in Studio for a saved draft or an existing piece.
-**Part of a series** enables its name and **Comes after** choice. Existing names
-are suggested; typing creates a new name. A collection is an optional shared
+**Part of a series** enables its name and **Comes after** choice. Choose an existing series or use Create a new series. Collection/world has
+its own existing/new choice. Comes after groups matching series work separately
+from unassigned work, showing drafts (latest updated first), scheduled pieces
+(nearest first, local time and timezone), then latest published releases. A collection is an optional shared
 world or grouping; different series can belong to one collection. Collection
 membership also works without a series. Save these details before publishing.
 
