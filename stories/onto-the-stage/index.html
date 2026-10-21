@@ -131,29 +131,31 @@
       </a>
     </div>
 
-    <!-- MAIN PAGES -->
+    <!-- MAIN PAGES: empty categories remain hidden until published work exists. -->
     <div class="sidebar-section">
-      <a href="/blog/" class="sidebar-item" aria-label="Blog" title="Blog">
+      <a href="/blog/" data-content-category="blog" hidden class="sidebar-item" aria-label="Blog" title="Blog">
         <i class="fa-solid fa-newspaper" aria-hidden="true"></i>
         <span>Blog</span>
       </a>
 
-      <a href="/games/" class="sidebar-item" aria-label="Games" title="Games">
+      <a href="/games/" data-content-category="games" class="sidebar-item" aria-label="Games" title="Games">
         <i class="fa-solid fa-gamepad" aria-hidden="true"></i>
         <span>Games</span>
       </a>
 
-      <a href="/stories/" class="sidebar-item" aria-label="Stories" title="Stories">
+      <a href="/stories/" data-content-category="stories" class="sidebar-item" aria-label="Stories" title="Stories">
         <i class="fa-solid fa-book-open" aria-hidden="true"></i>
         <span>Stories</span>
       </a>
 
-      <a href="/tools/" class="sidebar-item" aria-label="Tools" title="Tools">
+      <a href="/tools/" data-content-category="tools" class="sidebar-item" aria-label="Tools" title="Tools">
         <i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>
         <span>Tools</span>
       </a>
 
-      <a href="/videos/" class="sidebar-item" aria-label="Videos" title="Videos">
+      <a href="/gallery/" data-content-category="gallery" hidden class="sidebar-item" aria-label="Gallery" title="Gallery"><i class="fa-solid fa-images" aria-hidden="true"></i><span>Gallery</span></a>
+
+      <a href="/videos/" data-content-category="videos" hidden class="sidebar-item" aria-label="Videos" title="Videos">
         <i class="fa-solid fa-film" aria-hidden="true"></i>
         <span>Videos</span>
       </a>

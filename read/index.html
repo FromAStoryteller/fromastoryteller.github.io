@@ -59,6 +59,10 @@
     <div class="header-right">
       <button class="search-toggle shell-control" type="button" aria-label="Open search" aria-controls="header-search-panel" aria-expanded="false"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
       <button class="theme-toggle shell-control" type="button" data-theme-toggle aria-label="Switch colour theme"><svg class="theme-toggle__icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg><span class="visually-hidden" data-theme-label>Theme</span></button>
+      <div class="header-account" data-header-account>
+        <button type="button" class="shell-control" data-account-toggle aria-label="Your account" aria-expanded="false" aria-controls="header-account-panel"><i class="fa-solid fa-circle-user" aria-hidden="true"></i></button>
+        <nav class="header-account-panel" id="header-account-panel" aria-label="Account options" hidden><a href="/account/sign-in/">Sign in</a><a href="/account/sign-up/">Create account</a><a href="/account/settings/">Account settings</a></nav>
+      </div>
     </div>
     <div class="header-search-panel" id="header-search-panel" hidden>
       <form class="site-search" action="/search/" role="search" autocomplete="off">
@@ -103,36 +107,33 @@
         <i class="fa-solid fa-envelope" aria-hidden="true"></i>
         <span>Contact</span>
       </a>
-
-      <a href="/account/settings/" class="sidebar-item" aria-label="Your account" title="Your account">
-        <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
-        <span>Your account</span>
-      </a>
     </div>
 
-    <!-- MAIN PAGES -->
+    <!-- MAIN PAGES: empty categories remain hidden until published work exists. -->
     <div class="sidebar-section">
-      <a href="/blog/" class="sidebar-item" aria-label="Blog" title="Blog">
+      <a href="/blog/" data-content-category="blog" hidden class="sidebar-item" aria-label="Blog" title="Blog">
         <i class="fa-solid fa-newspaper" aria-hidden="true"></i>
         <span>Blog</span>
       </a>
 
-      <a href="/games/" class="sidebar-item" aria-label="Games" title="Games">
+      <a href="/games/" data-content-category="games" class="sidebar-item" aria-label="Games" title="Games">
         <i class="fa-solid fa-gamepad" aria-hidden="true"></i>
         <span>Games</span>
       </a>
 
-      <a href="/stories/" class="sidebar-item" aria-label="Stories" title="Stories">
+      <a href="/stories/" data-content-category="stories" class="sidebar-item" aria-label="Stories" title="Stories">
         <i class="fa-solid fa-book-open" aria-hidden="true"></i>
         <span>Stories</span>
       </a>
 
-      <a href="/tools/" class="sidebar-item" aria-label="Tools" title="Tools">
+      <a href="/tools/" data-content-category="tools" class="sidebar-item" aria-label="Tools" title="Tools">
         <i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>
         <span>Tools</span>
       </a>
 
-      <a href="/videos/" class="sidebar-item" aria-label="Videos" title="Videos">
+      <a href="/gallery/" data-content-category="gallery" hidden class="sidebar-item" aria-label="Gallery" title="Gallery"><i class="fa-solid fa-images" aria-hidden="true"></i><span>Gallery</span></a>
+
+      <a href="/videos/" data-content-category="videos" hidden class="sidebar-item" aria-label="Videos" title="Videos">
         <i class="fa-solid fa-film" aria-hidden="true"></i>
         <span>Videos</span>
       </a>
@@ -167,7 +168,7 @@
           <a href="https://www.tiktok.com/@fromastoryteller/" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
           <a href="https://www.youtube.com/@fromastoryteller/" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>
         </nav>
-  <div class="footer-details"><nav class="footer-legal" aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="#top" class="back-to-top">↑ Back to top</a></nav><p class="footer-copyright">© <span data-copyright-year>2026</span> From A Storyteller</p></div>
+  <div class="footer-details"><nav class="footer-legal" aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/terms/contributors/">Contributor policy</a><a href="#top" class="back-to-top">↑ Back to top</a></nav><p class="footer-copyright">© <span data-copyright-year>2026</span> From A Storyteller</p></div>
 </footer>
 <!-- static:footer-placeholder:end -->
 </div>

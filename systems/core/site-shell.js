@@ -1,3 +1,5 @@
+import {initContentNavigation} from '../content/content-navigation.mjs';
+import {initContentSeries} from '../content/content-series.mjs';
 import {initContentShare} from '../content/content-share.mjs';
 import {initViewerActions} from '../community/viewer-actions.mjs';
 import {initHeaderAccount} from './header-account.mjs';
@@ -25,6 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const shell=initSidebarToggle();
     initHeaderAccount({closeOther:()=>shell?.close()});
     setActiveSidebarLink();
+    void initContentNavigation();
+    initContentSeries();
     syncHeaderSearchQuery();
     initHeaderSearch();
     initContentDetailEnhancements();

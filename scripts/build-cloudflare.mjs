@@ -13,7 +13,7 @@ const accountConfig = productionAccountBuildConfig(process.env, registry, produc
 if (accountConfig) console.log('Production account policy release: ' + accountConfig.policyRelease);
 if (accountConfig) verifyPolicyHistory(root, registry);
 const output = path.join(root, production ? 'dist-production' : 'dist');
-const dirs = new Set(['about', 'account', 'assets', 'blog', 'components', 'contact', 'content', 'css', 'games', 'privacy', 'read', 'search', 'stories', 'storytellers', 'systems', 'terms', 'tools', 'videos']);
+const dirs = new Set(['about', 'account', 'assets', 'blog', 'components', 'contact', 'content', 'css', 'games', 'privacy', 'read', 'search', 'stories', 'collections', 'gallery', 'storytellers', 'systems', 'terms', 'tools', 'videos']);
 const files = new Set(['index.html', '404.html', 'home.js', 'favicon.ico', 'robots.txt', 'sitemap.xml', 'googlecae29814c1367461.html']);
 const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8', windowsHide: true }).split('\0').filter(Boolean);
 const selected = tracked.filter(file => files.has(file) || dirs.has(file.split('/')[0]));

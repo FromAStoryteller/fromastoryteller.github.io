@@ -9,7 +9,7 @@ import { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, g
 const SITE_ORIGIN = "https://fromastoryteller.com";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-const CONTENT_ROOTS = ["games", "tools", "stories", "videos", "blog"];
+const CONTENT_ROOTS = ["games", "tools", "stories", "videos", "blog", "gallery"];
 const CONTENT_ROOT_ORDER = new Map(
   CONTENT_ROOTS.map((name, index) => [name, index])
 );
@@ -246,11 +246,12 @@ function generateStaticHtml(items) {
   const components = ["header", "sidebar", "footer"].map(name => ({
     id: `${name}-placeholder`,
     html: readFileSync(join(ROOT, "components", `${name}.html`), "utf8")
+      .replace(/data-content-category="([a-z]+)" hidden/g,(attribute,category)=>content.some(item=>item.category===category)?attribute.replace(" hidden",""):attribute)
       .replace(new RegExp(`<${{header: 'header', sidebar: 'aside', footer: 'footer'}[name]} `),
         `<${{header: 'header', sidebar: 'aside', footer: 'footer'}[name]} data-static-component `)
   }));
   const pagePaths = [
-    ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/search/",
+    ...STATIC_PAGE_GROUPS.flatMap(group => group.pages), "/blog/", "/videos/", "/gallery/", "/collections/", "/search/", "/read/", "/storytellers/", "/account/studio/upload-guide/",
     ...items.map(item => item.url), "/404.html", "/_templates/page-template.html",
     // Account previews share the shell, but remain outside public search/sitemaps.
     ...readdirSync(join(ROOT, 'account'), { withFileTypes: true })
