@@ -34,7 +34,7 @@ export function mountSeriesEditor(host,service,{canEdit=()=>true,onAccessLost=()
   previous.replaceChildren(new Option('First in the series',''));
   const currentKey=(target?.source_kind==='file'?'file':'studio')+':'+target?.id;
   const assigned=d.createElement('optgroup'),unassigned=d.createElement('optgroup');assigned.label='In this series';unassigned.label='Add unassigned work to this series';
-  for(const item of sortSeriesParts(items)){if(item.key===currentKey)continue;const same=item.series_name===name.value.trim()&&(item.collection_name||'')===collection.value.trim();if(item.series_name&&!same)continue;(item.series_name?assigned:unassigned).append(new Option(seriesPartLabel(item),item.key));}
+  for(const item of sortSeriesParts(items)){if(item.key===currentKey)continue;const same=item.series_name===name.value.trim()&&(item.collection_name||'')===collection.value.trim();if(item.series_name&&!same||!item.series_name&&item.collection_name&&item.collection_name!==collection.value.trim())continue;(item.series_name?assigned:unassigned).append(new Option(seriesPartLabel(item),item.key));}
   if(assigned.children.length)previous.append(assigned);if(unassigned.children.length)previous.append(unassigned);
   if(selected&&![...previous.options].some(o=>o.value===selected))previous.append(new Option('Previous piece unavailable — choose another',selected));previous.value=selected;
  }
