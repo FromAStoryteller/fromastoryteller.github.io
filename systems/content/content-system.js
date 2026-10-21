@@ -36,6 +36,7 @@ function getPrimaryActionLabel(item) {
     if (category === "videos") return "Watch"
     if (category === "tools") return "Use"
     if (category === "blog") return "Read"
+    if (category === "gallery") return "View"
 
     return "Explore"
 }
@@ -124,7 +125,11 @@ async function loadMetaFile(metaPath) {
     return normalizeContentMeta(meta)
 }
 
+let allContentRequest;
 async function loadAllContent() {
+    return allContentRequest??=(loadAllContentUncached().catch(error=>{allContentRequest=null;throw error;}))
+}
+async function loadAllContentUncached() {
     const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
     const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
     const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog().catch(()=>[])]);
@@ -706,7 +711,8 @@ export async function initRelatedContentSection(config) {
     }
 }
 
-export async function getAllPublishedContent() {
+export async function getAllPublishedContent({refresh=false}={}) {
+    if(refresh)allContentRequest=null
     const loadedContent = await loadAllContent()
     return sortContent(getPublishedContent(loadedContent))
 }
