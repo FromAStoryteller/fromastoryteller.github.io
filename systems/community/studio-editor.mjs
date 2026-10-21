@@ -16,7 +16,7 @@ import {plainDocument,readManuscript,renderManuscript,documentText,renderSocialL
 import {publicCoverUrl} from './profiles.mjs';
 import {coverCrop,moveCoverCrop} from './studio-crop.mjs';
 
-const blank=()=>({executable_package:null,publishing_identity:'personal',title:'',summary:'',body:'',genres:[],tags:[],content_warning:'',warning_ids:[],warning_reviewed:false,metadata:{},content_type:'story',scene_style:'space',drop_caps:false,paragraph_style:'indented',language:'en',scheduled_at:null,cover_asset_id:null});
+const blank=()=>({executable_package:null,publishing_identity:'personal',title:'',summary:'',body:'',genres:[],tags:[],content_warning:'',warning_ids:[],warning_reviewed:false,metadata:{},content_type:'story',scene_style:'dots',drop_caps:false,paragraph_style:'indented',language:'en',scheduled_at:null,cover_asset_id:null});
 const stateLabel=s=>s?.status==='archived'?(s.author_archived_at?'Archived':'Moderation lock'):s?.status==='published'?'Published':s?.scheduled_at?'Scheduled':'Private draft';
 export function wordCount(body){const n=body.replace(/\*\*\*/g,'').trim().split(/\s+/).filter(Boolean).length;return `${n.toLocaleString()} ${n===1?'word':'words'}`;}
 export function downloadStory(d,story){const text=[story.title||'Untitled',story.summary,story.content_warning?`Content warning: ${story.content_warning}`:'',story.body_document?documentText(story.body_document):story.body].filter(Boolean).join('\n\n');const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'})),a=d.createElement('a');a.href=url;a.download=storySlug(story.title||'content')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
