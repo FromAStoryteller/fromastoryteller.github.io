@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - search/**
+      - systems/search/**
+      - systems/community/profile-directory.mjs
+      - systems/community/public-storyteller-page.mjs
+      - scripts/test-profile-discovery-browser.mjs
       - systems/community/public-profile.mjs
       - systems/community/series-editor.mjs
       - scripts/test-content-series-browser.mjs
@@ -68,6 +72,7 @@ jobs:
       - run: node scripts/test-content-layout-browser.mjs
       - run: node scripts/test-content-details-browser.mjs
       - run: node scripts/test-content-series-browser.mjs
+      - run: node scripts/test-profile-discovery-browser.mjs
       - run: node scripts/test-published-editorial-browser.mjs
       - run: node scripts/test-content-discovery-browser.mjs
       - run: node scripts/test-legacy-projects-browser.mjs

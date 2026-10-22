@@ -1,5 +1,6 @@
 import {navigationSnapshot,rememberNavigationSnapshot,clearNavigationSnapshot} from '../../account/navigation-shell.mjs';
 import {signInHref} from '../../account/return-path.mjs';
+import {syncProfileSidebar} from './profile-sidebar.mjs';
 
 export function initHeaderAccount({closeOther=()=>{}}={}) {
  const host=document.querySelector('[data-header-account]'),toggle=host?.querySelector('[data-account-toggle]'),panel=host?.querySelector('.header-account-panel');
@@ -7,6 +8,7 @@ export function initHeaderAccount({closeOther=()=>{}}={}) {
  let open=false,pinned=false,leaveTimer,checking,auth=null,known=navigationSnapshot(),epoch=0,rendered='',watching=false,phase='checking',focusFirst=false,verifiedUser=null;
  const current=location.pathname.replace(/index\.html$/,'');
  function render(access=known){
+  syncProfileSidebar(access);
   const active=panel.contains(document.activeElement)?{href:document.activeElement.getAttribute('href'),text:document.activeElement.textContent}:null;
   const links=access?[['Edit my profile','/account/profile/'],...(access.contributor&&access.publicId&&/^[0-9a-f-]{36}$/i.test(access.publicId)?[['View public profile','/storytellers/?author='+encodeURIComponent(access.publicId)]]:[]),...(access.contributor?[['Storyteller Studio','/account/studio/']]:[]),['Saved for later','/account/saved/'],['Favourites','/account/favourites/'],['Game saves','/account/games/'],['Account settings','/account/settings/'],...(access.admin?[['Admin tools','/account/admin/']]:[])]:phase==='ready'?[['Sign in',signInHref(location.pathname+location.search)],['Create account','/account/sign-up/'],['Account settings','/account/settings/']]:[];
   const signature=JSON.stringify([links,Boolean(auth),phase]);

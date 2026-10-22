@@ -1,3 +1,5 @@
+import {findPublicProfiles} from '../community/profile-directory.mjs';
+import {publicProfileUrl} from '../community/profiles.mjs';
 import { getAllPublishedContent, searchPublishedContent } from "../content/content-system.js";
 
 export function syncHeaderSearchQuery() {
@@ -17,10 +19,10 @@ export async function initHeaderSearch() {
 
   if (!input || !suggestionsContainer || !form) return
 
-  let allItems = []
+  let allItems = [], profileGeneration=0, profileTimer, suggestionsOpen=false
 
   try {
-    allItems = await getAllPublishedContent()
+    void getAllPublishedContent().then(items=>{allItems=items;if(document.activeElement===input)updateSuggestions(input.value.trim());}).catch(()=>{})
   } catch (err) {
     console.error("Header search failed to load content:", err)
   }
@@ -41,14 +43,15 @@ export async function initHeaderSearch() {
     window.location.href = url.toString()
   }
 
-  function showSuggestions(suggestions) {
+  function showSuggestions(suggestions,profiles=[]) {
     suggestionsContainer.innerHTML = ""
 
-    if (!suggestions.length) {
+    if (!suggestions.length&&!profiles.length) {
       hideSuggestions()
       return
     }
 
+    profiles.forEach(profile=>{const a=document.createElement('a');a.className='site-search-suggestion';a.href=publicProfileUrl(profile.public_id);a.textContent=profile.display_name+' — Storyteller';suggestionsContainer.append(a);});
     suggestions.forEach(item => {
       const button = document.createElement("button")
 
@@ -70,31 +73,28 @@ export async function initHeaderSearch() {
     return results.slice(0, 5)
   }
 
+  function updateSuggestions(query){suggestionsOpen=true;const token=++profileGeneration;clearTimeout(profileTimer);const content=getSuggestions(query);showSuggestions(content);if(!query)return;profileTimer=setTimeout(async()=>{try{const result=await findPublicProfiles(query);if(suggestionsOpen&&token===profileGeneration&&input.value.trim()===query)showSuggestions(content,result.data.items.slice(0,3));}catch{}},200);}
   form.addEventListener("submit", event => {
     event.preventDefault()
 
     const query = input.value.trim()
 
-    hideSuggestions()
+    suggestionsOpen=false;profileGeneration++;clearTimeout(profileTimer);hideSuggestions()
     goToSearchPage(query)
   })
 
   input.addEventListener("input", () => {
     const query = input.value.trim()
-    const suggestions = getSuggestions(query)
-
-    showSuggestions(suggestions)
+    updateSuggestions(query)
   })
 
   input.addEventListener("focus", () => {
     const query = input.value.trim()
-    const suggestions = getSuggestions(query)
-
-    showSuggestions(suggestions)
+    updateSuggestions(query)
   })
 
   suggestionsContainer.addEventListener("click", event => {
-    const button = event.target.closest(".site-search-suggestion")
+    const button = event.target.closest("button.site-search-suggestion")
 
     if (!button) return
 
@@ -109,7 +109,7 @@ export async function initHeaderSearch() {
 
   document.addEventListener("pointerdown", event => {
     if (!event.target.closest(".site-search-wrap")) {
-      hideSuggestions()
+      suggestionsOpen=false;profileGeneration++;clearTimeout(profileTimer);hideSuggestions()
     }
   })
 }

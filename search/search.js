@@ -1,3 +1,4 @@
+import {findPublicProfiles,renderProfileCards} from '/systems/community/profile-directory.mjs'
 import {createBrowseHistory} from '/systems/content/browse-state.mjs'
 import {
     getAllPublishedContent,
@@ -12,6 +13,17 @@ const suggestionsContainer = document.querySelector("#search-suggestions")
 const resultsSelector = "#search-results-grid"
 
 let allItems = []
+const people=document.createElement('section');people.className='search-storytellers';people.hidden=true;people.setAttribute('aria-label','Storyteller results');const peopleHeading=document.createElement('h2');peopleHeading.textContent='Storytellers';const peopleStatus=document.createElement('p');peopleStatus.setAttribute('role','status');const peopleGrid=document.createElement('div'),peopleMore=document.createElement('button');peopleMore.type='button';peopleMore.className='content-filter';peopleMore.textContent='More storytellers';peopleMore.hidden=true;people.append(peopleHeading,peopleStatus,peopleGrid,peopleMore);document.querySelector(resultsSelector).closest('section').before(people);
+let peopleGeneration=0,peopleTimer,peopleCursor=null,peopleQuery='',peopleSeen=new Set();
+async function loadPeople(query,append=false){const token=++peopleGeneration;people.hidden=!query;if(!query)return;peopleStatus.textContent='Loading storytellers.';peopleMore.disabled=true;
+ if(!append){peopleGrid.replaceChildren();peopleCursor=null;peopleQuery=query;peopleSeen.clear();peopleMore.hidden=true;}
+ try{const result=await findPublicProfiles(query,append?peopleCursor:null);if(token!==peopleGeneration)return;const key=JSON.stringify(result.data.next_cursor);if(result.data.next_cursor&&peopleSeen.has(key))throw Error('Storyteller results could not continue.');peopleSeen.add(key);renderProfileCards(peopleGrid,result.data.items,{imageBase:result.imageBase,append});peopleCursor=result.data.next_cursor;peopleMore.hidden=!peopleCursor;peopleStatus.textContent=peopleGrid.children.length?peopleGrid.children.length+' storytellers found.':'No storytellers match this search.';
+ }catch{if(token===peopleGeneration){peopleStatus.replaceChildren(document.createTextNode('Storyteller search is temporarily unavailable. '));const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Retry storyteller search';retry.addEventListener('click',()=>void loadPeople(query,append));peopleStatus.append(retry);}}
+ finally{if(token===peopleGeneration)peopleMore.disabled=false;}
+}
+peopleMore.addEventListener('click',()=>void loadPeople(peopleQuery,true));
+function searchPeople(query){peopleGeneration++;clearTimeout(peopleTimer);people.hidden=!query;peopleMore.hidden=true;peopleGrid.replaceChildren();peopleStatus.textContent='Loading storytellers.';peopleTimer=setTimeout(()=>void loadPeople(query),200);}
+
 const browsing=createBrowseHistory()
 
 function getQueryFromUrl() {
@@ -38,16 +50,16 @@ function updateSummary(query, resultsCount) {
     }
 
     if (resultsCount === 0) {
-        summary.textContent = `No results found for "${query}".`
+        summary.textContent = `No content results found for "${query}".`
         return
     }
 
     if (resultsCount === 1) {
-        summary.textContent = `1 result found for "${query}".`
+        summary.textContent = `1 content result found for "${query}".`
         return
     }
 
-    summary.textContent = `${resultsCount} results found for "${query}".`
+    summary.textContent = `${resultsCount} content results found for "${query}".`
 }
 
 function getSuggestions(query, items, limit = 6) {
@@ -117,12 +129,13 @@ function showRecovery(query){
     const hint=document.createElement('p');hint.textContent=query?'Try another word, or browse a category.':'You can also browse by category.';section.append(hint);
     if(query){const clear=document.createElement('button');clear.type='button';clear.className='content-filter';clear.textContent='Clear search';clear.addEventListener('click',()=>{input.value='';setQueryInUrl('');runSearch('');hideSuggestions();browsing.remember();input.focus({preventScroll:true});});section.append(clear);}
     const nav=document.createElement('nav');nav.setAttribute('aria-label','Browse content categories');
-    for(const [label,path]of [['Stories','/stories/'],['Games','/games/'],['Tools','/tools/'],['Videos','/videos/'],['Blog','/blog/']]){const a=document.createElement('a');a.className='content-filter';a.href=path;a.textContent=label;nav.append(a);}
+    for(const [label,path]of [['Stories','/stories/'],['Games','/games/'],['Tools','/tools/'],['Videos','/videos/'],['Blog','/blog/'],['Storytellers','/storytellers/']]){const a=document.createElement('a');a.className='content-filter';a.href=path;a.textContent=label;nav.append(a);}
     section.append(nav);grid.querySelector('.content-grid-empty')?.replaceWith(section);
 }
 
 function runSearch(query) {
     const trimmedQuery = query.trim()
+    searchPeople(trimmedQuery)
 
     if (!trimmedQuery) {
         updateSummary("", 0)
@@ -139,7 +152,7 @@ function runSearch(query) {
 
 async function initSearchPage() {
     try {
-        allItems = await getAllPublishedContent()
+        void getAllPublishedContent().then(items=>{allItems=items;runSearch(input.value.trim());browsing.restore();}).catch(()=>{summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';})
 
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery

@@ -1712,3 +1712,22 @@ html, body, button, input, textarea, select,
 .content-series-link span { font:.875rem/1.4 var(--font-family-interface); color:var(--colour-text-secondary); }
 .content-series-link:hover { background:var(--state-hover-background); color:var(--state-hover-colour); }
 .content-series-link:focus-visible { outline:2px solid var(--colour-focus-ring); outline-offset:3px; }
+
+/* Public contributor discovery and the private library section share the site theme. */
+.sidebar-library[hidden],.search-storytellers[hidden]{display:none;}
+.storyteller-directory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:1.25rem;margin-block:1.25rem;}
+.storyteller-directory-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:1.25rem;border:var(--surface-standard-border);border-radius:var(--radius-lg);background:var(--surface-standard-background);color:var(--colour-text-primary);text-decoration:none;overflow-wrap:anywhere;}
+.storyteller-directory-card:hover{border-color:var(--colour-accent-primary);background:var(--state-hover-background);color:var(--state-hover-colour);}
+.storyteller-directory-card:focus-visible{outline:2px solid var(--colour-focus-ring);outline-offset:3px;}
+.storyteller-directory-avatar{display:grid;place-items:center;width:4rem;height:4rem;flex-shrink:0;overflow:hidden;border-radius:50%;border:1px solid var(--colour-border-default);background:var(--surface-inset-background);color:var(--colour-text-primary);font:1.35rem var(--font-family-reading);}
+.storyteller-directory-avatar img{width:100%;height:100%;object-fit:cover;}
+.storyteller-directory-card h3{font:400 1.5rem/1.3 var(--font-family-reading);margin:1rem 0 .5rem;}
+.storyteller-directory-card p{font-size:.95rem;color:var(--colour-text-secondary);margin:0 0 1rem;line-height:1.65;}
+.storyteller-directory-action{margin-top:auto;font-size:.875rem;text-decoration:underline;text-underline-offset:.2em;}
+.storyteller-directory-search{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-block:1.5rem;}
+.storyteller-directory-search label{flex:1 0 100%;}
+.storyteller-directory-search input{flex:1 1 16rem;min-width:0;min-height:2.75rem;padding:.65rem .8rem;border:1px solid var(--colour-control-border);border-radius:var(--radius-md);background:var(--colour-control-background);color:var(--colour-control-text);font:inherit;}
+.storyteller-directory-search input:focus-visible{outline:2px solid var(--colour-focus-ring);outline-offset:2px;}
+.storyteller-directory-back{display:inline-block;margin-block:1rem;}
+.search-storytellers{margin-block:1.5rem 2rem;}
+.site-search-suggestions a.site-search-suggestion{display:block;text-decoration:none;}
