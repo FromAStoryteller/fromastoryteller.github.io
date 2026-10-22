@@ -3,6 +3,15 @@ on:
   push:
     branches: [main]
     paths:
+      - systems/community/profile-directory.mjs
+      - systems/community/public-storyteller-page.mjs
+      - systems/community/profile-page.mjs
+      - systems/core/profile-sidebar.mjs
+      - systems/core/header-account.mjs
+      - systems/search/header-search.js
+      - search/search.js
+      - css/components.css
+      - scripts/verify-content-layout-release.mjs
       - systems/content/page-layout.mjs
       - systems/community/public-profile.mjs
       - systems/community/studio-editor.mjs
