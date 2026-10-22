@@ -23,7 +23,7 @@ export function mountStoryDiscovery(host,items,onChange,{window:w=window}={}) {
   const controls={};
   const choices={genre:[['','All genres'],...[...new Set(items.flatMap(storyGenres))].sort().map(g=>[g,g])],length:[['','Any reading length'],['quick','Under 5 minutes'],['medium','5–15 minutes'],['long','Over 15 minutes']],sort:[['newest','Newest first'],['oldest','Oldest first'],['shortest','Shortest first'],['longest','Longest first'],['title','Title A–Z']]};
   for(const [key,title]of [['genre','Genre'],['length','Reading length'],['sort','Sort stories']]){
-    const label=d.createElement('label');label.textContent=title;const select=d.createElement('select');select.name=key;
+    const label=d.createElement('label');label.textContent=title;const select=d.createElement('select');select.name=key;select.setAttribute('aria-label',title);
     for(const [value,text]of choices[key]){const option=d.createElement('option');option.value=value;option.textContent=text;select.append(option);}
     if(choices[key].some(([value])=>value===params.get(key)))select.value=params.get(key);
     controls[key]=select;label.append(select);form.append(label);
