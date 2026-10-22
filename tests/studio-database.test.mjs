@@ -30,5 +30,6 @@ test('Studio metadata bounds, private drafts, public projections, moderation loc
   await db.exec(readFileSync(new URL('../supabase/tests/viewer-actions.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/content-series.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../supabase/tests/profile-discovery.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../supabase/tests/storyteller-following.sql',import.meta.url),'utf8'));
  }finally{await db.close();}
 });

@@ -6,6 +6,16 @@ on:
       - systems/community/profile-directory.mjs
       - systems/community/public-storyteller-page.mjs
       - systems/community/profile-share.mjs
+      - systems/community/storyteller-follow.mjs
+      - systems/community/following-page.mjs
+      - systems/community/audience-report.mjs
+      - systems/community/studio-service.mjs
+      - systems/community/account-navigation.mjs
+      - account/following/**
+      - account/return-path.mjs
+      - account/navigation-shell.mjs
+      - account/settings-controller.mjs
+      - account/account-data-download.mjs
       - systems/community/manuscript.mjs
       - systems/community/profile-page.mjs
       - systems/core/profile-sidebar.mjs

@@ -1,0 +1,41 @@
+// Fictional services only; no real accounts, follows or writes.
+import {chromium} from 'playwright';import assert from 'node:assert/strict';
+const origin=process.argv[2]??'http://127.0.0.1:55410',browser=await chromium.launch();
+const people=Array.from({length:26},(_,i)=>({public_id:'a6400000-0000-4000-8000-'+String(i+1).padStart(12,'0'),display_name:'Storyteller '+String(i+1).padStart(2,'0'),bio:'A fictional creative journey.',image:null}));
+try{for(const width of [1440,390,320])for(const theme of ['light','dark']){
+ const context=await browser.newContext({viewport:{width,height:950}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));const following=new Set();let failWrite=false,failList=false,writes=0;
+ await context.addInitScript(theme=>{addEventListener('DOMContentLoaded',()=>document.documentElement.dataset.theme=theme);},theme);
+ await context.route('**/__fas/local-auth',r=>r.fulfill({json:{mode:'development',url:'https://oqmmvjjycpyxvxipcyli.supabase.co',key:'sb_publishable_fixture'}}));
+ await context.route('**/account/sign-in.js',r=>r.fulfill({contentType:'text/javascript',body:'// Sign-in destination fixture; authentication has separate coverage.'}));
+ await context.route('**/account/local-auth-client.mjs',r=>r.fulfill({contentType:'text/javascript',body:`
+ let signed=true;const listeners=[],user={id:'a6410000-0000-4000-8000-000000000001',email:'viewer@example.invalid'};
+ const auth={getSession:async()=>({data:{session:signed?{user}:null}}),refreshSession:async()=>({data:{session:signed?{user}:null}}),getUser:async()=>({data:{user:signed?user:null}}),onAuthStateChange:fn=>{listeners.push(fn);return {data:{subscription:{unsubscribe(){const i=listeners.indexOf(fn);if(i>=0)listeners.splice(i,1);}}}};},signOut:async()=>{signed=false;for(const fn of [...listeners])fn('SIGNED_OUT',null);return {error:null};}};window.endFollowingSession=()=>auth.signOut();
+ const client={auth,rpc:async(name,args)=>fetch('/'+'__follow-rpc',{method:'POST',body:JSON.stringify({name,args})}).then(r=>r.json()),from(){return {select(){return this;},eq(){return this;},single:async()=>({data:{public_id:user.id,display_name:'Viewer',social_links:[]}}),then(resolve,reject){return Promise.resolve({data:[]}).then(resolve,reject);}};}};
+ export async function loadLocalAuthClient(){return {client,hadSession:false,storage:{clear(){}}};}
+ `}));
+ const rpc=async(name,args={})=>{
+  if(name==='fas_public_profile'){const p=people.find(p=>p.public_id===args.profile_key);return {data:p?{...p,stories:[],next_offset:null}:null};}
+  if(name==='fas_public_profile_catalog')return {data:{items:people.slice(0,2),next_cursor:null}};
+  if(name==='fas_my_account_state')return {data:'active'};
+  if(name==='fas_my_storyteller_follow')return {data:{available:true,can_follow:true,following:following.has(args.target_key)}};
+  if(name==='fas_set_storyteller_follow'){writes++;if(failWrite){failWrite=false;return {error:{message:'Fixture save failure'}};}if(args.enabled)following.add(args.target_key);else following.delete(args.target_key);return {data:{following:args.enabled}};}
+  if(name==='fas_my_following'){if(failList){failList=false;return {error:{message:'Fixture list failure'}};}const all=people.filter(p=>following.has(p.public_id)),start=args.after_id?all.findIndex(p=>p.public_id===args.after_id)+1:0,items=all.slice(start,start+24),last=items.at(-1);return {data:{items,next_cursor:all.length>start+24?{name:last.display_name.toLowerCase(),id:last.public_id}:null}};}
+  return {data:[]};
+ };
+ await context.route('**/__follow-rpc',async r=>{const {name,args}=r.request().postDataJSON();await r.fulfill({json:await rpc(name,args)});});
+ await context.route('**/rest/v1/rpc/**',async r=>{const name=new URL(r.request().url()).pathname.split('/').at(-1);const result=await rpc(name,r.request().postDataJSON());await r.fulfill({headers:{'access-control-allow-origin':'*'},json:result.data});});
+ const visit=async path=>{await page.goto(origin+path);const c=page.getByRole('button',{name:'Essentials only',exact:true});if(await c.isVisible())await c.click();};
+ await visit('/storytellers/?author='+people[0].public_id);await page.getByRole('heading',{name:people[0].display_name,exact:true}).waitFor();const follow=page.locator('[data-follow-action]');await page.waitForFunction(()=>{const b=document.querySelector('[data-follow-action]');return b&&!b.disabled;});assert.equal(await follow.textContent(),'Follow');
+ failWrite=true;await follow.click();await page.getByText('Your follow choice could not be saved. Please try again.',{exact:true}).waitFor();assert.equal(following.size,0);await follow.click();const toggle=page.locator('[data-following-toggle]');await toggle.waitFor();assert.equal(following.size,1);assert.equal(await page.getByRole('button',{name:'Unfollow',exact:true}).isVisible(),false);
+ await toggle.click();const unfollow=page.getByRole('button',{name:'Unfollow',exact:true});await unfollow.waitFor();assert.equal(await unfollow.evaluate(e=>getComputedStyle(e).color),await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--colour-error-text').trim()).then(async colour=>page.evaluate(colour=>{const e=document.createElement('span');e.style.color=colour;document.body.append(e);const value=getComputedStyle(e).color;e.remove();return value;},colour)));
+ await page.keyboard.press('Escape');assert.equal(await unfollow.isVisible(),false);await toggle.click();await unfollow.click();await follow.waitFor();assert.equal(following.size,0);await follow.click();await toggle.waitFor();assert.equal(writes,4);
+ assert.equal(await page.locator('[data-viewer-library] a[href="/account/following/"]').count(),1);assert.equal(await page.getByText('People Following',{exact:true}).count(),0);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ if(process.env.FAS_FOLLOW_SCREENSHOT_DIR)await page.screenshot({path:process.env.FAS_FOLLOW_SCREENSHOT_DIR+'/profile-'+width+'-'+theme+'.png',fullPage:true});
+ for(const p of people)following.add(p.public_id);failList=true;await visit('/account/following/');await page.getByRole('button',{name:'Try again',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('.storyteller-directory-card').length===24);await page.getByRole('button',{name:'More storytellers',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('.storyteller-directory-card').length===26);assert.equal(await page.getByRole('button',{name:'More storytellers',exact:true}).isVisible(),false);
+ await page.evaluate(()=>window.endFollowingSession());await page.getByText('Your account changed. Sign in again to view Following.',{exact:true}).waitFor();assert.equal(await page.locator('.storyteller-directory-card').count(),0);assert.match(await page.getByRole('link',{name:'Sign in',exact:true}).getAttribute('href'),/next=%2Faccount%2Ffollowing%2F/);
+ await visit('/storytellers/?author='+people[0].public_id);await page.locator('[data-following-toggle]').waitFor();await page.evaluate(()=>window.endFollowingSession());await follow.waitFor();assert.equal(await page.locator('[data-following-toggle]').isVisible(),false);
+ // Guests return to precisely this public profile after signing in.
+ await follow.click();await page.waitForURL('**/account/sign-in/?next=*');assert.equal(new URL(page.url()).searchParams.get('next'),'/storytellers/?author='+people[0].public_id);
+ // Counts are only rendered inside the private report, including a truthful zero.
+ await visit('/account/following/');await page.evaluate(async()=>{const {renderAudienceReport}=await import('/systems/community/audience-report.mjs');const host=document.querySelector('[data-following-root]');renderAudienceReport(host,{provider:'FAS first-party',followers:{people_following:0},pages:[],views:0});});await page.getByRole('heading',{name:'People Following',exact:true}).waitFor();assert.equal(await page.locator('.ss-follower-metrics article p').textContent(),'0');assert.deepEqual(errors,[]);await context.close();console.log('PASS follow/dropdown/unfollow, save failure, private list pagination/retry, sign-out, return link and private count '+width+' '+theme);
+}}finally{await browser.close();}

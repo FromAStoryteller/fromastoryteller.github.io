@@ -92,6 +92,6 @@ export function createStudioService(client,{ownerId,checkAccount=loadProfileAcco
    if(r.error)throw new Error(remove?'This cover could not be removed. Choose and save another cover (or clear an unscheduled draft’s cover) before removing the selected image.':'The description could not be saved. Check your access and description.');
    if(r.data?.id!==previous.id)throw new StudioConflictError('The image change was not confirmed. Reopen your content.');return r.data;
   },
-  async traffic(pageId=null,days=30){await authorize();const [r,a]=await Promise.all([client.rpc('fas_my_studio_traffic',{page_key:pageId,period_days:days}),client.rpc('fas_my_studio_acknowledgements',{page_key:pageId})]);if(r.error||a.error)throw new Error('Insights could not be loaded. Try again.');return {...r.data,acknowledgements:a.data};},
+  async traffic(pageId=null,days=30){await authorize();const [r,a,f]=await Promise.all([client.rpc('fas_my_studio_traffic',{page_key:pageId,period_days:days}),client.rpc('fas_my_studio_acknowledgements',{page_key:pageId}),client.rpc('fas_my_follower_count')]);if(r.error||a.error||f.error)throw new Error('Insights could not be loaded. Try again.');return {...r.data,acknowledgements:a.data,followers:f.data};},
  };
 }
