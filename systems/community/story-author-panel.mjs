@@ -5,6 +5,7 @@ import {profileImageUrl} from './profile-image-service.mjs';
 
 // Both repository stories and published contributor stories use the rendered byline.
 export function initStoryAuthorPanels({document:d=document,window:w=window,request=publicProfileRequest,connect}={}) {
+  if(w.location.pathname.startsWith('/account/'))return;
   let generation=0,stop;
   async function render(){
     const story=d.querySelector('.story-page'),footer=story?.querySelector('.story-footer');if(!footer||story.querySelector('[data-story-author-panel]'))return;

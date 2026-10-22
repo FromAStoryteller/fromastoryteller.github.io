@@ -1,0 +1,4 @@
+import {initPublicStorytellerPage} from '../../systems/community/public-storyteller-page.mjs';
+const id='aa000000-0000-4000-8000-000000000001';
+const make=(slug,type,date)=>({id:slug,slug,type,category:type==='story'?'stories':'blog',author:id,authorDisplay:'Mara Vale',status:'published',draft:false,datePublished:date,title:slug,url:'/'+(type==='story'?'stories':'blog')+'/'+slug+'/',image:{src:'/assets/images/covers/tea-at-the-summit.jpg',alt:'Mountain'},card:{title:slug,description:'A fictional publication.',image:'/assets/images/covers/tea-at-the-summit.jpg',imageAlt:'Mountain'}});
+await initPublicStorytellerPage(document.querySelector('#fixture-profile'),{request:async()=>({data:{public_id:id,display_name:'Mara Vale',bio:'A fictional writer.',stories:[],next_offset:null}}),connect:async()=>null,loadContent:async()=>[make('earlier-story','story','2026-10-18'),make('latest-story','story','2026-10-21'),make('latest-blog','blog','2026-10-22')]});
