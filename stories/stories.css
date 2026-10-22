@@ -269,7 +269,7 @@
 .story-details {width:min(100%,var(--width-reading));margin:0 auto var(--space-5);overflow-wrap:anywhere;}
 .story-summary {font-family:var(--font-family-reading);line-height:1.7;color:var(--colour-text-secondary);}
 .story-taxonomy,.story-warning {font-size:var(--font-size-sm);line-height:1.6;color:var(--colour-text-secondary);}
-.story-hero--no-image {min-height:12rem;background:var(--surface-standard-background);}
+.story-hero--no-image {width:100%;aspect-ratio:auto;min-height:12rem;background:var(--surface-standard-background);}
 .story-hero--no-image .story-hero-copy {position:relative;color:var(--colour-text-primary);}
 .story-hero--no-image h1 {color:var(--colour-text-primary);}
 .story-content.fas-manuscript > :is(p,div) {text-indent:0;}
