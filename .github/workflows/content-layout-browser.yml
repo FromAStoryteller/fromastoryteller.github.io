@@ -6,6 +6,8 @@ on:
       - systems/search/**
       - systems/community/profile-directory.mjs
       - systems/community/public-storyteller-page.mjs
+      - systems/community/profile-share.mjs
+      - systems/community/manuscript.mjs
       - scripts/test-profile-discovery-browser.mjs
       - systems/community/public-profile.mjs
       - systems/community/series-editor.mjs

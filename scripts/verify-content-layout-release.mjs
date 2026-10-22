@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 if(process.argv.slice(2).join(' ')!=='--production-read-only')throw Error('Explicit read-only mode required');
-const paths=['systems/community/profile-directory.mjs','systems/community/public-storyteller-page.mjs','systems/community/profile-page.mjs','systems/core/profile-sidebar.mjs','systems/core/header-account.mjs','systems/search/header-search.js','search/search.js','css/components.css','systems/content/page-layout.mjs','systems/community/public-profile.mjs','systems/community/studio-editor.mjs','stories/stories.css','css/manuscript.css','css/studio.css','games/rally-clash/game.js','games/brick-blitz/game.js'];
+const paths=['systems/community/profile-share.mjs','systems/community/manuscript.mjs','systems/community/profile-directory.mjs','systems/community/public-storyteller-page.mjs','systems/community/profile-page.mjs','systems/core/profile-sidebar.mjs','systems/core/header-account.mjs','systems/search/header-search.js','search/search.js','css/components.css','systems/content/page-layout.mjs','systems/community/public-profile.mjs','systems/community/studio-editor.mjs','stories/stories.css','css/manuscript.css','css/studio.css','games/rally-clash/game.js','games/brick-blitz/game.js'];
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 for(const path of paths){
  const expected=digest(await readFile(new URL('../'+path,import.meta.url)));let matched=false;

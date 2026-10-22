@@ -1728,6 +1728,17 @@ html, body, button, input, textarea, select,
 .storyteller-directory-search label{flex:1 0 100%;}
 .storyteller-directory-search input{flex:1 1 16rem;min-width:0;min-height:2.75rem;padding:.65rem .8rem;border:1px solid var(--colour-control-border);border-radius:var(--radius-md);background:var(--colour-control-background);color:var(--colour-control-text);font:inherit;}
 .storyteller-directory-search input:focus-visible{outline:2px solid var(--colour-focus-ring);outline-offset:2px;}
-.storyteller-directory-back{display:inline-block;margin-block:1rem;}
+.storyteller-profile-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin-block:1rem;}
+.storyteller-profile-actions .account-secondary,.storyteller-directory-back.account-secondary{width:fit-content;max-width:100%;margin:0;}
+.profile-share-controls{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;min-width:0;}
+.profile-share-status{font-size:.85rem;color:var(--colour-text-secondary);}
+.profile-share-status:empty{display:none;}
+.profile-share-fallback{display:flex;align-items:end;flex-wrap:wrap;gap:.75rem;flex-basis:100%;min-width:0;}
+.profile-share-fallback label{display:grid;gap:.4rem;flex:1 1 16rem;min-width:0;}
+.profile-share-fallback input{box-sizing:border-box;width:100%;min-height:2.75rem;padding:.6rem;border:1px solid var(--colour-control-border);border-radius:var(--radius-md);background:var(--colour-control-background);color:var(--colour-control-text);font:inherit;}
+.storyteller-socials a{justify-content:center;width:2.75rem;border:1px solid var(--colour-border-default);border-radius:50%;color:var(--colour-text-primary);text-decoration:none;font-size:1.2rem;}
+.storyteller-socials a:hover{color:var(--colour-accent-primary);border-color:var(--colour-accent-primary);background:var(--colour-control-background);}
+.storyteller-socials a:focus-visible,.storyteller-profile-actions .account-secondary:focus-visible,.profile-share-fallback input:focus-visible{outline:2px solid var(--colour-focus-ring);outline-offset:3px;}
+.storyteller-profile-actions button.account-secondary:hover{color:var(--colour-accent-primary-hover);border-color:var(--colour-accent-primary-hover);background:var(--colour-control-background);}
 .search-storytellers{margin-block:1.5rem 2rem;}
 .site-search-suggestions a.site-search-suggestion{display:block;text-decoration:none;}

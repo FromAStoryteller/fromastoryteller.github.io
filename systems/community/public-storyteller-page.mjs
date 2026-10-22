@@ -1,15 +1,16 @@
 import {isPublicId,publicProfileUrl} from './profiles.mjs';
 import {renderPublicProfile} from './public-profile.mjs';
 import {initProfileDirectory,publicProfileRequest} from './profile-directory.mjs';
+import {profileShareControls} from './profile-share.mjs';
 export async function initPublicStorytellerPage(root,{request=publicProfileRequest,onRender=()=>{},window:w=window}={}){
  const d=root.ownerDocument,id=new URL(w.location.href).searchParams.get('author');
  if(!id){d.title='Storytellers | From A Storyteller';await initProfileDirectory(root,{window:w});return;}
- const back=()=>{const a=d.createElement('a');a.href='/storytellers/';a.className='storyteller-directory-back';a.textContent='Browse storytellers';return a;};
+ const back=()=>{const a=d.createElement('a');a.href='/storytellers/';a.className='account-secondary storyteller-directory-back';a.textContent='Browse storytellers';return a;};
  let profile=null,disposed=false,loading=false;w.addEventListener('pagehide',event=>{if(!event.persisted)disposed=true;},{once:true});
  async function load(append=false){if(loading||disposed)return;loading=true;const more=root.querySelector('[data-profile-more]');if(more)more.disabled=true;
   try{const response=isPublicId(id)?await request('fas_public_profile',{profile_key:id,page_offset:append?profile.next_offset:0}):{data:null};if(disposed)return;const page=response.data;
    profile=append&&page?{...page,stories:[...profile.stories,...page.stories]}:page;
-   renderPublicProfile(root,profile,{imageBase:response.imageBase});root.prepend(back());
+   renderPublicProfile(root,profile,{imageBase:response.imageBase});const toolbar=d.createElement('nav');toolbar.className='storyteller-profile-actions';toolbar.setAttribute('aria-label','Storyteller profile actions');toolbar.append(back());if(profile)toolbar.append(profileShareControls(profile,{document:d,window:w}));root.prepend(toolbar);
    if(!profile){d.title='Storyteller unavailable | From A Storyteller';return;}
    d.title=profile.display_name+' | From A Storyteller';
    const description=(profile.welcome_line||profile.bio||'Published work by '+profile.display_name).slice(0,180);d.querySelector('meta[name="description"]')?.setAttribute('content',description);d.querySelector('link[rel="canonical"]')?.setAttribute('href','https://fromastoryteller.com'+publicProfileUrl(id));
