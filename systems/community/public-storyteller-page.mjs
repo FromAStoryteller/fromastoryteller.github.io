@@ -3,7 +3,9 @@ import {renderPublicProfile} from './public-profile.mjs';
 import {initProfileDirectory,publicProfileRequest} from './profile-directory.mjs';
 import {profileShareControls} from './profile-share.mjs';
 import {mountStorytellerFollow} from './storyteller-follow.mjs';
-export async function initPublicStorytellerPage(root,{request=publicProfileRequest,onRender=()=>{},window:w=window}={}){
+import {getAllPublishedContent,initFeaturedRotator} from '../content/content-system.js';
+import {selectFeatured,contributorKey} from '../content/featured-selection.mjs';
+export async function initPublicStorytellerPage(root,{request=publicProfileRequest,onRender=()=>{},window:w=window,loadContent=getAllPublishedContent,connect}={}){
  const d=root.ownerDocument,id=new URL(w.location.href).searchParams.get('author');
  if(!id){d.title='Storytellers | From A Storyteller';await initProfileDirectory(root,{window:w});return;}
  const back=()=>{const a=d.createElement('a');a.href='/storytellers/';a.className='account-secondary storyteller-directory-back';a.textContent='Browse storytellers';return a;};
@@ -11,9 +13,11 @@ export async function initPublicStorytellerPage(root,{request=publicProfileReque
  async function load(append=false){if(loading||disposed)return;loading=true;const more=root.querySelector('[data-profile-more]');if(more)more.disabled=true;
   try{const response=isPublicId(id)?await request('fas_public_profile',{profile_key:id,page_offset:append?profile.next_offset:0}):{data:null};if(disposed)return;const page=response.data;
    profile=append&&page?{...page,stories:[...profile.stories,...page.stories]}:page;
-   stopFollow?.();renderPublicProfile(root,profile,{imageBase:response.imageBase});const toolbar=d.createElement('nav');toolbar.className='storyteller-profile-actions';toolbar.setAttribute('aria-label','Storyteller profile actions');toolbar.append(back());if(profile){const header=root.querySelector('.storyteller-header'),followHost=d.createElement('div');followHost.className='storyteller-profile-follow';header.insertBefore(followHost,header.querySelector('.storyteller-socials'));stopFollow=mountStorytellerFollow(followHost,profile,{window:w});toolbar.append(profileShareControls(profile,{document:d,window:w}));}root.prepend(toolbar);
+   stopFollow?.();renderPublicProfile(root,profile,{imageBase:response.imageBase});const toolbar=d.createElement('nav');toolbar.className='storyteller-profile-actions';toolbar.setAttribute('aria-label','Storyteller profile actions');toolbar.append(back());if(profile){const header=root.querySelector('.storyteller-header'),followHost=d.createElement('div');followHost.className='storyteller-profile-follow';header.insertBefore(followHost,header.querySelector('.storyteller-socials'));stopFollow=mountStorytellerFollow(followHost,profile,{window:w,...(connect?{connect}:{})});toolbar.append(profileShareControls(profile,{document:d,window:w}));}root.prepend(toolbar);
    if(!profile){d.title='Storyteller unavailable | From A Storyteller';return;}
    d.title=profile.display_name+' | From A Storyteller';
+   const featured=d.createElement('section');featured.className='storyteller-featured';featured.setAttribute('aria-label','Featured work');const featuredHeading=d.createElement('h2');featuredHeading.textContent='Featured work';const carousel=d.createElement('div');carousel.id='storyteller-featured-carousel';carousel.className='content-featured';featured.append(featuredHeading,carousel);featured.hidden=true;root.querySelector('.storyteller-stories').before(featured);
+   void loadContent().then(items=>{if(disposed||!featured.isConnected)return;const latest=selectFeatured(items.filter(item=>contributorKey(item)===id.toLowerCase()),{perType:true});if(latest.length){featured.hidden=false;initFeaturedRotator('#storyteller-featured-carousel',latest,'Featured work by '+profile.display_name);}}).catch(()=>{});
    const description=(profile.welcome_line||profile.bio||'Published work by '+profile.display_name).slice(0,180);d.querySelector('meta[name="description"]')?.setAttribute('content',description);d.querySelector('link[rel="canonical"]')?.setAttribute('href','https://fromastoryteller.com'+publicProfileUrl(id));
    if(profile.next_offset!=null){const button=d.createElement('button');button.type='button';button.className='account-secondary';button.dataset.profileMore='';button.textContent='More work';button.addEventListener('click',()=>void load(true));root.append(button);if(append)button.focus({preventScroll:true});}
    void Promise.resolve(onRender(profile)).catch(()=>{});

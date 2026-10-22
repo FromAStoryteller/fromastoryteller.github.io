@@ -5,6 +5,8 @@ import {publicStoryCatalog} from '../community/public-story-catalog.mjs'
 import {publicFileCatalog} from '../community/publishing-identity.mjs'
 import { readingTimeLabel } from "../reading/reading-time.mjs"
 import {isKeyboardInteraction} from "../core/focus.js"
+import {selectFeatured,newestPublished} from './featured-selection.mjs'
+import {mountStoryDiscovery} from './story-discovery.mjs'
 
 // ==================================
 // SHARED CONTENT SYSTEM
@@ -132,7 +134,7 @@ async function loadAllContent() {
 async function loadAllContentUncached() {
     const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
     const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
-    const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog().catch(()=>[])]);
+    const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog()]);
     const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
     const unavailable=new Set(fileAuthors.filter(item=>item.unavailable).map(item=>item.url));
     const live=new Map(community.map(item=>[item.url,item]));
@@ -149,17 +151,7 @@ function getPublishedContent(items) {
 }
 
 function sortContent(items) {
-    return [...items].sort((a, b) => {
-        if (a.pinned !== b.pinned) {
-            return a.pinned ? -1 : 1
-        }
-
-        if (a.featured !== b.featured) {
-            return a.featured ? -1 : 1
-        }
-
-        return parseDate(b.datePublished) - parseDate(a.datePublished)
-    })
+    return newestPublished(items)
 }
 
 function filterByCategory(items, category) {
@@ -168,13 +160,7 @@ function filterByCategory(items, category) {
 }
 
 function getFeaturedItem(items) {
-    const featuredItems = items.filter(item => item.featured)
-
-    if (featuredItems.length > 0) {
-        return sortContent(featuredItems)[0]
-    }
-
-    return items[0] || null
+    return selectFeatured(items)[0] || null
 }
 
 function getFilterValues(items, filterMode) {
@@ -298,23 +284,17 @@ function searchContentItems(items, query) {
 
 // ----- RENDER HELPERS -----
 function getHomeFeaturedItems(items) {
-    const featuredItems = items.filter(item => item.featured)
+    return selectFeatured(items)
+}
 
-    if (featuredItems.length === 0) {
-        return items.length > 0 ? [items[0]] : []
-    }
-
-    const categoryOrder = ["blog", "games", "stories", "tools", "videos"]
-
-    const selectedItems = categoryOrder
-        .map(category => {
-            const categoryItems = featuredItems.filter(item => item.category === category)
-            if (categoryItems.length === 0) return null
-            return sortContent(categoryItems)[0]
-        })
-        .filter(Boolean)
-    
-    return selectedItems.sort((a, b) => parseDate(b.datePublished) - parseDate(a.datePublished))
+function cardAuthorMarkup(item) {
+    const id=typeof item.author==='object'?item.author?.public_id:item.author;
+    const name=item.authorDisplay || (typeof item.author==='object'?item.author?.display_name:'');
+    if(!name)return '';
+    const text='By '+escapeHtml(name);
+    return /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(id||'')
+        ? `<a class="content-card-author" href="/storytellers/?author=${escapeHtml(id)}">${text}</a>`
+        : `<span class="content-card-author">${text}</span>`;
 }
 
 function cardTypeLabel(item) {
@@ -345,6 +325,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
                 </div>
             </div>
         </a>
+        ${cardAuthorMarkup(item)}
         </article>
     `
 }
@@ -363,13 +344,16 @@ function createCardMarkup(item, variant = "standard") {
                     ${cardVariant === "standard" ? `<p class="content-grid-card-excerpt">${escapeHtml(item.card.description || item.excerpt || item.description)}</p>` : ""}
                 </div>
             </a>
+            ${cardAuthorMarkup(item)}
         </article>
     `
 }
 
 function initFeaturedRotator(selector, items, label = "Featured Content", interval = 7000) {
     const shell = document.querySelector(selector)
-    if (!shell || !items?.length) return
+    if (!shell) return
+    shell._disposeFeatured?.()
+    if (!items?.length) {shell.replaceChildren();return}
     if (items.length === 1) return renderFeaturedItem(selector, items[0], label)
     let index = 0
     let paused = false
@@ -379,6 +363,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     let timer = null
     let gesture = null
     let suppressClick = false
+    const events = new AbortController()
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)")
     shell.setAttribute("role", "region")
     shell.setAttribute("aria-roledescription", "carousel")
@@ -419,7 +404,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     function canRun() {
         const rect = shell.getBoundingClientRect()
         const header = document.querySelector(".site-header")?.getBoundingClientRect().height || 0
-        return !paused && !hovered && !reducedMotion.matches && !document.hidden
+        return shell.isConnected && !paused && !hovered && !reducedMotion.matches && !document.hidden
             && !document.body.classList.contains("shell-open")
             && !(isKeyboardInteraction() && shell.contains(document.activeElement))
             && rect.top >= header && rect.bottom <= innerHeight
@@ -483,13 +468,16 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     shell.addEventListener("mouseleave", () => { hovered = false; schedule() })
     shell.addEventListener("focusin", () => schedule())
     shell.addEventListener("focusout", () => queueMicrotask(schedule))
-    reducedMotion.addEventListener("change", () => schedule(true))
-    document.addEventListener("focusmodalitychange", () => schedule())
-    document.addEventListener("visibilitychange", () => schedule())
-    window.addEventListener("scroll", () => schedule(), {passive: true})
-    window.addEventListener("resize", () => schedule())
-    new ResizeObserver(() => schedule()).observe(shell)
-    new MutationObserver(() => schedule()).observe(document.body, {attributes: true, attributeFilter: ["class"]})
+    reducedMotion.addEventListener("change", () => schedule(true),{signal:events.signal})
+    document.addEventListener("focusmodalitychange", () => schedule(),{signal:events.signal})
+    document.addEventListener("visibilitychange", () => schedule(),{signal:events.signal})
+    window.addEventListener("scroll", () => schedule(), {passive: true,signal:events.signal})
+    window.addEventListener("resize", () => schedule(),{signal:events.signal})
+    const resizeObserver=new ResizeObserver(() => schedule());resizeObserver.observe(shell)
+    const bodyObserver=new MutationObserver(() => schedule());bodyObserver.observe(document.body, {attributes: true, attributeFilter: ["class"]})
+    const dispose=()=>{paused=true;events.abort();clearTimeout(timer);resizeObserver.disconnect();bodyObserver.disconnect();shell._disposeFeatured=null;}
+    shell._disposeFeatured=dispose
+    window.addEventListener('pagehide',dispose,{once:true,signal:events.signal})
     show(0, false)
     schedule()
 }
@@ -582,6 +570,9 @@ export async function initCategoryPage(config) {
     let allItems = []
     let activeFilter = "all"
     let filters = []
+    const grid=document.querySelector(gridSelector)
+    grid?.setAttribute('aria-busy','true')
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory(()=>({filter:activeFilter})) : null
 
     function updatePage() {
@@ -606,10 +597,9 @@ export async function initCategoryPage(config) {
 
         if(filters.includes(browsing?.state?.filter))activeFilter=browsing.state.filter
 
-        const featuredItem = getFeaturedItem(allItems)
-
-        renderFeaturedItem(featuredSelector, featuredItem, featuredLabel)
-        updatePage()
+        initFeaturedRotator(featuredSelector, selectFeatured(allItems), featuredLabel)
+        if(category==='stories')mountStoryDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,'No stories match these filters. Try another genre or reading length.'))
+        else updatePage()
         browsing?.restore()
     } catch (error) {
         console.error("Error loading category page:", error)
@@ -620,12 +610,8 @@ export async function initCategoryPage(config) {
 
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
-        if (gridContainer && !gridContainer.querySelector("a[href]")) {
-            gridContainer.innerHTML = `
-                <p class="content-grid-empty">Unable to load content right now.</p>
-            `
-        }
-    }
+        showCatalogError(gridContainer)
+    } finally {grid?.setAttribute('aria-busy','false');loading.remove()}
 }
 
 export async function initHomePage(config) {
@@ -641,6 +627,9 @@ export async function initHomePage(config) {
     let allItems = []
     let activeFilter = "all"
     let filters = []
+    const grid=document.querySelector(gridSelector)
+    grid?.setAttribute('aria-busy','true')
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory(()=>({filter:activeFilter})) : null
 
     function updatePage() {
@@ -676,12 +665,14 @@ export async function initHomePage(config) {
 
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
-        if (gridContainer && !gridContainer.querySelector("a[href]")) {
-            gridContainer.innerHTML = `
-                <p class="content-grid-empty">Unable to load content right now.</p>
-            `
-        }
-    }
+        showCatalogError(gridContainer)
+    } finally {grid?.setAttribute('aria-busy','false');loading.remove()}
+}
+
+function showCatalogError(grid) {
+    if(!grid)return
+    const notice=document.createElement('p');notice.className='content-grid-empty';notice.setAttribute('role','status');notice.textContent=grid.querySelector('a[href]')?'The latest content could not be checked. Previously available content is shown. ':'Unable to load published content right now. '
+    const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Try again';retry.addEventListener('click',()=>location.reload());notice.append(retry);grid.prepend(notice)
 }
 
 export async function initRelatedContentSection(config) {
@@ -725,5 +716,5 @@ export function renderContentGrid(selector, items, emptyMessage = "Nothing to sh
     renderGrid(selector, items, emptyMessage)
 }
 // Shared with the build script so static and interactive cards stay identical.
-export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup };
+export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup, initFeaturedRotator };
 

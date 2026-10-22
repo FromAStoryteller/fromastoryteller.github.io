@@ -12,7 +12,7 @@ const summary = document.querySelector("#search-summary")
 const suggestionsContainer = document.querySelector("#search-suggestions")
 const resultsSelector = "#search-results-grid"
 
-let allItems = []
+let allItems = [],contentError=false
 const people=document.createElement('section');people.className='search-storytellers';people.hidden=true;people.setAttribute('aria-label','Storyteller results');const peopleHeading=document.createElement('h2');peopleHeading.textContent='Storytellers';const peopleStatus=document.createElement('p');peopleStatus.setAttribute('role','status');const peopleGrid=document.createElement('div'),peopleMore=document.createElement('button');peopleMore.type='button';peopleMore.className='content-filter';peopleMore.textContent='More storytellers';peopleMore.hidden=true;people.append(peopleHeading,peopleStatus,peopleGrid,peopleMore);document.querySelector(resultsSelector).closest('section').before(people);
 let contentReady=false,peopleSettled=false,peopleGeneration=0,peopleTimer,peopleCursor=null,peopleQuery='',peopleSeen=new Set();
 async function loadPeople(query,append=false){const token=++peopleGeneration;people.hidden=!query;peopleSettled=false;if(!query){peopleSettled=true;if(contentReady)browsing.restore();return;}peopleStatus.textContent='Loading storytellers.';peopleMore.disabled=true;
@@ -136,6 +136,10 @@ function showRecovery(query){
 function runSearch(query,searchProfiles=true) {
     const trimmedQuery = query.trim()
     if(searchProfiles)searchPeople(trimmedQuery)
+    const grid=document.querySelector(resultsSelector)
+    grid.setAttribute('aria-busy',String(!contentReady))
+    if(!contentReady){summary.textContent='Loading published content…';renderContentGrid(resultsSelector,[],'Loading search results…');return}
+    if(contentError){summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';renderContentGrid(resultsSelector,[],'');const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Retry content search';retry.addEventListener('click',()=>void loadSearchContent());grid.replaceChildren(retry);return}
 
     if (!trimmedQuery) {
         updateSummary("", 0)
@@ -152,7 +156,7 @@ function runSearch(query,searchProfiles=true) {
 
 async function initSearchPage() {
     try {
-        void getAllPublishedContent().then(items=>{allItems=items;contentReady=true;runSearch(input.value.trim(),false);if(peopleSettled)browsing.restore();}).catch(()=>{contentReady=true;summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';if(peopleSettled)browsing.restore();})
+        void loadSearchContent()
 
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery
@@ -199,5 +203,7 @@ async function initSearchPage() {
         renderContentGrid(resultsSelector, [], "Unable to load search right now.")
     }
 }
+
+async function loadSearchContent(){contentReady=false;contentError=false;runSearch(input.value.trim(),false);try{allItems=await getAllPublishedContent({refresh:true});}catch{contentError=true;}finally{contentReady=true;runSearch(input.value.trim(),false);if(peopleSettled)browsing.restore();}}
 
 initSearchPage()

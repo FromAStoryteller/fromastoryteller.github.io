@@ -1,4 +1,6 @@
 import {initContentNavigation} from '../content/content-navigation.mjs';
+import {initStoryAuthorPanels} from '../community/story-author-panel.mjs';
+import {initNavigationLabels} from './navigation-labels.mjs';
 import {initContentSeries} from '../content/content-series.mjs';
 import {initContentShare} from '../content/content-share.mjs';
 import {initViewerActions} from '../community/viewer-actions.mjs';
@@ -27,6 +29,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const shell=initSidebarToggle();
     initHeaderAccount({closeOther:()=>shell?.close()});
     setActiveSidebarLink();
+    initNavigationLabels();
+    initStoryAuthorPanels();
     void initContentNavigation();
     initContentSeries();
     syncHeaderSearchQuery();

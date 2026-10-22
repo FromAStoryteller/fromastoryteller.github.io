@@ -17,6 +17,7 @@ try{for(const width of [1440,390,320])for(const theme of ['light','dark']){
   if(name==='fas_public_profile'){const p=people.find(p=>p.public_id===args.profile_key);return {data:p?{...p,stories:[],next_offset:null}:null};}
   if(name==='fas_public_profile_catalog')return {data:{items:people.slice(0,2),next_cursor:null}};
   if(name==='fas_my_account_state')return {data:'active'};
+  if(name==='fas_public_story_catalog')return {data:{items:[],next_cursor:null}};
   if(name==='fas_my_storyteller_follow')return {data:{available:true,can_follow:true,following:following.has(args.target_key)}};
   if(name==='fas_set_storyteller_follow'){writes++;if(failWrite){failWrite=false;return {error:{message:'Fixture save failure'}};}if(args.enabled)following.add(args.target_key);else following.delete(args.target_key);return {data:{following:args.enabled}};}
   if(name==='fas_my_following'){if(failList){failList=false;return {error:{message:'Fixture list failure'}};}const all=people.filter(p=>following.has(p.public_id)),start=args.after_id?all.findIndex(p=>p.public_id===args.after_id)+1:0,items=all.slice(start,start+24),last=items.at(-1);return {data:{items,next_cursor:all.length>start+24?{name:last.display_name.toLowerCase(),id:last.public_id}:null}};}
