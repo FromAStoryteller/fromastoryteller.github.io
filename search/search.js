@@ -14,15 +14,15 @@ const resultsSelector = "#search-results-grid"
 
 let allItems = []
 const people=document.createElement('section');people.className='search-storytellers';people.hidden=true;people.setAttribute('aria-label','Storyteller results');const peopleHeading=document.createElement('h2');peopleHeading.textContent='Storytellers';const peopleStatus=document.createElement('p');peopleStatus.setAttribute('role','status');const peopleGrid=document.createElement('div'),peopleMore=document.createElement('button');peopleMore.type='button';peopleMore.className='content-filter';peopleMore.textContent='More storytellers';peopleMore.hidden=true;people.append(peopleHeading,peopleStatus,peopleGrid,peopleMore);document.querySelector(resultsSelector).closest('section').before(people);
-let peopleGeneration=0,peopleTimer,peopleCursor=null,peopleQuery='',peopleSeen=new Set();
-async function loadPeople(query,append=false){const token=++peopleGeneration;people.hidden=!query;if(!query)return;peopleStatus.textContent='Loading storytellers.';peopleMore.disabled=true;
+let contentReady=false,peopleSettled=false,peopleGeneration=0,peopleTimer,peopleCursor=null,peopleQuery='',peopleSeen=new Set();
+async function loadPeople(query,append=false){const token=++peopleGeneration;people.hidden=!query;peopleSettled=false;if(!query){peopleSettled=true;if(contentReady)browsing.restore();return;}peopleStatus.textContent='Loading storytellers.';peopleMore.disabled=true;
  if(!append){peopleGrid.replaceChildren();peopleCursor=null;peopleQuery=query;peopleSeen.clear();peopleMore.hidden=true;}
  try{const result=await findPublicProfiles(query,append?peopleCursor:null);if(token!==peopleGeneration)return;const key=JSON.stringify(result.data.next_cursor);if(result.data.next_cursor&&peopleSeen.has(key))throw Error('Storyteller results could not continue.');peopleSeen.add(key);renderProfileCards(peopleGrid,result.data.items,{imageBase:result.imageBase,append});peopleCursor=result.data.next_cursor;peopleMore.hidden=!peopleCursor;peopleStatus.textContent=peopleGrid.children.length?peopleGrid.children.length+' storytellers found.':'No storytellers match this search.';
  }catch{if(token===peopleGeneration){peopleStatus.replaceChildren(document.createTextNode('Storyteller search is temporarily unavailable. '));const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Retry storyteller search';retry.addEventListener('click',()=>void loadPeople(query,append));peopleStatus.append(retry);}}
- finally{if(token===peopleGeneration)peopleMore.disabled=false;}
+ finally{if(token===peopleGeneration){peopleMore.disabled=false;peopleSettled=true;if(contentReady)browsing.restore();}}
 }
 peopleMore.addEventListener('click',()=>void loadPeople(peopleQuery,true));
-function searchPeople(query){peopleGeneration++;clearTimeout(peopleTimer);people.hidden=!query;peopleMore.hidden=true;peopleGrid.replaceChildren();peopleStatus.textContent='Loading storytellers.';peopleTimer=setTimeout(()=>void loadPeople(query),200);}
+function searchPeople(query){peopleSettled=false;peopleGeneration++;clearTimeout(peopleTimer);people.hidden=!query;peopleMore.hidden=true;peopleGrid.replaceChildren();peopleStatus.textContent='Loading storytellers.';peopleTimer=setTimeout(()=>void loadPeople(query),200);}
 
 const browsing=createBrowseHistory()
 
@@ -133,9 +133,9 @@ function showRecovery(query){
     section.append(nav);grid.querySelector('.content-grid-empty')?.replaceWith(section);
 }
 
-function runSearch(query) {
+function runSearch(query,searchProfiles=true) {
     const trimmedQuery = query.trim()
-    searchPeople(trimmedQuery)
+    if(searchProfiles)searchPeople(trimmedQuery)
 
     if (!trimmedQuery) {
         updateSummary("", 0)
@@ -152,12 +152,12 @@ function runSearch(query) {
 
 async function initSearchPage() {
     try {
-        void getAllPublishedContent().then(items=>{allItems=items;runSearch(input.value.trim());browsing.restore();}).catch(()=>{summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';})
+        void getAllPublishedContent().then(items=>{allItems=items;contentReady=true;runSearch(input.value.trim(),false);if(peopleSettled)browsing.restore();}).catch(()=>{contentReady=true;summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';if(peopleSettled)browsing.restore();})
 
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery
         runSearch(initialQuery)
-        browsing.restore()
+        // Restore after both content and storyteller results have settled.
 
         form.addEventListener("submit", event => {
             event.preventDefault()
