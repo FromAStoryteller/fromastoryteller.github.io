@@ -7,6 +7,9 @@ on:
       - systems/community/profile-directory.mjs
       - systems/community/public-storyteller-page.mjs
       - systems/community/profile-share.mjs
+      - systems/community/storyteller-follow.mjs
+      - systems/community/following-page.mjs
+      - scripts/test-storyteller-following-browser.mjs
       - systems/community/manuscript.mjs
       - scripts/test-profile-discovery-browser.mjs
       - systems/community/public-profile.mjs
@@ -75,6 +78,7 @@ jobs:
       - run: node scripts/test-content-details-browser.mjs
       - run: node scripts/test-content-series-browser.mjs
       - run: node scripts/test-profile-discovery-browser.mjs
+      - run: node scripts/test-storyteller-following-browser.mjs
       - run: node scripts/test-published-editorial-browser.mjs
       - run: node scripts/test-content-discovery-browser.mjs
       - run: node scripts/test-legacy-projects-browser.mjs

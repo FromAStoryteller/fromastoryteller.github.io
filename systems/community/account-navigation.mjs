@@ -15,6 +15,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     ['studio', 'Storyteller Studio', contributor ? '/account/studio/' : null],
     ['saved', 'Saved for later', '/account/saved/'],
     ['favourites', 'Favourites', '/account/favourites/'],
+    ['following', 'Following', '/account/following/'],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;

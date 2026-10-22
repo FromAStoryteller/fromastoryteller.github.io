@@ -1,8 +1,10 @@
-// Return only to known local pages. Never forward credentials, query strings,
+// Return only to known local pages. Only a public profile author query is allowed.
+// Never forward credentials, arbitrary query strings,
 // callbacks, absolute URLs or another authentication page.
 export function safeReturnPath(value){
  if(typeof value!=='string'||value.length>180)return null;
- return /^(?:\/|\/account\/(?:saved|favourites|games|studio|settings|profile|agreements|admin)\/|\/(?:games|tools|stories|blog)\/(?:[a-z0-9][a-z0-9-]{0,119}\/)?)$/.test(value)?value:null;
+ if(/^\/storytellers\/(?:\?author=[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})?$/i.test(value))return value;
+ return /^(?:\/|\/account\/(?:following|saved|favourites|games|studio|settings|profile|agreements|admin)\/|\/(?:games|tools|stories|blog)\/(?:[a-z0-9][a-z0-9-]{0,119}\/)?)$/.test(value)?value:null;
 }
 export function returnPathFromSearch(search=''){
  if(typeof search!=='string'||search.length>1024)return null;

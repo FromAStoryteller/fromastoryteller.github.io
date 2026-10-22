@@ -1,7 +1,14 @@
+export function renderFollowerCount(host,followers){
+ if(!Number.isSafeInteger(followers?.people_following)||followers.people_following<0)return;
+ const d=host.ownerDocument,node=(tag,text)=>{const el=d.createElement(tag);el.textContent=text;return el;},grid=node('div','');grid.className='ss-stat-grid ss-follower-metrics';
+ for(const [label,count]of [['People Following',followers.people_following],...(Number.isSafeInteger(followers.fas_people_following)&&followers.fas_people_following>=0?[['People Following FAS',followers.fas_people_following]]:[])]){const card=node('article','');card.append(node('h3',label),node('p',count.toLocaleString()));grid.append(card);}
+ host.append(grid,node('p','Current account followers, across all time. This count is private to you and is separate from page views. Follower identities and their lists stay private.'));
+}
 export function renderAudienceReport(host,data,{pageNames=new Map()}={}){
  const d=host.ownerDocument;host.replaceChildren();
  const node=(tag,text)=>{const el=d.createElement(tag);el.textContent=text;return el;};
  const firstParty=data.provider==='FAS first-party';
+ renderFollowerCount(host,data.followers);
  if(data.acknowledgements){const a=data.acknowledgements;host.append(node('h2','Viewer acknowledgements'),node('p','Current totals from account holders who chose to acknowledge or love your work. These totals cover all time and are separate from measured page views. Saved lists and viewer identities remain private.'));
  const grid=node('div','');grid.className='ss-stat-grid ss-acknowledgement-metrics';for(const [label,count]of [['Read / played / used',a.experienced],['Loved it',a.loved]]){const card=node('article','');card.append(node('h3',label),node('p',Number(count??0).toLocaleString()));grid.append(card);}host.append(grid);
  if(a.pages?.length){const table=node('table','');table.className='ss-report-table ss-acknowledgements';const head=node('thead',''),tr=node('tr','');for(const label of ['Piece','Read / tried','Loved it']){const th=node('th',label);th.scope='col';tr.append(th);}head.append(tr);table.append(head);const body=node('tbody','');for(const row of a.pages){const tr=node('tr',''),th=node('th',row.title);th.scope='row';tr.append(th,node('td',Number(row.experienced).toLocaleString()),node('td',Number(row.loved).toLocaleString()));body.append(tr);}table.append(body);host.append(table);}

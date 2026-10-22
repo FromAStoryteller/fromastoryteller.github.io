@@ -6,4 +6,5 @@ export function syncProfileSidebar(access,{document:d=document}={}){
  let section=nav.querySelector('[data-viewer-library]');
  if(!section){section=d.createElement('section');section.className='sidebar-section sidebar-library';section.dataset.viewerLibrary='';section.setAttribute('aria-label','Your library');section.append(link('Favourites','/account/favourites/','fa-star'),link('Saved for later','/account/saved/','fa-bookmark'));nav.append(section);}
  section.hidden=!access;
+ if(!section.querySelector('a[href="/account/following/"]'))section.append(link('Following','/account/following/','fa-user-check'));
 }

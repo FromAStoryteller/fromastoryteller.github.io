@@ -31,6 +31,7 @@ ${data.account.policy_agreements?.length ? data.account.policy_agreements.map(it
 
 This file contains your current account and profile details. Passwords and session
 credentials are excluded. Download your stored profile images, story text and covers\nseparately using your content download in account settings.
+Storytellers followed: ${data.following?.length ?? 0}
 Saved content and acknowledgements: ${data.viewer_actions?.length ?? 0}
 Collection and series settings: ${data.content_series?.length ?? 0}
 Private game saves: ${data.game_data?.saves?.length ?? 0}
