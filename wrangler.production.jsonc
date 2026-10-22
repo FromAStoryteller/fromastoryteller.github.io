@@ -1,4 +1,5 @@
 {
+  // Frontend release: contributor discovery and signed-in library navigation.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fas-site-production",
   "compatibility_date": "2026-10-13",
