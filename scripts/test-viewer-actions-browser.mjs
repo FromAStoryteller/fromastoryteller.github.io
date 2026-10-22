@@ -59,6 +59,8 @@ try{
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   }
 
+  // Multiple fictional contributors exercise rotation under the per-author rule.
+  await page.route('**/meta.json',async route=>{const r=await route.fetch(),item=JSON.parse(await r.text());item.author=({stories:'aa000000-0000-4000-8000-000000000001',games:'aa000000-0000-4000-8000-000000000002',tools:'aa000000-0000-4000-8000-000000000003'})[item.category]||item.author;await route.fulfill({response:r,json:item});});
   await page.goto(origin+'/');
   // Background account checks can remain active; wait for the initialized carousel.
   await page.locator('.content-featured-slide .content-featured-card').waitFor();

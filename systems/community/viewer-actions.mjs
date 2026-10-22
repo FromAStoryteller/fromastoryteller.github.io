@@ -51,6 +51,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   }
   function paint(host) {
     const key = host.dataset.viewerKey, s = states.get(key), labels = viewerLabels(host.dataset.viewerType);
+    host.setAttribute('aria-busy',String(!ready || pending.has(key)));
     for (const b of host.querySelectorAll("[data-viewer-action]")) {
       const action = b.dataset.viewerAction, on = s?.[action] === true;
       b.setAttribute("aria-pressed", String(on));
@@ -85,7 +86,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
         icon.className = "fa-solid fa-check";
         icon.setAttribute("aria-hidden", "true");
         const label = node("span", labels.experienced[1]);
-        label.className = "visually-hidden";
+        label.className = "viewer-experienced-label";
         badge.append(icon, label);
         badge.title = labels.experienced[1];
       }
@@ -119,6 +120,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     parent.append(host);
     hosts.add(host);
     paint(host);
+    host.setAttribute('aria-busy',String(!ready));
     return host;
   }
   function scan() {
