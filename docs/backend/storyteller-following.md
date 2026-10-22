@@ -6,8 +6,10 @@ are returned to the exact public profile after signing in. Contributors cannot
 follow their own personal profile. The public profile remains readable without
 an account and does not expose counts or follower identities.
 
+Follow sits below the storyteller's description and above their social links.
 Following appears alongside Favourites and Saved for later in the signed-in
-sidebar, header account menu and account navigation. `/account/following/` is a
+sidebar and account navigation. These library links are omitted from the header
+profile dropdown. `/account/following/` is a
 private, alphabetically ordered profile grid with keyset pagination and retry.
 Unavailable or revoked contributors are omitted. Auth changes clear the private
 list and pending results; focus, reconnect and cross-tab changes refresh it.
