@@ -157,7 +157,8 @@ async function initSearchPage() {
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery
         runSearch(initialQuery)
-        // Restore after both content and storyteller results have settled.
+        // Capture early departures; repeat restoration when both result sections settle.
+        browsing.restore()
 
         form.addEventListener("submit", event => {
             event.preventDefault()
