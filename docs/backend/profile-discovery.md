@@ -29,3 +29,10 @@ Verification covers anonymous directory pagination and privacy in PostgreSQL and
 hosted DEV rollback fixtures, public search/profile navigation, published-work
 pagination, late-query responses, retry, account transitions, browser restore and
 desktop/mobile light/dark layouts. Production verification uses read-only calls.
+
+Public profile social links use the bundled platform brand icons with accessible
+names and new-tab labels. Browse storytellers is a themed button link. Copy
+profile link uses the canonical public author URL, excluding tracking and preview
+parameters; browsers supporting Web Share also offer Share profile. Clipboard or
+share failure exposes a selectable read-only URL. Cancelling native sharing is
+silent. Sharing does not require an account or change profile visibility.

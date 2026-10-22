@@ -5,6 +5,8 @@ on:
     paths:
       - systems/community/profile-directory.mjs
       - systems/community/public-storyteller-page.mjs
+      - systems/community/profile-share.mjs
+      - systems/community/manuscript.mjs
       - systems/community/profile-page.mjs
       - systems/core/profile-sidebar.mjs
       - systems/core/header-account.mjs
