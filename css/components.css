@@ -1807,3 +1807,7 @@ html, body, button, input, textarea, select,
 .viewer-collection-navigation { display:flex; flex-wrap:wrap; gap:.5rem; }
 .viewer-collection-navigation .account-secondary { width:auto; }
 .viewer-history-page [hidden] { display:none; }
+
+/* Destructive secondary actions retain their distinct red treatment. */
+.account-secondary.account-danger { color:var(--colour-error-text); border-color:var(--colour-error-text); }
+.account-secondary.account-danger:hover:not(:disabled) { background:var(--colour-wine); color:var(--colour-parchment); border-color:var(--colour-wine); }
