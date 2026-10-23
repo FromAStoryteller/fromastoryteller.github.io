@@ -1,24 +1,12 @@
 import {connectViewerAccount} from './viewer-actions.mjs';
 import {watchViewerChanges} from './viewer-sync.mjs';
 import {renderProfileCards} from './profile-directory.mjs';
-import {isPublicId} from './profiles.mjs';
+import {loadFollowedStorytellers} from './following-service.mjs';
+export {loadFollowedStorytellers} from './following-service.mjs';
 import {signInHref} from '../../account/return-path.mjs';
 import {getAllPublishedContent,renderContentGrid} from '../content/content-system.js';
 import {contributorKey,newestPublished} from '../content/featured-selection.mjs';
 
-// Read every cursor page so the feed includes authors beyond the first page.
-export async function loadFollowedStorytellers(client,{isEnded=()=>false}={}) {
- const people=new Map(),cursors=new Set();let cursor=null;
- do {
-  const r=await client.rpc('fas_my_following',{after_name:cursor?.name??null,after_id:cursor?.id??null});
-  if(isEnded())return [];
-  const page=r.data,next=page?.next_cursor;
-  if(r.error||!Array.isArray(page?.items)||page.items.length>24||page.items.some(p=>!isPublicId(p.public_id)||typeof p.display_name!=='string')||next&&(!isPublicId(next.id)||typeof next.name!=='string'||cursors.has(JSON.stringify(next))))throw Error('Following could not be loaded.');
-  for(const p of page.items)people.set(p.public_id,p);
-  cursor=next;if(cursor)cursors.add(JSON.stringify(cursor));
- }while(cursor);
- return [...people.values()];
-}
 export function followedWork(items,people){const ids=new Set(people.map(p=>p.public_id.toLowerCase()));return newestPublished(items.filter(item=>item.status==='published'&&!item.draft&&ids.has(contributorKey(item))));}
 
 export async function mountFollowingPage(root,{connect=connectViewerAccount,loadContent=getAllPublishedContent}={}){

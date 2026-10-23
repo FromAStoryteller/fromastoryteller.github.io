@@ -6,11 +6,12 @@ try{
   const context=await browser.newContext({viewport:{width,height:900}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.stack));
   for(const mode of ['contributor','viewer']){
    await page.goto(origin+'/tests/profile-preview/?mode='+mode);await cookies(page);const input=page.locator('[name=display_name]');await input.waitFor();await page.waitForFunction(()=>!document.querySelector('form fieldset').disabled);
+   const signOut=async()=>{const menu=page.locator('main .account-navigation-menu');if(await menu.getAttribute('open')===null)await menu.locator('summary').click();await page.locator('main [data-account-sign-out]').click();};
    const original=await input.inputValue();await input.fill(original+' changed');
    let prompts=0;const dismiss=async dialog=>{prompts++;await dialog.dismiss();};page.on('dialog',dismiss);
-   await page.locator('main [data-account-sign-out]').click();assert.equal(prompts,1);assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0);
+   await signOut();assert.equal(prompts,1);assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0);
    await page.evaluate(()=>__profilePreview.profileFail(true));await page.locator('form.profile-editor [type=submit]').click();await page.getByText('Your profile could not be saved. Please try again.',{exact:true}).waitFor();
-   await page.locator('main [data-account-sign-out]').click();assert.equal(prompts,2,'failed saves remain protected');
+   await signOut();assert.equal(prompts,2,'failed saves remain protected');
    await page.evaluate(()=>__profilePreview.profileFail(false));await page.locator('form.profile-editor [type=submit]').click();await page.getByText('Your profile was saved.',{exact:true}).waitFor();
    // Synthetic beforeunload checks avoid navigating away from the fixture.
    assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),false);
@@ -21,7 +22,7 @@ try{
    await context.route('**/functions/v1/fas-story-image**',route=>route.fulfill({contentType:'image/png',body:Buffer.from(png,'base64')}));
    await page.locator('#profile-image-file').setInputFiles({name:'crop.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')});await page.locator('[data-profile-image] [data-upload]:enabled').waitFor();
    assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),true,'staged image crop is protected');
-   await page.locator('main [data-account-sign-out]').click();assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0);
+   await signOut();assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0);
    await page.evaluate(()=>__profilePreview.fail(true));await page.locator('[data-profile-image] [data-upload]').click();await page.getByText('Image changed or session expired. Reload its saved state.',{exact:true}).waitFor();assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),true,'failed image upload remains protected');
    await page.evaluate(()=>{__profilePreview.fail(false);__profilePreview.imageDelay(500);document.querySelector('[data-profile-image] [data-upload]').click();document.querySelector('main [data-account-sign-out]').click();});assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0,'pending image upload blocks signout');await page.locator('[data-profile-image] [data-reload]:enabled').waitFor();
    assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),false,'saved image clears protection');

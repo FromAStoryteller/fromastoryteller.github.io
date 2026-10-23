@@ -1780,3 +1780,34 @@ html, body, button, input, textarea, select,
 .storyteller-profile-actions button.account-secondary:hover{color:var(--colour-accent-primary-hover);border-color:var(--colour-accent-primary-hover);background:var(--colour-control-background);}
 .search-storytellers{margin-block:1.5rem 2rem;}
 .site-search-suggestions a.site-search-suggestion{display:block;text-decoration:none;}
+
+/* Shared action styling also applies on public pages without account.css. */
+.account-secondary { box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:2.75rem; max-width:100%; padding:.6rem .9rem; border:1px solid var(--colour-accent-primary); border-radius:var(--radius-md); background:transparent; color:var(--colour-text-primary); font:600 .9rem/1.4 var(--font-family-interface); text-decoration:none; text-align:center; cursor:pointer; }
+.account-secondary:hover:not(:disabled) { color:var(--colour-accent-primary-hover); border-color:var(--colour-accent-primary-hover); background:var(--colour-control-background); }
+.account-secondary:focus-visible { outline:2px solid var(--colour-focus-ring); outline-offset:3px; }
+.account-secondary:disabled { opacity:.65; cursor:wait; }
+.account-secondary[hidden] { display:none; }
+.story-author-actions .account-secondary,.storyteller-owner-toolbar .account-secondary { width:auto; margin:0; }
+.story-author-panel { box-sizing:border-box; clear:both; }
+.story-author-panel h2 a { color:inherit; text-decoration:underline; text-underline-offset:.15em; }
+.storyteller-follow-state { flex-basis:100%; font-size:.85rem; color:var(--colour-text-secondary); }
+.storyteller-follow-state:empty { display:none; }
+.home-following-status { text-align:center; color:var(--colour-text-secondary); font:.9rem/1.6 var(--font-family-interface); }
+.story-return-link.account-secondary { width:fit-content; margin-inline:auto; }
+.account-navigation.account-navigation--compact { display:flex; align-items:center; justify-content:space-between; gap:1rem; width:100%; max-width:none; padding:.5rem 0 1rem; text-align:left; }
+.account-navigation-context { font:.9rem/1.4 var(--font-family-interface); color:var(--colour-text-secondary); }
+.account-navigation-menu { position:relative; flex:0 0 auto; }
+.account-navigation-menu>summary { list-style:none; width:auto!important; min-height:2.75rem!important; }
+.account-navigation-menu>summary::after,.storyteller-owner-toolbar>summary::after { content:'⌄'; margin-left:.75rem; }
+.account-navigation-list,.storyteller-owner-toolbar>nav { position:absolute; z-index:30; right:0; top:calc(100% + .4rem); display:grid; gap:.15rem; width:min(19rem,calc(100vw - 3rem)); padding:.5rem; background:var(--surface-standard-background); border:var(--surface-standard-border); border-radius:var(--radius-md); box-shadow:var(--surface-standard-shadow); }
+.account-navigation .account-navigation-list .account-secondary { justify-content:flex-start; min-height:2.75rem; padding:.6rem .75rem; border-color:transparent; font-weight:400; }
+.account-navigation-menu>summary::-webkit-details-marker,.storyteller-owner-toolbar>summary::-webkit-details-marker { display:none; }
+.storyteller-owner-toolbar { display:block; position:relative; width:fit-content; margin-left:auto; }
+.storyteller-owner-toolbar>nav .account-secondary { width:100%; justify-content:flex-start; border-color:transparent; font-weight:400; }
+.viewer-collection-navigation { display:flex; flex-wrap:wrap; gap:.5rem; }
+.viewer-collection-navigation .account-secondary { width:auto; }
+.viewer-history-page [hidden] { display:none; }
+
+/* Destructive secondary actions retain their distinct red treatment. */
+.account-secondary.account-danger { color:var(--colour-error-text); border-color:var(--colour-error-text); }
+.account-secondary.account-danger:hover:not(:disabled) { background:var(--colour-wine); color:var(--colour-parchment); border-color:var(--colour-wine); }

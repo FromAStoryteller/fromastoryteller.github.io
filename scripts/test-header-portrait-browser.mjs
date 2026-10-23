@@ -29,6 +29,9 @@ try{
  // A delayed server response must never paint a signed-in person as a guest.
  for(const hint of ['fresh','expired','missing','unavailable','signed-in-later']){
   const context=await browser.newContext();
+  // Personalization verifies its own viewer identity. This fixture isolates the
+  // header's delayed identity check; home/follow integration has separate coverage.
+  await context.route('**/systems/community/home-following.mjs*',route=>route.fulfill({contentType:'text/javascript',body:'export async function mountHomeFollowing(){}'}));
   await context.route('**/systems/core/site-shell.js*',async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text()).replace(/\binitViewerActions\(\);/g,'/* isolate header account check */')});});
   if(hint==='fresh'||hint==='expired')await context.addInitScript(hint=>{const prefix='fas-account-test-supabase-co',user='81000000-0000-0000-0000-000000000001',session='82000000-0000-0000-0000-000000000001';sessionStorage.setItem(prefix+'-mode','remembered');localStorage.setItem(prefix+'-remembered',JSON.stringify({user:{id:user},access_token:'e30.'+btoa(JSON.stringify({session_id:session}))+'.fixture'}));sessionStorage.setItem('fas-account-navigation-v1',JSON.stringify({user,session,key:prefix+'-remembered',store:'localStorage',admin:true,contributor:true,publicId:user,expires:Date.now()+(hint==='fresh'?600000:-1)}));},hint);
   if(hint==='unavailable')await context.addInitScript(()=>window.headerIdentityFails=true);

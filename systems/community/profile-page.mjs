@@ -28,8 +28,8 @@ if(mode==='public'){
   ownerPromise??=(async()=>{const local=await loadLocalAuthClient();if(!local)return null;const stop=watchSessionEnd(local,()=>{ownerEnded=true;root.querySelector('.storyteller-owner-toolbar')?.remove();});addEventListener('pagehide',stop,{once:true});const session=await local.client.auth.getSession();if(!session.data?.session)return null;return {account:await loadProfileAccount(local.client),local};})().catch(()=>null);
   const own=await ownerPromise;if(ownerEnded||!own||own.account.state!=='active'||own.account.profile.public_id!==publicId||root.dataset.profilePublicId!==publicId)return;
   root.querySelector('.storyteller-owner-toolbar')?.remove();
-  const toolbar=document.createElement('nav');toolbar.className='storyteller-owner-toolbar';toolbar.setAttribute('aria-label','Manage your storyteller profile');
-  for(const [label,href]of [['Edit profile','/account/profile/'],['Storyteller Studio','/account/studio/']]){const a=document.createElement('a');a.className='account-secondary';a.href=href;a.textContent=label;toolbar.append(a);}root.prepend(toolbar);
+  const toolbar=document.createElement('details');toolbar.className='storyteller-owner-toolbar';const summary=document.createElement('summary');summary.className='account-secondary';summary.textContent='Manage profile';toolbar.append(summary);const options=document.createElement('nav');options.setAttribute('aria-label','Manage your storyteller profile');toolbar.append(options);
+  for(const [label,href]of [['Edit profile','/account/profile/'],['Storyteller Studio','/account/studio/']]){const a=document.createElement('a');a.className='account-secondary';a.href=href;a.textContent=label;options.append(a);}root.prepend(toolbar);
  }});
 }else try {
   const local = await loadLocalAuthClient();

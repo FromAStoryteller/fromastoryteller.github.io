@@ -1,3 +1,4 @@
+import {compactAccountNavigation} from '../../account/compact-navigation.mjs';
 import { rememberNavigationSnapshot, clearNavigationSnapshot, navigationSnapshot } from '../../account/navigation-shell.mjs';
 import { showPendingInvitation } from '../../account/invitation-storage.mjs';
 import { publicProfileUrl } from './profiles.mjs';
@@ -16,6 +17,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     ['saved', 'Saved for later', '/account/saved/'],
     ['favourites', 'Favourites', '/account/favourites/'],
     ['following', 'Following', '/account/following/'],
+    ['history', 'Read history', '/account/history/'],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;
@@ -63,5 +65,5 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     nav.append(signOut);
   }
   if (auth) showPendingInvitation(nav);
-  return nav;
+  return compactAccountNavigation(nav,{current});
 }

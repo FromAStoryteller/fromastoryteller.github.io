@@ -62,7 +62,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  '<section class="story-content'+(manuscript?' fas-manuscript':'')+'" aria-label="Manuscript"'+(manuscript?' '+manuscript.attributes:'')+'>'+body+'</section>'+
  '<footer class="story-footer"><div class="story-end-mark" aria-hidden="true">✦</div>'+
  (layout.end?'<p class="story-end-text">'+layout.end+'</p>':'')+socialMarkup(item.author?.social_links)+'<!--author-socials-->'+
- '<a href="'+layout.collection+'" class="story-return-link">Browse All '+layout.label+'</a></footer></article>';
+ '<a href="'+layout.collection+'" class="story-return-link account-secondary">Browse All '+layout.label+'</a></footer></article>';
 }
 // Type-specific platform wrapper. Interactive implementations remain opaque slots.
 export function interactiveHeaderMarkup(item){
