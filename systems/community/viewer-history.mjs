@@ -40,7 +40,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
   const heading=node('h2',historyViews[view]),description=node('p',view==='recent'?'Pieces you have opened, most recent first. Visiting does not mark a piece completed.':'Your explicit Read, Played, Watched, Listened and Used marks, newest marks first. Older marks without a recorded date appear last.');
   const privacy=node('section');privacy.className='viewer-history-recording';privacy.setAttribute('aria-label','Recent activity recording');
   const recording=node('p','Checking recent activity recording…'),toggle=node('button','Enable Recent Activity');toggle.type='button';toggle.className='account-secondary';toggle.disabled=true;
-  const privacyText=node('p','Optional: keep the latest visit to up to 500 pieces for 90 days in your account. You can pause, remove entries, or clear visits. Saved lists, completion marks and game saves are separate.');
+  const privacyText=node('p','On by default for signed-in accounts: keep the latest visit to up to 500 pieces for 90 days in your account. You can pause, remove entries, or clear visits. Saved lists, completion marks and game saves are separate.');
   const privacyLink=node('a','Privacy details');privacyLink.href='/privacy/#recent-activity';privacy.append(recording,privacyText,toggle,privacyLink);
   const controls=node('form');controls.className='viewer-collection-filters';controls.setAttribute('role','search');controls.setAttribute('aria-label','Filter your history');
   function field(title,el){const label=node('label',title);label.className='viewer-collection-field';el.setAttribute('aria-label',title);label.append(el);controls.append(label);return el;}
@@ -82,7 +82,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
     entry.append(meta);grid.append(entry);
    }
    if(focusKey&&!oldFocus.isConnected){const entry=[...grid.querySelectorAll('[data-activity-entry]')].find(el=>el.dataset.activityEntry===focusKey);(entry?.querySelector('button,a')??search).focus({preventScroll:true});}
-   status.textContent=shown.length?shown.length+' '+(shown.length===1?'piece':'pieces')+' shown.':state.query||state.type||state.period?'No pieces match these filters.':view==='recent'?'No recent activity yet. Enable recording, then open a piece to add it here.':'Nothing marked yet. Use Read, Played, Watched, Listened or Used on a piece to add it here.';
+   status.textContent=shown.length?shown.length+' '+(shown.length===1?'piece':'pieces')+' shown.':state.query||state.type||state.period?'No pieces match these filters.':view==='recent'?'No recent activity yet. Open a piece while recording is on to add it here.':'Nothing marked yet. Use Read, Played, Watched, Listened or Used on a piece to add it here.';
    more.hidden=!cursor&&rows.length<=shown.length;more.disabled=loading||mutating;clear.disabled=mutating||!cache.size;
    w.dispatchEvent(new CustomEvent('fas-viewer-collection-rendered'));
   }

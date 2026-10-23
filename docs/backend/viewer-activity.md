@@ -1,5 +1,13 @@
 # Your history: Recent Activity and Completed / Used / Played
 
+## Default-on update (24 October 2026)
+
+Ryan requested Recent Activity on by default for accounts. The follow-up release uses `viewer-activity-default-2026-10-24-v1` policy snapshots and migration `20261023201856_viewer_activity_default_on` (hosted DEV version). Accounts without a settings row now report enabled/version 0; their first recorder call creates the setting under the existing account lock. Every existing setting is preserved, including paused accounts. No visits are backfilled and no agreement is inserted. Pause/remove/clear version checks still reject stale writes. Cookie and anonymous analytics choices remain independent.
+
+Release order: publish and verify the new policy snapshots and history interface, apply the guarded policy transition in `supabase/ops/viewer-activity-default-2026-10-24-v1.sql`, then apply the default-on migration to PROD. This keeps the disclosure live before the new default records visits. Preserve previous immutable snapshots and installed migration history. The original opt-in release notes below describe PR #93; this update supersedes its default-off behavior.
+
+Validation: 243 automated tests, hosted DEV rollback fixture, and the real history/recorder browser suite at 1440/390/320px in both themes passed. The fixture now verifies automatic recording for an unset account and refusal after pause, while retaining isolation, retention, exports, deletion and stale-write checks.
+
 Ryan explicitly approved deployment on 24 October 2026. The tested backend is installed in hosted DEV and PROD; the matching frontend and public policy rollout are in PR #93. No existing viewer is opted in and no historical visits are reconstructed. Final deployment and live verification evidence is recorded in PR #93.
 
 | Target | Applied migration |

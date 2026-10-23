@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "viewer-activity-2026-10-24-v1",
+  "activePublishedVersion": "viewer-activity-default-2026-10-24-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -226,6 +226,27 @@
           "sha256": "dce7a81c32523f5d08b27a2b1386375eb06dc9b878fefae404768592c022b27a"
         }
       }
+    },
+    "viewer-activity-default-2026-10-24-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-24",
+      "previousVersion": "viewer-activity-2026-10-24-v1",
+      "change": "Private Recent Activity enabled by default for accounts without a setting; existing pause choices preserved, with pause/remove/clear controls.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-24",
+        "scope": "Requested default-on Recent Activity for accounts, within the authorised history deployment."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/viewer-activity-default-2026-10-24-v1/terms/index.html",
+          "sha256": "6f8ca14a37d040a6803c4e232798d09ef782d7e543328189a85501c4e763814f"
+        },
+        "privacy": {
+          "path": "/account/policy-history/viewer-activity-default-2026-10-24-v1/privacy/index.html",
+          "sha256": "9a1044a28cc3fbcf170e06054910276a168eaa4b1cb65b1417d93955e0590bb4"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
@@ -236,5 +257,6 @@
   "historyUpdateVersion": "studio-history-2026-10-20-v1",
   "insightsUpdateVersion": "contributor-insights-2026-10-20-v1",
   "viewerUpdateVersion": "viewer-actions-2026-10-20-v1",
-  "activityUpdateVersion": "viewer-activity-2026-10-24-v1"
+  "activityUpdateVersion": "viewer-activity-2026-10-24-v1",
+  "activityDefaultUpdateVersion": "viewer-activity-default-2026-10-24-v1"
 }

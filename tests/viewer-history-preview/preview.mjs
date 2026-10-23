@@ -1,7 +1,7 @@
 import {mountViewerHistory} from '/systems/community/viewer-history.mjs';
 import {recordRecentVisit} from '/systems/community/viewer-activity.mjs';
 const now=Date.now(),item=(n,type='story',date=new Date(now-n*1000).toISOString())=>({id:'a6940000-0000-4000-8000-'+String(n).padStart(12,'0'),title:'Fictional '+type+' '+n,type,source:'file',url:'/'+({story:'stories',game:'games',tool:'tools'})[type]+'/fictional-'+n+'/',summary:'History fixture',image:'/assets/images/covers/the-deal.jpg',activity_at:date});
-const fixture={settings:{enabled:false,version:0},recent:Array.from({length:52},(_,i)=>item(i+1)),completed:[item(100,'game'),item(101,'tool',null),item(102,'story',null)],calls:[],fail:false,wait:false,ended:false,subscribers:new Set()};
+const fixture={settings:{enabled:true,version:0},recent:Array.from({length:52},(_,i)=>item(i+1)),completed:[item(100,'game'),item(101,'tool',null),item(102,'story',null)],calls:[],fail:false,wait:false,ended:false,subscribers:new Set()};
 fixture.completed[0].title='Completed arcade game';fixture.completed[1].title='Useful timer';
 const account={imageBase:'',subscribe(fn){fixture.subscribers.add(fn);return()=>fixture.subscribers.delete(fn);},client:{rpc:async(name,args)=>{
  fixture.calls.push({name,args});

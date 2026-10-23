@@ -1,5 +1,5 @@
 import {publishViewerChanges} from './viewer-sync.mjs';
-// Optional account history, independent of analytics and completion choices.
+// Private account history, independent of analytics and completion choices.
 export function recordRecentVisit(account,{window:w=window,document:d=document,isEnded=()=>false}={}) {
  let stopped=false,attempted=false;
  const path=w.location.pathname.replace(/index\.html$/,'');
