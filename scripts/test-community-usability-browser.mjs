@@ -25,7 +25,7 @@ try{
    export async function loadLocalAuthClient(){return {mode:'local',hadSession:true,storage:{clear(){}},client};}
   `}));
   const page=await context.newPage();await page.goto(origin+'/account/'+destination+'/');
-  const nav=page.locator('.account-navigation').last();await nav.getByRole('link',{name:'Storyteller Studio',exact:true}).waitFor({timeout:5000});
+  const nav=page.locator('.account-navigation').last();await nav.locator('summary').click();await nav.getByRole('link',{name:'Storyteller Studio',exact:true}).waitFor({timeout:5000});
   assert.equal(await nav.getByRole('link',{name:'Storyteller Studio',exact:true}).getAttribute('href'),'/account/studio/');
   assert.equal(await nav.getByRole('link',{name:'Admin tools',exact:true}).count(),0);
   assert.equal(await nav.getByRole('button',{name:'Sign out',exact:true}).isEnabled(),true);

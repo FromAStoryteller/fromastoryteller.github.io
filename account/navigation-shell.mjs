@@ -1,3 +1,4 @@
+import {compactAccountNavigation} from './compact-navigation.mjs';
 // A short-lived, tab-local presentation hint. Never used for authentication,
 // role checks, editor access or template permissions. Destinations verify afresh.
 const KEY='fas-account-navigation-v1',TTL=10*60*1000;
@@ -13,10 +14,10 @@ export function mountNavigationShell(document){
  const hint=navigationSnapshot();if(!hint)return;
  const host=document.querySelector('[data-account-navigation], [data-studio-navigation], [data-admin-navigation]')??(document.querySelector('[data-profile-mode="profile"]')?document.querySelector('[data-profile-root]'):null);if(!host)return;
  const nav=document.createElement('nav');nav.className='account-navigation'+(hint.admin?' account-navigation--admin':'');nav.setAttribute('aria-label','Your profile and account');nav.dataset.navigationShell='';
- const links=[['profile','Edit my profile','/account/profile/'],...(hint.publicId&&/^[0-9a-f-]{36}$/i.test(hint.publicId)?[['public','View public profile','/storytellers/?author='+encodeURIComponent(hint.publicId)]]:[]),...(hint.contributor?[['studio','Storyteller Studio','/account/studio/']]:[]),['saved','Saved for later','/account/saved/'],['favourites','Favourites','/account/favourites/'],['following','Following','/account/following/'],['settings','Account settings','/account/settings/'],...(hint.admin?[['admin','Admin tools','/account/admin/']]:[])];
+ const links=[['profile','Edit my profile','/account/profile/'],...(hint.publicId&&/^[0-9a-f-]{36}$/i.test(hint.publicId)?[['public','View public profile','/storytellers/?author='+encodeURIComponent(hint.publicId)]]:[]),...(hint.contributor?[['studio','Storyteller Studio','/account/studio/']]:[]),['saved','Saved for later','/account/saved/'],['favourites','Favourites','/account/favourites/'],['following','Following','/account/following/'],['history','Read history','/account/history/'],['settings','Account settings','/account/settings/'],...(hint.admin?[['admin','Admin tools','/account/admin/']]:[])];
  for(const [key,label,href]of links){const a=document.createElement('a');a.className='account-secondary';a.href=href;a.textContent=label;if(location.pathname==='/account/'+key+'/')a.setAttribute('aria-current','page');nav.append(a);}
  const signOut=document.createElement('button');signOut.className='account-secondary';signOut.type='button';signOut.disabled=true;signOut.textContent='Sign out';nav.append(signOut);
- host.querySelector('.account-navigation')?.remove();host.prepend(nav);
+ compactAccountNavigation(nav);host.querySelector('.account-navigation')?.remove();host.prepend(nav);
 }
 if(typeof document!=='undefined'){
  mountNavigationShell(document);

@@ -6,7 +6,8 @@ import {publicFileCatalog} from '../community/publishing-identity.mjs'
 import { readingTimeLabel } from "../reading/reading-time.mjs"
 import {isKeyboardInteraction} from "../core/focus.js"
 import {selectFeatured,newestPublished} from './featured-selection.mjs'
-import {mountStoryDiscovery} from './story-discovery.mjs'
+import {mountContentDiscovery,discoverContent} from './content-discovery.mjs'
+import {mountHomeFollowing} from '../community/home-following.mjs'
 
 // ==================================
 // SHARED CONTENT SYSTEM
@@ -161,46 +162,6 @@ function filterByCategory(items, category) {
 
 function getFeaturedItem(items) {
     return selectFeatured(items)[0] || null
-}
-
-function getFilterValues(items, filterMode) {
-    if (filterMode === "category") {
-        const values = [...new Set(
-            items
-                .map(item => item.category)
-                .filter(Boolean)
-        )]
-
-        return values.sort((a, b) => a.localeCompare(b))
-    }
-
-    if (filterMode === "subtype") {
-        const values = [...new Set(
-            items
-                .map(item => item.subtype)
-                .filter(Boolean)
-        )]
-
-        return values.sort((a, b) => a.localeCompare(b))
-    }
-
-    return []
-}
-
-function getFilteredItems(items, filterValue, filterMode) {
-    if (filterValue === "all") {
-        return items
-    }
-
-    if (filterMode === "category") {
-        return items.filter(item => item.category === filterValue)
-    }
-
-    if (filterMode === "subtype") {
-        return items.filter(item => item.subtype === filterValue)
-    }
-
-    return items
 }
 
 function getSearchableText(item) {
@@ -482,44 +443,6 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     schedule()
 }
 
-function renderFilters(selector, filters, activeFilter, onFilterClick) {
-    const container = document.querySelector(selector)
-    if (!container) return
-
-    const allButton = `
-        <button
-            class="content-filter ${activeFilter === "all" ? "active" : ""}"
-            type="button"
-            aria-pressed="${activeFilter === "all"}"
-            data-filter="all"
-        >
-            All
-        </button>
-    `
-
-    const filterButtons = filters.map(filter => `
-        <button
-            class="content-filter ${activeFilter === filter ? "active" : ""}"
-            type="button"
-            aria-pressed="${activeFilter === filter}"
-            data-filter="${escapeHtml(filter)}"
-        >
-            ${escapeHtml(formatLabel(filter))}
-        </button>
-    `).join("")
-
-    container.innerHTML = allButton + filterButtons
-
-    const buttons = container.querySelectorAll(".content-filter")
-    buttons.forEach(button => {
-        button.addEventListener("click", () => {
-            const nextFilter = button.dataset.filter || "all"
-            onFilterClick(nextFilter)
-            container.querySelector(`[data-filter="${CSS.escape(nextFilter)}"]`)?.focus({preventScroll: true})
-        })
-    })
-}
-
 function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", variant = "standard") {
     const container = document.querySelector(selector)
     if (!container) return
@@ -562,30 +485,15 @@ export async function initCategoryPage(config) {
         featuredSelector,
         filtersSelector,
         gridSelector,
-        filterMode = "subtype",
         featuredLabel = "Featured",
         emptyMessage = "Nothing to show yet."
     } = config
 
     let allItems = []
-    let activeFilter = "all"
-    let filters = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
     const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
-    const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory(()=>({filter:activeFilter})) : null
-
-    function updatePage() {
-        const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
-
-        renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
-            activeFilter = nextFilter
-            updatePage()
-            browsing?.remember()
-        })
-
-        renderGrid(gridSelector, filteredItems, emptyMessage)
-    }
+    const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
         const loadedContent = await loadAllContent()
@@ -593,13 +501,10 @@ export async function initCategoryPage(config) {
         const categoryItems = filterByCategory(publishedContent, category)
 
         allItems = sortContent(categoryItems)
-        filters = getFilterValues(allItems, filterMode)
 
-        if(filters.includes(browsing?.state?.filter))activeFilter=browsing.state.filter
 
         initFeaturedRotator(featuredSelector, selectFeatured(allItems), featuredLabel)
-        if(category==='stories')mountStoryDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,'No stories match these filters. Try another genre or reading length.'))
-        else updatePage()
+        mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,'No content matches these filters. Try another selection.'),{category})
         browsing?.restore()
     } catch (error) {
         console.error("Error loading category page:", error)
@@ -619,42 +524,26 @@ export async function initHomePage(config) {
         featuredSelector,
         filtersSelector,
         gridSelector,
-        filterMode = "category",
         featuredLabel = "Featured",
         emptyMessage = "Nothing to show yet."
     } = config
 
     let allItems = []
-    let activeFilter = "all"
-    let filters = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
     const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
-    const browsing = typeof window!=="undefined" ? createBrowseHistory(()=>({filter:activeFilter})) : null
-
-    function updatePage() {
-        const filteredItems = getFilteredItems(allItems, activeFilter, filterMode)
-
-        renderFilters(filtersSelector, filters, activeFilter, nextFilter => {
-            activeFilter = nextFilter
-            updatePage()
-            browsing?.remember()
-        })
-
-        renderGrid(gridSelector, filteredItems, emptyMessage)
-    }
+    const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
 
     try {
         const loadedContent = await loadAllContent()
         allItems = sortContent(getPublishedContent(loadedContent))
-        filters = getFilterValues(allItems, filterMode)
 
-        if(filters.includes(browsing?.state?.filter))activeFilter=browsing.state.filter
 
         const featuredItems = getHomeFeaturedItems(allItems)
 
         initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
-        updatePage()
+        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,"No content matches these filters. Try another selection."))
+        void mountHomeFollowing(grid,ids=>{discovery.setFollowed(ids);initFeaturedRotator(featuredSelector,discoverContent(featuredItems,{},ids),featuredLabel,7000)})
         browsing?.restore()
     } catch (error) {
         console.error("Error loading home page:", error)

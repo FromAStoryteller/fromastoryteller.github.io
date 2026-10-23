@@ -74,6 +74,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/wait-for-preview.mjs
+      - run: node scripts/test-reader-controls-browser.mjs
       - run: node scripts/test-reader-discovery-browser.mjs
       - run: node scripts/test-content-layout-browser.mjs
       - run: node scripts/test-content-details-browser.mjs
