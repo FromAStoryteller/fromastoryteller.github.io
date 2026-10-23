@@ -13,5 +13,6 @@ export async function mountHomeFollowing(host,onChange,{connect=connectViewerAcc
   finally{loading=false;if(queued&&!ended){queued=false;void refresh();}}
  }
  w.addEventListener('pagehide',()=>{ended=true;stop?.();stopSync?.();w.removeEventListener('fas-storyteller-follow-change',changed);},{once:true});
+ w.addEventListener('pageshow',event=>{if(event.persisted)w.location.reload();});
  try{account=await connect();if(ended)return;if(!account){status.remove();return;}stop=account.subscribe(clear);w.addEventListener('fas-storyteller-follow-change',changed);stopSync=watchViewerChanges(()=>void refresh(),{window:w,document:d});await refresh();}catch{status.remove();}
 }

@@ -504,7 +504,7 @@ export async function initCategoryPage(config) {
 
 
         initFeaturedRotator(featuredSelector, selectFeatured(allItems), featuredLabel)
-        mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,'No content matches these filters. Try another selection.'),{category})
+        mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?'No content matches these filters. Try another selection.':emptyMessage),{category})
         browsing?.restore()
     } catch (error) {
         console.error("Error loading category page:", error)
@@ -542,7 +542,7 @@ export async function initHomePage(config) {
         const featuredItems = getHomeFeaturedItems(allItems)
 
         initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
-        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,"No content matches these filters. Try another selection."))
+        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
         void mountHomeFollowing(grid,ids=>{discovery.setFollowed(ids);initFeaturedRotator(featuredSelector,discoverContent(featuredItems,{},ids),featuredLabel,7000)})
         browsing?.restore()
     } catch (error) {
