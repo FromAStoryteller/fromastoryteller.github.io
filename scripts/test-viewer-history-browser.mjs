@@ -7,12 +7,13 @@ try{
   await page.emulateMedia({colorScheme:theme});await page.goto(origin+'/tests/viewer-history-preview/');await page.evaluate(t=>document.documentElement.dataset.theme=t,theme);
   const root=page.locator('#history'),cards=root.locator('.content-grid-card');await cards.first().waitFor();
   assert.equal(await cards.count(),48);await root.getByRole('button',{name:'Load more',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('.content-grid-card').length===52);
-  // Opt-in only; loading the history page never records a visit.
-  await page.evaluate(()=>window.historyFixture.track());assert.equal(await page.evaluate(()=>window.historyFixture.calls.filter(c=>c.name==='fas_record_content_visit').length),0);
-  await root.getByRole('button',{name:'Enable Recent Activity',exact:true}).click();await root.getByRole('button',{name:'Pause recording',exact:true}).waitFor();
+  // Default-on records content visits, while loading history itself records nothing.
+  assert.equal(await page.evaluate(()=>window.historyFixture.calls.filter(c=>c.name==='fas_record_content_visit').length),0);
+  await root.getByRole('button',{name:'Pause recording',exact:true}).waitFor();
   await page.evaluate(()=>window.historyFixture.track());await page.waitForFunction(()=>window.historyFixture.calls.some(c=>c.name==='fas_record_content_visit'));
-  const params=await page.evaluate(()=>window.historyFixture.calls.find(c=>c.name==='fas_record_content_visit').args);assert.deepEqual(params,{content_key:'/stories/the-deal/',expected_version:1});
+  const params=await page.evaluate(()=>window.historyFixture.calls.find(c=>c.name==='fas_record_content_visit').args);assert.deepEqual(params,{content_key:'/stories/the-deal/',expected_version:0});
   await root.getByRole('button',{name:'Pause recording',exact:true}).click();await root.getByRole('button',{name:'Enable Recent Activity',exact:true}).waitFor();
+  const pausedCalls=await page.evaluate(()=>window.historyFixture.calls.filter(c=>c.name==='fas_record_content_visit').length);await page.evaluate(()=>window.historyFixture.track());assert.equal(await page.evaluate(()=>window.historyFixture.calls.filter(c=>c.name==='fas_record_content_visit').length),pausedCalls);
   await root.getByRole('searchbox',{name:'Search history',exact:true}).fill('story 52');await page.waitForFunction(()=>document.querySelectorAll('.content-grid-card').length===1);assert.equal(await cards.locator('h3').innerText(),'Fictional story 52');
   await root.getByRole('button',{name:'Clear filters',exact:true}).click();await cards.first().waitFor();
   // Failed removal leaves the confirmed entry and offers a readable error.
@@ -32,7 +33,7 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   await page.screenshot({path:'../../outputs/history-'+width+'-'+theme+'.png',fullPage:true});
   await page.getByRole('button',{name:'End fictional session',exact:true}).click();await root.getByText('Your account changed. Sign in again to see your history.',{exact:true}).waitFor();assert.equal(await cards.count(),0);assert.deepEqual(errors,[]);
-  await page.close();console.log('PASS history sections, consent, paging, search, failure, removal, clear isolation, dates, session clearing and layout '+width+' '+theme);
+  await page.close();console.log('PASS history sections, default-on and pause, paging, search, failure, removal, clear isolation, dates, session clearing and layout '+width+' '+theme);
  }
  const page=await browser.newPage();await page.goto(origin+'/tests/viewer-history-preview/');await page.locator('.content-grid-card').first().waitFor();
  await page.evaluate(()=>{window.historyFixture.wait=true;window.dispatchEvent(new Event('focus'));});

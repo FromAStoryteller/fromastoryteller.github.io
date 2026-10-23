@@ -21,8 +21,11 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','a6900000-0000-4000-8000-000000000002',true);
 select set_config('request.jwt.claims','{"session_id":"a6910000-0000-4000-8000-000000000002"}',true);
 do $$declare s jsonb;stamp jsonb;begin
- if public.fas_my_activity_settings()->>'enabled'<>'false' then raise exception 'FAIL default opt in';end if;
- if public.fas_record_content_visit('/stories/activity-public-fixture/',0) then raise exception 'FAIL recorded without consent';end if;
+ if public.fas_my_activity_settings()->>'enabled'<>'true' then raise exception 'FAIL default on';end if;
+ if not public.fas_record_content_visit('/stories/activity-public-fixture/',0) then raise exception 'FAIL default visit';end if;
+ perform public.fas_set_activity_recording(false);
+ if public.fas_my_activity_settings()->>'enabled'<>'false' then raise exception 'FAIL explicit pause';end if;
+ if public.fas_record_content_visit('/stories/activity-public-fixture/',0) then raise exception 'FAIL stale default bypassed pause';end if;
  s:=public.fas_set_activity_recording(true);
  if public.fas_record_content_visit('/stories/activity-private-fixture/',(s->>'version')::int) then raise exception 'FAIL private visit';end if;
  if public.fas_record_content_visit('/stories/activity-public-fixture/?secret=1',(s->>'version')::int) then raise exception 'FAIL query recorded';end if;

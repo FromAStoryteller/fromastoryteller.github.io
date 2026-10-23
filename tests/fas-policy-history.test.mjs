@@ -11,7 +11,7 @@ test('Remembered sign-in update preserves the live policy and freezes its new st
   const update=registry.versions[registry.sessionUpdateVersion];
   assert.equal(update.previousVersion,'account-launch-2026-10-16-v1');
   assert.ok(['publication-candidate','published'].includes(update.status));
-  assert.ok([update.previousVersion,registry.sessionUpdateVersion,registry.communityUpdateVersion,registry.gameUpdateVersion,registry.historyUpdateVersion,registry.insightsUpdateVersion,registry.viewerUpdateVersion,registry.activityUpdateVersion].includes(registry.activePublishedVersion));
+  assert.ok([update.previousVersion,registry.sessionUpdateVersion,registry.communityUpdateVersion,registry.gameUpdateVersion,registry.historyUpdateVersion,registry.insightsUpdateVersion,registry.viewerUpdateVersion,registry.activityUpdateVersion,registry.activityDefaultUpdateVersion].includes(registry.activePublishedVersion));
   const privacy=readFileSync(new URL('..'+update.documents.privacy.path,import.meta.url),'utf8');
   assert.match(privacy,/Keep me signed in on this device, selected by default/);
   assert.match(privacy,/Uncheck the option for a tab-only session/);
