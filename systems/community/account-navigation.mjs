@@ -17,7 +17,7 @@ export function accountNavigation(document, { current, publicId, auth, admin = f
     ['saved', 'Saved for later', '/account/saved/'],
     ['favourites', 'Favourites', '/account/favourites/'],
     ['following', 'Following', '/account/following/'],
-    ['history', 'Read history', '/account/history/'],
+    ['history', 'Your history', '/account/history/'],
     ['settings', 'Account settings', '/account/settings/'],
   ]) {
     if (!href) continue;
