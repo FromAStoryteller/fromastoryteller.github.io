@@ -6,7 +6,8 @@ export function compactAccountNavigation(nav,{current}={}) {
  const context=d.createElement('span');context.className='account-navigation-context';context.textContent=selected?.textContent??'Your profile and library';
  nav.replaceChildren(context,details);nav.classList.add('account-navigation--compact');
  details.addEventListener('keydown',e=>{if(e.key==='Escape'){details.open=false;summary.focus();}});
- // Focus leaving the navigation also closes the disclosure, without global listeners.
- nav.addEventListener('focusout',()=>queueMicrotask(()=>{if(!nav.contains(d.activeElement))details.open=false;}));
+ // relatedTarget is the intended destination. activeElement can briefly be the
+ // body between focusout and focusin, which would swallow clicks inside the menu.
+ nav.addEventListener('focusout',event=>{if(event.relatedTarget&&!nav.contains(event.relatedTarget))details.open=false;});
  return nav;
 }
