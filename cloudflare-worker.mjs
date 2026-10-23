@@ -1,4 +1,4 @@
-// Generated account policy release: viewer-actions-2026-10-20-v1
+// Generated account policy release: viewer-activity-2026-10-24-v1
 // Regenerated with site indexes so policy-only releases also refresh the hosting build.
 import {interactivePageMarkup} from './systems/community/interactive-page.mjs';
 import {isInteractive} from './systems/community/interactive-package.mjs';

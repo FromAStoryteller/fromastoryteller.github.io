@@ -116,6 +116,18 @@
 .account-secondary[aria-pressed="true"]:hover:not(:disabled), .account-secondary[aria-pressed="true"]:focus-visible, .account-navigation .account-secondary[aria-current="page"]:hover, .account-navigation .account-secondary[aria-current="page"]:focus-visible { background: var(--colour-accent-primary-hover); color: var(--colour-button-primary-text); border-color: var(--colour-accent-primary-hover); }
 
 .account-action-group { display: grid; gap: 1rem; }
+.viewer-history-tabs,.viewer-history-recording {display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-block:1rem 1.5rem;}
+.viewer-history-recording {padding:1rem;border:1px solid var(--colour-border-default);border-radius:var(--radius-md);background:var(--colour-surface);}
+.viewer-history-recording p {flex-basis:100%;margin:0;}
+.viewer-history-group {grid-column:1/-1;margin:1.25rem 0 0;font-size:1.1rem;}
+.viewer-history-entry {min-width:0;display:flex;flex-direction:column;gap:.5rem;}
+.viewer-history-entry>.content-grid-card {width:100%;}
+.viewer-history-meta {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;}
+.viewer-history-meta p {margin:0;font-size:.85rem;color:var(--colour-text-secondary);}
+.viewer-history-meta .account-secondary {min-height:44px;padding:.35rem .75rem;}
+.viewer-history-confirm {max-width:min(32rem,calc(100vw - 3rem));padding:1.5rem;background:var(--colour-surface);color:var(--colour-text-primary);border:1px solid var(--colour-border-default);border-radius:var(--radius-md);}
+.viewer-history-confirm::backdrop {background:rgba(0,0,0,.65);}
+.viewer-history-confirm button {margin:.5rem .5rem 0 0;}
 .account-action-group > :is(.account-submit, .account-secondary) { margin: 0; }
 
 /* Destructive controls share the wine/red treatment across account surfaces. */
