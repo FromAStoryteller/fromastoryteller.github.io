@@ -15,7 +15,7 @@ test('account navigation keeps destinations consistent and signs out only the cu
   let scope;
   const nav=accountNavigation(document,{current:'settings',publicId:'81000000-0000-0000-0000-000000000001',auth:{signOut:async options=>{scope=options.scope;return {error:null};}}});
   const list=nav.children[1].children[1];
-  assert.deepEqual(list.children.map(n=>n.textContent),['Edit my profile','View public profile','Storyteller Studio','Saved for later','Favourites','Following','Read history','Account settings','Sign out']);
+  assert.deepEqual(list.children.map(n=>n.textContent),['Edit my profile','View public profile','Storyteller Studio','Saved for later','Favourites','Following','Your history','Account settings','Sign out']);
   assert.equal(list.children.find(n=>n.textContent==='Account settings').attributes['aria-current'],'page');
   await nav.children[1].children[1].children.at(-1).click();
   assert.equal(scope,'local');

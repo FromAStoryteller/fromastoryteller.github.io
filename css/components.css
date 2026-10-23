@@ -1790,8 +1790,6 @@ html, body, button, input, textarea, select,
 .story-author-actions .account-secondary,.storyteller-owner-toolbar .account-secondary { width:auto; margin:0; }
 .story-author-panel { box-sizing:border-box; clear:both; }
 .story-author-panel h2 a { color:inherit; text-decoration:underline; text-underline-offset:.15em; }
-.storyteller-follow-state { flex-basis:100%; font-size:.85rem; color:var(--colour-text-secondary); }
-.storyteller-follow-state:empty { display:none; }
 .home-following-status { text-align:center; color:var(--colour-text-secondary); font:.9rem/1.6 var(--font-family-interface); }
 .story-return-link.account-secondary { width:fit-content; margin-inline:auto; }
 .account-navigation.account-navigation--compact { display:flex; align-items:center; justify-content:space-between; gap:1rem; width:100%; max-width:none; padding:.5rem 0 1rem; text-align:left; }

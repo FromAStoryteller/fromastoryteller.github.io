@@ -46,7 +46,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
       : 'Pieces you have kept for another time. Your saved list is private.'));
     const nav = node('nav','');
     nav.className = 'viewer-collection-navigation'; nav.setAttribute('aria-label','Your collections');
-    for (const [text,href] of [['Saved for later','/account/saved/'],['Favourites','/account/favourites/'],['Read history','/account/history/']]) {
+    for (const [text,href] of [['Saved for later','/account/saved/'],['Favourites','/account/favourites/'],['Your history','/account/history/']]) {
       const a = node('a',text); a.href = href; a.className = 'account-secondary';
       if (href === w.location.pathname) a.setAttribute('aria-current','page');
       nav.append(a);
