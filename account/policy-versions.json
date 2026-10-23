@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "viewer-actions-2026-10-20-v1",
+  "activePublishedVersion": "viewer-activity-2026-10-24-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -205,6 +205,27 @@
           "sha256": "08b40fd2cd9e22c7a677e9b2570c3defbac4a2a9ba67396c2fbe8c7e8860b17d"
         }
       }
+    },
+    "viewer-activity-2026-10-24-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-24",
+      "previousVersion": "viewer-actions-2026-10-20-v1",
+      "change": "Optional private recent visits with explicit recording choice, 90-day/500-item limits, completion timestamps, controls and export/deletion.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-24",
+        "scope": "Requested implementation of Recent Activity and Completed / Used / Played; necessary matching privacy notices."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/viewer-activity-2026-10-24-v1/terms/index.html",
+          "sha256": "d33330c5f438bdee9c670148f49588daf903846e4efd84761b38ed8b3b1758ac"
+        },
+        "privacy": {
+          "path": "/account/policy-history/viewer-activity-2026-10-24-v1/privacy/index.html",
+          "sha256": "dce7a81c32523f5d08b27a2b1386375eb06dc9b878fefae404768592c022b27a"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
@@ -214,5 +235,6 @@
   "gameUpdateVersion": "game-features-2026-10-19-v1",
   "historyUpdateVersion": "studio-history-2026-10-20-v1",
   "insightsUpdateVersion": "contributor-insights-2026-10-20-v1",
-  "viewerUpdateVersion": "viewer-actions-2026-10-20-v1"
+  "viewerUpdateVersion": "viewer-actions-2026-10-20-v1",
+  "activityUpdateVersion": "viewer-activity-2026-10-24-v1"
 }

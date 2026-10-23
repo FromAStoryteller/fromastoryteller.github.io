@@ -9,6 +9,8 @@ const row=(id,type,author,date,extra={})=>({id,title:id,type,category:({story:'s
 const items=[row('Newest discovery','story',b,'2026-10-22',{genres:['fantasy'],readingMinutes:4}),row('Followed story','story',a,'2026-10-20',{genres:['fantasy'],readingMinutes:20}),row('Solo game','game',a,'2026-10-19',{subtype:'arcade',gameFeatures:{saves:true,multiplayer:'off'}}),row('Room game','game',b,'2026-10-21',{subtype:'sports',gameFeatures:{saves:false,multiplayer:'realtime'}}),row('Focus timer','tool',b,'2026-10-18',{genres:['productivity'],tags:['Focus'],subtype:'focus'}),row('Writing notes','blog',a,'2026-10-17',{genres:['creative-process'],tags:['Writing'],readingMinutes:6}),row('Mountain film','video',b,'2026-10-16',{tags:['Travel'],subtype:'short-film'})];
 const completed=new Set([items[0].url,items[2].url]),subscribers=new Set();let following=true;
 const account={imageBase:'',subscribe(fn){subscribers.add(fn);return()=>subscribers.delete(fn);},client:{rpc:async(name,args)=>{
+ if(name==='fas_my_activity_settings')return {data:{enabled:false,version:0}};
+ if(name==='fas_my_content_history')return {data:{items:items.filter(i=>completed.has(i.url)).map(i=>({...i,source:'file',summary:i.card.description,image:'',activity_at:null})),next_cursor:null}};
  if(name==='fas_my_viewer_actions')return {data:args.content_keys.map(key=>({key,experienced:completed.has(key)}))};
  if(name==='fas_my_following')return {data:{items:following?[profile]:[],next_cursor:null}};
  if(name==='fas_my_storyteller_follow')return {data:{available:true,can_follow:true,following}};

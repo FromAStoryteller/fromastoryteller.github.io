@@ -1,4 +1,5 @@
 import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
+import {recordRecentVisit} from './viewer-activity.mjs';
 import { loadLocalAuthClient } from "../../account/local-auth-client.mjs";
 import { restoreSession } from "../../account/session-controller.mjs";
 import { watchSessionEnd } from "../../account/session-events.mjs";
@@ -39,6 +40,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   const states = /* @__PURE__ */ new Map(), pending = /* @__PURE__ */ new Set(), requested = /* @__PURE__ */ new Set(), hosts = /* @__PURE__ */ new Set();
   let account, ready = false, ended = false, epoch = 0, loading, error = "", scheduled = false, stop, stopSync, refreshing = false, refreshQueued = false, readSequence = 0;
   const reads = new Map();
+  let stopActivity;
   const node = (tag, text) => {
     const el = d.createElement(tag);
     el.textContent = text;
@@ -158,6 +160,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
       ready = true;
       error = "";
       if (account) stop = account.subscribe(() => {
+        stopActivity?.();
         ended = true;
         epoch++;
         account = null;
@@ -173,6 +176,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
         }
       });
       if (account && !ended) stopSync = watchViewerChanges(() => void refresh(), {window:w,document:d});
+      if (account && !ended) stopActivity = recordRecentVisit(account,{window:w,document:d,isEnded:()=>ended});
       for (const h of hosts) {
         paint(h);
         status(h, "");
@@ -293,6 +297,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     ended = true;
     epoch++;
     observer.disconnect();
+    stopActivity?.();
     stop?.();
     stopSync?.();
     reads.clear();

@@ -7,6 +7,7 @@ const paths=['systems/community/storyteller-follow.mjs','systems/community/follo
 paths.push('systems/content/featured-selection.mjs','systems/content/story-discovery.mjs','systems/content/content-system.js','systems/community/story-author-panel.mjs','systems/community/viewer-actions.mjs','systems/community/public-story-catalog.mjs','systems/core/navigation-labels.mjs','systems/core/site-shell.js');
 paths.push('systems/content/content-discovery.mjs','systems/community/home-following.mjs','systems/community/following-service.mjs','systems/community/viewer-history.mjs','account/history/index.html','account/compact-navigation.mjs');
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+paths.push('systems/community/viewer-activity.mjs','account/account.css');
 for(const path of paths){
  const expected=digest(await readFile(new URL('../'+path,import.meta.url)));let matched=false;
  for(let attempt=0;attempt<18;attempt++){
@@ -28,3 +29,7 @@ console.log('PASS exact production layout/manuscript sources, both independent g
 
 for(const name of ['fas_my_storyteller_follow','fas_set_storyteller_follow','fas_my_following','fas_my_follower_count','fas_my_following_data']){const args=name==='fas_my_storyteller_follow'?{target_key:directory.items[0]?.public_id??'00000000-0000-4000-8000-000000000000'}:name==='fas_set_storyteller_follow'?{target_key:'00000000-0000-4000-8000-000000000000',enabled:false}:{};const response=await fetch(config.url+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify(args),signal:AbortSignal.timeout(15000)});assert.ok([401,403].includes(response.status),'Anonymous follow endpoint must be denied: '+name);}
 console.log('PASS deployed following sources and anonymous private list/count/write denials');
+for(const [name,args] of [['fas_my_activity_settings',{}],['fas_set_activity_recording',{enabled:true}],['fas_record_content_visit',{content_key:'/stories/the-deal/',expected_version:0}],['fas_remove_recent_activity',{content_key:null}],['fas_my_content_history',{view_key:'recent'}],['fas_my_activity_data',{}]]){
+ const r=await fetch(config.url+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify(args),signal:AbortSignal.timeout(15000)});assert.ok([401,403].includes(r.status),'Anonymous history endpoint denied: '+name);
+}
+console.log('PASS deployed history sources and anonymous activity/settings/write/export denials');

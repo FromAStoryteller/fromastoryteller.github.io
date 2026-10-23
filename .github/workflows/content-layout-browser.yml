@@ -75,6 +75,7 @@ jobs:
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/wait-for-preview.mjs
       - run: node scripts/test-reader-controls-browser.mjs
+      - run: node scripts/test-viewer-history-browser.mjs
       - run: node scripts/test-header-portrait-browser.mjs
       - run: node scripts/test-profile-history-browser.mjs
       - run: node scripts/test-contributor-insights-browser.mjs
