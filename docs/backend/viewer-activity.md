@@ -1,6 +1,13 @@
 # Your history: Recent Activity and Completed / Used / Played
 
-Prepared feature; **not installed in hosted DEV or PROD**. Automatic approval review rejected the persistent database/retention installation. The remote DEV rehearsal ran in a transaction and rolled back, including fictional identities and the cron registration. Do not merge this frontend until the database and policy rollout below is approved and completed.
+Ryan explicitly approved deployment on 24 October 2026. The tested backend is installed in hosted DEV and PROD; the matching frontend and public policy rollout are in PR #93. No existing viewer is opted in and no historical visits are reconstructed. Final deployment and live verification evidence is recorded in PR #93.
+
+| Target | Applied migration |
+| --- | --- |
+| Repository / hosted DEV | `20261023195546_viewer_recent_activity` |
+| Hosted PROD | `20261023195646_viewer_recent_activity` |
+
+Both environments have the same reviewed SQL. Private tables have no browser grants, and the daily retention job is active. The post-install production check found zero opt-ins and zero recent-visit records. Hosted DEV permission/lifecycle tests passed with rollback and no fictional identities retained. DEV retains its existing NULL policy requirement; the guarded published-policy transition below applies to PROD.
 
 ## Behaviour
 
@@ -12,13 +19,13 @@ Pause keeps existing visits. Remove and Clear affect recent visits only. Clear h
 
 RLS is enabled without browser table grants. Authenticated invoker wrappers call bounded private helpers using `require_operator_session`, current public projections and existing account lifecycle locks. No caller-supplied owner ID is accepted. Private data clears from the interface on account changes; late responses cannot restore it. Foreign keys cascade on account/content deletion. Personal exports include settings/visits and completion timestamps; lifecycle snapshots include them for deletion consistency.
 
-## Prepared rollout
+## Release and verification
 
-1. Review and approve the explicit installation scope: two private tables, acknowledgement timestamp/trigger, six account RPCs, own-data export/snapshot integration and daily 90-day retention. No existing account is opted in and no historical visit is reconstructed.
-2. `supabase/ops/viewer-recent-activity-prepared.sql` is reviewed source, not an applied migration. The local CLI could not create a migration because its telemetry file is outside writable paths. After approval, generate the migration with the supported CLI in a usable environment, copy this SQL into it and remove the extra prepared-SQL load from `tests/studio-database.test.mjs`. Alternatively use the approved hosted migration tool and persist its exact generated version, preserving the repository/DEV/PROD mapping. Do not fabricate an applied migration timestamp.
-3. Apply/rehearse on hosted DEV, run `supabase/tests/viewer-activity.sql` (rollback-only), and verify fixture cleanup and advisors. Complete the current backup requirements before approved PROD installation. The six new RPCs must reject anonymous callers; both private tables must have no browser grants. Verify the retention job is active. It removes only expired recent visits and its own old cron logs.
-4. Publish the reviewed frontend and frozen `viewer-activity-2026-10-24-v1` policy snapshots. Preserve all old policy snapshots/agreements. Verify exact live bytes before applying `supabase/ops/viewer-activity-2026-10-24-v1.sql` to DEV/PROD. This guarded transition must verify the exact viewer-actions predecessor and must not insert user consent. Recording still requires the separate explicit per-account opt-in.
-5. Run the shared browser/build checks and `scripts/verify-content-layout-release.mjs --production-read-only` from the exact deployed revision. This verifies new frontend sources and anonymous RPC denial without production test identities.
+The persistent installation includes two private tables, an acknowledgement timestamp/trigger, six account RPCs, own-data export/snapshot integration and daily 90-day retention. The actual hosted migration version is preserved in `supabase/migrations/20261023195546_viewer_recent_activity.sql`; the earlier prepared SQL was removed. Do not reapply the SQL to an installed environment or rewrite either migration history.
+
+The frontend release publishes the frozen `viewer-activity-2026-10-24-v1` policy snapshots while preserving all earlier snapshots and agreements. Verify exact live bytes before applying `supabase/ops/viewer-activity-2026-10-24-v1.sql` to PROD. The guarded transition verifies the exact viewer-actions predecessor and inserts no user consent. Recording requires the separate per-account opt-in even after a policy agreement.
+
+Run the shared browser/build checks and `scripts/verify-content-layout-release.mjs --production-read-only` from the exact deployed revision. This verifies new frontend sources and anonymous RPC denial without production test identities. The six new RPCs must reject anonymous callers; both private tables must have no browser grants. Check that `fas-recent-activity-retention` is active. It removes only expired recent visits and its own old cron logs.
 
 Frontend rollback must preserve the new private records, timestamps, policy snapshots and current agreements. An old frontend can ignore additive tables; never reverse recorded policy acceptance or remove account history to roll back UI.
 
