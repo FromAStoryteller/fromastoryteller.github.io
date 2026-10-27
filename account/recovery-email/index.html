@@ -4,6 +4,7 @@
 
   <!-- HEAD -->
   <head>
+    <script src="/account/presentation-startup.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="modulepreload" href="/account/vendor/supabase-client.js">
@@ -103,6 +104,7 @@
         <i class="fa-solid fa-envelope" aria-hidden="true"></i>
         <span>Contact</span>
       </a>
+      <a href="/storytellers/" class="sidebar-item" aria-label="Storytellers" title="Storytellers"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Storytellers</span></a>
     </div>
 
     <!-- MAIN PAGES: empty categories remain hidden until published work exists. -->
@@ -135,6 +137,12 @@
       </a>
     </div>
 
+    <section class="sidebar-section sidebar-library" data-viewer-library aria-label="Your library" hidden>
+      <a class="sidebar-item" href="/account/favourites/" aria-label="Favourites" title="Favourites"><i class="fa-solid fa-star" aria-hidden="true"></i><span>Favourites</span></a>
+      <a class="sidebar-item" href="/account/saved/" aria-label="Saved for later" title="Saved for later"><i class="fa-solid fa-bookmark" aria-hidden="true"></i><span>Saved for later</span></a>
+      <a class="sidebar-item" href="/account/history/" aria-label="Your history" title="Your history"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>Your history</span></a>
+      <a class="sidebar-item" href="/account/following/" aria-label="Following" title="Following"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Following</span></a>
+    </section>
   </nav>
 
 <section class="sidebar-follow" aria-label="Follow From A Storyteller"><h2 class="sidebar-follow__title">Follow</h2><nav class="socials" aria-label="Social Links">

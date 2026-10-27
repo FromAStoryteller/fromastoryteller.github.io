@@ -536,15 +536,16 @@ export async function initHomePage(config) {
     const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
     let discovery, featuredItems = [], followedIds = new Set()
-    if (grid) void mountHomeFollowing(grid, ids => {
+    const following = grid ? mountHomeFollowing(grid, ids => {
         followedIds = ids
         if (!discovery) return
         discovery.setFollowed(ids)
         initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, ids), featuredLabel, 7000)
-    })
+    }) : Promise.resolve()
 
     try {
         const loadedContent = await loadAllContent()
+        if (document.documentElement.dataset.fasHomeStartup === 'pending') await following
         allItems = sortContent(getPublishedContent(loadedContent))
 
 
@@ -564,7 +565,7 @@ export async function initHomePage(config) {
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
         showCatalogError(gridContainer)
-    } finally {grid?.setAttribute('aria-busy','false');loading.remove()}
+    } finally {delete document.documentElement.dataset.fasHomeStartup;grid?.setAttribute('aria-busy','false');loading.remove()}
 }
 
 function showCatalogError(grid) {

@@ -38,10 +38,13 @@ try{
   const context=await browser.newContext({viewport:{width,height:950}});
   await context.addInitScript(({session})=>{const prefix='fas-account-oqmmvjjycpyxvxipcyli-supabase-co';sessionStorage.setItem(prefix+'-mode','remembered');localStorage.setItem(prefix+'-remembered',JSON.stringify(session));},{session:token()});
   const page=await context.newPage(),calls=[],errors=[];
+  let releaseModules;
+  const modulesReady=new Promise(resolve=>releaseModules=resolve);
+  if(!process.argv[2]) for(const entry of ['/home.js','/systems/core/site-shell.js'])await page.route(origin+entry,async route=>{await modulesReady;await route.continue();});
   page.on('pageerror',e=>errors.push(e.message));
   await page.route(backend+'/**',async route=>{
    const request=route.request(),url=new URL(request.url()),name=url.pathname.split('/').at(-1);calls.push(name);
-   await delay(150);
+   await delay(name==='fas_my_following'&&!process.argv[2]?800:150);
    let body;
    if(url.pathname==='/auth/v1/token')body=token();
    else if(url.pathname==='/auth/v1/user')body=user;
@@ -58,7 +61,20 @@ try{
   });
   // Deny every external request that is not the intercepted fictional backend.
   await page.route(/https?:\/\/(?!127\.0\.0\.1:55410\/|oqmmvjjycpyxvxipcyli\.supabase\.co\/)/,route=>route.abort());
-  await page.goto(origin+'/',{waitUntil:'domcontentloaded'});
+  await page.goto(origin+'/',{waitUntil:process.argv[2]?'domcontentloaded':'commit'});
+  let initialLibraryHeight;
+  if(!process.argv[2]){
+   // Hold both page entry modules: this checks the actual first painted HTML,
+   // not a fast script that corrects a guest layout just before the assertion.
+   await page.waitForFunction(()=>document.querySelector('#home-grid > *')&&getComputedStyle(document.querySelector('#home-grid > *')).visibility==='hidden');
+   assert.equal(await page.locator('html').getAttribute('data-fas-account-startup'),'pending');
+   initialLibraryHeight=await page.locator('[data-viewer-library]').evaluate(el=>el.getBoundingClientRect().height);
+   assert.ok(initialLibraryHeight>100,'account navigation space exists before modules execute');
+   assert.equal(await page.locator('.header-account-panel > a').first().evaluate(el=>getComputedStyle(el).visibility),'hidden');
+   releaseModules();
+   await page.waitForFunction(()=>document.querySelector('.home-following-status')&&document.querySelector('#home-grid')?.getAttribute('aria-busy')==='true');
+   assert.equal(await page.locator('#home-grid > *').first().evaluate(el=>getComputedStyle(el).visibility),'hidden','public feed is not painted while following is pending');
+  }
   await page.waitForFunction(()=>[...document.querySelectorAll('.header-account-panel button')].some(b=>b.textContent==='Sign out'&&!b.disabled));
   const accountReady=await page.evaluate(()=>Math.round(performance.now()));
   await page.waitForFunction(()=>{
@@ -75,6 +91,12 @@ try{
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   // Current implementation shares startup restoration; comparison may request more.
   if(!process.argv[2]){assert.equal(refreshes,1);assert.equal(verifications,1);}
+  if(!process.argv[2]){
+   assert.equal(await page.locator('html').getAttribute('data-fas-home-startup'),null);
+   assert.equal(await page.locator('#home-grid > *').first().evaluate(el=>getComputedStyle(el).visibility),'visible');
+   const finalHeight=await page.locator('[data-viewer-library]').evaluate(el=>el.getBoundingClientRect().height);
+   assert.ok(Math.abs(finalHeight-initialLibraryHeight)<1,'account verification does not change sidebar geometry');
+  }
   if(width===1440)await page.locator('[data-account-toggle]').hover();
   else await page.locator('[data-account-toggle]').click();
   await page.getByRole('button',{name:'Sign out',exact:true}).click();
@@ -82,4 +104,11 @@ try{
   assert.equal(await page.locator('.home-following-status').count(),0);
   await context.close();
  }
+ // Guests must retain the ordinary first paint without waiting for account services.
+ const guest=await browser.newPage();
+ await guest.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
+ await guest.goto(origin+'/',{waitUntil:'domcontentloaded'});
+ assert.equal(await guest.locator('html').getAttribute('data-fas-home-startup'),null);
+ assert.equal(await guest.locator('#home-grid > *').first().evaluate(el=>getComputedStyle(el).visibility),'visible');
+ await guest.close();
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

@@ -261,6 +261,7 @@ function generateStaticHtml(items) {
   for (const urlPath of new Set(pagePaths)) {
     const path = urlPath.endsWith(".html") ? join(ROOT, urlPath.slice(1)) : join(ROOT, urlPath.replace(/^\//, ""), "index.html");
     let html = readFileSync(path, "utf8");
+    if (!html.includes('src="/account/presentation-startup.js"')) html = html.replace(/<head\b[^>]*>/i, match => match + '\n    <script src="/account/presentation-startup.js"></script>');
     for (const component of components) html = replaceGenerated(html, component.id, component.html.trim());
     const section = urlPath === "/" ? "home" : urlPath.split("/")[1];
     if (urlPath === "/" || CONTENT_ROOTS.some(name => urlPath === `/${name}/`)) {
