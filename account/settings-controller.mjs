@@ -33,7 +33,7 @@ export async function loadAccount(client, { useRestoredSession = false, includeP
     client.rpc('fas_my_registration_declaration'),
     includePolicyHistory ? client.rpc('fas_my_policy_agreements') : Promise.resolve({ data: [], error: null }),
   ]);
-  if (profile.error || roles.error || state.error || declaration.error || agreements.error || !Array.isArray(agreements.data)) throw new Error('We couldn't load your account. Please try again.');
+  if (profile.error || roles.error || state.error || declaration.error || agreements.error || !Array.isArray(agreements.data)) throw new Error('We couldn’t load your account. Please try again.');
   return { user: { id: user.id, email: user.email, created_at: user.created_at, email_confirmed_at: user.email_confirmed_at }, profile: profile.data, ...accountRoles(roles.data), state: state.data, registration: declaration.data, policy_agreements: agreements.data };
 }
 
@@ -50,10 +50,10 @@ export async function loadProfileAccount(client, { useRestoredSession = false, o
 
 export async function saveProfile(client, { displayName, bio }) {
   const name = displayName.trim();
-  if (!name || [...name].length > 80 || [...bio].length > 1000) throw new Error('Use a display name of 1-80 characters and a bio of up to 1,000 characters.');
+  if (!name || [...name].length > 80 || [...bio].length > 1000) throw new Error('Use a display name of 1–80 characters and a bio of up to 1,000 characters.');
   const user = await verifiedIdentity(client);
   const saved = await client.from('profiles').update({ display_name: name, bio }).eq('id', user.id).select('id,display_name,bio,created_at').single();
-  if (saved.error) throw new Error('We couldn't save your profile. Please try again.');
+  if (saved.error) throw new Error('We couldn’t save your profile. Please try again.');
   return saved.data;
 }
 

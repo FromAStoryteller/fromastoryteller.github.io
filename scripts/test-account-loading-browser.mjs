@@ -59,6 +59,8 @@ try{
   // Deny every external request that is not the intercepted fictional backend.
   await page.route(/https?:\/\/(?!127\.0\.0\.1:55410\/|oqmmvjjycpyxvxipcyli\.supabase\.co\/)/,route=>route.abort());
   await page.goto(origin+'/',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>[...document.querySelectorAll('.header-account-panel button')].some(b=>b.textContent==='Sign out'&&!b.disabled));
+  const accountReady=await page.evaluate(()=>Math.round(performance.now()));
   await page.waitForFunction(()=>{
    const following=document.querySelector('.home-following-status');
    const action=document.querySelector('.viewer-card-actions button');
@@ -67,7 +69,7 @@ try{
   });
   const ready=await page.evaluate(()=>Math.round(performance.now()));
   const refreshes=calls.filter(x=>x==='token').length,verifications=calls.filter(x=>x==='user').length;
-  console.log(JSON.stringify({width,loggedInReadyMs:ready,refreshes,verifications,root}));
+  console.log(JSON.stringify({width,accountNavigationReadyMs:accountReady,loggedInReadyMs:ready,refreshes,verifications,root}));
   assert.deepEqual(errors,[]);
   assert.equal(await page.locator('[data-viewer-library]').getAttribute('hidden'),null);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);

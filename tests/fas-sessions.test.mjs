@@ -116,7 +116,7 @@ test('Restoration refreshes and verifies with the server, ignoring cached identi
     getUser:async()=>{calls.push('user');return {data:{user:{id:'viewer',email:'reader@example.invalid'}}};},
   },true);
   assert.deepEqual(calls,['cache','refresh','user']);
-  assert.deepEqual(result,{state:'signed-in',message:'You're signed in.',email:'reader@example.invalid'});
+  assert.deepEqual(result,{state:'signed-in',message:'You’re signed in.',email:'reader@example.invalid'});
 });
 
 test('Revoked/expired refresh tokens end the session and clear the local Auth cache', async () => {

@@ -263,7 +263,7 @@ function cardAuthorMarkup(item) {
 function cardTypeLabel(item) {
     const type = item.category === "stories" ? "Story" : formatLabel(item.type || item.category)
     const time = item.category === "stories" ? readingTimeLabel(item.readingMinutes) : ""
-    return time ? type + " � " + time : type
+    return time ? type + " · " + time : type
 }
 
 function viewerCardAttributes(item) {
@@ -281,7 +281,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
             </div>
             <div class="content-featured-text image-overlay__content">
                 <div class="content-featured-text-inner">
-                    <p class="content-featured-label image-overlay__label">Featured � ${escapeHtml(type)}</p>
+                    <p class="content-featured-label image-overlay__label">Featured · ${escapeHtml(type)}</p>
                     <h2>${escapeHtml(item.title)}</h2>
                     <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>
                     <span class="content-featured-action"><span class="content-featured-action-label">${escapeHtml(getPrimaryActionLabel(item))}</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
@@ -494,7 +494,7 @@ export async function initCategoryPage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
@@ -533,7 +533,7 @@ export async function initHomePage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
     let discovery, featuredItems = [], followedIds = new Set()
     if (grid) void mountHomeFollowing(grid, ids => {

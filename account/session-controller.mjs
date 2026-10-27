@@ -1,5 +1,5 @@
 export const SESSION_ENDED = 'Your session has ended. Please sign in again.';
-export const SESSION_UNAVAILABLE = 'We couldn't check your session. Please reconnect and try again.';
+export const SESSION_UNAVAILABLE = 'We couldn’t check your session. Please reconnect and try again.';
 const restoredIdentities = new WeakMap();
 const restorations = new WeakMap();
 const generations = new WeakMap();
@@ -64,6 +64,6 @@ async function restoreSessionOnce(auth, hadSession, generation) {
     if (verified.error) return retryable(verified.error) ? unavailable(verified.error) : ended();
     if (!verified.data?.user?.id || !verified.data.user.email || verified.data.user.is_anonymous) return ended();
     restoredIdentities.set(auth, { user: verified.data.user, at: Date.now() });
-    return { state: 'signed-in', message: 'You're signed in.', email: verified.data.user.email };
+    return { state: 'signed-in', message: 'You’re signed in.', email: verified.data.user.email };
   } catch { return { state: 'session-unavailable', message: SESSION_UNAVAILABLE }; }
 }
