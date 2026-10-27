@@ -133,14 +133,16 @@ async function loadAllContent() {
     return allContentRequest??=(loadAllContentUncached().catch(error=>{allContentRequest=null;throw error;}))
 }
 async function loadAllContentUncached() {
-    const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
-    const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
-    const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog()]);
+    const [results, times, fileAuthors, community] = await Promise.all([
+        loadContentIndex().then(metaPaths => Promise.allSettled(metaPaths.map(loadMetaFile))),
+        fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({})),
+        publicFileCatalog(), publicStoryCatalog()
+    ])
     const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
     const unavailable=new Set(fileAuthors.filter(item=>item.unavailable).map(item=>item.url));
     const live=new Map(community.map(item=>[item.url,item]));
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
-    if (metaPaths.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
+    if (results.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
     const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
     const paths=new Set(files.map(item=>item.url));
     return [...files,...community.filter(item=>!paths.has(item.url))]
@@ -261,7 +263,7 @@ function cardAuthorMarkup(item) {
 function cardTypeLabel(item) {
     const type = item.category === "stories" ? "Story" : formatLabel(item.type || item.category)
     const time = item.category === "stories" ? readingTimeLabel(item.readingMinutes) : ""
-    return time ? type + " · " + time : type
+    return time ? type + " � " + time : type
 }
 
 function viewerCardAttributes(item) {
@@ -279,7 +281,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
             </div>
             <div class="content-featured-text image-overlay__content">
                 <div class="content-featured-text-inner">
-                    <p class="content-featured-label image-overlay__label">Featured · ${escapeHtml(type)}</p>
+                    <p class="content-featured-label image-overlay__label">Featured � ${escapeHtml(type)}</p>
                     <h2>${escapeHtml(item.title)}</h2>
                     <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>
                     <span class="content-featured-action"><span class="content-featured-action-label">${escapeHtml(getPrimaryActionLabel(item))}</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
@@ -492,7 +494,7 @@ export async function initCategoryPage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';grid?.before(loading)
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
@@ -531,19 +533,26 @@ export async function initHomePage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
+    let discovery, featuredItems = [], followedIds = new Set()
+    if (grid) void mountHomeFollowing(grid, ids => {
+        followedIds = ids
+        if (!discovery) return
+        discovery.setFollowed(ids)
+        initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, ids), featuredLabel, 7000)
+    })
 
     try {
         const loadedContent = await loadAllContent()
         allItems = sortContent(getPublishedContent(loadedContent))
 
 
-        const featuredItems = getHomeFeaturedItems(allItems)
+        featuredItems = getHomeFeaturedItems(allItems)
 
-        initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
-        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
-        void mountHomeFollowing(grid,ids=>{discovery.setFollowed(ids);initFeaturedRotator(featuredSelector,discoverContent(featuredItems,{},ids),featuredLabel,7000)})
+        initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, followedIds), featuredLabel, 7000)
+        discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
+        discovery.setFollowed(followedIds)
         browsing?.restore()
     } catch (error) {
         console.error("Error loading home page:", error)

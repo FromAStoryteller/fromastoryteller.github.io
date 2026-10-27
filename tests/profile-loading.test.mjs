@@ -25,6 +25,16 @@ test('revoked sessions stop profile queries before any private data is requested
   await assert.rejects(loadProfileAccount(client),/session has ended/);
 });
 
+test('header and profile share restored identity without repeating token refreshes or user checks',async()=>{
+  let refreshes=0,verifications=0;
+  const client={auth:{getSession:async()=>({data:{session:{}}}),refreshSession:async()=>{refreshes++;return {data:{session:{}}};},getUser:async()=>{verifications++;return {data:{user:{id:'owner',email:'owner@example.invalid'}}};}},
+    from(){return {select(){return this;},eq(){return this;},single:async()=>({data:{display_name:'Reader'}}),then(resolve,reject){return Promise.resolve({data:[]}).then(resolve,reject);}};},
+    rpc:async()=>({data:'active'})};
+  await Promise.all([restoreSession(client.auth,true),restoreSession(client.auth,true)]);
+  await Promise.all([loadProfileAccount(client,{useRestoredSession:true}),loadProfileAccount(client,{useRestoredSession:true})]);
+  assert.equal(refreshes,1);assert.equal(verifications,1);
+});
+
 test('server-verified restoration can be consumed once and a later failed restoration clears it',async()=>{
   const user={id:'owner',email:'owner@example.invalid'};
   let revoked=false;

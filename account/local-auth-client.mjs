@@ -1,5 +1,6 @@
 import { loadAccountAuthConfig } from './auth-settings.mjs';
 import { createBrowserSessionStorage } from './session-storage.mjs';
+import { invalidateSessionRestoration } from './session-controller.mjs';
 
 let localClientPromise;
 
@@ -28,6 +29,11 @@ async function initializeClient(remember) {
   const client = createClient(config.url, config.key, {
     auth: { persistSession: true, storage: storage.adapter, autoRefreshToken: true, detectSessionInUrl: false, storageKey: storage.key },
     global: { fetch: (url, options = {}) => fetch(url, { ...options, redirect: 'error', signal: AbortSignal.any([...(options.signal ? [options.signal] : []), AbortSignal.timeout(15000)]) }) },
+  });
+  let owner;
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (owner && session?.user?.id && session.user.id !== owner)) invalidateSessionRestoration(client.auth);
+    owner = session?.user?.id;
   });
   return { client, publicImageBase: new URL('/functions/v1/fas-story-image',config.url).href, mode: config.mode ?? 'local', policyRelease: config.policyRelease, accountOrigin: location.origin, signupEnabled: config.signup === true, lifecycleEnabled: config.lifecycle === true, storage, hadSession };
 }

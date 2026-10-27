@@ -24,7 +24,18 @@ export function isProductionAuthConfig(config) {
 
 // The runtime file is absent from ordinary builds. Merely shipping this adapter
 // never enables accounts; the exact live origin needs a valid deliberate build.
+const configRequests = new WeakMap();
 export async function loadAccountAuthConfig(origin, request = fetch) {
+  let requests = configRequests.get(request);
+  if (!requests) { requests = new Map(); configRequests.set(request, requests); }
+  if (requests.has(origin)) return requests.get(origin);
+  const pending = requestAccountAuthConfig(origin, request);
+  requests.set(origin, pending);
+  try { return await pending; }
+  finally { if (requests.get(origin) === pending) requests.delete(origin); }
+}
+
+async function requestAccountAuthConfig(origin, request) {
   if (origin !== PRODUCTION_ACCOUNT_ORIGIN) return loadLocalAuthConfig(origin, request);
   try {
     const response = await request(PRODUCTION_CONFIG_PATH, {

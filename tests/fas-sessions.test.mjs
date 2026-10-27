@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSessionStorage, createBrowserSessionStorage, SESSION_KEY } from '../account/session-storage.mjs';
 import { watchSessionEnd } from '../account/session-events.mjs';
-import { restoreSession } from '../account/session-controller.mjs';
+import { restoreSession, restoredIdentity, invalidateSessionRestoration } from '../account/session-controller.mjs';
 
 function fakeStorage() {
   const data = new Map([['unrelated-theme', 'dark']]);
@@ -116,7 +116,7 @@ test('Restoration refreshes and verifies with the server, ignoring cached identi
     getUser:async()=>{calls.push('user');return {data:{user:{id:'viewer',email:'reader@example.invalid'}}};},
   },true);
   assert.deepEqual(calls,['cache','refresh','user']);
-  assert.deepEqual(result,{state:'signed-in',message:'You’re signed in.',email:'reader@example.invalid'});
+  assert.deepEqual(result,{state:'signed-in',message:'You're signed in.',email:'reader@example.invalid'});
 });
 
 test('Revoked/expired refresh tokens end the session and clear the local Auth cache', async () => {
@@ -144,4 +144,39 @@ test('Server user rejection cannot display cached identity, even when refreshing
   let cleared=false;
   const result=await restoreSession({getSession:async()=>({data:{session:{}}}),refreshSession:async()=>({data:{session:{}}}),getUser:async()=>({error:{status:403}}),signOut:async()=>({error:null})},true,()=>{cleared=true;});
   assert.equal(result.state,'session-ended');assert.equal(cleared,true);
+});
+
+test('concurrent startup consumers share one refresh and verification; later checks verify again', async () => {
+  let refreshes=0, users=0;
+  const user={id:'verified-reader',email:'reader@example.invalid'};
+  const auth={getSession:async()=>({data:{session:{}}}),refreshSession:async()=>{refreshes++;return {data:{session:{}}};},getUser:async()=>{users++;return {data:{user}};}};
+  const results=await Promise.all(Array.from({length:4},()=>restoreSession(auth,true)));
+  assert.ok(results.every(result=>result.state==='signed-in'));
+  assert.equal(refreshes,1);assert.equal(users,1);
+  assert.equal(restoredIdentity(auth),user);assert.equal(restoredIdentity(auth),user);
+  await restoreSession(auth,true);assert.equal(refreshes,2);assert.equal(users,2);
+});
+
+test('shared revoked restoration clears every caller and transient failures can retry', async () => {
+  let cleared=0, refreshes=0;
+  const auth={getSession:async()=>({data:{session:{}}}),refreshSession:async()=>{refreshes++;return {error:{status:401}};},signOut:async()=>({error:null})};
+  await Promise.all(Array.from({length:3},()=>restoreSession(auth,true,()=>cleared++)));
+  assert.equal(cleared,3);assert.equal(refreshes,1);assert.equal(restoredIdentity(auth),null);
+  auth.refreshSession=async()=>({error:{status:503}});
+  assert.equal((await restoreSession(auth,true)).state,'session-unavailable');
+  auth.refreshSession=async()=>({data:{session:{}}});auth.getUser=async()=>({data:{user:{id:'reader',email:'reader@example.invalid'}}});
+  assert.equal((await restoreSession(auth,true)).state,'signed-in');
+});
+
+test('sign-out or account changes during a slow verification cannot restore stale identity', async () => {
+  let finish;
+  const auth={getSession:async()=>({data:{session:{}}}),refreshSession:async()=>({data:{session:{}}}),getUser:()=>new Promise(resolve=>finish=resolve)};
+  const pending=restoreSession(auth,true);
+  await new Promise(resolve=>setImmediate(resolve));
+  invalidateSessionRestoration(auth);
+  finish({data:{user:{id:'old-owner',email:'old@example.invalid'}}});
+  assert.equal((await pending).state,'session-unavailable');assert.equal(restoredIdentity(auth),null);
+  auth.getUser=async()=>({data:{user:{id:'new-owner',email:'new@example.invalid'}}});
+  assert.equal((await restoreSession(auth,true)).state,'signed-in');
+  invalidateSessionRestoration(auth);assert.equal(restoredIdentity(auth),null);
 });

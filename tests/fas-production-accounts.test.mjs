@@ -29,6 +29,19 @@ test('Production config needs exact opt-ins, backend and public key; malformed/m
   assert.equal(await loadAccountAuthConfig(DEV_ACCOUNT_ORIGIN,async()=>Response.json(config)),null);
 });
 
+test('concurrent runtime config reads share a request without retaining stale configuration',async()=>{
+  let calls=0,finish;
+  const request=()=>{calls++;return new Promise(resolve=>finish=resolve);};
+  const first=loadAccountAuthConfig(PRODUCTION_ACCOUNT_ORIGIN,request);
+  const second=loadAccountAuthConfig(PRODUCTION_ACCOUNT_ORIGIN,request);
+  assert.equal(calls,1);finish(Response.json(config));
+  assert.deepEqual(await first,config);assert.deepEqual(await second,config);
+  const retry=loadAccountAuthConfig(PRODUCTION_ACCOUNT_ORIGIN,request);
+  assert.equal(calls,2);finish(new Response('',{status:503}));assert.equal(await retry,null);
+  const recovered=loadAccountAuthConfig(PRODUCTION_ACCOUNT_ORIGIN,request);
+  assert.equal(calls,3);finish(Response.json(config));assert.deepEqual(await recovered,config);
+});
+
 test('Build cannot enable accounts in preview, without lifecycle, with a secret, or with draft/misplaced policies', () => {
   assert.equal(productionAccountBuildConfig({},registry,true),null);
   assert.equal(productionAccountBuildConfig({...env,WORKERS_CI_BRANCH:'feature/fixture'},registry,true),null);
