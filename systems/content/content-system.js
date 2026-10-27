@@ -133,14 +133,16 @@ async function loadAllContent() {
     return allContentRequest??=(loadAllContentUncached().catch(error=>{allContentRequest=null;throw error;}))
 }
 async function loadAllContentUncached() {
-    const [metaPaths, times] = await Promise.all([loadContentIndex(), fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({}))])
-    const results = await Promise.allSettled(metaPaths.map(loadMetaFile))
-    const [fileAuthors,community]=await Promise.all([publicFileCatalog(),publicStoryCatalog()]);
+    const [results, times, fileAuthors, community] = await Promise.all([
+        loadContentIndex().then(metaPaths => Promise.allSettled(metaPaths.map(loadMetaFile))),
+        fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({})),
+        publicFileCatalog(), publicStoryCatalog()
+    ])
     const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
     const unavailable=new Set(fileAuthors.filter(item=>item.unavailable).map(item=>item.url));
     const live=new Map(community.map(item=>[item.url,item]));
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
-    if (metaPaths.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
+    if (results.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
     const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
     const paths=new Set(files.map(item=>item.url));
     return [...files,...community.filter(item=>!paths.has(item.url))]
@@ -533,17 +535,25 @@ export async function initHomePage(config) {
     grid?.setAttribute('aria-busy','true')
     const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
+    let discovery, featuredItems = [], followedIds = new Set()
+    const following = grid ? mountHomeFollowing(grid, ids => {
+        followedIds = ids
+        if (!discovery) return
+        discovery.setFollowed(ids)
+        initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, ids), featuredLabel, 7000)
+    }) : Promise.resolve()
 
     try {
         const loadedContent = await loadAllContent()
+        if (document.documentElement.dataset.fasHomeStartup === 'pending') await following
         allItems = sortContent(getPublishedContent(loadedContent))
 
 
-        const featuredItems = getHomeFeaturedItems(allItems)
+        featuredItems = getHomeFeaturedItems(allItems)
 
-        initFeaturedRotator(featuredSelector, featuredItems, featuredLabel, 7000)
-        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
-        void mountHomeFollowing(grid,ids=>{discovery.setFollowed(ids);initFeaturedRotator(featuredSelector,discoverContent(featuredItems,{},ids),featuredLabel,7000)})
+        initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, followedIds), featuredLabel, 7000)
+        discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
+        discovery.setFollowed(followedIds)
         browsing?.restore()
     } catch (error) {
         console.error("Error loading home page:", error)
@@ -555,7 +565,7 @@ export async function initHomePage(config) {
         if (featuredContainer) featuredContainer.innerHTML = ""
         if (filtersContainer) filtersContainer.innerHTML = ""
         showCatalogError(gridContainer)
-    } finally {grid?.setAttribute('aria-busy','false');loading.remove()}
+    } finally {delete document.documentElement.dataset.fasHomeStartup;grid?.setAttribute('aria-busy','false');loading.remove()}
 }
 
 function showCatalogError(grid) {

@@ -1,9 +1,9 @@
 import { clearNavigationSnapshot } from './navigation-shell.mjs';
 import { accountRoles } from './roles.mjs';
-import { takeRestoredIdentity } from './session-controller.mjs';
+import { restoredIdentity } from './session-controller.mjs';
 
 async function verifiedIdentity(client, useRestoredSession = false) {
-  const restored = useRestoredSession && takeRestoredIdentity(client.auth);
+  const restored = useRestoredSession && restoredIdentity(client.auth);
   if (restored) return restored;
   const refreshed = await client.auth.refreshSession();
   if (refreshed.error || !refreshed.data?.session) throw new Error('Your session has ended. Please sign in again.');

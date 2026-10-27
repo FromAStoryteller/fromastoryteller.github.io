@@ -1,7 +1,7 @@
 import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
 import {recordRecentVisit} from './viewer-activity.mjs';
 import { loadLocalAuthClient } from "../../account/local-auth-client.mjs";
-import { restoreSession } from "../../account/session-controller.mjs";
+import { restoreSession, restoredIdentity } from "../../account/session-controller.mjs";
 import { watchSessionEnd } from "../../account/session-events.mjs";
 import { signInHref } from "../../account/return-path.mjs";
 const viewerLabels = (type) => ({ saved: ["game", "tool"].includes(type) ? ["Add to favourites", "Favourited"] : ["Save for later", "Saved for later"], experienced: { game: ["I’ve played this", "Played"], tool: ["I’ve used this", "Used"], video: ["Mark as watched", "Watched"], audio: ["Mark as listened", "Listened"] }[type] ?? ["Mark as read", "Read"], loved: ["Loved it", "Loved it"] });
@@ -11,9 +11,9 @@ async function connectViewerAccount() {
   const session = await restoreSession(local.client.auth, local.hadSession, () => local.storage.clear());
   if (session.state === "session-unavailable") throw Error("Your account could not be checked. Try again.");
   if (session.state !== "signed-in") return null;
-  const identity = await local.client.auth.getUser();
-  if (identity.error || !identity.data?.user?.id) throw Error("Your account could not be checked. Try again.");
-  const owner = identity.data.user.id;
+  const user = restoredIdentity(local.client.auth);
+  if (!user?.id) throw Error("Your account could not be checked. Try again.");
+  const owner = user.id;
   return { client: local.client, imageBase: local.publicImageBase, subscribe(end) {
     let ended = false;
     const stop = () => {

@@ -34,3 +34,24 @@
 .skip-link { position: fixed; left: 1rem; top: 0.5rem; z-index: calc(var(--z-header) + 1); transform: translateY(-200%); padding: 0.75rem 1rem; background: var(--colour-surface); color: var(--colour-link); }
 .skip-link:focus { transform: none; }
 @media print { .skip-link { display: none; } }
+
+/* Reserve the account layout before server verification, without painting a
+   signed-out view or revealing private data. The head script sets these flags
+   before the parser reaches the body; guests retain the static public page. */
+html[data-fas-account-startup="pending"] [data-viewer-library][hidden] {
+  display: block !important;
+  background: var(--colour-surface-raised);
+}
+html[data-fas-account-startup="pending"] [data-viewer-library][hidden] *,
+html[data-fas-account-startup="pending"] .header-account-panel > a,
+html[data-fas-account-startup="pending"] .account-navigation[aria-busy="true"] {
+  visibility: hidden;
+}
+html[data-fas-home-startup="pending"] .home-page :is(#home-featured, #home-grid) {
+  background: var(--colour-surface-raised);
+  border-radius: var(--radius-card, 1rem);
+  pointer-events: none;
+}
+html[data-fas-home-startup="pending"] .home-page :is(#home-featured, #home-grid) * {
+  visibility: hidden;
+}

@@ -1,12 +1,6 @@
-import {initContentNavigation} from '../content/content-navigation.mjs';
-import {initStoryAuthorPanels} from '../community/story-author-panel.mjs';
 import {initNavigationLabels} from './navigation-labels.mjs';
-import {initContentSeries} from '../content/content-series.mjs';
-import {initContentShare} from '../content/content-share.mjs';
-import {initViewerActions} from '../community/viewer-actions.mjs';
 import {initHeaderAccount} from './header-account.mjs';
 import {restoreFocus} from "/systems/core/focus.js"
-import {initAudienceInsights} from '../privacy/audience-insights.mjs';
 import { initStorageChoices } from '../privacy/storage-banner.js';
 
 // =======================================
@@ -15,10 +9,8 @@ import { initStorageChoices } from '../privacy/storage-banner.js';
 // Global component, sidebar and search behaviour
 // =======================================
 
-import { syncHeaderSearchQuery, initHeaderSearch } from "../search/header-search.js"
-
 // Load components, then wire up global page behaviour
-document.addEventListener("DOMContentLoaded", async () => {
+async function initSiteShell() {
   try {
     await Promise.all([
       loadComponent("/components/header.html", "header-placeholder"),
@@ -30,20 +22,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     initHeaderAccount({closeOther:()=>shell?.close()});
     setActiveSidebarLink();
     initNavigationLabels();
-    initStoryAuthorPanels();
-    void initContentNavigation();
-    initContentSeries();
-    syncHeaderSearchQuery();
-    initHeaderSearch();
     initContentDetailEnhancements();
     initStorageChoices();
-    initAudienceInsights();
-    initViewerActions();
-    initContentShare();
+    // Content/catalogue dependency downloads must not delay account navigation.
+    const enhance = (module, start) => module.then(start).catch(error => console.error('Page enhancement failed:', error));
+    void Promise.all([
+      enhance(import('../content/content-navigation.mjs'), m => m.initContentNavigation()),
+      enhance(import('../community/story-author-panel.mjs'), m => m.initStoryAuthorPanels()),
+      enhance(import('../content/content-series.mjs'), m => m.initContentSeries()),
+      enhance(import('../search/header-search.js'), m => {m.syncHeaderSearchQuery(); return m.initHeaderSearch();}),
+      enhance(import('../privacy/audience-insights.mjs'), m => m.initAudienceInsights()),
+      enhance(import('../community/viewer-actions.mjs'), ({initViewerActions}) => { initViewerActions(); }),
+      enhance(import('../content/content-share.mjs'), m => m.initContentShare()),
+    ]);
   } catch (err) {
     console.error("Error loading components:", err);
   } 
-});
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSiteShell, {once:true});
+else void initSiteShell();
 
 
 // Load detail-page enhancements only where they are needed.
