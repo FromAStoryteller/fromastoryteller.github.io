@@ -47,3 +47,12 @@ test('responsive images validate widths and recheck permission after transformat
  const invalid=await handler(new Request(`https://image.invalid/?asset_id=${id}&width=9999`));assert.equal(invalid.status,400);assert.equal(checks,0);
  const response=await handler(new Request(`https://image.invalid/?asset_id=${id}&width=480`));assert.equal(response.status,404);assert.equal(transforms,1);assert.ok(!(await response.text()).includes('small image'));
 });
+
+// The emergency delivery path must support existing responsive URLs without a codec.
+test('master delivery preserves exact bytes for concurrent responsive URLs',async()=>{
+ const bytes=new Uint8Array([255,216,255,224,1,2,3,255,217]);let checks=0;
+ const handler=makeImageHandler(config,async url=>url.includes('/rest/v1/')?(checks++,Response.json([{object_path:path}])):new Response(bytes,{headers:{'Content-Type':'image/jpeg'}}));
+ const responses=await Promise.all([480,800,1200,1600,2400,3200].map(width=>handler(new Request(`https://image.invalid/?asset_id=${id}&width=${width}`))));
+ for(const response of responses){assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'image/jpeg');assert.deepEqual(new Uint8Array(await response.arrayBuffer()),bytes);assert.match(response.headers.get('Cache-Control'),/no-store/);}
+ assert.equal(checks,12);
+});
