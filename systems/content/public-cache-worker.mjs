@@ -14,6 +14,7 @@ export function publicCatalogRequest(url){
   if(keys.some(k=>!['asset_id','width'].includes(k))||new Set(keys).size!==keys.length||!UUID.test(id??'')||![480,800,1200,1600,2400,3200].includes(width))throw Error('Invalid public image');
   return {image:true,id,width};
  }
+ if(url.pathname===API+'discovery'&&!url.search)return {discovery:true};
  if(url.pathname===API+'files'&&!url.search)return {rpc:'fas_public_file_catalog',args:{}};
  if(url.pathname!==API+'stories')throw Error('Unknown public endpoint');
  const keys=[...url.searchParams.keys()];
@@ -47,12 +48,13 @@ export async function publicContentResponse(request,env,render,{fetcher=fetch,ca
   const key=new Request(keyUrl,{method:'GET'});
   if(useCache){try{const hit=await cache.match(key);if(hit)return exposed(hit,'HIT',request.method==='HEAD');}catch{/* A cache outage still permits a fresh public read. */}}
   const anonymous=new Request(url,{method:'GET'});
-  let response=catalog?.image?await fetcher(PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+catalog.id+'&width='+catalog.width,{method:'GET',credentials:'omit',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{'x-region':'ap-southeast-2'}}):catalog?await rpc(catalog.rpc,catalog.args):await render(anonymous,env,fetcher);
+  const discovery=async()=>{const responses=await Promise.all([rpc('fas_public_file_catalog',{}),rpc('fas_public_story_catalog',{before_time:null,after_id:null})]);if(responses.some(r=>!r.ok))throw Error('Discovery unavailable');const [files,stories]=await Promise.all(responses.map(r=>r.json()));return Response.json({files,stories},{headers:noStore});};
+  let response=catalog?.discovery?await discovery():catalog?.image?await fetcher(PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+catalog.id+'&width='+catalog.width,{method:'GET',credentials:'omit',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{'x-region':'ap-southeast-2'}}):catalog?await rpc(catalog.rpc,catalog.args):await render(anonymous,env,fetcher);
   if(catalog?.image){
    if(!response.ok)return new Response('Image unavailable.',{status:response.status===404?404:503,headers:noStore});
    if(response.headers.get('Content-Type')?.split(';')[0]!=='image/jpeg')return unavailable();
    // Anonymous JPEG bytes need no gateway cookies or upstream cache policy.
-   response=new Response(response.body,{headers:{...noStore,'Content-Type':'image/jpeg','X-SB-Edge-Region':response.headers.get('X-SB-Edge-Region')??''}});
+   response=new Response(response.body,{headers:{...noStore,'Content-Type':'image/jpeg','X-FAS-Image-Variant':response.headers.get('X-FAS-Image-Variant')??'master','X-SB-Edge-Region':response.headers.get('X-SB-Edge-Region')??''}});
   }else if(catalog){if(!response.ok)return unavailable();const data=await response.json();response=Response.json(data,{headers:noStore});}
   if(useCache&&response.status===200&&!response.headers.has('Set-Cookie')){
    const stored=response.clone(),headers=new Headers(stored.headers);headers.set('Cache-Control','public, max-age=60');for(const name of ['CDN-Cache-Control','Cloudflare-CDN-Cache-Control','Surrogate-Control','Vary'])headers.delete(name);

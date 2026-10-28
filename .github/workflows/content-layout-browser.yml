@@ -95,6 +95,7 @@ jobs:
       - run: node scripts/test-profile-discovery-browser.mjs
       - run: node scripts/test-storyteller-following-browser.mjs
       - run: node scripts/test-published-editorial-browser.mjs
+      - run: node scripts/test-progressive-delivery-browser.mjs
       - run: node scripts/test-content-discovery-browser.mjs
       - run: node scripts/test-legacy-projects-browser.mjs
       - run: node scripts/test-existing-file-editor-browser.mjs

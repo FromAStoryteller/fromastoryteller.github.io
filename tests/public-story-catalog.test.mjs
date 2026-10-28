@@ -25,3 +25,9 @@ test('public discovery rejects repeated or malformed cursors and HTTP failures',
  await assert.rejects(publicStoryCatalog({...args,fetcher:async()=>({ok:false})}),/could not be loaded/);
  assert.deepEqual(await publicStoryCatalog({...args,loadConfig:async()=>null}),[]);
 });
+
+test('paged discovery stops after each requested page and retries without losing its cursor',async()=>{
+ const {createPublicStoryPager}=await import('../systems/community/public-story-catalog.mjs');let calls=0,fail=true;
+ const pager=createPublicStoryPager({origin:'https://fromastoryteller.com',loadConfig:async()=>({url:root,key:'public'}),fetcher:async()=>{calls++;if(calls===1)return Response.json({items:[row],next_cursor:{id,published_at:when}});if(fail){fail=false;return new Response(null,{status:503});}return Response.json({items:[{...row,id:other,slug:'another'}],next_cursor:null});}});
+ assert.equal((await pager.next()).length,1);assert.equal(calls,1);assert.equal(pager.done,false);await assert.rejects(pager.next());assert.equal((await pager.next())[0].id,other);assert.equal(pager.done,true);assert.deepEqual(await pager.next(),[]);assert.equal(calls,3);
+});

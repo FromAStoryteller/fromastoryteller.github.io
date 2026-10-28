@@ -60,7 +60,7 @@ test('cleanup removes only claimed exact paths; failed Storage deletes retain a 
   if(url.endsWith('fas_claim_image_cleanup'))return Response.json([{path,lease:version},{path:'../other-user',lease:version}]);
   if(options.method==='DELETE')return Response.json({});
   return Response.json(true);
- });assert.equal(result.completed,1);assert.deepEqual(calls.find(c=>c.url.includes('/storage/')).body,{prefixes:[path]});
+ });assert.equal(result.completed,1);assert.deepEqual(calls.find(c=>c.url.includes('/storage/')).body,{prefixes:[path,...[480,800,1200,1600,2400].map(w=>path.replace('.jpg','-'+w+'.jpg'))]});
  let ack=false;const failed=await cleanImages(config,async(url,options)=>{
   if(url.endsWith('fas_claim_image_cleanup'))return Response.json([{path,lease:version}]);
   if(options.method==='DELETE')return Response.json({},{status:503});

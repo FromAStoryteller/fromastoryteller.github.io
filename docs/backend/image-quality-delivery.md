@@ -15,3 +15,7 @@ This photo-cover policy does not rewrite creator package assets, pixel art, SVGs
 ## Emergency delivery correction — 28 October 2026
 
 Live parallel image requests exhausted the Supabase isolate CPU budget (546 `WORKER_RESOURCE_LIMIT`, shutdown reason `CPUTime`). The deployed story-image entrypoint now omits on-demand transformation and serves the stored master bytes unchanged, retaining both caller-scoped visibility checks, size limits, and no-store responses. Existing width URLs remain accepted for compatibility. This increases transfer size but avoids request-time codec work and preserves source quality. Pre-generated derivatives should replace request-time encoding in the next optimisation. The resize module remains available for offline tests, but is not loaded by the delivery entrypoint.
+
+## Precomputed sizes
+
+New Studio uploads now generate smaller JPEG crops in the contributor's browser at quality 94. The upload boundary verifies their bounded dimensions and stores them under the master's lifecycle. Only service-verified stored widths are used; a missing variant falls back to the unchanged master. Existing covers keep working and acquire sizes on re-upload. Delivery performs no decoding or JPEG encoding. See progressive-delivery.md for the complete loading and asset contract.

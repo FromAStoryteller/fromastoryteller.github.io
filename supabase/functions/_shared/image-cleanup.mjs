@@ -9,7 +9,7 @@ export async function cleanImages({base,serviceKey},fetcher=fetch,owner=null){
  for(const item of items){
   if(!/^[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]+[.](jpg|jpeg|png|webp)$/.test(item.path)||!/^[-a-f0-9]{36}$/.test(item.lease))continue;
   try{
-   await call('/storage/v1/object/fas-story-images',{prefixes:[item.path]},'DELETE');
+   await call('/storage/v1/object/fas-story-images',{prefixes:[item.path,...(item.path.endsWith('.jpg')?[480,800,1200,1600,2400].map(width=>item.path.replace(/\.jpg$/,'-'+width+'.jpg')):[])]},'DELETE');
    await call('/rest/v1/rpc/fas_ack_image_cleanup',{image_path:item.path,claim_key:item.lease});completed++;
   }catch{/* A durable lease expires for automatic retry; don't log paths or keys. */}
  }
