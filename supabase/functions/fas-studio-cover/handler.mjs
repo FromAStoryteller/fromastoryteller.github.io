@@ -8,7 +8,7 @@ export function inspectRaster(bytes){
 async function limitedBody(request,max){const reader=request.body?.getReader();if(!reader)throw new Error('Image required');const chunks=[];let size=0;while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>max){await reader.cancel();throw new Error('Image upload too large');}chunks.push(value);}const data=new Uint8Array(size);let offset=0;for(const chunk of chunks){data.set(chunk,offset);offset+=chunk.length;}return data;}
 export function makeCoverHandler({base,anonKey,serviceKey,origins,kind='cover'},normalize,fetcher=fetch){
  const profile=kind==='profile';
- const headers=origin=>({'Cache-Control':'no-store','Content-Type':'application/json','Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'});
+ const headers=origin=>({'Cache-Control':'no-store','Content-Type':'application/json','Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-region','Access-Control-Allow-Methods':'POST,OPTIONS'});
  return async request=>{
   const origin=request.headers.get('Origin');if(!origins?.includes(origin))return new Response('Origin unavailable',{status:403});
   const reply=(status,data)=>Response.json(data,{status,headers:headers(origin)});
