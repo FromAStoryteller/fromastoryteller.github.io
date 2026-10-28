@@ -76,6 +76,7 @@ jobs:
       - run: node scripts/test-cache-assets-browser.mjs
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/wait-for-preview.mjs
+      - run: node scripts/test-progressive-delivery-browser.mjs
       - run: node scripts/test-reader-controls-browser.mjs
       - run: node scripts/test-viewer-history-browser.mjs
       - run: node scripts/test-header-portrait-browser.mjs
@@ -95,7 +96,6 @@ jobs:
       - run: node scripts/test-profile-discovery-browser.mjs
       - run: node scripts/test-storyteller-following-browser.mjs
       - run: node scripts/test-published-editorial-browser.mjs
-      - run: node scripts/test-progressive-delivery-browser.mjs
       - run: node scripts/test-content-discovery-browser.mjs
       - run: node scripts/test-legacy-projects-browser.mjs
       - run: node scripts/test-existing-file-editor-browser.mjs

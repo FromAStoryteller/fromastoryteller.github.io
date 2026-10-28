@@ -575,7 +575,7 @@ function showCatalogError(grid) {
     const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Try again';retry.addEventListener('click',()=>location.reload());notice.append(retry);grid.prepend(notice)
 }
 
-export function initRelatedContentSection(config) {return whenVisible(document.querySelector(config.gridSelector),()=>loadRelatedContentSection(config));}
+export function initRelatedContentSection(config) {const grid=document.querySelector(config.gridSelector);return whenVisible(grid?.closest('section')??grid?.parentElement??grid,()=>loadRelatedContentSection(config));}
 async function loadRelatedContentSection(config) {
     const {
         gridSelector,
