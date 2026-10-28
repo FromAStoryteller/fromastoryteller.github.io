@@ -50,7 +50,9 @@ async function initSiteShell() {
         void enhance(import('../content/content-series.mjs'),m=>m.initContentSeries());
         void enhance(import('../content/content-share.mjs'),m=>m.initContentShare());
       }
-      if(detail||location.pathname.startsWith('/storytellers/'))void enhance(import('../privacy/audience-insights.mjs'),m=>m.initAudienceInsights());
+      // Keep the lightweight consent observer available for dynamically mounted
+      // content/profile targets; it makes no request without consent and a target.
+      void enhance(import('../privacy/audience-insights.mjs'),m=>m.initAudienceInsights());
     });
   } catch (err) {
     console.error("Error loading components:", err);
