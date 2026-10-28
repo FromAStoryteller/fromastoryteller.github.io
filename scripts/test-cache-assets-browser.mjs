@@ -28,6 +28,6 @@ try{for(const width of [390,1440]){
  assert.equal(await page.locator('.menu-toggle').isVisible(),true);await page.locator('.menu-toggle').click();await page.locator('.sidebar a[href="/stories/"]').click();await page.waitForFunction(()=>document.querySelector('.content-grid')?.getAttribute('aria-busy')==='false');
  await page.goto(origin+'/stories/tea-at-the-summit/');await page.locator('.story-page').waitFor();assert.ok((await page.locator('.story-page').textContent()).includes('Eleanor'));
  await page.goto(origin+'/account/sign-in/');await page.locator('input[type="email"]').waitFor();
- assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);assert.ok(requests.some(u=>u.includes('/_assets/')&&u.endsWith('.js')));assert.ok(requests.some(u=>u.endsWith('/api/public/stories')));assert.ok(!requests.some(u=>u.endsWith('/meta.json')));
+ assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);assert.ok(requests.some(u=>u.includes('/_assets/')&&u.endsWith('.js')));assert.ok(requests.some(u=>u.endsWith('/api/public/discovery')));assert.ok(!requests.some(u=>u.endsWith('/api/public/files')||u.endsWith('/api/public/stories')));assert.ok(!requests.some(u=>u.endsWith('/meta.json')));
  console.log('PASS production asset graph, home/category/story/sign-in, anonymous catalogue and navigation at '+width+'px; '+requests.length+' requests');await context.close();
 }}finally{await browser.close();}
