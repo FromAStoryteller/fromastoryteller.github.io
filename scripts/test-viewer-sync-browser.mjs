@@ -40,7 +40,7 @@ async function open(tab,owner,path=story,{channel=true,settled=true}={}){
   const {initViewerActions}=await import('/systems/community/viewer-actions.mjs');initViewerActions({connect:async()=>account});
  },{tab,owner,path});
  if(!path.startsWith('/account/'))await page.waitForFunction(()=>{const b=document.querySelector('main .viewer-content-actions [data-viewer-action=saved]');return b&&!b.disabled;});
- if(settled&&!path.startsWith('/account/')){await page.locator('#related-content-grid article').first().waitFor();await page.waitForFunction(()=>[...document.querySelectorAll('[data-viewer-key]')].every(h=>window.viewerLoadedKeys.has(h.dataset.viewerKey)));}
+ if(settled&&!path.startsWith('/account/')){await page.locator('#related-content-grid').evaluate(el=>el.parentElement.scrollIntoView({block:'center'}));await page.locator('#related-content-grid article').first().waitFor();await page.waitForFunction(()=>[...document.querySelectorAll('[data-viewer-key]')].every(h=>window.viewerLoadedKeys.has(h.dataset.viewerKey)));}
  return page;
 }
 const action=(page,name)=>page.locator('main .viewer-content-actions [data-viewer-action='+name+']');

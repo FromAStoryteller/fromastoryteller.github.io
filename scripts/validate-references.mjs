@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {publicCatalogRequest} from '../systems/content/public-cache-worker.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -16,6 +17,7 @@ const files = walk(root), errors = [], ids = new Map();
 let references = 0, syntax = 0, metadata = 0;
 function check(file, value) {
   if (!value || /^(?:[a-z][\w+.-]*:|\/\/|#)/i.test(value) || /[{}<>$]/.test(value)) return;
+  if(value.startsWith('/api/public/')){try{if(publicCatalogRequest(new URL(value,'https://fromastoryteller.com')))return;}catch{}errors.push(`${file}: invalid public API route ${value}`);return;}
   const clean = decodeURIComponent(value.split(/[?#]/)[0]);
   if (!clean) return;
   const target = clean.startsWith('/') ? path.join(root, clean.slice(1)) : path.resolve(root, path.dirname(file), clean);

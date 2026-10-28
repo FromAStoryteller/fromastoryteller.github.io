@@ -1,3 +1,4 @@
+import {createCoverDerivatives} from './cover-derivatives.mjs';
 import {validatePackage,isInteractive} from './interactive-package.mjs';
 import {loadProfileAccount} from '../../account/settings-controller.mjs';
 import {isPublicId} from './profiles.mjs';
@@ -84,7 +85,7 @@ export function createStudioService(client,{ownerId,checkAccount=loadProfileAcco
    if(r.error)throw new Error('The draft could not be deleted. Reopen it from Your work before trying again.');
    if(r.data?.id!==previous.id)throw new StudioConflictError('This draft changed elsewhere, was scheduled or published, or is no longer available. Reopen it from Your work before deleting.');
   },
-  async uploadCover(id,file,alt,crop){await authorize();if(!isPublicId(id)||!file||file.size>5*1024*1024||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and describe the image.');const body=new FormData();body.set('story_id',id);body.set('image',file);body.set('alt',alt.trim());body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));const r=await client.functions.invoke('fas-studio-cover',{body,region:'ap-southeast-2'});if(r.error||!r.data?.asset)throw new Error('Cover upload could not finish. Try again. Existing covers are unchanged.');return r.data.asset;},
+  async uploadCover(id,file,alt,crop){await authorize();if(!isPublicId(id)||!file||file.size>5*1024*1024||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and describe the image.');const body=new FormData();body.set('story_id',id);body.set('image',file);body.set('alt',alt.trim());body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));try{for(const {width,blob}of await createCoverDerivatives(file,crop))body.set('variant_'+width,blob,'cover-'+width+'.jpg');}catch{/* The verified master remains available if this browser cannot create variants. */}const r=await client.functions.invoke('fas-studio-cover',{body,region:'ap-southeast-2'});if(r.error||!r.data?.asset)throw new Error('Cover upload could not finish. Try again. Existing covers are unchanged.');return r.data.asset;},
   async changeCover(previous,assetId,alt,remove=false){
    await authorize();if(!isPublicId(previous?.id)||!isPublicId(assetId)||!previous.updated_at)throw new Error('Reopen this content before managing covers.');
    const r=await client.rpc('fas_change_cover_image',{target_story:previous.id,asset_key:assetId,expected_version:previous.updated_at,image_alt:alt,remove_image:remove});

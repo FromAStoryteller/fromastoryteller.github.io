@@ -51,5 +51,5 @@ export function mountContentDiscovery(host,items,onChange,{category='',window:w=
  }
  form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',e=>{const key=e.target.name;if(!controls[key])return;state[key]=e.target.value;if(key==='category'){for(const field of ['subtype','genre','tag','players','saves','length'])state[field]='';build();controls.category?.focus();}update();});
  const pop=()=>{const query=new URL(w.location.href).searchParams;for(const key of Object.keys(state))state[key]=query.get(key)??(key==='sort'?'newest':'');if(category)state.category=category;build();update(false);};w.addEventListener('popstate',pop);w.addEventListener('pagehide',()=>w.removeEventListener('popstate',pop),{once:true});
- build();update(false);return {setFollowed(ids){followed=ids;update(false);},dispose(){w.removeEventListener('popstate',pop);}};
+ build();update(false);return {setItems(next){items=next;build();update(false);},setFollowed(ids){if(ids.size===followed.size&&[...ids].every(id=>followed.has(id)))return;followed=ids;update(false);},dispose(){w.removeEventListener('popstate',pop);}};
 }

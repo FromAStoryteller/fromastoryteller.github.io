@@ -1,8 +1,9 @@
+import {observeImages,whenVisible} from './deferred-media.mjs';
 import {responsiveImage} from './responsive-image.mjs';
 import {createBrowseHistory} from './browse-state.mjs'
 import {relatedContent} from './related-content.mjs'
 import {normalizeGameFeatures,gameFeatureLabels} from './game-features.mjs'
-import {publicStoryCatalog} from '../community/public-story-catalog.mjs'
+import {createPublicStoryPager} from '../community/public-story-catalog.mjs'
 import {publicFileCatalog} from '../community/publishing-identity.mjs'
 import { readingTimeLabel } from "../reading/reading-time.mjs"
 import {isKeyboardInteraction} from "../core/focus.js"
@@ -105,28 +106,34 @@ function normalizeContentMeta(meta) {
 }
 
 // ----- DATA LOADING -----
-let allContentRequest;
-async function loadAllContent() {
-    return allContentRequest??=(loadAllContentUncached().catch(error=>{allContentRequest=null;throw error;}))
+let allContentRequest,contentPager,fileRows,communityRows=[],staticRows;
+function mergedContent(){
+ const authors=new Map(fileRows.filter(item=>item.author).map(item=>[item.url,item.author]));
+ const unavailable=new Set(fileRows.filter(item=>item.unavailable).map(item=>item.url));
+ const live=new Map(communityRows.map(item=>[item.url,item]));
+ const files=staticRows.filter(item=>!unavailable.has(item.url)).map(item=>live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}),readingMinutes:item.category==='stories'?Number(item.readingMinutes)||0:0}));
+ const paths=new Set(files.map(item=>item.url));return [...files,...communityRows.filter(item=>!paths.has(item.url))];
 }
-async function loadAllContentUncached() {
-    const [results, fileAuthors, community] = await Promise.all([
-        fetch("/content/catalogue.json").then(async response => {
-            if (!response.ok) throw new Error("Content catalogue could not load");
-            const rows = await response.json();
-            if (!Array.isArray(rows)) throw new Error("Invalid content catalogue");
-            return rows.map(value => ({status:"fulfilled",value:normalizeContentMeta(value)}));
-        }),
-        publicFileCatalog(), publicStoryCatalog()
-    ])
-    const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
-    const unavailable=new Set(fileAuthors.filter(item=>item.unavailable).map(item=>item.url));
-    const live=new Map(community.map(item=>[item.url,item]));
-    const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
-    if (results.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
-    const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(item.readingMinutes) || 0 : 0}))
-    const paths=new Set(files.map(item=>item.url));
-    return [...files,...community.filter(item=>!paths.has(item.url))]
+async function loadAllContent({firstPage=false}={}){
+ await (allContentRequest??=loadInitialContent().catch(error=>{allContentRequest=null;throw error;}));
+ if(!firstPage)while(!contentPager.done)await loadMoreContent();
+ return mergedContent();
+}
+async function loadInitialContent(){
+ const edge=typeof location!=='undefined'&&location.origin==='https://fromastoryteller.com';
+ const catalogue=fetch('/content/catalogue.json').then(async response=>{if(!response.ok)throw Error('Content catalogue could not load');const rows=await response.json();if(!Array.isArray(rows))throw Error('Invalid content catalogue');return rows.map(normalizeContentMeta);});
+ if(edge){
+  const bootstrap=fetch('/api/public/discovery',{credentials:'omit',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(10000)}).then(async r=>{if(!r.ok)throw Error('Published content could not load');const data=await r.json();if(!Array.isArray(data.files)||!data.stories)throw Error('Published content could not be read');return data;});
+  const [rows,data]=await Promise.all([catalogue,bootstrap]);staticRows=rows;fileRows=data.files;contentPager=createPublicStoryPager({initialPage:data.stories});communityRows=await contentPager.next();
+ }else{
+  contentPager=createPublicStoryPager();[staticRows,fileRows,communityRows]=await Promise.all([catalogue,publicFileCatalog(),contentPager.next()]);
+ }
+}
+async function loadMoreContent(){const batch=await contentPager.next(),seen=new Set(communityRows.map(item=>item.id));communityRows.push(...batch.filter(item=>!seen.has(item.id)));return mergedContent();}
+function mountCatalogMore(grid,onChange){
+ if(!grid||contentPager.done)return;
+ const section=document.createElement('div'),notice=document.createElement('p'),button=document.createElement('button');section.className='content-catalog-more';notice.setAttribute('role','status');notice.textContent='More published content is available. Load more to include it in filters and sorting.';button.type='button';button.className='account-secondary';button.textContent='Load more published content';section.append(notice,button);grid.after(section);
+ button.addEventListener('click',async()=>{button.disabled=true;notice.textContent='Loading more published content…';try{onChange(await loadMoreContent());if(contentPager.done){section.remove();return;}notice.textContent='More published content is available. Load more to include it in filters and sorting.';}catch{notice.textContent='More content could not load. Please try again.';}finally{button.disabled=false;}});
 }
 
 // ----- SORT / FILTER -----
@@ -274,13 +281,14 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
     `
 }
 
+function cardVersion(item){return JSON.stringify([item.dateModified,item.card?.title,item.card?.description,item.card?.image,item.card?.imageAlt,item.author,item.authorDisplay,item.category,item.readingMinutes,item.image?.width,item.image?.height]);}
 function createCardMarkup(item, variant = "standard") {
     const cardVariant = "standard"
     return `
-        <article class="content-grid-card content-card--${cardVariant}" ${viewerCardAttributes(item)}>
+        <article class="content-grid-card content-card--${cardVariant}" data-fas-version="${escapeHtml(cardVersion(item))}" ${viewerCardAttributes(item)}>
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
-                    ${item.card.image ? responsiveImage(item.card.image,item.card.imageAlt,{width:item.image?.width||1600,height:item.image?.height||900}) : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
+                    ${item.card.image ? responsiveImage(item.card.image,item.card.imageAlt,{width:item.image?.width||1600,height:item.image?.height||900,deferred:true}) : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">${escapeHtml(cardTypeLabel(item))}</span>
@@ -438,7 +446,17 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", vari
     }
 
     container.classList.remove("content-grid--compact")
-    container.innerHTML = items.map(item => createCardMarkup(item, variant)).join("")
+    // Keep unchanged card/image nodes when following, filters or pagination update.
+    const previous=new Map([...container.querySelectorAll(':scope > article')].map(node=>[node.querySelector('.content-grid-card-link')?.getAttribute('href'),node]));
+    container._fasGridObserver?.disconnect();
+    let shown=0;
+    const nodes=items.map(item=>{const markup=createCardMarkup(item,variant);let node=previous.get(item.url);if(!node||node._fasMarkup!==markup&&node.dataset.fasVersion!==cardVersion(item)){const template=document.createElement('template');template.innerHTML=markup.trim();node=template.content.firstElementChild;node._fasMarkup=markup;}return node;});
+    const retain=new Set(nodes.slice(0,24));for(const child of [...container.children])if(!retain.has(child))child.remove();
+    // Batch DOM work; the accessible button also works without IntersectionObserver.
+    const more=document.createElement('button');more.type='button';more.className='account-secondary content-grid-more';more.textContent='Show more';more.style.gridColumn='1 / -1';
+    const append=()=>{const end=Math.min(shown+24,nodes.length);for(;shown<end;shown++)container.append(nodes[shown]);more.remove();if(shown<nodes.length)container.append(more);observeImages(container);};
+    more.addEventListener('click',append);append();
+
 }
 
 function renderFeaturedItem(selector, item, label = "Featured") {
@@ -479,7 +497,7 @@ export async function initCategoryPage(config) {
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
-        const loadedContent = await loadAllContent()
+        const loadedContent = await loadAllContent({firstPage:true})
         const publishedContent = getPublishedContent(loadedContent)
         const categoryItems = filterByCategory(publishedContent, category)
 
@@ -487,7 +505,8 @@ export async function initCategoryPage(config) {
 
 
         initFeaturedRotator(featuredSelector, selectFeatured(allItems), featuredLabel)
-        mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?'No content matches these filters. Try another selection.':emptyMessage),{category})
+        const discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?'No content matches these filters. Try another selection.':emptyMessage),{category});
+        mountCatalogMore(grid,rows=>{allItems=sortContent(filterByCategory(getPublishedContent(rows),category));discovery.setItems(allItems);initFeaturedRotator(featuredSelector,selectFeatured(allItems),featuredLabel);});
         browsing?.restore()
     } catch (error) {
         console.error("Error loading category page:", error)
@@ -525,8 +544,8 @@ export async function initHomePage(config) {
     }) : Promise.resolve()
 
     try {
-        const loadedContent = await loadAllContent()
-        if (document.documentElement.dataset.fasHomeStartup === 'pending') await following
+        const loadedContent = await loadAllContent({firstPage:true})
+        // Following is a progressive enhancement; account verification does not block content.
         allItems = sortContent(getPublishedContent(loadedContent))
 
 
@@ -535,6 +554,7 @@ export async function initHomePage(config) {
         initFeaturedRotator(featuredSelector, discoverContent(featuredItems, {}, followedIds), featuredLabel, 7000)
         discovery=mountContentDiscovery(document.querySelector(filtersSelector),allItems,items=>renderGrid(gridSelector,items,allItems.length?"No content matches these filters. Try another selection.":emptyMessage))
         discovery.setFollowed(followedIds)
+        mountCatalogMore(grid,rows=>{allItems=sortContent(getPublishedContent(rows));featuredItems=getHomeFeaturedItems(allItems);discovery.setItems(allItems);initFeaturedRotator(featuredSelector,discoverContent(featuredItems,{},followedIds),featuredLabel,7000);});
         browsing?.restore()
     } catch (error) {
         console.error("Error loading home page:", error)
@@ -555,7 +575,8 @@ function showCatalogError(grid) {
     const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Try again';retry.addEventListener('click',()=>location.reload());notice.append(retry);grid.prepend(notice)
 }
 
-export async function initRelatedContentSection(config) {
+export function initRelatedContentSection(config) {const grid=document.querySelector(config.gridSelector);return whenVisible(grid?.closest('section')??grid?.parentElement??grid,()=>loadRelatedContentSection(config));}
+async function loadRelatedContentSection(config) {
     const {
         gridSelector,
         currentContentId = "",
@@ -598,3 +619,6 @@ export function renderContentGrid(selector, items, emptyMessage = "Nothing to sh
 // Shared with the build script so static and interactive cards stay identical.
 export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup, initFeaturedRotator };
 
+
+// Activate the server-rendered first screen while catalogue freshness is checked.
+if(typeof document!=='undefined'&&document.body)observeImages(document.body);

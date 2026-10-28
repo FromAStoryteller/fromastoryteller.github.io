@@ -34,3 +34,11 @@ test('dynamic games/tools use the shared shell, retain existing files and reject
   assert.equal((await readingResponse(new Request(url),env,async()=>Response.json(null))).status,404);assert.equal((await readingResponse(new Request(url),env,async()=>Response.json({...item,content_type:'story'}))).status,404);
  }
 });
+
+test('nested media paths round-trip through ZIP and folder upload without flattening or collisions',async()=>{
+ const p={...starterPackage(),assets:[{name:'images/hero.png',type:'image/png',data:'aGVsbG8='},{name:'icons/hero.png',type:'image/png',data:'aGVsbG8='}],css:'.hero{background:url(assets/images/hero.png)}'};
+ const restored=await packageFromFiles([new File([packageZip(p)],'project.zip')]);assert.deepEqual(restored.assets,p.assets);assert.match(packageDocument(p),/data:image\/png;base64/);
+ const files=[new File(['const ready=true'],'game.js'),new File(['hello'],'hero.png')];Object.defineProperty(files[0],'webkitRelativePath',{value:'project/game.js'});Object.defineProperty(files[1],'webkitRelativePath',{value:'project/assets/images/hero.png'});assert.equal((await packageFromFiles(files)).assets[0].name,'images/hero.png');
+ for(const name of ['../hero.png','a/../hero.png','/hero.png','a//hero.png','a\\hero.png','a/b/c/d/hero.png'])assert.throws(()=>validatePackage({...p,assets:[{...p.assets[0],name}]}));
+ assert.throws(()=>packageDocument({...p,css:'.x{background:url(assets/missing.png)}'}),/Missing CSS asset/);
+});

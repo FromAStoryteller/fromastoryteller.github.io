@@ -40,3 +40,7 @@ test('public images cache anonymous bytes in Sydney, revalidate visibility, and 
  f.withdraw();assert.equal((await run()).headers.get('X-FAS-Public-Cache'),'MISS');assert.equal(images,2);f.fail();assert.equal((await run()).status,503);assert.equal(images,2);
  for(const query of ['asset_id=bad','asset_id=aa000000-0000-0000-0000-000000000001&width=9999','asset_id=aa000000-0000-0000-0000-000000000001&path=private'])assert.throws(()=>publicCatalogRequest(new URL(origin+'/api/public/image?'+query)));
 });
+
+test('discovery combines only anonymous file metadata and the first story page under one revision check',async()=>{
+ const f=fixture();const response=await f.run('/api/public/discovery',{headers:{Cookie:'private',Authorization:'Bearer private'}});assert.equal(response.status,200);assert.deepEqual(await response.json(),{files:['public'],stories:['public']});assert.equal(f.counts.checks,1);assert.equal(f.counts.reads,2);assert.equal((await f.run('/api/public/discovery')).headers.get('X-FAS-Public-Cache'),'HIT');f.fail();assert.equal((await f.run('/api/public/discovery')).status,503);assert.equal((await f.run('/api/public/discovery?x=1')).status,400);
+});

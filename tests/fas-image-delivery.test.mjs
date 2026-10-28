@@ -56,3 +56,12 @@ test('master delivery preserves exact bytes for concurrent responsive URLs',asyn
  for(const response of responses){assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'image/jpeg');assert.deepEqual(new Uint8Array(await response.arrayBuffer()),bytes);assert.match(response.headers.get('Cache-Control'),/no-store/);}
  assert.equal(checks,12);
 });
+
+test('stored derivatives require current asset visibility and safely fall back to the unchanged master',async()=>{
+ for(const available of [true,false])for(const missing of [true,false]){
+  let checks=0;const gets=[];const assetPath=path.replace('.png','.jpg');
+  const handler=makeImageHandler(config,async url=>{if(url.includes('/rest/v1/')){checks++;return Response.json([{object_path:assetPath,derivative_widths:available?[480]:[]}]);}gets.push(url);return url.endsWith('-480.jpg')?new Response('small',{status:missing?404:200,headers:{'Content-Type':'image/jpeg'}}):new Response('master',{headers:{'Content-Type':'image/jpeg'}});});
+  const response=await handler(new Request(`https://image.invalid/?asset_id=${id}&width=480`));assert.equal(response.status,200);assert.equal(await response.text(),available&&!missing?'small':'master');assert.equal(checks,2);assert.equal(gets.length,available&&missing?2:1);assert.equal(response.headers.get('X-FAS-Image-Variant'),available&&!missing?'480':'master');
+ }
+ let checks=0;const handler=makeImageHandler(config,async url=>url.includes('/rest/v1/')?Response.json(++checks===1?[{object_path:path.replace('.png','.jpg'),derivative_widths:[480]}]:[]):new Response('small',{headers:{'Content-Type':'image/jpeg'}}));assert.equal((await handler(new Request(`https://image.invalid/?asset_id=${id}&width=480`))).status,404);
+});
