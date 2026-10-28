@@ -21,6 +21,6 @@ try{for(const width of [1440,390,320]){
  assert.deepEqual(errors,[]);await page.close();console.log('PASS discovery, labelled read status, featured types, author panel, Following feed, navigation and session clear at '+width+'px');
 }
  // Delayed catalogue responses must never present a false empty search state.
- const page=await browser.newPage();await page.route('**/content/content-index.json',async route=>{await new Promise(resolve=>setTimeout(resolve,800));await route.continue();});
+ const page=await browser.newPage();await page.route('**/content/catalogue.json',async route=>{await new Promise(resolve=>setTimeout(resolve,800));await route.continue();});
  await page.goto(origin+'/search/?q=tea');await page.getByText('Loading published content…',{exact:true}).waitFor();assert.equal(await page.getByText('No content results found for "tea".',{exact:true}).count(),0);await page.getByText('1 content result found for "tea".',{exact:true}).waitFor();await page.close();
 }finally{await browser.close();}
