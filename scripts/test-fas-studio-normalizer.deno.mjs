@@ -28,3 +28,7 @@ Deno.test('small sources are never enlarged; large crops retain a sharper master
  for(const normalise of [normalizeCover,normalizeProfile]){let failed=false;try{await normalise(png,{x:.5,y:.5});}catch{failed=true;}if(!failed)throw Error('Small source was enlarged');}
  const source=await (await Image.decode(png)).resize(2400,1350).encode();const bytes=await normalizeCover(source,{x:.5,y:.5}),size=inspectRaster(bytes);if(size.width!==2400||size.height!==1350)throw Error('Master was unnecessarily downsampled');
 });
+
+Deno.test('camera orientation uses the real image bitmap before crop geometry',async()=>{
+ const {orientImage}=await import('../supabase/functions/fas-studio-cover/orientation.mjs');const image=await Image.decode(png),rotated=orientImage(image,6,Image);if(rotated.width!==9||rotated.height!==16||rotated.bitmap.length!==image.bitmap.length)throw Error('Camera orientation failed');
+});
