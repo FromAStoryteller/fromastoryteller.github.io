@@ -44,7 +44,7 @@ async function initSiteShell() {
     const detail=document.querySelector('main .story-header,main .game-hero,main .tool-hero,main .video-hero')||/^\/(?:read|stories\/[^/]+|blog\/[^/]+|games\/[^/]+|tools\/[^/]+|videos\/[^/]+)\/?$/.test(location.pathname);
     const cards=detail||document.querySelector('.content-grid,[data-viewer-content]')||/^\/(?:storytellers|collections|search)\//.test(location.pathname);
     idle(()=>{
-      if(cards)void enhance(import('../community/viewer-actions.mjs'),m=>m.initViewerActions());
+      if(cards)void enhance(import('../community/viewer-actions.mjs'),({initViewerActions})=>{initViewerActions();});
       if(detail){
         void enhance(import('../community/story-author-panel.mjs'),m=>m.initStoryAuthorPanels());
         void enhance(import('../content/content-series.mjs'),m=>m.initContentSeries());
