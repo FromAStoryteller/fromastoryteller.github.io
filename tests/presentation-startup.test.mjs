@@ -9,7 +9,7 @@ const session=JSON.stringify({user:{id:'reader'},access_token:'presentation-only
 function paint({shared={},local={},pathname='/',origin='https://fromastoryteller.com',blocked=false}={}){
  const dataset={};
  const storage=values=>({getItem(key){if(blocked)throw Error('storage blocked');return values[key]??null;}});
- runInNewContext(source,{location:{origin,pathname},sessionStorage:storage(local),localStorage:storage(shared),document:{documentElement:{dataset}}});
+ runInNewContext(source,{location:{origin,pathname},sessionStorage:storage(local),localStorage:storage(shared),setTimeout:()=>{},document:{documentElement:{dataset}}});
  return dataset;
 }
 test('remembered credentials reserve account and home presentation before any auth modules load',()=>{
@@ -24,4 +24,10 @@ test('active tab persistence takes precedence over another remembered account',(
 });
 test('guests, malformed hints, other origins and blocked storage keep the public first paint',()=>{
  for(const options of [{},{blocked:true},{shared:{[prefix+'-remembered']:'broken'}},{shared:{[prefix+'-remembered']:'{}'}},{shared:{[prefix+'-remembered']:session},origin:'https://preview.workers.dev'}])assert.deepEqual(paint(options),{});
+});
+
+test('a slow signed-in startup reveals the existing public cards after a bounded wait',()=>{
+ const dataset={},timers=[];
+ runInNewContext(source,{location:{origin:'https://fromastoryteller.com',pathname:'/'},sessionStorage:{getItem:()=>null},localStorage:{getItem:()=>session},document:{documentElement:{dataset}},setTimeout:(callback,delay)=>timers.push({callback,delay})});
+ assert.equal(dataset.fasHomeStartup,'pending');assert.equal(timers[0].delay,1500);timers[0].callback();assert.equal(dataset.fasHomeStartup,undefined);assert.equal(dataset.fasAccountStartup,'pending');
 });

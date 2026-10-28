@@ -72,6 +72,8 @@ jobs:
           FAS_LAYOUT_BASE: ${{ github.event.pull_request.base.sha }}
       - run: npm install --no-save playwright@1.58.0
       - run: npx playwright install --with-deps chromium
+      - run: npm run build:cloudflare
+      - run: node scripts/test-cache-assets-browser.mjs
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/wait-for-preview.mjs
       - run: node scripts/test-reader-controls-browser.mjs

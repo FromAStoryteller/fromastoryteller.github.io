@@ -1,5 +1,6 @@
 // Generated account policy release: viewer-activity-default-2026-10-24-v1
 // Regenerated with site indexes so policy-only releases also refresh the hosting build.
+import {publicContentResponse} from './systems/content/public-cache-worker.mjs';
 import {interactivePageMarkup} from './systems/community/interactive-page.mjs';
 import {isInteractive} from './systems/community/interactive-package.mjs';
 import {storyPageMarkup,socialMarkup} from './systems/content/page-layout.mjs';
@@ -88,4 +89,4 @@ export async function readingResponse(request,env,fetcher=fetch){
   return new Response(request.method==='HEAD'?null:html,{status:200,headers});
  }catch{return fallback(503);}
 }
-export default {fetch:(request,env)=>readingResponse(request,env)};
+export default {fetch:(request,env)=>publicContentResponse(request,env,readingResponse)};
