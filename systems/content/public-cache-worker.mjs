@@ -9,6 +9,11 @@ const exposed=(response,state,head=false)=>{
 };
 export function publicCatalogRequest(url){
  if(!url.pathname.startsWith(API))return null;
+ if(url.pathname===API+'image'){
+  const keys=[...url.searchParams.keys()],id=url.searchParams.get('asset_id'),width=Number(url.searchParams.get('width')??1600);
+  if(keys.some(k=>!['asset_id','width'].includes(k))||new Set(keys).size!==keys.length||!UUID.test(id??'')||![480,800,1200,1600,2400,3200].includes(width))throw Error('Invalid public image');
+  return {image:true,id,width};
+ }
  if(url.pathname===API+'files'&&!url.search)return {rpc:'fas_public_file_catalog',args:{}};
  if(url.pathname!==API+'stories')throw Error('Unknown public endpoint');
  const keys=[...url.searchParams.keys()];
@@ -42,10 +47,13 @@ export async function publicContentResponse(request,env,render,{fetcher=fetch,ca
   const key=new Request(keyUrl,{method:'GET'});
   if(useCache){try{const hit=await cache.match(key);if(hit)return exposed(hit,'HIT',request.method==='HEAD');}catch{/* A cache outage still permits a fresh public read. */}}
   const anonymous=new Request(url,{method:'GET'});
-  let response= catalog?await rpc(catalog.rpc,catalog.args):await render(anonymous,env,fetcher);
-  if(catalog){if(!response.ok)return unavailable();const data=await response.json();response=Response.json(data,{headers:noStore});}
+  let response=catalog?.image?await fetcher(PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+catalog.id+'&width='+catalog.width,{method:'GET',credentials:'omit',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{'x-region':'ap-southeast-2'}}):catalog?await rpc(catalog.rpc,catalog.args):await render(anonymous,env,fetcher);
+  if(catalog?.image){
+   if(!response.ok)return new Response('Image unavailable.',{status:response.status===404?404:503,headers:noStore});
+   if(response.headers.get('Content-Type')?.split(';')[0]!=='image/jpeg')return unavailable();
+  }else if(catalog){if(!response.ok)return unavailable();const data=await response.json();response=Response.json(data,{headers:noStore});}
   if(useCache&&response.status===200&&!response.headers.has('Set-Cookie')){
-   const stored=response.clone(),headers=new Headers(stored.headers);headers.set('Cache-Control','public, max-age=60');
+   const stored=response.clone(),headers=new Headers(stored.headers);headers.set('Cache-Control','public, max-age=60');for(const name of ['CDN-Cache-Control','Cloudflare-CDN-Cache-Control','Surrogate-Control','Vary'])headers.delete(name);
    // Await the write so HEAD requests and cache failures cannot outlive this task.
    try{await cache.put(key,new Response(stored.body,{status:200,headers}));}catch{/* Cache writes must never fail a successful public page. */}
   }

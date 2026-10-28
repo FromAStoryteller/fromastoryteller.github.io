@@ -18,7 +18,7 @@ export function makeImageHandler({ base, anonKey, serviceKey, kind='cover',trans
     if (request.method !== 'GET') return reply(405, 'GET required');
     const params=new URL(request.url).searchParams;
     const width=params.has('width')?Number(params.get('width')):null;
-    if(width!==null&&(![480,800,1200,1600].includes(width)||kind!=='cover'))return reply(400,'Unsupported image width');
+    if(width!==null&&(![480,800,1200,1600,2400,3200].includes(width)||kind!=='cover'))return reply(400,'Unsupported image width');
     const id = params.get('asset_id') ?? '';
     if (!uuid.test(id)) return reply(400, 'Valid asset ID required');
     if (!base || !anonKey || !serviceKey) return reply(503, 'Image service unavailable');

@@ -10,6 +10,15 @@ insert into public.user_roles(user_id,role) values('98000000-0000-0000-0000-0000
 -- Only synthetic SQL metadata; all changes roll back.
 insert into public.stories(id,author_id,title) values('98200000-0000-0000-0000-000000000001','98000000-0000-0000-0000-000000000001','Image fixture');
 do $$
+declare owner uuid:='98000000-0000-0000-0000-000000000001'; session uuid:='98100000-0000-0000-0000-000000000001'; story uuid:='98200000-0000-0000-0000-000000000001'; path text; asset jsonb;
+begin
+ if has_function_privilege('anon','public.fas_register_verified_cover_v2(uuid,uuid,uuid,text,text,integer,integer)','execute') or has_function_privilege('authenticated','public.fas_register_verified_cover_v2(uuid,uuid,uuid,text,text,integer,integer)','execute') then raise exception 'Master registration exposed';end if;
+ path:=owner::text||'/'||story::text||'/cccccccc-cccc-cccc-cccc-cccccccccccc.jpg';
+ perform public.fas_reserve_image_upload(owner,session,path,'cover');
+ asset:=public.fas_register_verified_cover_v2(story,owner,session,path,'Synthetic high-resolution cover',3200,1800);
+ if (asset->>'pixel_width')::int<>3200 or not exists(select 1 from public.story_assets where id=(asset->>'id')::uuid and pixel_width=3200 and pixel_height=1800) then raise exception 'Master dimensions lost';end if;
+end;$$;
+do $$
 declare owner uuid:='98000000-0000-0000-0000-000000000001';session uuid:='98100000-0000-0000-0000-000000000001';key uuid;v uuid;first jsonb;second jsonb;path1 text;path2 text;batch jsonb;
 begin
  select public_id,image_version into key,v from public.profiles where id=owner;

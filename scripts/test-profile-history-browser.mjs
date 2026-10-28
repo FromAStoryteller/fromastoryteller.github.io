@@ -18,7 +18,7 @@ try{
    await input.fill(original+' another');assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),true);
    await page.evaluate(()=>__profilePreview.profileDelay(500));await page.evaluate(()=>{document.querySelector('form.profile-editor').requestSubmit();document.querySelector('main [data-account-sign-out]').click();});assert.equal(await page.evaluate(()=>__profilePreview.signOuts()),0,'pending save blocks signout');await page.getByText('Your profile was saved.',{exact:true}).waitFor();
    if(mode==='viewer'){assert.equal(await page.locator('[data-profile-image]').count(),0,'viewer photo controls are absent');await page.evaluate(()=>__profilePreview.dispose());page.off('dialog',dismiss);continue;}
-   const png=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d');x.fillStyle='#182a46';x.fillRect(0,0,160,160);return c.toDataURL('image/png').split(',')[1];});
+   const png=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.fillStyle='#182a46';x.fillRect(0,0,512,512);return c.toDataURL('image/png').split(',')[1];});
    await context.route('**/functions/v1/fas-story-image**',route=>route.fulfill({contentType:'image/png',body:Buffer.from(png,'base64')}));
    await page.locator('#profile-image-file').setInputFiles({name:'crop.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')});await page.locator('[data-profile-image] [data-upload]:enabled').waitFor();
    assert.equal(await page.evaluate(()=>{const e=new Event('beforeunload',{cancelable:true});dispatchEvent(e);return e.defaultPrevented;}),true,'staged image crop is protected');
