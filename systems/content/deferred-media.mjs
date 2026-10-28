@@ -1,5 +1,6 @@
 // Off-screen and hidden images have no network URL until they approach the viewport.
 export function activateImage(image){
+ image.removeAttribute('aria-hidden');
  const picture=image.closest('picture');
  for(const source of picture?.querySelectorAll('source[data-fas-srcset]')??[]){source.srcset=source.dataset.fasSrcset;delete source.dataset.fasSrcset;}
  if(image.dataset.fasSrcset){image.srcset=image.dataset.fasSrcset;delete image.dataset.fasSrcset;}
