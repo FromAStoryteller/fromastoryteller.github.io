@@ -129,7 +129,7 @@ async function loadInitialContent(){
   contentPager=createPublicStoryPager();[staticRows,fileRows,communityRows]=await Promise.all([catalogue,publicFileCatalog(),contentPager.next()]);
  }
 }
-async function loadMoreContent(){communityRows.push(...await contentPager.next());return mergedContent();}
+async function loadMoreContent(){const batch=await contentPager.next(),seen=new Set(communityRows.map(item=>item.id));communityRows.push(...batch.filter(item=>!seen.has(item.id)));return mergedContent();}
 function mountCatalogMore(grid,onChange){
  if(!grid||contentPager.done)return;
  const section=document.createElement('div'),notice=document.createElement('p'),button=document.createElement('button');section.className='content-catalog-more';notice.setAttribute('role','status');notice.textContent='More published content is available. Load more to include it in filters and sorting.';button.type='button';button.className='account-secondary';button.textContent='Load more published content';section.append(notice,button);grid.after(section);
