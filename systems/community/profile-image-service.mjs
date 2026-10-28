@@ -16,7 +16,7 @@ export function createProfileImageService(client,{ownerId}={}){
    await authorize();
    if(!isPublicId(version)||!file||file.size>5242880||!['image/jpeg','image/png'].includes(file.type)||!alt.trim()||[...alt].length>500)throw new Error('Choose a JPEG or PNG up to 5 MiB and add a description.');
    const body=new FormData();body.set('image',file);body.set('alt',alt.trim());body.set('expected_version',version);body.set('focus_x',String(crop.x));body.set('focus_y',String(crop.y));
-   const r=await client.functions.invoke('fas-profile-upload',{body});
+   const r=await client.functions.invoke('fas-profile-upload',{body,region:'ap-southeast-2'});
    if(r.error||!r.data?.asset?.version)throw new Error('The image was not confirmed. Reload its saved state before retrying. Your saved image stays safe.');
    return r.data.asset;
   },

@@ -258,7 +258,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
         <article class="content-featured-card" ${viewerCardAttributes(item)}>
         <a class="content-featured-link image-overlay" href="${escapeHtml(item.url)}" aria-label="${escapeHtml(getPrimaryActionLabel(item) + ': ' + item.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
             <div class="content-featured-media image-overlay__media">
-                ${responsiveImage(item.image.src || item.card.image,item.image.alt || item.card.imageAlt,{featured:true})}
+                ${responsiveImage(item.image.src || item.card.image,item.image.alt || item.card.imageAlt,{featured:true,width:item.image?.width||1600,height:item.image?.height||900})}
             </div>
             <div class="content-featured-text image-overlay__content">
                 <div class="content-featured-text-inner">
@@ -280,7 +280,7 @@ function createCardMarkup(item, variant = "standard") {
         <article class="content-grid-card content-card--${cardVariant}" ${viewerCardAttributes(item)}>
             <a href="${escapeHtml(item.url)}" class="content-grid-card-link image-overlay" aria-label="${escapeHtml(item.card.title + (item.category === "stories" && item.readingMinutes ? ", " + readingTimeLabel(item.readingMinutes) : ""))}">
                 <div class="content-grid-card-image image-overlay__media">
-                    ${item.card.image ? responsiveImage(item.card.image,item.card.imageAlt) : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
+                    ${item.card.image ? responsiveImage(item.card.image,item.card.imageAlt,{width:item.image?.width||1600,height:item.image?.height||900}) : `<span class="content-grid-card-placeholder" aria-hidden="true">From, A Storyteller</span>`}
                 </div>
                 <div class="content-grid-card-body image-overlay__content">
                     <span class="image-overlay__label">${escapeHtml(cardTypeLabel(item))}</span>

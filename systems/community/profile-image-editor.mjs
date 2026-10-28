@@ -6,7 +6,7 @@ export function squareCrop(width,height,x=50,y=50){
 export function mountProfileImage(root,client,{ownerId,imageBase,contributor,getName=()=>'',service=createProfileImageService(client,{ownerId}),onImage=()=>{}}={}){
  const d=root.ownerDocument,w=d.defaultView;
  let image=null,source=null,file=null,sourceURL,displayURL,controller,disposed=false,busy=false,writing=false,savedAlt='',generation=0,drag;
- root.innerHTML=`<h3>Profile image</h3><p class="profile-muted">${contributor?'Shown on your public storyteller page.':'Only you can see your image while your account is a viewer.'} Optional. JPEG or PNG up to 5 MiB and 8 million pixels. Images are saved as a square crop (512 × 512); upload another shape and move it to fit.</p>
+ root.innerHTML=`<h3>Profile image</h3><p class="profile-muted">${contributor?'Shown on your public storyteller page.':'Only you can see your image while your account is a viewer.'} Optional. JPEG or PNG up to 5 MiB and 8 million pixels. Images need a square crop of at least 512 × 512 source pixels and are saved at 512 × 512; upload another shape and move it to fit.</p>
  <div class="profile-image-current"><img data-current hidden alt=""><span data-empty>No profile image</span></div>
  <fieldset disabled class="profile-image-fields"><legend class="visually-hidden">Profile image controls</legend>
  <div class="account-field"><label for="profile-image-file">Choose an image</label><input id="profile-image-file" type="file" accept="image/jpeg,image/png"></div>
@@ -46,10 +46,8 @@ export function mountProfileImage(root,client,{ownerId,imageBase,contributor,get
   try{
    let saved;
    if(action==='upload'){
-    const crop=squareCrop(source.naturalWidth,source.naturalHeight,+x.value,+y.value),out=d.createElement('canvas');out.width=out.height=512;
-    out.getContext('2d').drawImage(source,crop.x,crop.y,crop.width,crop.height,0,0,512,512);
-    const blob=await new Promise(resolve=>out.toBlob(resolve,'image/jpeg',.9));if(!blob)throw new Error('The crop could not be prepared.');
-    saved=await service.upload(new File([blob],'profile.jpg',{type:'image/jpeg'}),alt.value,{x:.5,y:.5},image.version);
+    if(Math.min(source.naturalWidth,source.naturalHeight)<512)throw new Error('Choose an image with at least 512 × 512 pixels for a sharp profile crop.');
+    saved=await service.upload(file,alt.value,{x:Number(x.value)/100,y:Number(y.value)/100},image.version);
    }else saved=await service.change(image.version,alt.value,action==='remove');
    if(disposed)return;image=saved;reset();alt.value=saved.alt||('Profile image for '+(getName().trim()||'Storyteller'));savedAlt=alt.value;status.textContent=action==='remove'?'Profile image removed. Stored bytes are queued for cleanup.':'Profile image saved.';await display();
   }catch(e){if(!disposed)status.textContent=e.message;}
@@ -60,7 +58,7 @@ export function mountProfileImage(root,client,{ownerId,imageBase,contributor,get
   if(selected.size>5242880||!['image/jpeg','image/png'].includes(selected.type)){status.textContent='Choose a JPEG or PNG up to 5 MiB.';update();return;}
   if(!image?.asset_id&&(!alt.value||alt.value==='Profile image for Storyteller'))alt.value='Profile image for '+(getName().trim()||'Storyteller');
   sourceURL=URL.createObjectURL(selected);const next=new w.Image(),stamp=generation;
-  next.onload=()=>{if(disposed||stamp!==generation)return;if(next.naturalWidth*next.naturalHeight>8000000){status.textContent='Choose an image with at most 8 million pixels.';update();return;}source=next;file=selected;draw();update();status.textContent='Adjust the square crop, then save your image.';};
+  next.onload=()=>{if(disposed||stamp!==generation)return;if(next.naturalWidth*next.naturalHeight>8000000){status.textContent='Choose an image with at most 8 million pixels.';update();return;}if(Math.min(next.naturalWidth,next.naturalHeight)<512){status.textContent='Choose an image at least 512 × 512 pixels. Small images are never enlarged.';update();return;}source=next;file=selected;draw();update();status.textContent='Adjust the square crop, then save your image.';};
   next.onerror=()=>{if(!disposed&&stamp===generation){status.textContent='This image could not be opened.';update();}};next.src=sourceURL;
  });
  for(const control of [x,y])control.addEventListener('input',draw);
