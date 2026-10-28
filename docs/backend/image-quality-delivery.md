@@ -11,3 +11,7 @@ Production public cover markup uses `/api/public/image`. Cloudflare verifies the
 Image cache misses invoke the processor in Sydney (`ap-southeast-2`), near the database/storage, rather than making multiple database round trips from an arbitrary execution region. Explicit regional routing has no automatic regional failover; a failed origin is never replaced with unchecked stale images.
 
 This photo-cover policy does not rewrite creator package assets, pixel art, SVGs, manuscripts, PDFs, source code or downloads. Those retain their original bytes and require content-appropriate optimisation. Static repository images retain the separate AVIF/WebP derivative pipeline.
+
+## Emergency delivery correction — 28 October 2026
+
+Live parallel image requests exhausted the Supabase isolate CPU budget (546 `WORKER_RESOURCE_LIMIT`, shutdown reason `CPUTime`). The deployed story-image entrypoint now omits on-demand transformation and serves the stored master bytes unchanged, retaining both caller-scoped visibility checks, size limits, and no-store responses. Existing width URLs remain accepted for compatibility. This increases transfer size but avoids request-time codec work and preserves source quality. Pre-generated derivatives should replace request-time encoding in the next optimisation. The resize module remains available for offline tests, but is not loaded by the delivery entrypoint.
