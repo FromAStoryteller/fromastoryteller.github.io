@@ -14,9 +14,6 @@ import {mountHomeFollowing} from '../community/home-following.mjs'
 // Used by category pages and home page
 // ==================================
 
-// ----- CONFIG -----
-const CONTENT_INDEX_PATH = "/content/content-index.json"
-
 // ----- HELPERS -----
 function safeArray(value) {
     return Array.isArray(value) ? value : []
@@ -107,35 +104,18 @@ function normalizeContentMeta(meta) {
 }
 
 // ----- DATA LOADING -----
-async function loadContentIndex() {
-    const response = await fetch(CONTENT_INDEX_PATH)
-
-    if (!response.ok) {
-        throw new Error(`Failed to load content index: ${response.status}`)
-    }
-
-    return response.json()
-}
-
-async function loadMetaFile(metaPath) {
-    const response = await fetch(metaPath)
-
-    if (!response.ok) {
-        throw new Error(`Failed to load meta file: ${metaPath}`)
-    }
-
-    const meta = await response.json()
-    return normalizeContentMeta(meta)
-}
-
 let allContentRequest;
 async function loadAllContent() {
     return allContentRequest??=(loadAllContentUncached().catch(error=>{allContentRequest=null;throw error;}))
 }
 async function loadAllContentUncached() {
-    const [results, times, fileAuthors, community] = await Promise.all([
-        loadContentIndex().then(metaPaths => Promise.allSettled(metaPaths.map(loadMetaFile))),
-        fetch("/content/story-reading-times.json").then(response => response.ok ? response.json() : {}).catch(() => ({})),
+    const [results, fileAuthors, community] = await Promise.all([
+        fetch("/content/catalogue.json").then(async response => {
+            if (!response.ok) throw new Error("Content catalogue could not load");
+            const rows = await response.json();
+            if (!Array.isArray(rows)) throw new Error("Invalid content catalogue");
+            return rows.map(value => ({status:"fulfilled",value:normalizeContentMeta(value)}));
+        }),
         publicFileCatalog(), publicStoryCatalog()
     ])
     const authors=new Map(fileAuthors.filter(item=>item.author).map(item=>[item.url,item.author]));
@@ -143,7 +123,7 @@ async function loadAllContentUncached() {
     const live=new Map(community.map(item=>[item.url,item]));
     const loaded = results.filter(result => result.status === "fulfilled").map(result => result.value)
     if (results.length && !loaded.length && !community.length) throw new Error("No content metadata could be loaded")
-    const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(times[item.id]?.minutes) || 0 : 0}))
+    const files=loaded.filter(item=>!unavailable.has(item.url)).map(item => live.has(item.url)?({...item,...live.get(item.url),featured:item.featured,pinned:item.pinned,subtype:item.subtype}):({...item,...(authors.has(item.url)?{author:authors.get(item.url).public_id,authorDisplay:authors.get(item.url).display_name}:{}), readingMinutes: item.category === "stories" ? Number(item.readingMinutes) || 0 : 0}))
     const paths=new Set(files.map(item=>item.url));
     return [...files,...community.filter(item=>!paths.has(item.url))]
 }
@@ -494,7 +474,7 @@ export async function initCategoryPage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';if (!grid?.querySelector('a[href]')) grid?.before(loading)
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
@@ -533,7 +513,7 @@ export async function initHomePage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';if (!grid?.querySelector('a[href]')) grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
     let discovery, featuredItems = [], followedIds = new Set()
     const following = grid ? mountHomeFollowing(grid, ids => {

@@ -430,6 +430,7 @@ function main() {
     writeIfChanged(pagePath, html);
   }
   writeIfChanged(join(ROOT, "content/story-reading-times.json"), JSON.stringify(times, null, 2) + "\n");
+  writeIfChanged(join(ROOT, "content/catalogue.json"), JSON.stringify(publishedItems.map(item => normalizeContentMeta(item.meta))) + "\n");
   generateStaticHtml(publishedItems);
   const contentIndexChanged = writeIfChanged(
     CONTENT_INDEX_PATH,

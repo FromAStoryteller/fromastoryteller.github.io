@@ -16,6 +16,10 @@
     const stored = JSON.parse((tabOnly ? sessionStorage : localStorage).getItem(prefix + (tabOnly ? '-' + tabId : '-remembered')) ?? 'null');
     if (!stored?.user?.id || typeof stored.access_token !== 'string' || !stored.access_token) return;
     document.documentElement.dataset.fasAccountStartup = 'pending';
-    if (/^\/(?:index\.html)?$/.test(location.pathname)) document.documentElement.dataset.fasHomeStartup = 'pending';
+    if (/^\/(?:index\.html)?$/.test(location.pathname)) {
+      document.documentElement.dataset.fasHomeStartup = 'pending';
+      // A slow or failed auth/catalogue request must never hide public cards indefinitely.
+      setTimeout(() => { delete document.documentElement.dataset.fasHomeStartup; }, 1500);
+    }
   } catch { /* Blocked storage and malformed hints retain the public page. */ }
 })();

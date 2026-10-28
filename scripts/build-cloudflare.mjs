@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import {verifyBuiltAssets} from './verify-built-assets.mjs';
+import {versionPublicAssets} from './version-public-assets.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -38,8 +40,21 @@ if (accountConfig) {
   fs.writeFileSync(path.join(output, 'account/runtime-config.json'), data);
   manifest.push({ path: 'account/runtime-config.json', bytes: data.length, sha256: createHash('sha256').update(data).digest('hex') });
 }
+const assetVersion=versionPublicAssets(output,manifest.map(item=>item.path),Buffer.concat(['cloudflare-worker.mjs','scripts/version-public-assets.mjs','scripts/build-cloudflare.mjs'].map(file=>fs.readFileSync(path.join(root,file)))));
+console.log(`Versioned ${assetVersion.assetCount} assets for release ${assetVersion.release}.`);
 // Production uses its own output directory; preview keeps its search exclusion.
-fs.writeFileSync(path.join(output, '_headers'), '/*\n' + (production ? '' : '  X-Robots-Tag: noindex, nofollow\n') + '  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n/account/runtime-config.json\n  Cache-Control: no-store\n');
+fs.writeFileSync(path.join(output, '_headers'), '/*\n' + (production ? '' : '  X-Robots-Tag: noindex, nofollow\n') + '  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n/_assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/content/build-release.json\n  Cache-Control: no-store\n/account/runtime-config.json\n  Cache-Control: no-store\n');
+// Record the bytes actually deployed, including rewritten HTML and versioned assets.
+manifest.length=0;
+function record(directory,base=''){
+ for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+  const file=path.posix.join(base,entry.name),target=path.join(directory,entry.name);
+  if(entry.isDirectory())record(target,file);
+  else if(file!=='_headers'){const data=fs.readFileSync(target);manifest.push({path:file,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex')});}
+ }
+}
+record(output);
+console.log(`Verified ${verifyBuiltAssets(output,manifest.map(item=>item.path))} deployed asset references.`);
 // Keep audit information outside the served directory.
 fs.writeFileSync(path.join(root, production ? 'cloudflare-production-manifest.json' : 'cloudflare-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-console.log(`Prepared ${manifest.length} unchanged public files for ${production ? 'production candidate' : 'preview'}; no domain routes configured.`);
+console.log(`Prepared ${manifest.length} public files for ${production ? 'production candidate' : 'preview'}; no domain routes configured.`);

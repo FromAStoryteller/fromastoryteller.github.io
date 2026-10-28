@@ -11,11 +11,13 @@ export function publicStoryCard(row,imageBase){
 }
 export async function publicStoryCatalog({origin=typeof location==='undefined'?null:location.origin,fetcher=fetch,loadConfig=loadAccountAuthConfig}={}){
  if(!origin)return [];
- const config=await loadConfig(origin);if(!config)return [];
- const endpoint=config.url+'/rest/v1/rpc/fas_public_story_catalog',imageBase=config.url+'/functions/v1/fas-story-image',items=[],seen=new Set(),cursors=new Set();let cursor=null;
+ const edge=origin==='https://fromastoryteller.com'&&typeof location!=='undefined'&&location.origin===origin&&fetcher===globalThis.fetch&&loadConfig===loadAccountAuthConfig;
+ const config=edge?{url:origin}:await loadConfig(origin);if(!config)return [];
+ const endpoint=config.url+'/rest/v1/rpc/fas_public_story_catalog',imageBase=(edge?'https://vzdicnufhidelaoeqbza.supabase.co':config.url)+'/functions/v1/fas-story-image',items=[],seen=new Set(),cursors=new Set();let cursor=null;
  const deadline=AbortSignal.timeout(15000);
  do{
-  const response=await fetcher(endpoint,{method:'POST',credentials:'omit',redirect:'error',cache:'no-store',signal:AbortSignal.any([deadline,AbortSignal.timeout(5000)]),headers:{apikey:config.key,'Content-Type':'application/json'},body:JSON.stringify({before_time:cursor?.published_at??null,after_id:cursor?.id??null})});
+  const query=new URLSearchParams();if(cursor){query.set('before_time',cursor.published_at);query.set('after_id',cursor.id);}
+  const response=await fetcher(edge?'/api/public/stories'+(query.size?'?'+query:''):endpoint,{method:edge?'GET':'POST',credentials:'omit',redirect:'error',cache:'no-store',signal:AbortSignal.any([deadline,AbortSignal.timeout(5000)]),headers:edge?{}:{apikey:config.key,'Content-Type':'application/json'},body:edge?undefined:JSON.stringify({before_time:cursor?.published_at??null,after_id:cursor?.id??null})});
   if(!response.ok)throw new Error('Published stories could not be loaded.');
   const page=await response.json();if(!Array.isArray(page?.items)||page.items.length>60)throw new Error('Published stories could not be read.');
   for(const row of page.items){const card=publicStoryCard(row,imageBase);if(card&&!seen.has(card.id)){seen.add(card.id);items.push(card);}}

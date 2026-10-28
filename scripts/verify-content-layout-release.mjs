@@ -11,12 +11,14 @@ paths.push('systems/community/viewer-activity.mjs','account/account.css');
 for(const path of paths){
  const expected=digest(await readFile(new URL('../'+path,import.meta.url)));let matched=false;
  for(let attempt=0;attempt<18;attempt++){
-  try{const r=await fetch('https://fromastoryteller.com/'+path,{cache:'no-store',signal:AbortSignal.timeout(15000)});if(r.ok&&digest(Buffer.from(await r.arrayBuffer()))===expected){matched=true;break;}}catch{}
+  try{const r=await fetch('https://fromastoryteller.com/'+path,{cache:'no-store',signal:AbortSignal.timeout(15000)});if(r.ok&&digest(path.endsWith('.html')?Buffer.from((await r.text()).replace(/\/_assets\/[0-9a-f]{24}\//g,'/')):Buffer.from(await r.arrayBuffer()))===expected){matched=true;break;}}catch{}
   if(attempt<17)await new Promise(resolve=>setTimeout(resolve,10000));
  }
  assert.ok(matched,'Deployment source mismatch: '+path);
 }
 await import('./test-fas-operational-readiness.mjs');
+const {verifyCacheRelease}=await import('./verify-cache-release.mjs');
+await verifyCacheRelease();
 for(const [path,type] of [['/stories/the-deal/','story'],['/games/rally-clash/','game'],['/tools/countdown/','tool']]){
  const r=await fetch('https://fromastoryteller.com'+path,{cache:'no-store',signal:AbortSignal.timeout(15000)});assert.equal(r.status,200);assert.ok((await r.text()).includes('data-content-layout="'+type+'"'));
 }
