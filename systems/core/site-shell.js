@@ -42,7 +42,7 @@ async function initSiteShell() {
     const input=document.querySelector('.site-search-input');
     if(input)input.value=new URLSearchParams(location.search).get('q')||'';
     const detail=document.querySelector('main .story-header,main .game-hero,main .tool-hero,main .video-hero')||/^\/(?:read|stories\/[^/]+|blog\/[^/]+|games\/[^/]+|tools\/[^/]+|videos\/[^/]+)\/?$/.test(location.pathname);
-    const cards=detail||document.querySelector('.content-grid,[data-viewer-content]')||/^\/(?:storytellers|collections|search)\//.test(location.pathname);
+    const cards=detail||document.querySelector('.content-grid,[data-viewer-content],[data-viewer-collection],[data-viewer-history]')||/^\/(?:storytellers|collections|search)\//.test(location.pathname);
     idle(()=>{
       if(cards)void enhance(import('../community/viewer-actions.mjs'),({initViewerActions})=>{initViewerActions();});
       if(detail){
