@@ -33,10 +33,10 @@ test('cache storage failures preserve successful fresh public reads',async()=>{
 });
 
 test('public images cache anonymous bytes in Sydney, revalidate visibility, and never expose stored browser caching',async()=>{
- const f=fixture();let images=0;const fetcher=async(url,options)=>{if(!url.includes('/functions/'))return f.fetcher(url,options);images++;assert.equal(options.headers['x-region'],'ap-southeast-2');assert.equal(options.headers.Authorization,undefined);assert.equal(options.headers.Cookie,undefined);return new Response('jpeg bytes',{headers:{'Content-Type':'image/jpeg','Cache-Control':'private, no-store','CDN-Cache-Control':'no-store'}});};
+ const f=fixture();let images=0;const fetcher=async(url,options)=>{if(!url.includes('/functions/'))return f.fetcher(url,options);images++;assert.equal(options.headers['x-region'],'ap-southeast-2');assert.equal(options.headers.Authorization,undefined);assert.equal(options.headers.Cookie,undefined);return new Response('jpeg bytes',{headers:{'Content-Type':'image/jpeg','Cache-Control':'private, no-store','CDN-Cache-Control':'no-store','Set-Cookie':'__cf_bm=gateway; Domain=supabase.co; Secure'}});};
  const req=()=>new Request(origin+'/api/public/image?asset_id=aa000000-0000-0000-0000-000000000001&width=480',{headers:{Cookie:'reader-private',Authorization:'Bearer private'}});
  const run=()=>publicContentResponse(req(),f.env,f.render,{fetcher,cache:f.cache});
- let r=await run();assert.equal(r.status,200);assert.equal(await r.text(),'jpeg bytes');assert.equal(r.headers.get('Cache-Control'),'no-store');assert.equal((await run()).headers.get('X-FAS-Public-Cache'),'HIT');assert.equal(images,1);
+ let r=await run();assert.equal(r.status,200);assert.equal(await r.text(),'jpeg bytes');assert.equal(r.headers.get('Set-Cookie'),null);assert.equal(r.headers.get('Cache-Control'),'no-store');assert.equal((await run()).headers.get('X-FAS-Public-Cache'),'HIT');assert.equal(images,1);
  f.withdraw();assert.equal((await run()).headers.get('X-FAS-Public-Cache'),'MISS');assert.equal(images,2);f.fail();assert.equal((await run()).status,503);assert.equal(images,2);
  for(const query of ['asset_id=bad','asset_id=aa000000-0000-0000-0000-000000000001&width=9999','asset_id=aa000000-0000-0000-0000-000000000001&path=private'])assert.throws(()=>publicCatalogRequest(new URL(origin+'/api/public/image?'+query)));
 });

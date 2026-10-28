@@ -51,6 +51,8 @@ export async function publicContentResponse(request,env,render,{fetcher=fetch,ca
   if(catalog?.image){
    if(!response.ok)return new Response('Image unavailable.',{status:response.status===404?404:503,headers:noStore});
    if(response.headers.get('Content-Type')?.split(';')[0]!=='image/jpeg')return unavailable();
+   // Anonymous JPEG bytes need no gateway cookies or upstream cache policy.
+   response=new Response(response.body,{headers:{...noStore,'Content-Type':'image/jpeg','X-SB-Edge-Region':response.headers.get('X-SB-Edge-Region')??''}});
   }else if(catalog){if(!response.ok)return unavailable();const data=await response.json();response=Response.json(data,{headers:noStore});}
   if(useCache&&response.status===200&&!response.headers.has('Set-Cookie')){
    const stored=response.clone(),headers=new Headers(stored.headers);headers.set('Cache-Control','public, max-age=60');for(const name of ['CDN-Cache-Control','Cloudflare-CDN-Cache-Control','Surrogate-Control','Vary'])headers.delete(name);
