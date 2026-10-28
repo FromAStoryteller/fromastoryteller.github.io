@@ -11,12 +11,15 @@ const headers = {
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const imagePath = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/;
-export function makeImageHandler({ base, anonKey, serviceKey, kind='cover' }, fetcher = fetch) {
+export function makeImageHandler({ base, anonKey, serviceKey, kind='cover',transform }, fetcher = fetch) {
   const reply = (status, message) => new Response(message, { status, headers });
   return async (request) => {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
     if (request.method !== 'GET') return reply(405, 'GET required');
-    const id = new URL(request.url).searchParams.get('asset_id') ?? '';
+    const params=new URL(request.url).searchParams;
+    const width=params.has('width')?Number(params.get('width')):null;
+    if(width!==null&&(![480,800,1200,1600].includes(width)||kind!=='cover'))return reply(400,'Unsupported image width');
+    const id = params.get('asset_id') ?? '';
     if (!uuid.test(id)) return reply(400, 'Valid asset ID required');
     if (!base || !anonKey || !serviceKey) return reply(503, 'Image service unavailable');
     // PostgREST verifies caller JWTs and enforces story_assets RLS. Anonymous
@@ -52,10 +55,12 @@ export function makeImageHandler({ base, anonKey, serviceKey, kind='cover' }, fe
       if (Number(upstream.headers.get('Content-Length')) > 5242880) return reply(502, 'Image too large');
       const bytes = await upstream.arrayBuffer();
       if (bytes.byteLength > 5242880) return reply(502, 'Image too large');
-      // Recheck after buffering: a moderation/approval change during the Storage
+      let result=bytes,outputType=type;
+      if(width!==null&&transform){result=await transform(new Uint8Array(bytes),width);outputType='image/jpeg';}
+      // Recheck after resizing and buffering: a moderation/approval change during the Storage
       // fetch must not send bytes to a caller who just lost permission.
       if (await visibleAsset() !== path) return reply(404, 'Image unavailable');
-      return new Response(bytes, { status: 200, headers: { ...headers, 'Content-Type': type } });
+      return new Response(result, { status: 200, headers: { ...headers, 'Content-Type': outputType } });
     } catch { return reply(503, 'Image service unavailable'); }
   };
 }

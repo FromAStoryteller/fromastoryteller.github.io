@@ -26,15 +26,32 @@ async function initSiteShell() {
     initStorageChoices();
     // Content/catalogue dependency downloads must not delay account navigation.
     const enhance = (module, start) => module.then(start).catch(error => console.error('Page enhancement failed:', error));
-    void Promise.all([
-      enhance(import('../content/content-navigation.mjs'), m => m.initContentNavigation()),
-      enhance(import('../community/story-author-panel.mjs'), m => m.initStoryAuthorPanels()),
-      enhance(import('../content/content-series.mjs'), m => m.initContentSeries()),
-      enhance(import('../search/header-search.js'), m => {m.syncHeaderSearchQuery(); return m.initHeaderSearch();}),
-      enhance(import('../privacy/audience-insights.mjs'), m => m.initAudienceInsights()),
-      enhance(import('../community/viewer-actions.mjs'), ({initViewerActions}) => { initViewerActions(); }),
-      enhance(import('../content/content-share.mjs'), m => m.initContentShare()),
-    ]);
+    const idle=task => {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(task,{timeout:1200});
+      else window.setTimeout(task,150);
+    };
+    let searchStarted=false, navigationStarted=false;
+    const search=()=>{if(searchStarted)return;searchStarted=true;void enhance(import('../search/header-search.js'),m=>{m.syncHeaderSearchQuery();return m.initHeaderSearch();});};
+    const navigation=()=>{if(navigationStarted)return;navigationStarted=true;void enhance(import('../content/content-navigation.mjs'),m=>m.initContentNavigation());};
+    document.querySelector('.search-toggle')?.addEventListener('click',search,{once:true});
+    document.querySelector('.site-search-input')?.addEventListener('focus',search,{once:true});
+    document.querySelector('.menu-toggle')?.addEventListener('click',navigation,{once:true});
+    document.querySelector('.sidebar')?.addEventListener('pointerenter',navigation,{once:true});
+    document.querySelector('.sidebar')?.addEventListener('focusin',navigation,{once:true});
+    // Synchronise the input without downloading catalogue/search dependencies.
+    const input=document.querySelector('.site-search-input');
+    if(input)input.value=new URLSearchParams(location.search).get('q')||'';
+    const detail=document.querySelector('main .story-header,main .game-hero,main .tool-hero,main .video-hero')||/^\/(?:read|stories\/[^/]+|blog\/[^/]+|games\/[^/]+|tools\/[^/]+|videos\/[^/]+)\/?$/.test(location.pathname);
+    const cards=detail||document.querySelector('.content-grid,[data-viewer-content]')||/^\/(?:storytellers|collections|search)\//.test(location.pathname);
+    idle(()=>{
+      if(cards)void enhance(import('../community/viewer-actions.mjs'),m=>m.initViewerActions());
+      if(detail){
+        void enhance(import('../community/story-author-panel.mjs'),m=>m.initStoryAuthorPanels());
+        void enhance(import('../content/content-series.mjs'),m=>m.initContentSeries());
+        void enhance(import('../content/content-share.mjs'),m=>m.initContentShare());
+      }
+      if(detail||location.pathname.startsWith('/storytellers/'))void enhance(import('../privacy/audience-insights.mjs'),m=>m.initAudienceInsights());
+    });
   } catch (err) {
     console.error("Error loading components:", err);
   } 

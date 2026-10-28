@@ -40,3 +40,10 @@ test('caller cannot supply a Storage path, URL or arbitrary method',async()=>{
   assert.equal((await handler(new Request('https://image.invalid/?asset_id=https://evil.invalid'))).status,400);
   assert.equal((await handler(new Request(`https://image.invalid/?asset_id=${id}`,{method:'POST'}))).status,405);
 });
+
+test('responsive images validate widths and recheck permission after transformation',async()=>{
+ let checks=0,transforms=0;
+ const handler=makeImageHandler({...config,transform:async(bytes,width)=>{transforms++;assert.equal(width,480);assert.equal(new TextDecoder().decode(bytes),'source');return new TextEncoder().encode('small image');}},async url=>url.includes('/rest/v1/')?Response.json(++checks===1?[{object_path:path}]:[]):new Response('source',{headers:{'Content-Type':'image/png'}}));
+ const invalid=await handler(new Request(`https://image.invalid/?asset_id=${id}&width=9999`));assert.equal(invalid.status,400);assert.equal(checks,0);
+ const response=await handler(new Request(`https://image.invalid/?asset_id=${id}&width=480`));assert.equal(response.status,404);assert.equal(transforms,1);assert.ok(!(await response.text()).includes('small image'));
+});

@@ -1,3 +1,4 @@
+import {responsiveImage} from './responsive-image.mjs';
 import {genreLabel,publicSocialLinks,socialLabel} from '../community/studio-catalog.mjs';
 import {normalizeGameFeatures} from './game-features.mjs';
 import {plainDocument,validateDocument} from '../community/manuscript.mjs';
@@ -53,7 +54,7 @@ export function storyPageMarkup(item,{trustedBody,preview=false}={}){
  return '<article class="story-page" data-content-layout="'+type+'"'+(item.id?' data-current-content-id="'+escapeText(item.id)+'"':'')+'>'+
  '<a href="'+layout.collection+'" class="story-back-link"><span aria-hidden="true">←</span><span>Back to '+layout.label+'</span></a>'+
  '<header class="story-header"><div class="story-hero image-overlay'+(image?'':' story-hero--no-image')+'">'+
- (image?'<figure class="story-feature-image image-overlay__media"><img src="'+image+'" alt="'+escapeText(item.image_alt)+'" width="1600" height="900"></figure>':'')+
+ (image?'<figure class="story-feature-image image-overlay__media">'+responsiveImage(item.image??item.card?.image??'',item.image_alt,{featured:true,sizes:'(max-width: 64rem) 100vw, 1152px'})+'</figure>':'')+
  '<div class="story-hero-copy image-overlay__content"><p class="story-category">'+layout.label+(item.subtype_label?' / '+escapeText(item.subtype_label):'')+'</p><h1'+(preview?' id="ss-preview-title"':'')+'>'+title+'</h1></div></div>'+
  '<div class="story-meta">'+authorMarkup(item.author,item.source_kind==='file')+'<span data-story-reading-time><i class="fa-solid fa-clock" aria-hidden="true"></i>'+minutes+' min read</span>'+dateMarkup+'</div></header>'+
  ((labels.length||item.content_warning)?'<div class="story-details">'+

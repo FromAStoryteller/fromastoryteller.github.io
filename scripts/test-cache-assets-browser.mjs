@@ -5,7 +5,7 @@ import {chromium} from 'playwright';
 const root=process.cwd(),origin='https://fromastoryteller.com';
 const {publicContentResponse}=await import(path.join(root,'systems/content/public-cache-worker.mjs'));
 const {readingResponse}=await import(path.join(root,'cloudflare-worker.mjs'));
-const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf'};
+const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2','.avif':'image/avif','.webp':'image/webp','.woff':'font/woff','.ttf':'font/ttf'};
 const env={ASSETS:{async fetch(request){let file=new URL(request.url).pathname;if(file==='/account/runtime-config.json')return Response.json({mode:'production',enabled:true,url:'https://vzdicnufhidelaoeqbza.supabase.co',key:'sb_publishable_fixture',signup:true,lifecycle:true,policyRelease:'fixture'});if(file.endsWith('/'))file+='index.html';try{return new Response(await fs.readFile(path.join(root,'dist',file)),{headers:{'Content-Type':types[path.extname(file)]??'application/octet-stream'}});}catch{return new Response('Not found',{status:404});}}}};
 const fetcher=async(url)=>{
  if(url.endsWith('fas_public_content_revision'))return Response.json('aa000000-0000-0000-0000-000000000001');
@@ -22,6 +22,9 @@ try{for(const width of [390,1440]){
  await context.route(origin+'/**',async route=>{try{const req=route.request();const response=await publicContentResponse(new Request(req.url(),{method:req.method(),headers:req.headers()}),env,readingResponse,{fetcher,cache:null});await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}catch(e){errors.push(e.stack);await route.abort();}});
  await page.goto(origin+'/');await page.waitForFunction(()=>document.querySelector('#home-grid')?.getAttribute('aria-busy')==='false');
  assert.equal(await page.locator('#home-grid .content-grid-card').count(),14);
+ assert.ok(await page.locator('#home-grid picture source[type="image/avif"]').count());
+ await page.waitForFunction(()=>document.querySelector('#home-grid img')?.complete);
+ assert.ok(await page.locator('#home-grid img').first().evaluate(img=>img.naturalWidth>0));
  assert.equal(await page.locator('.menu-toggle').isVisible(),true);await page.locator('.menu-toggle').click();await page.locator('.sidebar a[href="/stories/"]').click();await page.waitForFunction(()=>document.querySelector('.content-grid')?.getAttribute('aria-busy')==='false');
  await page.goto(origin+'/stories/tea-at-the-summit/');await page.locator('.story-page').waitFor();assert.ok((await page.locator('.story-page').textContent()).includes('Eleanor'));
  await page.goto(origin+'/account/sign-in/');await page.locator('input[type="email"]').waitFor();
