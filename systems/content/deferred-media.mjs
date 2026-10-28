@@ -1,4 +1,4 @@
-// Off-screen and hidden images have no network URL until they approach the viewport.
+// One viewport observer also watches cards added later by profiles, collections and search.
 export function activateImage(image){
  image.removeAttribute('aria-hidden');
  const picture=image.closest('picture');
@@ -7,13 +7,21 @@ export function activateImage(image){
  if(image.dataset.fasSrc){image.src=image.dataset.fasSrc;delete image.dataset.fasSrc;}
 }
 export function observeImages(root){
- root._fasImageObserver?.disconnect();
- const images=[...root.querySelectorAll('img[data-fas-src]')];
- const w=root.ownerDocument.defaultView;
- if(!w.IntersectionObserver){images.forEach(activateImage);return;}
- const observer=new w.IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){activateImage(entry.target);observer.unobserve(entry.target);}},{rootMargin:'160px 0px'});
- images.forEach(image=>observer.observe(image));root._fasImageObserver=observer;
- if(!root._fasImageCleanup){root._fasImageCleanup=true;w.addEventListener('pagehide',()=>root._fasImageObserver?.disconnect(),{once:true});}
+ const d=root.ownerDocument,w=d.defaultView,body=d.body??root;
+ if(body._fasMediaController){body._fasMediaController.scan(root);return;}
+ let ended=false;
+ const observer=w.IntersectionObserver?new w.IntersectionObserver(entries=>{if(ended)return;for(const entry of entries)if(entry.isIntersecting){activateImage(entry.target);observer.unobserve(entry.target);}},{rootMargin:'160px 0px'}):null;
+ const scan=node=>{
+  if(ended||!node.isConnected||node.ownerDocument!==d)return;
+  const images=[...(node.matches?.('img[data-fas-src]')?[node]:[]),...node.querySelectorAll?.('img[data-fas-src]')??[]];
+  for(const image of images)if(observer)observer.observe(image);else activateImage(image);
+ };
+ const forget=node=>{for(const image of [...(node.matches?.('img')?[node]:[]),...node.querySelectorAll?.('img')??[]])observer?.unobserve(image);};
+ const changes=new w.MutationObserver(records=>{if(ended)return;for(const record of records)for(const node of record.removedNodes)forget(node);for(const record of records)for(const node of record.addedNodes)scan(node);});
+ changes.observe(body,{childList:true,subtree:true});
+ body._fasMediaController={scan,dispose(){ended=true;observer?.disconnect();changes.disconnect();body._fasMediaController=null;}};
+ if(!body._fasMediaLifecycle){body._fasMediaLifecycle=true;w.addEventListener('pagehide',()=>body._fasMediaController?.dispose());w.addEventListener('pageshow',event=>{if(event.persisted)observeImages(body);});}
+ scan(root);
 }
 export function whenVisible(element,load){
  if(!element)return;
