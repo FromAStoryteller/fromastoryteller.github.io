@@ -14,3 +14,9 @@ Deno.test('profile crops use the same WASM codec and produce a square JPEG',asyn
  if(size.width!==512||size.height!==512||bytes[0]!==255||bytes[1]!==216)throw new Error('Invalid profile crop');
  let rejected=false;try{await normalizeProfile(new Uint8Array([1,2,3]),{x:.5,y:.5});}catch{rejected=true;}if(!rejected)throw new Error('Corrupted input accepted');
 });
+
+Deno.test('responsive gateway variants retain aspect ratio and bound output dimensions',async()=>{
+ const {resizeCover}=await import('../supabase/functions/fas-story-image/resize.mjs');
+ const original=await normalizeCover(png,{x:.5,y:.5});
+ for(const width of [480,800,1200,1600]){const bytes=await resizeCover(original,width),size=inspectRaster(bytes);if(size.width!==width||size.height!==Math.round(width*9/16))throw Error('Invalid responsive dimensions');}
+});

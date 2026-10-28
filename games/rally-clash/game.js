@@ -281,12 +281,28 @@ var Input = {
 // systems/games/audio.js
 var AudioManager = {
   sounds: {},
+  generation: 0,
+  pendingPlays: /* @__PURE__ */ new WeakSet(),
   soundEnabled: true,
   masterVolume: 1,
   loadSounds(soundMap) {
     this.sounds = {};
     for (const key in soundMap) {
-      this.sounds[key] = loadSound(soundMap[key]);
+      let audio, pending;
+      this.sounds[key] = {
+        load() {
+          return pending ??= new Promise((resolve, reject) => {
+            audio = loadSound(soundMap[key], () => resolve(audio), (error) => {
+              pending = null;
+              reject(error);
+            });
+          });
+        },
+        isLoaded: () => !!audio?.isLoaded(),
+        setVolume: (value) => audio?.setVolume(value),
+        play: () => audio?.play(),
+        stop: () => audio?.stop()
+      };
     }
     return this.sounds;
   },
@@ -299,12 +315,24 @@ var AudioManager = {
   },
   play(sound, baseVolume = 1) {
     if (!this.soundEnabled) return;
-    if (!sound || !sound.isLoaded()) return;
+    if (!sound) return;
+    if (!sound.isLoaded()) {
+      if (sound.load && !this.pendingPlays.has(sound)) {
+        this.pendingPlays.add(sound);
+        const generation = this.generation;
+        void sound.load().then(() => {
+          this.pendingPlays.delete(sound);
+          if (generation === this.generation) this.play(sound, baseVolume);
+        }).catch(() => this.pendingPlays.delete(sound));
+      }
+      return;
+    }
     const finalVolume = Math.max(0, Math.min(1, baseVolume * this.masterVolume));
     sound.setVolume(finalVolume);
     sound.play();
   },
   stopAll() {
+    this.generation++;
     for (const key in this.sounds) {
       const sound = this.sounds[key];
       if (sound && sound.isLoaded()) {
@@ -1976,13 +2004,13 @@ function renderGame() {
 }
 window.preload = function() {
   sounds = AudioManager.loadSounds({
-    paddleHit: "/assets/sounds/games/rally-clash/paddle-hit.wav",
-    wallHit: "/assets/sounds/games/rally-clash/wall-hit.wav",
-    score: "/assets/sounds/games/rally-clash/score.wav",
-    win: "/assets/sounds/games/rally-clash/win.wav",
-    lose: "/assets/sounds/games/rally-clash/lose.wav",
-    countdown: "/assets/sounds/games/rally-clash/countdown-beep.wav",
-    start: "/assets/sounds/games/rally-clash/start.wav"
+    paddleHit: "/assets/sounds/games/rally-clash/paddle-hit.mp3",
+    wallHit: "/assets/sounds/games/rally-clash/wall-hit.mp3",
+    score: "/assets/sounds/games/rally-clash/score.mp3",
+    win: "/assets/sounds/games/rally-clash/win.mp3",
+    lose: "/assets/sounds/games/rally-clash/lose.mp3",
+    countdown: "/assets/sounds/games/rally-clash/countdown-beep.mp3",
+    start: "/assets/sounds/games/rally-clash/start.mp3"
   });
 };
 window.setup = function() {

@@ -15,10 +15,10 @@ const progressCircle = document.getElementById("countdown-progress-value")
 const progressGlow = document.getElementById("countdown-progress-glow")
 
 // === AUDIO ===
-const completeSound = new Audio("/assets/sounds/tools/countdown/countdown-complete.wav")
+const completeSound = new Audio("/assets/sounds/tools/countdown/countdown-complete.mp3")
 completeSound.volume = 0.6
 completeSound.loop = false
-completeSound.preload = "auto"
+completeSound.preload = "none"
 
 // === STATE ===
 let remainingSeconds = 0

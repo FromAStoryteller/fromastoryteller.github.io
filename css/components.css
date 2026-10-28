@@ -99,6 +99,7 @@
 }
 .image-overlay::after { content: ""; position: absolute; inset: 0; z-index: 3; border: var(--surface-standard-border); border-radius: inherit; pointer-events: none; }
 .image-overlay__media { position: absolute; inset: 0; margin: 0; overflow: hidden; }
+.image-overlay__media picture { display: contents; }
 .image-overlay__media img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .image-overlay__content {
   position: absolute; inset: auto 0 0; z-index: 1; isolation: isolate;

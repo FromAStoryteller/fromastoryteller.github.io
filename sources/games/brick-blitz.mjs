@@ -1578,13 +1578,13 @@ function drawGame() {
 // === P5 LIFECYCLE (ES MODULE MODE) === //
 window.preload = function() {
     sounds = AudioManager.loadSounds({
-        brickBreak: "/assets/sounds/games/brick-blitz/brick-break.wav",
-        brickHit: "/assets/sounds/games/brick-blitz/brick-hit.wav",
-        paddleHit: "/assets/sounds/games/brick-blitz/paddle-hit.wav",
-        wallHit: "/assets/sounds/games/brick-blitz/wall-hit.wav",
-        gameover: "/assets/sounds/games/brick-blitz/game-over.wav",
-        countdown: "/assets/sounds/games/brick-blitz/countdown-beep.wav",
-        start: "/assets/sounds/games/brick-blitz/start.wav"
+        brickBreak: "/assets/sounds/games/brick-blitz/brick-break.mp3",
+        brickHit: "/assets/sounds/games/brick-blitz/brick-hit.mp3",
+        paddleHit: "/assets/sounds/games/brick-blitz/paddle-hit.mp3",
+        wallHit: "/assets/sounds/games/brick-blitz/wall-hit.mp3",
+        gameover: "/assets/sounds/games/brick-blitz/game-over.mp3",
+        countdown: "/assets/sounds/games/brick-blitz/countdown-beep.mp3",
+        start: "/assets/sounds/games/brick-blitz/start.mp3"
     })
 }
 

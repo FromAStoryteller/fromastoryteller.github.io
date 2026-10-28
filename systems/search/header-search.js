@@ -8,7 +8,7 @@ export function syncHeaderSearchQuery() {
 
   const searchInputs = document.querySelectorAll('.site-search input[name="q"]')
   searchInputs.forEach(input => {
-    input.value = query
+    if (document.activeElement !== input) input.value = query
   })
 }
 
