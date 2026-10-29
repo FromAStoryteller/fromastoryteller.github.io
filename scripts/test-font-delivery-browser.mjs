@@ -59,14 +59,25 @@ try {
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
    if(mode==='after'){
     await page.screenshot({path:'font-story-'+width+'-'+theme+'.png',fullPage:true});
+    // Less-common Latin, Vietnamese and Greek must still use their original font.
+    const fallback=await page.evaluate(async()=>{
+     const text='Ǎ Ḍ ệ Ελληνικά';
+     for(const family of ['Source Sans 3','Literata']){
+      const probe=document.createElement('p');probe.style.fontFamily='"'+family+'"';probe.textContent=text;document.querySelector('main').append(probe);
+      await document.fonts.load('400 24px "'+family+'"',text);
+     }
+     return document.fonts.status;
+    });
+    assert.equal(fallback,'loaded');
+    for(const name of ['source-sans-3-variable.woff2','literata-variable.woff2'])assert.ok(fonts.has(name),'extended text must retain '+name);
     // Compare actual glyph rasterization, not only CSS family names or widths.
     const proof=await page.evaluate(async()=>{
      const specs=[
       ['MonteCarlo','montecarlo/montecarlo-regular','normal',[400],'from, A Storyteller'],
-      ['Source Sans 3','source-sans-3/source-sans-3-variable','normal',[200,400,700,900],'Āā Ēē Īī Ōō Ūū — “Story” ← → ✦ ◆'],
-      ['Source Sans 3','source-sans-3/source-sans-3-italic-variable','italic',[200,400,700,900],'Āā Ēē Īī Ōō Ūū — “Story”'],
-      ['Literata','literata/literata-variable','normal',[200,400,700,900],'Āā Ēē Īī Ōō Ūū — “Story” • ◆'],
-      ['Literata','literata/literata-italic-variable','italic',[200,400,700,900],'Āā Ēē Īī Ōō Ūū — “Story”']
+      ['Source Sans 3','source-sans-3/source-sans-3-variable','normal',[200,400,700,900],'Ǎ Ḍ ệ Ελληνικά Āā Ēē Īī Ōō Ūū — “Story” ← → ✦ ◆'],
+      ['Source Sans 3','source-sans-3/source-sans-3-italic-variable','italic',[200,400,700,900],'Ǎ Ḍ ệ Ελληνικά Āā Ēē Īī Ōō Ūū — “Story”'],
+      ['Literata','literata/literata-variable','normal',[200,400,700,900],'Ǎ Ḍ ệ Ελληνικά Āā Ēē Īī Ōō Ūū — “Story” • ◆'],
+      ['Literata','literata/literata-italic-variable','italic',[200,400,700,900],'Ǎ Ḍ ệ Ελληνικά Āā Ēē Īī Ōō Ūū — “Story”']
      ];
      let count=0;
      for(const [family,file,style,weights,text]of specs){
@@ -82,17 +93,7 @@ try {
      return count;
     });
     assert.equal(proof,17);
-    // Less-common Latin, Vietnamese and Greek must still use their original font.
-    const fallback=await page.evaluate(async()=>{
-     const text='Ǎ Ḍ ệ Ελληνικά';
-     for(const family of ['Source Sans 3','Literata']){
-      const probe=document.createElement('p');probe.style.fontFamily='"'+family+'"';probe.textContent=text;document.querySelector('main').append(probe);
-      await document.fonts.load('400 24px "'+family+'"',text);
-     }
-     return document.fonts.status;
-    });
-    assert.equal(fallback,'loaded');
-    for(const name of ['source-sans-3-variable.woff2','literata-variable.woff2'])assert.ok(fonts.has(name),'extended text must retain '+name);
+
    }
    assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
    results.push({width,theme,mode,fontBytes,fonts:initial});

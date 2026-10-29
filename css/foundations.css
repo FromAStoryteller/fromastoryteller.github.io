@@ -9,9 +9,9 @@
    SELF-HOSTED FONTS
    ========================================================= */
 
-/* Rebuild common subsets with scripts/build-font-subsets.py. Full faces come
-   first; the later common face wins for supported common characters. Keep the
-   full range available for other languages, accents and contributor text.
+/* Rebuild common subsets with scripts/build-font-subsets.py. Disjoint ranges keep
+   decorative symbols from starting a full-font fetch for missing glyphs. Full
+   faces cover all other characters for languages, accents and contributor text.
    The historical .latin filenames also preserve existing preload references. */
 
 /* Match Source Sans line wrapping while its preloaded font arrives. The local
@@ -26,7 +26,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  unicode-range: U+0000-10FFFF;
+  unicode-range: U+0080-10FFFF;
 }
 
 @font-face {
@@ -44,7 +44,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-10FFFF;
+  unicode-range: U+102-111,U+114-129,U+12C-14B,U+14E-169,U+16C-2FF,U+370-1FFF,U+2070-209F,U+20D0-218F,U+2194-2211,U+2213-25B1,U+25B3-25BB,U+25BD-25C5,U+25C7-2725,U+2727-FEFE,U+FF00-FFFC,U+FFFE-10FFFF;
 }
 
 @font-face {
@@ -62,7 +62,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-10FFFF;
+  unicode-range: U+102-111,U+114-129,U+12C-14B,U+14E-169,U+16C-2FF,U+370-1FFF,U+2070-209F,U+20D0-218F,U+2194-2211,U+2213-25B1,U+25B3-25BB,U+25BD-25C5,U+25C7-2725,U+2727-FEFE,U+FF00-FFFC,U+FFFE-10FFFF;
 }
 
 @font-face {
@@ -80,7 +80,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-10FFFF;
+  unicode-range: U+102-111,U+114-129,U+12C-14B,U+14E-169,U+16C-2FF,U+370-1FFF,U+2070-209F,U+20D0-218F,U+2194-2211,U+2213-25B1,U+25B3-25BB,U+25BD-25C5,U+25C7-2725,U+2727-FEFE,U+FF00-FFFC,U+FFFE-10FFFF;
 }
 
 @font-face {
@@ -98,7 +98,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-10FFFF;
+  unicode-range: U+102-111,U+114-129,U+12C-14B,U+14E-169,U+16C-2FF,U+370-1FFF,U+2070-209F,U+20D0-218F,U+2194-2211,U+2213-25B1,U+25B3-25BB,U+25BD-25C5,U+25C7-2725,U+2727-FEFE,U+FF00-FFFC,U+FFFE-10FFFF;
 }
 
 @font-face {

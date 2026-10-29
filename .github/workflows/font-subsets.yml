@@ -7,13 +7,21 @@ on:
       - scripts/build-font-subsets.py
       - scripts/font-subsets-requirements.txt
       - scripts/test-font-delivery-browser.mjs
+      - scripts/verify-font-release.mjs
+      - .github/workflows/font-subsets.yml
+  push:
+    branches: [main]
+    paths:
+      - assets/fonts/**
+      - css/foundations.css
+      - scripts/verify-font-release.mjs
       - .github/workflows/font-subsets.yml
 permissions:
   contents: read
 jobs:
   fonts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,10 +40,13 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run build:cloudflare
       - run: node scripts/test-font-delivery-browser.mjs
+        if: github.event_name == 'pull_request'
         env:
           FAS_FONT_BASE: ${{ github.event.pull_request.base.sha }}
+      - run: node scripts/verify-font-release.mjs
+        if: github.event_name == 'push'
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && github.event_name == 'pull_request'
         with:
           name: story-font-appearance
           path: font-story-*.png

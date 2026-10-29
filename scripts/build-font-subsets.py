@@ -4,7 +4,6 @@ Run from the repository root: python scripts/build-font-subsets.py [--check]
 Full fonts remain the fallback for every other supported character.
 """
 import argparse
-import base64
 import io
 import json
 from pathlib import Path
@@ -28,7 +27,6 @@ FILES = [
 ]
 parser = argparse.ArgumentParser()
 parser.add_argument("--check", action="store_true")
-parser.add_argument("--emit-blobs", action="store_true", help=argparse.SUPPRESS)
 args = parser.parse_args()
 for name in FILES:
     original = ROOT / "assets/fonts" / (name + ".woff2")
@@ -67,6 +65,3 @@ for name in FILES:
     print("FONT_SUBSET " + json.dumps({"path":str(output.relative_to(ROOT)).replace("\\","/"),
           "original":original.stat().st_size,"bytes":len(data),"characters":len(cmap),
           "glyphs":len(result.getGlyphOrder())}))
-    if args.emit_blobs:
-        print("FONT_BLOB " + json.dumps({"path":str(output.relative_to(ROOT)).replace("\\","/"),
-              "content":base64.b64encode(data).decode("ascii")}))
