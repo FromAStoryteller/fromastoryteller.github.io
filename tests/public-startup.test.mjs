@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {Script} from 'node:vm';import {publicStartupMarkup} from '../scripts/public-startup-markup.mjs';import {queryPublicContent} from '../systems/content/public-query.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {Script,createContext} from 'node:vm';import {publicStartupMarkup} from '../scripts/public-startup-markup.mjs';import {queryPublicContent} from '../systems/content/public-query.mjs';
 test('public startup preloads static dependencies once and leaves dynamic/editor modules lazy',()=>{
  const source=new Map(Object.entries({'main.mjs':'import "./child.mjs";const lazy=()=>import("./editor.mjs");','child.mjs':'export {x} from "./leaf.mjs";','leaf.mjs':'export const x=1;const sample="import \\"./editor.mjs\\"";','editor.mjs':'export const editor=true;'}));
  source.set('systems/content/discovery-startup.js','globalThis.boot=true;');
@@ -12,7 +12,7 @@ test('public startup preloads static dependencies once and leaves dynamic/editor
  assert.equal(publicStartupMarkup('account/policy-history/frozen/index.html',html,{source,mapping,resolve}),html);
 });
 const startup=readFileSync(new URL('../systems/content/discovery-startup.js',import.meta.url),'utf8'),slot=Symbol.for('fas.public-discovery');
-function begin(path,fetcher){const events=new Map(),location={origin:'https://fromastoryteller.com',pathname:path.split('?')[0],href:'https://fromastoryteller.com'+path},sandbox={location,URL,URLSearchParams,Symbol,AbortController,AbortSignal,fetch:fetcher,addEventListener:(name,fn)=>events.set(name,fn)};sandbox.globalThis=sandbox;new Script(startup).runInNewContext(sandbox);return {pending:sandbox[slot],hide:()=>events.get('pagehide')?.()};}
+function begin(path,fetcher){const events=new Map(),location={origin:'https://fromastoryteller.com',pathname:path.split('?')[0],href:'https://fromastoryteller.com'+path},sandbox={location,URL,URLSearchParams,Symbol,AbortController,AbortSignal,fetch:fetcher,addEventListener:(name,fn)=>events.set(name,fn)};const context=createContext(sandbox);new Script(startup).runInContext(context);const pending=new Script('globalThis[Symbol.for("fas.public-discovery")]').runInContext(context);return {pending,hide:()=>events.get('pagehide')?.()};}
 const page=()=>Response.json({items:[],featured:[],total:0,next_cursor:null});
 test('one anonymous startup request is consumed once, with fresh reads after consumption or restoration',async()=>{
  const previous=globalThis.fetch,calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,options});return page();};

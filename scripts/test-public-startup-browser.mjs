@@ -34,6 +34,7 @@ try{
   for(const pathname of ['/','/stories/','/search/?q=Tea']){
    queries.length=0;await page.goto(origin+pathname);
    await page.locator(pathname==='/'?'#home-grid[aria-busy="false"]':pathname==='/stories/'?'#stories-grid[aria-busy="false"]':'#search-results-grid[aria-busy="false"]').waitFor();
+   if(pathname.startsWith('/search/'))await page.locator('#search-results-grid article').first().waitFor();
    const result=await page.evaluate(async()=>({dom:await window.qaReady,started:performance.getEntriesByType('resource').find(r=>r.name.includes('/api/public/browse?'))?.startTime,preloads:[...document.querySelectorAll('link[rel="modulepreload"]')].map(l=>l.href),pending:Boolean(globalThis[Symbol.for('fas.public-discovery')])}));
    assert.ok(result.preloads.length>0);assert.ok(!result.preloads.some(p=>p.endsWith('/account/vendor/supabase-client.js')||p.endsWith('/interactive-package.mjs')),'deferred SDK/editor must not be statically preloaded');
    assert.equal(queries.length,1,'one initial anonymous discovery request: '+queries);
