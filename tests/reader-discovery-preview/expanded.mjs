@@ -13,6 +13,7 @@ const account={imageBase:'',subscribe(fn){subscribers.add(fn);return()=>subscrib
  if(name==='fas_my_content_history')return {data:{items:items.filter(i=>completed.has(i.url)).map(i=>({...i,source:'file',summary:i.card.description,image:'',activity_at:null})),next_cursor:null}};
  if(name==='fas_my_viewer_actions')return {data:args.content_keys.map(key=>({key,experienced:completed.has(key)}))};
  if(name==='fas_my_following')return {data:{items:following?[profile]:[],next_cursor:null}};
+ if(name==='fas_my_following_ids')return {data:following?[profile.public_id]:[]};
  if(name==='fas_my_storyteller_follow')return {data:{available:true,can_follow:true,following}};
  if(name==='fas_set_storyteller_follow'){following=args.enabled;return {data:{following}};}
  throw Error('Unexpected fixture RPC '+name);

@@ -1,5 +1,5 @@
 import {connectViewerAccount} from './viewer-actions.mjs';
-import {loadFollowedStorytellers} from './following-service.mjs';
+import {loadFollowedIds} from './following-service.mjs';
 import {watchViewerChanges} from './viewer-sync.mjs';
 import {onPageRestore} from '../core/page-restore.mjs';
 
@@ -9,7 +9,7 @@ export async function mountHomeFollowing(host,onChange,{connect=connectViewerAcc
  const changed=()=>void refresh();
  const clear=()=>{ended=true;stopSync?.();w.removeEventListener('fas-storyteller-follow-change',changed);onChange(new Set());status.remove();};
  async function refresh(){if(ended)return;if(loading){queued=true;return;}loading=true;
-  try{const people=await loadFollowedStorytellers(account.client,{isEnded:()=>ended});if(ended)return;onChange(new Set(people.map(p=>p.public_id.toLowerCase())));status.textContent=people.length?'From storytellers you follow first, then more to discover.':'Follow storytellers to see their work first here.';}
+  try{const ids=await loadFollowedIds(account.client,{isEnded:()=>ended});if(ended)return;onChange(ids);status.textContent=ids.size?'From storytellers you follow first, then more to discover.':'Follow storytellers to see their work first here.';}
   catch{if(!ended){status.replaceChildren(d.createTextNode('Following could not be checked. Showing all content. '));onChange(new Set());const retry=d.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Retry following';retry.addEventListener('click',()=>void refresh());status.append(retry);}}
   finally{loading=false;if(queued&&!ended){queued=false;void refresh();}}
  }

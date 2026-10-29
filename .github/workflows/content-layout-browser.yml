@@ -9,6 +9,9 @@ on:
       - systems/community/profile-share.mjs
       - systems/community/storyteller-follow.mjs
       - systems/community/following-page.mjs
+      - systems/community/following-service.mjs
+      - systems/community/home-following.mjs
+      - scripts/test-account-loading-browser.mjs
       - scripts/test-storyteller-following-browser.mjs
       - systems/community/manuscript.mjs
       - scripts/test-profile-discovery-browser.mjs
@@ -78,6 +81,7 @@ jobs:
       - run: npm run build:cloudflare
       - run: node scripts/test-cache-assets-browser.mjs
       - run: node scripts/test-performance-budget-browser.mjs
+      - run: node scripts/test-account-loading-browser.mjs
       - run: npx vite --host 127.0.0.1 --port 55410 > /tmp/fas-layout-vite.log 2>&1 &
       - run: node scripts/wait-for-preview.mjs
       - run: node scripts/test-progressive-delivery-browser.mjs

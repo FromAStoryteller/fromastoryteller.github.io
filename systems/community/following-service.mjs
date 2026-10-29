@@ -1,4 +1,12 @@
 import {isPublicId} from './profiles.mjs';
+// Homepage membership needs no bios, images, names, timestamps or page cursors.
+export async function loadFollowedIds(client,{isEnded=()=>false}={}) {
+ if(isEnded())return new Set();
+ const r=await client.rpc('fas_my_following_ids',{});
+ if(isEnded())return new Set();
+ if(r.error||!Array.isArray(r.data)||r.data.length>5000||r.data.some(id=>!isPublicId(id)))throw Error('Following could not be loaded.');
+ return new Set(r.data.map(id=>id.toLowerCase()));
+}
 export async function loadFollowedStorytellers(client,{isEnded=()=>false}={}) {
  const people=new Map(),cursors=new Set();let cursor=null;
  do {

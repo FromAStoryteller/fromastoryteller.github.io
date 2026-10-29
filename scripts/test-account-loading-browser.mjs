@@ -44,7 +44,7 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await page.route(backend+'/**',async route=>{
    const request=route.request(),url=new URL(request.url()),name=url.pathname.split('/').at(-1);calls.push(name);
-   await delay(name==='fas_my_following'&&!process.argv[2]?800:150);
+   await delay(['fas_my_following','fas_my_following_ids'].includes(name)&&!process.argv[2]?800:150);
    let body;
    if(url.pathname==='/auth/v1/token')body=token();
    else if(url.pathname==='/auth/v1/user')body=user;
@@ -54,6 +54,7 @@ try{
    else if(name==='fas_public_file_catalog')body=[];
    else if(name==='fas_public_story_catalog')body={items:[],next_cursor:null};
    else if(name==='fas_my_following')body={items:[{public_id:owner,display_name:'Fictional writer'}],next_cursor:null};
+    else if(name==='fas_my_following_ids')body=[owner,...Array.from({length:99},(_,i)=>'bf000000-0000-4000-8000-'+String(i+1).padStart(12,'0'))];
    else if(name==='fas_my_viewer_actions')body=(request.postDataJSON()?.content_keys??[]).map(key=>({id:owner,key,saved:false,loved:false,experienced:false}));
    else if(name==='logout')body={};
    else throw Error('Unexpected backend request: '+name);
@@ -90,7 +91,7 @@ try{
   assert.equal(await page.locator('[data-viewer-library]').getAttribute('hidden'),null);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   // Current implementation shares startup restoration; comparison may request more.
-  if(!process.argv[2]){assert.equal(refreshes,1);assert.equal(verifications,1);}
+  if(!process.argv[2]){assert.equal(refreshes,1);assert.equal(verifications,1);assert.equal(calls.filter(x=>x==='fas_my_following_ids').length,1,'100 follows use one membership request');assert.equal(calls.filter(x=>x==='fas_my_following').length,0,'homepage does not page through profiles');}
   if(!process.argv[2]){
    assert.equal(await page.locator('html').getAttribute('data-fas-home-startup'),null);
    assert.equal(await page.locator('#home-grid > *').first().evaluate(el=>getComputedStyle(el).visibility),'visible');
