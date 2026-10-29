@@ -1,0 +1,24 @@
+name: Read-only speed retest
+on:
+  pull_request:
+    paths: [scripts/audit-speed-retest.mjs, .github/workflows/speed-retest.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/audit-speed-retest.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loading-speed-retest
+          path: loading-audit.json
