@@ -1,0 +1,21 @@
+name: Layout stability verification
+on:
+  pull_request:
+    paths: [css/components.css, search/search.js, scripts/test-layout-stability-browser.mjs, .github/workflows/layout-stability.yml]
+permissions:
+  contents: read
+jobs:
+  stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:cloudflare
+      - run: node scripts/test-layout-stability-browser.mjs
