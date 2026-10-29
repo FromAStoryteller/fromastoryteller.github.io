@@ -1,0 +1,52 @@
+name: Font subset verification
+on:
+  pull_request:
+    paths:
+      - assets/fonts/**
+      - css/foundations.css
+      - scripts/build-font-subsets.py
+      - scripts/font-subsets-requirements.txt
+      - scripts/test-font-delivery-browser.mjs
+      - scripts/verify-font-release.mjs
+      - .github/workflows/font-subsets.yml
+  push:
+    branches: [main]
+    paths:
+      - assets/fonts/**
+      - css/foundations.css
+      - scripts/verify-font-release.mjs
+      - .github/workflows/font-subsets.yml
+permissions:
+  contents: read
+jobs:
+  fonts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/font-subsets-requirements.txt
+      - run: python scripts/build-font-subsets.py --check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:cloudflare
+      - run: node scripts/test-font-delivery-browser.mjs
+        if: github.event_name == 'pull_request'
+        env:
+          FAS_FONT_BASE: ${{ github.event.pull_request.base.sha }}
+      - run: node scripts/verify-font-release.mjs
+        if: github.event_name == 'push'
+      - uses: actions/upload-artifact@v4
+        if: always() && github.event_name == 'pull_request'
+        with:
+          name: story-font-appearance
+          path: font-story-*.png
