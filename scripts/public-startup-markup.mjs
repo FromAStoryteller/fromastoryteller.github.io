@@ -17,10 +17,7 @@ export function publicStartupMarkup(file,html,{resolve,source,mapping,imports=ne
   for(const dep of imports.get(entry))if(/\.(?:m?js)$/.test(dep)){selected.add(dep);visit(dep);}
  };
  for(const entry of entries)visit(entry);
- const game={'games/rally-clash/index.html':'games/rally-clash/game.js','games/brick-blitz/index.html':'games/brick-blitz/game.js'}[file];
- if(game&&mapping.has('/'+game))selected.add(game);
  const tags=[...selected].sort().map(dep=>'<link rel="modulepreload" fetchpriority="low" href="'+mapping.get('/'+dep)+'">');
- if(game)for(const dep of ['assets/vendor/p5-1.9.0.min.js','assets/vendor/p5.sound-1.9.0.min.js'])if(mapping.has('/'+dep))tags.push('<link rel="preload" as="script" fetchpriority="low" href="'+mapping.get('/'+dep)+'">');
  if(source.has('systems/content/discovery-startup.js')&&(file==='index.html'||/^(?:stories|games|tools|blog|videos|gallery|search)\/index\.html$/.test(file)))tags.unshift('<script data-fas-discovery-startup>'+transformSync(source.get('systems/content/discovery-startup.js').toString(),{loader:'js',minify:true,legalComments:'none',target:'es2022'}).code.replace(/<\/script/gi,'<\\/script')+'</script>');
  return tags.length?html.replace('</head>',tags.join('\n')+'\n</head>'):html;
 }
