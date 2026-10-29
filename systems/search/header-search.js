@@ -52,7 +52,7 @@ export async function initHeaderSearch() {
       return
     }
 
-    profiles.forEach(profile=>{const a=document.createElement('a');a.className='site-search-suggestion';a.href=publicProfileUrl(profile.public_id);a.textContent=profile.display_name+' - Storyteller';suggestionsContainer.append(a);});
+    profiles.forEach(profile=>{const a=document.createElement('a');a.className='site-search-suggestion';a.href=publicProfileUrl(profile.public_id);a.textContent=profile.display_name+' — Storyteller';suggestionsContainer.append(a);});
     suggestions.forEach(item => {
       const button = document.createElement("button")
 

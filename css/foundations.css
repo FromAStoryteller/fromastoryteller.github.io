@@ -9,6 +9,12 @@
    SELF-HOSTED FONTS
    ========================================================= */
 
+/* Match Source Sans line wrapping while its preloaded font arrives. The local
+   fallback adds no download; actual Source Sans remains the final typeface. */
+@font-face { font-family:"FAS Interface Fallback"; src:local("Arial"),local("Liberation Sans"); font-style:normal; font-weight:200 500; size-adjust:91.58%; ascent-override:100%; descent-override:25%; line-gap-override:0%; }
+@font-face { font-family:"FAS Interface Fallback"; src:local("Arial Bold"),local("Liberation Sans Bold"); font-style:normal; font-weight:600 900; size-adjust:91.58%; ascent-override:100%; descent-override:25%; line-gap-override:0%; }
+@font-face { font-family:"FAS Interface Fallback"; src:local("Arial Italic"),local("Liberation Sans Italic"); font-style:italic; font-weight:200 500; size-adjust:91.58%; ascent-override:100%; descent-override:25%; line-gap-override:0%; }
+@font-face { font-family:"FAS Interface Fallback"; src:local("Arial Bold Italic"),local("Liberation Sans Bold Italic"); font-style:italic; font-weight:600 900; size-adjust:91.58%; ascent-override:100%; descent-override:25%; line-gap-override:0%; }
 @font-face {
   font-family: "MonteCarlo";
   src: url("../assets/fonts/montecarlo/montecarlo-regular.woff2") format("woff2");
@@ -174,7 +180,7 @@
 :root {
   /* Families */
   --font-family-brand: "MonteCarlo", cursive;
-  --font-family-interface: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-interface: "Source Sans 3", "FAS Interface Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-family-heading: var(--font-family-interface);
   --font-family-body: var(--font-family-interface);
   --font-family-reading: "Literata", Georgia, "Times New Roman", serif;

@@ -63,18 +63,18 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
     const clear = node('button','Clear filters'); clear.type = 'button'; clear.className = 'account-secondary'; clear.hidden = !filtered();
     controls.append(searchField,typeField,clear);
     const grid = node('div',''); grid.id = 'viewer-collection-grid'; grid.className = 'content-grid viewer-collection-grid';
-    const status = node('p','Loading your collection.'); status.setAttribute('role','status');
+    const status = node('p','Loading your collection…'); status.setAttribute('role','status');
     const more = node('button','Load more'); more.type = 'button'; more.className = 'account-secondary'; more.hidden = true;
     root.append(nav,controls,status,grid,more);
     notice = node('div',''); notice.className = 'viewer-notice'; notice.hidden = true;
     const noticeText = node('span',''); noticeText.setAttribute('role','status');
     const undo = node('button','Undo'); undo.type = 'button'; undo.className = 'viewer-notice-undo'; undo.dataset.viewerUndo = '';
-    const dismiss = node('button','x'); dismiss.type = 'button'; dismiss.className = 'viewer-notice-close'; dismiss.setAttribute('aria-label','Dismiss message');
+    const dismiss = node('button','×'); dismiss.type = 'button'; dismiss.className = 'viewer-notice-close'; dismiss.setAttribute('aria-label','Dismiss message');
     notice.append(noticeText,undo,dismiss); d.body.append(notice);
     dismiss.onclick = () => { undoEntry = null; notice.hidden = true; (grid.querySelector('a,button') ?? search).focus({preventScroll:true}); };
     undo.onclick = async () => {
       if (ended || undoing || !undoEntry) return;
-      const entry = undoEntry; undoing = true; revision++; undo.disabled = true; noticeText.textContent = 'Restoring.'; let restored = false;
+      const entry = undoEntry; undoing = true; revision++; undo.disabled = true; noticeText.textContent = 'Restoring…'; let restored = false;
       try {
         const r = await account.client.rpc('fas_set_viewer_action',{content_key:entry.key,action_key:'saved',enabled:true});
         if (ended) return;
@@ -116,7 +116,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
       reconcile(shown); clear.hidden = !filtered();
       grid.setAttribute('aria-busy',String(pending));
       more.hidden = !cursor && found.length <= shown.length; more.disabled = pending; more.textContent = 'Load more';
-      if (pending) status.textContent = filtered() ? 'Searching your collection.' : 'Loading your collection.';
+      if (pending) status.textContent = filtered() ? 'Searching your collection…' : 'Loading your collection…';
       else if (!shown.length) status.textContent = filtered() ? 'No pieces match your search and filters.' : 'Nothing here yet. Use the save or favourite button on a piece or card to add it. Published pieces appear here while they are available.';
       else status.textContent = filtered() ? 'Showing '+shown.length+' matching '+(shown.length === 1 ? 'piece.' : 'pieces.') : '';
     }
@@ -124,7 +124,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
       if (ended) return;
       if (undoing || loading) { if (refresh) refreshQueued = true; else viewQueued = true; return; }
       loading = true; retryRefresh = refresh; more.disabled = true; grid.setAttribute('aria-busy','true');
-      if (!refresh || filtered()) status.textContent = filtered() ? 'Searching your collection.' : 'Loading your collection.';
+      if (!refresh || filtered()) status.textContent = filtered() ? 'Searching your collection…' : 'Loading your collection…';
       const before = revision, items = refresh ? new Map() : new Map(cache), cursors = new Set();
       let next = refresh ? null : cursor, fetched = !refresh && hasLoaded;
       try {
@@ -167,7 +167,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
       const card = [...grid.children].find(c => c.dataset.viewerContent === event.detail.key);
       if (!card) return;
       const pieceTitle = card.querySelector('h3')?.textContent ?? 'this piece';
-      undoEntry = {key:event.detail.key}; noticeText.textContent = 'Removed "'+pieceTitle+'".'; notice.hidden = false; undo.hidden = false; undo.disabled = undoing;
+      undoEntry = {key:event.detail.key}; noticeText.textContent = 'Removed “'+pieceTitle+'”.'; notice.hidden = false; undo.hidden = false; undo.disabled = undoing;
       const focused = card.contains(d.activeElement) || event.detail.restoreFocus; card.remove(); renderView(loading);
       if (focused) undo.focus({preventScroll:true});
     };

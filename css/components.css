@@ -1,7 +1,7 @@
 Warning: truncated output (original token count: 17648)
 Total output lines: 1815
 
-/* From A Storyteller - components.
+/* From A Storyteller — components.
    Shared visual components, cards, controls and the graphical wordmark. */
 
 .error-container {
@@ -1503,7 +1503,7 @@ a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px 
 .account-navigation-context { font:.9rem/1.4 var(--font-family-interface); color:var(--colour-text-secondary); }
 .account-navigation-menu { position:relative; flex:0 0 auto; }
 .account-navigation-menu>summary { list-style:none; width:auto!important; min-height:2.75rem!important; }
-.account-navigation-menu>summary::after,.storyteller-owner-toolbar>summary::after { content:'?'; margin-left:.75rem; }
+.account-navigation-menu>summary::after,.storyteller-owner-toolbar>summary::after { content:'⌄'; margin-left:.75rem; }
 .account-navigation-list,.storyteller-owner-toolbar>nav { position:absolute; z-index:30; right:0; top:calc(100% + .4rem); display:grid; gap:.15rem; width:min(19rem,calc(100vw - 3rem)); padding:.5rem; background:var(--surface-standard-background); border:var(--surface-standard-border); border-radius:var(--radius-md); box-shadow:var(--surface-standard-shadow); }
 .account-navigation .account-navigation-list .account-secondary { justify-content:flex-start; min-height:2.75rem; padding:.6rem .75rem; border-color:transparent; font-weight:400; }
 .account-navigation-menu>summary::-webkit-details-marker,.storyteller-owner-toolbar>summary::-webkit-details-marker { display:none; }

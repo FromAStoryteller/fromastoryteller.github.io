@@ -134,7 +134,7 @@ async function loadMoreContent(){const batch=await contentPager.next(),seen=new 
 function mountCatalogMore(grid,onChange){
  if(!grid||contentPager.done)return;
  const section=document.createElement('div'),notice=document.createElement('p'),button=document.createElement('button');section.className='content-catalog-more';notice.setAttribute('role','status');notice.textContent='More published content is available. Load more to include it in filters and sorting.';button.type='button';button.className='account-secondary';button.textContent='Load more published content';section.append(notice,button);grid.after(section);
- button.addEventListener('click',async()=>{button.disabled=true;notice.textContent='Loading more published content.';try{onChange(await loadMoreContent());if(contentPager.done){section.remove();return;}notice.textContent='More published content is available. Load more to include it in filters and sorting.';}catch{notice.textContent='More content could not load. Please try again.';}finally{button.disabled=false;}});
+ button.addEventListener('click',async()=>{button.disabled=true;notice.textContent='Loading more published content…';try{onChange(await loadMoreContent());if(contentPager.done){section.remove();return;}notice.textContent='More published content is available. Load more to include it in filters and sorting.';}catch{notice.textContent='More content could not load. Please try again.';}finally{button.disabled=false;}});
 }
 
 // ----- SORT / FILTER -----
@@ -252,7 +252,7 @@ function cardAuthorMarkup(item) {
 function cardTypeLabel(item) {
     const type = item.category === "stories" ? "Story" : formatLabel(item.type || item.category)
     const time = item.category === "stories" ? readingTimeLabel(item.readingMinutes) : ""
-    return time ? type + " � " + time : type
+    return time ? type + " · " + time : type
 }
 
 function viewerCardAttributes(item) {
@@ -270,7 +270,7 @@ function createFeaturedPanelMarkup(item, label = "Featured") {
             </div>
             <div class="content-featured-text image-overlay__content">
                 <div class="content-featured-text-inner">
-                    <p class="content-featured-label image-overlay__label">Featured � ${escapeHtml(type)}</p>
+                    <p class="content-featured-label image-overlay__label">Featured · ${escapeHtml(type)}</p>
                     <h2>${escapeHtml(item.title)}</h2>
                     <p class="content-featured-description">${escapeHtml(item.excerpt || item.card.description || item.description)}</p>
                     <span class="content-featured-action"><span class="content-featured-action-label">${escapeHtml(getPrimaryActionLabel(item))}</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
@@ -496,7 +496,7 @@ export async function initCategoryPage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';if (!grid?.querySelector('a[href]')) grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';if (!grid?.querySelector('a[href]')) grid?.before(loading)
     const browsing = typeof window!=="undefined"&&window.history?.replaceState ? createBrowseHistory() : null
 
     try {
@@ -537,7 +537,7 @@ export async function initHomePage(config) {
     let allItems = []
     const grid=document.querySelector(gridSelector)
     grid?.setAttribute('aria-busy','true')
-    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content.';if (!grid?.querySelector('a[href]')) grid?.before(loading)
+    const loading=document.createElement('p');loading.className='content-load-status';loading.setAttribute('role','status');loading.textContent='Loading published content…';if (!grid?.querySelector('a[href]')) grid?.before(loading)
     const browsing = typeof window!=="undefined" ? createBrowseHistory() : null
     let discovery, featuredItems = [], followedIds = new Set()
     const following = grid ? mountHomeFollowing(grid, ids => {

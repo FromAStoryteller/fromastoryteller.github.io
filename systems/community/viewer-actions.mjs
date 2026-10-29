@@ -5,7 +5,7 @@ import { loadLocalAuthClient } from "../../account/local-auth-client.mjs";
 import { restoreSession, restoredIdentity } from "../../account/session-controller.mjs";
 import { watchSessionEnd } from "../../account/session-events.mjs";
 import { signInHref } from "../../account/return-path.mjs";
-const viewerLabels = (type) => ({ saved: ["game", "tool"].includes(type) ? ["Add to favourites", "Favourited"] : ["Save for later", "Saved for later"], experienced: { game: ["I've played this", "Played"], tool: ["I've used this", "Used"], video: ["Mark as watched", "Watched"], audio: ["Mark as listened", "Listened"] }[type] ?? ["Mark as read", "Read"], loved: ["Loved it", "Loved it"] });
+const viewerLabels = (type) => ({ saved: ["game", "tool"].includes(type) ? ["Add to favourites", "Favourited"] : ["Save for later", "Saved for later"], experienced: { game: ["I’ve played this", "Played"], tool: ["I’ve used this", "Used"], video: ["Mark as watched", "Watched"], audio: ["Mark as listened", "Listened"] }[type] ?? ["Mark as read", "Read"], loved: ["Loved it", "Loved it"] });
 async function connectViewerAccount() {
   const local = await loadLocalAuthClient();
   if (!local) throw Error("Account services are unavailable.");
@@ -50,7 +50,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   function status(host, text) {
     const label = host.querySelector("[data-viewer-status]");
     label.textContent = text;
-    label.classList.toggle("visually-hidden", text === "Saved." || text === "Saving." || host.classList.contains("viewer-card-actions") && !host.dataset.viewerInteracted);
+    label.classList.toggle("visually-hidden", text === "Saved." || text === "Saving…" || host.classList.contains("viewer-card-actions") && !host.dataset.viewerInteracted);
   }
   function paint(host) {
     const key = host.dataset.viewerKey, s = states.get(key), labels = viewerLabels(host.dataset.viewerType);
@@ -77,7 +77,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
       b.title=nextLabel;b.setAttribute("aria-label",nextLabel);
       if (host.classList.contains("viewer-card-actions")) {
         const label = nextLabel;
-        b.setAttribute("aria-label", label + " - " + (host.closest("article")?.querySelector("h2,h3")?.textContent ?? "content"));
+        b.setAttribute("aria-label", label + " — " + (host.closest("article")?.querySelector("h2,h3")?.textContent ?? "content"));
         b.title = label;
       }
     }
@@ -256,7 +256,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
     pending.add(key);
     for (const h of hosts) if (h.dataset.viewerKey === key) {
       paint(h);
-      status(h, "Saving.");
+      status(h, "Saving…");
     }
     try {
       let state = states.get(key);
