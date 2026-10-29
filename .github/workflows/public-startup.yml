@@ -1,7 +1,7 @@
 name: Public startup verification
 on:
   pull_request:
-    paths: [systems/community/legacy-page.mjs, systems/content/public-query.mjs, systems/content/discovery-startup.js, scripts/public-startup-markup.mjs, scripts/version-public-assets.mjs, scripts/test-public-startup-browser.mjs, scripts/audit-public-startup.mjs, .github/workflows/public-startup.yml]
+    paths: [search/search.js, systems/community/legacy-page.mjs, systems/content/public-query.mjs, systems/content/discovery-startup.js, scripts/public-startup-markup.mjs, scripts/version-public-assets.mjs, scripts/test-public-startup-browser.mjs, scripts/audit-public-startup.mjs, .github/workflows/public-startup.yml]
   push:
     branches: [main]
     paths: [systems/community/legacy-page.mjs, systems/content/public-query.mjs, systems/content/discovery-startup.js, scripts/public-startup-markup.mjs, scripts/version-public-assets.mjs]

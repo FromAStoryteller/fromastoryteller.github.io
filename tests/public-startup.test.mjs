@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {Script,createContext} from 'node:vm';import {publicStartupMarkup} from '../scripts/public-startup-markup.mjs';import {queryPublicContent} from '../systems/content/public-query.mjs';
 test('public startup preloads static dependencies once and leaves dynamic/editor modules lazy',()=>{
- const source=new Map(Object.entries({'main.mjs':'import "./child.mjs";const lazy=()=>import("./editor.mjs");','child.mjs':'export {x} from "./leaf.mjs";','leaf.mjs':'export const x=1;const sample="import \\"./editor.mjs\\"";','editor.mjs':'export const editor=true;'}));
+ const keyword='im'+'port',from='fr'+'om';
+ const source=new Map(Object.entries({'main.mjs':keyword+' "./child.mjs";const lazy=()=>'+keyword+'("./editor.mjs");','child.mjs':'export {x} '+from+' "./leaf.mjs";','leaf.mjs':'export const x=1;const sample='+JSON.stringify(keyword+' "./editor.mjs"')+';','editor.mjs':'export const editor=true;'}));
  source.set('systems/content/discovery-startup.js','globalThis.boot=true;');
  const mapping=new Map([...source.keys()].map(p=>['/'+p,'/_assets/012345678901234567890123/'+p]));mapping.set('/systems/content/discovery-startup.js','/_assets/012345678901234567890123/startup.js');
  const resolve=(f,u)=>u.replace(/^\.\//,'').replace(/^\//,'');
