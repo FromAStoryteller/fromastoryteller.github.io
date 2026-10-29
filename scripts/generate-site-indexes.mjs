@@ -1,4 +1,5 @@
 import {relatedContent} from '../systems/content/related-content.mjs';
+import {discoveryPlaceholder} from '../systems/content/content-discovery.mjs';
 import { readingTimeFromHtml, storyBodyHtml, readingTimeMarkup } from "../systems/reading/reading-time.mjs";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
@@ -269,6 +270,7 @@ function generateStaticHtml(items) {
       const empty = section === "blog" ? "No blogs found yet." : section === "videos" ? "No videos found yet." : "Nothing to show yet.";
       const markup = categoryItems.map(createCardMarkup).join("\n") || `<p class="content-grid-empty">${empty}</p>`;
       html = replaceGenerated(html, `${section}-grid`, markup, "section");
+      html=html.replace(new RegExp('(<nav[^>]*id="'+section+'-filters"[^>]*>)[\\s\\S]*?(</nav>)'),(_match,open,close)=>open+discoveryPlaceholder(categoryItems,{category:section==='home'?'':section})+close);
       // Render the first featured panel before first paint to avoid pushing the grid
       // down after metadata arrives. Browser code uses the same panel renderer.
       const featuredId = section === 'home' ? 'home-featured' : {stories:'featured-story', games:'featured-game', tools:'featured-tool', blog:'featured-blog', videos:'featured-video'}[section];

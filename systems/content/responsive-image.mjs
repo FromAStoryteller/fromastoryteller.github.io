@@ -2,7 +2,8 @@ import {imageVariants} from './image-variants.mjs';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function responsiveImage(src,alt='',{featured=false,sizes=featured?'(max-width: 64rem) 100vw, 1152px':'(max-width: 40rem) 100vw, (max-width: 64rem) 50vw, 384px',width=1600,height=900,deferred=false}={}){
  if(deferred){const html=responsiveImage(src,alt,{featured,sizes,width,height});return html.replace('<img ','<img aria-hidden="true" ').replace(/\bsrc=/g,'data-fas-src=').replace(/\bsrcset=/g,'data-fas-srcset=')+'<noscript>'+html.replace('<img ','<img style="position:absolute;inset:0" ')+'</noscript>';}
- const variants=imageVariants[src];
+ // Runtime database paths are canonical; built manifests use versioned keys.
+ const entry=Object.entries(imageVariants).find(([key])=>key===src||key.replace(/^\/_assets\/[a-f0-9]{24}/,'')===src),variants=entry?.[1];if(entry)src=entry[0];
  const attributes=' alt="'+escape(alt)+'" width="'+width+'" height="'+height+'" decoding="async"'+(featured?' fetchpriority="high"':' loading="lazy"');
  if(variants){const sets=format=>variants[format].map(x=>escape(x.src)+' '+x.width+'w').join(', ');return '<picture><source type="image/avif" srcset="'+sets('avif')+'" sizes="'+escape(sizes)+'"><source type="image/webp" srcset="'+sets('webp')+'" sizes="'+escape(sizes)+'"><img src="'+escape(src)+'"'+attributes+'></picture>';}
  // The image gateway keeps caller-scoped visibility checks on every variant.

@@ -36,6 +36,16 @@ test('profile ownership, public projection, attribution, pagination and account 
     const key=(await db.query(`select public_id from public.profiles where id='${owner}'`)).rows[0].public_id;
     const viewerKey=(await db.query(`select public_id from public.profiles where id='${viewer}'`)).rows[0].public_id;
     const as=async(role,id='',sql)=>{await db.exec(`set role ${role};select set_config('request.jwt.claim.sub','${id}',false);`);try{return await db.query(sql);}finally{await db.exec('reset role');}};
+    // Query beyond the old 60-card startup page, under actual anonymous grants.
+    await db.exec(`begin;insert into public.stories(author_id,slug,title,summary,body,status,published_at,genres) select '${owner}','scale-fixture-'||n,'Scale fixture '||n||case when n=70 then ' Needleproof' else '' end,'Public summary',repeat('word ',1000),'published',now()-n*interval '1 minute',array['fantasy'] from generate_series(1,70)n;`);
+    const query=async options=>(await as('anon','',`select public.fas_query_public_content('${JSON.stringify(options)}'::jsonb) as result`)).rows[0].result;
+    const pageOne=await query({q:'Scale fixture',limit:24,genre:'Fantasy'}),pageTwo=await query({q:'Scale fixture',offset:24,limit:24}),pageThree=await query({q:'Scale fixture',offset:48,limit:24});
+    assert.equal(pageOne.total,70);assert.equal(pageOne.items.length,24);assert.equal(pageTwo.items.length,24);assert.equal(pageThree.items.length,22);assert.equal(pageThree.next_cursor,null);assert.equal(new Set([...pageOne.items,...pageTwo.items,...pageThree.items].map(i=>i.id)).size,70);
+    assert.equal((await query({q:'Needleproof'})).items.length,1);assert.equal(pageOne.items[0].reading_minutes,5);assert.ok(!['body','body_document','executable_package','author_id'].some(key=>key in pageOne.items[0]));
+    assert.ok(!['id','email'].some(key=>key in pageOne.items[0].author));assert.equal((await query({related:'/stories/scale-fixture-1/',limit:6})).items.length,6);
+    for(const options of [{limit:25},{offset:-1},{sort:'forged'},{unexpected:true}]){await db.exec('savepoint invalid_discovery');await assert.rejects(query(options));await db.exec('rollback to savepoint invalid_discovery;release savepoint invalid_discovery;');}
+    await db.exec(`update public.stories set status='draft' where slug='scale-fixture-70';`);assert.equal((await query({q:'Needleproof'})).total,0);
+    await db.exec(`delete from public.user_roles where user_id='${owner}' and role='member';`);assert.equal((await query({q:'Scale fixture'})).total,0);await db.exec('rollback;');
     const read=async()=> (await as('anon','',`select public.fas_public_profile('${key}') as value`)).rows[0].value;
     const profile=await read();
     const newContributorKey=(await db.query(`select public_id from public.profiles where id='${other}'`)).rows[0].public_id;

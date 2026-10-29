@@ -1,4 +1,6 @@
 import {connectViewerAccount} from './viewer-actions.mjs';
+import {onPageRestore} from '../core/page-restore.mjs';
+import {createBrowseHistory} from '../content/browse-state.mjs';
 import {createCardMarkup} from '../content/content-system.js';
 import {publicCoverUrl} from './profiles.mjs';
 import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
@@ -29,6 +31,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
  const d=root.ownerDocument,w=d.defaultView,node=(tag,text='')=>{const el=d.createElement(tag);el.textContent=text;return el;};
  const params=new URL(w.location.href).searchParams,view=params.get('view')==='completed'?'completed':'recent';
  let ended=false,account,stop,stopSync,loading=false,queued=false,mutating=false,revision=0,cursor=null,loaded=false,cache=new Map(),limit=48,settings;
+ const browsing=createBrowseHistory(()=>({pages:Math.ceil(limit/48)}),{window:w,document:d});limit=Math.max(1,Math.min(50,browsing.state?.pages??1))*48;
  const state={query:(params.get('q')??'').slice(0,160),type:params.get('type')??'',period:params.get('period')??''};
  function unavailable(text){root.replaceChildren(node('h1','Your history'),node('p',text));const a=node('a','Sign in');a.className='account-secondary';a.href=signInHref('/account/history/');root.append(a);}
  try{
@@ -39,7 +42,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
   for(const [key,title]of Object.entries(historyViews)){const a=node('a',title);a.className='account-secondary';a.href='/account/history/?view='+key;if(key===view)a.setAttribute('aria-current','page');nav.append(a);}
   const heading=node('h2',historyViews[view]),description=node('p',view==='recent'?'Pieces you have opened, most recent first. Visiting does not mark a piece completed.':'Your explicit Read, Played, Watched, Listened and Used marks, newest marks first. Older marks without a recorded date appear last.');
   const privacy=node('section');privacy.className='viewer-history-recording';privacy.setAttribute('aria-label','Recent activity recording');
-  const recording=node('p','Checking recent activity recording…'),toggle=node('button','Enable Recent Activity');toggle.type='button';toggle.className='account-secondary';toggle.disabled=true;
+  const recording=node('p','Checking recent activity recording.'),toggle=node('button','Enable Recent Activity');toggle.type='button';toggle.className='account-secondary';toggle.disabled=true;
   const privacyText=node('p','On by default for signed-in accounts: keep the latest visit to up to 500 pieces for 90 days in your account. You can pause, remove entries, or clear visits. Saved lists, completion marks and game saves are separate.');
   const privacyLink=node('a','Privacy details');privacyLink.href='/privacy/#recent-activity';privacy.append(recording,privacyText,toggle,privacyLink);
   const controls=node('form');controls.className='viewer-collection-filters';controls.setAttribute('role','search');controls.setAttribute('aria-label','Filter your history');
@@ -50,7 +53,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
   const period=select('Activity date',[['','Any date'],['week','Last 7 days'],['month','Last 30 days']],state.period);
   state.type=type.value;state.period=period.value;
   const reset=node('button','Clear filters');reset.type='button';reset.className='account-secondary';controls.append(reset);
-  const status=node('p','Loading history…');status.setAttribute('role','status');
+  const status=node('p','Loading history.');status.setAttribute('role','status');
   const actionStatus=node('p');actionStatus.setAttribute('role','status');
   const grid=node('div');grid.className='content-grid viewer-history-grid';
   const more=node('button','Load more');more.type='button';more.className='account-secondary';more.hidden=true;
@@ -77,7 +80,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
     entry.append(template.content);
     const meta=node('div');meta.className='viewer-history-meta';
     const label=view==='recent'?'Visited':({story:'Read',blog:'Read',game:'Played',tool:'Used',video:'Watched',audio:'Listened'})[item.type]??'Marked';
-    const time=node('p',label+' · '+dateText(item));meta.append(time);
+    const time=node('p',label+' � '+dateText(item));meta.append(time);
     if(view==='recent'){const remove=node('button','Remove');remove.type='button';remove.className='account-secondary account-danger';remove.setAttribute('aria-label','Remove '+item.title+' from recent activity');remove.disabled=mutating;remove.onclick=()=>void mutate('fas_remove_recent_activity',{content_key:item.id},'Visit removed.');meta.append(remove);}
     entry.append(meta);grid.append(entry);
    }
@@ -112,9 +115,9 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
   search.addEventListener('input',change);type.onchange=change;period.onchange=change;controls.onsubmit=e=>{e.preventDefault();change();};reset.onclick=()=>{search.value=type.value=period.value='';change();search.focus();};
   more.onclick=()=>{limit+=48;void load();};retry.onclick=()=>void load(true);
   const changed=()=>{revision++;void load(true);};w.addEventListener('fas-viewer-action-change',changed);stopSync=watchViewerChanges(changed,{window:w,document:d});
-  w.addEventListener('pagehide',()=>{ended=true;cache.clear();stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
-  w.addEventListener('pageshow',e=>{if(e.persisted)w.location.reload();});
-  await load();
+  w.addEventListener('pagehide',()=>{ended=true;cache.clear();browsing.dispose();stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
+  onPageRestore(w,()=>mountViewerHistory(root,{connect}),{hide:root});
+  await load();browsing.restore();
  }catch{if(!ended)unavailable('Your account could not be checked. Please sign in again.');}
 }
 const root=typeof document!=='undefined'?document.querySelector('[data-viewer-history]'):null;if(root)void mountViewerHistory(root);

@@ -1,6 +1,7 @@
 import {findPublicProfiles} from '../community/profile-directory.mjs';
 import {publicProfileUrl} from '../community/profiles.mjs';
 import { getAllPublishedContent, searchPublishedContent } from "../content/content-system.js";
+import {remoteDiscovery,queryPublicContent} from '../content/public-query.mjs';
 
 export function syncHeaderSearchQuery() {
   const params = new URLSearchParams(window.location.search)
@@ -22,7 +23,7 @@ export async function initHeaderSearch() {
   let allItems = [], profileGeneration=0, profileTimer, suggestionsOpen=false
 
   try {
-    void getAllPublishedContent().then(items=>{allItems=items;if(document.activeElement===input)updateSuggestions(input.value.trim());}).catch(()=>{})
+    if(!remoteDiscovery())void getAllPublishedContent().then(items=>{allItems=items;if(document.activeElement===input)updateSuggestions(input.value.trim());}).catch(()=>{})
   } catch (err) {
     console.error("Header search failed to load content:", err)
   }
@@ -51,7 +52,7 @@ export async function initHeaderSearch() {
       return
     }
 
-    profiles.forEach(profile=>{const a=document.createElement('a');a.className='site-search-suggestion';a.href=publicProfileUrl(profile.public_id);a.textContent=profile.display_name+' — Storyteller';suggestionsContainer.append(a);});
+    profiles.forEach(profile=>{const a=document.createElement('a');a.className='site-search-suggestion';a.href=publicProfileUrl(profile.public_id);a.textContent=profile.display_name+' - Storyteller';suggestionsContainer.append(a);});
     suggestions.forEach(item => {
       const button = document.createElement("button")
 
@@ -73,7 +74,7 @@ export async function initHeaderSearch() {
     return results.slice(0, 5)
   }
 
-  function updateSuggestions(query){suggestionsOpen=true;const token=++profileGeneration;clearTimeout(profileTimer);const content=getSuggestions(query);showSuggestions(content);if(!query)return;profileTimer=setTimeout(async()=>{try{const result=await findPublicProfiles(query);if(suggestionsOpen&&token===profileGeneration&&input.value.trim()===query)showSuggestions(content,result.data.items.slice(0,3));}catch{}},200);}
+  function updateSuggestions(query){suggestionsOpen=true;const token=++profileGeneration;clearTimeout(profileTimer);const content=getSuggestions(query);showSuggestions(content);if(!query)return;profileTimer=setTimeout(async()=>{const [people,results]=await Promise.allSettled([findPublicProfiles(query),remoteDiscovery()?queryPublicContent({q:query,limit:5}):Promise.resolve({items:content})]);if(suggestionsOpen&&token===profileGeneration&&input.value.trim()===query)showSuggestions(results.status==='fulfilled'?results.value.items:content,people.status==='fulfilled'?people.value.data.items.slice(0,3):[]);},200);}
   form.addEventListener("submit", event => {
     event.preventDefault()
 
