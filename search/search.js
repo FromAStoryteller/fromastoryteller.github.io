@@ -1,3 +1,5 @@
+import {queryPublicContent,remoteDiscovery} from '/systems/content/public-query.mjs'
+import {onPageRestore} from '/systems/core/page-restore.mjs'
 import {findPublicProfiles,renderProfileCards} from '/systems/community/profile-directory.mjs'
 import {createBrowseHistory} from '/systems/content/browse-state.mjs'
 import {
@@ -24,7 +26,7 @@ async function loadPeople(query,append=false){const token=++peopleGeneration;peo
 peopleMore.addEventListener('click',()=>void loadPeople(peopleQuery,true));
 function searchPeople(query){peopleSettled=false;peopleGeneration++;clearTimeout(peopleTimer);people.hidden=!query;peopleMore.hidden=true;peopleGrid.replaceChildren();peopleStatus.textContent='Loading storytellers.';peopleTimer=setTimeout(()=>void loadPeople(query),200);}
 
-const browsing=createBrowseHistory()
+const browsing=createBrowseHistory(()=>({pages:Math.max(1,Math.ceil(allItems.length/24))}))
 
 function getQueryFromUrl() {
     const params = new URLSearchParams(window.location.search)
@@ -134,6 +136,7 @@ function showRecovery(query){
 }
 
 function runSearch(query,searchProfiles=true) {
+    if(remoteDiscovery()){if(searchProfiles)searchPeople(query.trim());clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>void loadRemoteSearch(query.trim()),200);return;}
     const trimmedQuery = query.trim()
     if(searchProfiles)searchPeople(trimmedQuery)
     const grid=document.querySelector(resultsSelector)
@@ -204,6 +207,27 @@ async function initSearchPage() {
     }
 }
 
-async function loadSearchContent(){contentReady=false;contentError=false;runSearch(input.value.trim(),false);try{allItems=await getAllPublishedContent({refresh:true});}catch{contentError=true;}finally{contentReady=true;runSearch(input.value.trim(),false);if(peopleSettled)browsing.restore();}}
+async function loadSearchContent(){if(remoteDiscovery()){const pages=Math.min(50,browsing.state?.pages??1),query=input.value.trim();await loadRemoteSearch(query);for(let i=1;i<pages&&remoteCursor;i++)await loadRemoteSearch(query,true);return;}contentReady=false;contentError=false;runSearch(input.value.trim(),false);try{allItems=await getAllPublishedContent({refresh:true});}catch{contentError=true;}finally{contentReady=true;runSearch(input.value.trim(),false);if(peopleSettled)browsing.restore();}}
 
+
+let remoteCursor=null,remoteGeneration=0,remoteController,remoteTimer;
+const contentMore=document.createElement('button');contentMore.type='button';contentMore.className='content-filter';contentMore.textContent='More content results';contentMore.hidden=true;document.querySelector(resultsSelector).after(contentMore);
+async function loadRemoteSearch(query,append=false){
+ const generation=++remoteGeneration;remoteController?.abort();remoteController=new AbortController();const grid=document.querySelector(resultsSelector);grid.setAttribute('aria-busy','true');contentMore.disabled=true;contentReady=false;
+ if(!append){allItems=[];remoteCursor=null;contentMore.hidden=true;}
+ try{
+  if(!query){updateSummary('',0);renderContentGrid(resultsSelector,[],'Start typing to search the site.');showRecovery('');return;}
+  const page=await queryPublicContent({q:query,limit:24,offset:append?remoteCursor?.offset??0:0},{signal:remoteController.signal});
+  if(generation!==remoteGeneration)return;
+  const seen=new Set(append?allItems.map(item=>item.id):[]);allItems=[...(append?allItems:[]),...page.items.filter(item=>!seen.has(item.id))];remoteCursor=page.next_cursor;
+  updateSummary(query,page.total);renderContentGrid(resultsSelector,allItems,`No results found for "${query}".`,{initialCount:allItems.length});contentMore.hidden=!remoteCursor;
+  if(!allItems.length)showRecovery(query);
+  if(document.activeElement===input)showSuggestions(getSuggestions(query,allItems));
+ }catch(error){if(generation!==remoteGeneration||error.name==='AbortError')return;summary.textContent='Content search is temporarily unavailable. You can still search storytellers.';renderContentGrid(resultsSelector,[],'');const retry=document.createElement('button');retry.type='button';retry.className='content-filter';retry.textContent='Retry content search';retry.addEventListener('click',()=>void loadSearchContent());grid.replaceChildren(retry);contentMore.hidden=true;}
+ finally{if(generation===remoteGeneration){contentReady=true;contentMore.disabled=false;grid.setAttribute('aria-busy','false');if(peopleSettled)browsing.restore();}}
+}
+contentMore.addEventListener('click',()=>void loadRemoteSearch(input.value.trim(),true));
+window.addEventListener('pagehide',()=>{remoteGeneration++;remoteController?.abort();peopleGeneration++;clearTimeout(peopleTimer);clearTimeout(remoteTimer);});
+function watchSearchRestore(){onPageRestore(window,async()=>{await Promise.all([loadSearchContent(),loadPeople(input.value.trim())]);watchSearchRestore();},{hide:document.querySelector('main')});}
+watchSearchRestore();
 initSearchPage()
