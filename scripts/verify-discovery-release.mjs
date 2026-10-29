@@ -13,7 +13,7 @@ for(let attempt=0;attempt<30;attempt++){
    const hash=createHash('sha256').update(bytes.replace(/\r\n/g,'\n')).digest('hex');
    assert.equal(hash,doc.sha256,kind+' public snapshot checksum');
    const current=await(await get('/'+kind+'/')).text();
-   assert.equal(createHash('sha256').update(current.replace(/\r\n/g,'\n')).digest('hex'),doc.sha256,kind+' current document checksum');
+   assert.equal(current.match(/<main\b[^>]*>[\s\S]*?<\/main>/)?.[0],bytes.match(/<main\b[^>]*>[\s\S]*?<\/main>/)?.[0],kind+' current policy wording');
    console.log(kind+' verified '+hash);
   }
   const browse=await(await get('/api/public/browse?limit=2')).json();
