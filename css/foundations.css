@@ -9,6 +9,11 @@
    SELF-HOSTED FONTS
    ========================================================= */
 
+/* Rebuild common subsets with scripts/build-font-subsets.py. Full faces come
+   first; the later common face wins for supported common characters. Keep the
+   full range available for other languages, accents and contributor text.
+   The historical .latin filenames also preserve existing preload references. */
+
 /* Match Source Sans line wrapping while its preloaded font arrives. The local
    fallback adds no download; actual Source Sans remains the final typeface. */
 @font-face { font-family:"FAS Interface Fallback"; src:local("Arial"),local("Liberation Sans"); font-style:normal; font-weight:200 500; size-adjust:91.58%; ascent-override:100%; descent-override:25%; line-gap-override:0%; }
@@ -21,7 +26,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  unicode-range: U+0250-1DFF,U+1F00-1FFF,U+2070-209F,U+20D0-10FFFF;
+  unicode-range: U+0000-10FFFF;
 }
 
 @font-face {
@@ -30,7 +35,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  unicode-range: U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF;
+  unicode-range: U+0000-007F;
 }
 
 @font-face {
@@ -39,7 +44,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0250-1DFF,U+1F00-1FFF,U+2070-209F,U+20D0-10FFFF;
+  unicode-range: U+0000-10FFFF;
 }
 
 @font-face {
@@ -48,7 +53,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF;
+  unicode-range: U+0000-00FF,U+0100-0101,U+0112-0113,U+012A-012B,U+014C-014D,U+016A-016B,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2190-2193,U+2212,U+25B2,U+25BC,U+25C6,U+2726,U+FEFF,U+FFFD;
 }
 
 @font-face {
@@ -57,7 +62,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0250-1DFF,U+1F00-1FFF,U+2070-209F,U+20D0-10FFFF;
+  unicode-range: U+0000-10FFFF;
 }
 
 @font-face {
@@ -66,7 +71,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF;
+  unicode-range: U+0000-00FF,U+0100-0101,U+0112-0113,U+012A-012B,U+014C-014D,U+016A-016B,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2190-2193,U+2212,U+25B2,U+25BC,U+25C6,U+2726,U+FEFF,U+FFFD;
 }
 
 @font-face {
@@ -75,7 +80,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0250-1DFF,U+1F00-1FFF,U+2070-209F,U+20D0-10FFFF;
+  unicode-range: U+0000-10FFFF;
 }
 
 @font-face {
@@ -84,7 +89,7 @@
   font-style: normal;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF;
+  unicode-range: U+0000-00FF,U+0100-0101,U+0112-0113,U+012A-012B,U+014C-014D,U+016A-016B,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2190-2193,U+2212,U+25B2,U+25BC,U+25C6,U+2726,U+FEFF,U+FFFD;
 }
 
 @font-face {
@@ -93,7 +98,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0250-1DFF,U+1F00-1FFF,U+2070-209F,U+20D0-10FFFF;
+  unicode-range: U+0000-10FFFF;
 }
 
 @font-face {
@@ -102,7 +107,7 @@
   font-style: italic;
   font-weight: 200 900;
   font-display: swap;
-  unicode-range: U+0000-024F,U+1E00-1EFF,U+2000-206F,U+20A0-20CF;
+  unicode-range: U+0000-00FF,U+0100-0101,U+0112-0113,U+012A-012B,U+014C-014D,U+016A-016B,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2190-2193,U+2212,U+25B2,U+25BC,U+25C6,U+2726,U+FEFF,U+FFFD;
 }
 
 
