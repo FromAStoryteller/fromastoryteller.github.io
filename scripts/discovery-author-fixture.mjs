@@ -5,7 +5,7 @@ export const root=new URL('../',import.meta.url);
 export const migration='20261029205709_discovery_author_lookups.sql';
 export const optimization=readFileSync(new URL('supabase/migrations/'+migration,root),'utf8');
 export const rollback=readFileSync(new URL('supabase/ops/rollback_discovery_author_lookups.sql',root),'utf8');
-export async function discoveryDatabase(){
+export async function discoveryDatabase({throughLatest=false}={}){
  const db=new PGlite();
  await db.exec(`create role supabase_auth_admin;create role anon;create role authenticated;create role service_role bypassrls;
  create schema auth;create schema storage;
@@ -20,7 +20,7 @@ export async function discoveryDatabase(){
  grant select,insert,update,delete on storage.objects to anon,authenticated;`);
  const directory=new URL('supabase/migrations/',root);
  for(const file of readdirSync(directory).filter(f=>f.endsWith('.sql')).sort()){
-  if(file===migration)break;
+  if(file===migration&&!throughLatest)break;
   await db.exec(readFileSync(new URL(file,directory),'utf8'));
  }
  return db;

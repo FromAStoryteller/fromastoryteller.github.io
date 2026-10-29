@@ -14,6 +14,7 @@ async function contextFor(width,theme){
 `+source.slice(b)});});
  await context.route('**/__fas_viewer_details_fixture/**',async route=>{const name=new URL(route.request().url()).pathname.split('/').at(-1),args=route.request().postDataJSON();let data;
   if(name==='fas_my_following')data={items:[],next_cursor:null};
+   if(name==='fas_my_following_ids')data=[];
   else if(name==='fas_my_activity_settings')data={enabled:false,version:0};
   else if(name==='fas_my_viewer_actions')data=args.content_keys.map(key=>({...state(key)}));
   else if(name==='fas_set_viewer_action'){if(failWrite){await route.fulfill({json:{error:{message:'Offline fixture'}}});return;}const s=state(args.content_key);s[args.action_key]=args.enabled;if(args.action_key==='saved'&&args.enabled)s.order=++order;data={...s};}
