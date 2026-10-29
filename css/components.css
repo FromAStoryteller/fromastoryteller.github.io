@@ -1817,6 +1817,6 @@ html, body, button, input, textarea, select,
 /* Reserve the save/share row before the shell module mounts it. Removing the
    placeholder and inserting the real row preserves the next section's position. */
 main :is(.story-header,.game-hero,.tool-hero,.video-hero):not(:has(+ .viewer-content-actions))::after {
-  content:""; display:block; height:3.75rem;
+  content:""; display:block; height:2.75rem;
 }
 main .story-header:not(:has(+ .viewer-content-actions))::after { height:4rem; }
