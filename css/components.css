@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 17648)
-Total output lines: 1815
-
 /* From A Storyteller — components.
    Shared visual components, cards, controls and the graphical wordmark. */
 
@@ -1247,7 +1244,306 @@ a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px 
   display: flex;
   align-items: center;
   justify-content: center;
-  padding…1648 tokens truncated…y-content: center; width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 0; border-radius: 0.5rem; background: transparent; color: var(--colour-control-text); text-decoration: none; cursor: pointer; font-size: 1rem; transition: background var(--site-motion-normal), color var(--site-motion-normal); }
+  padding: 20px;
+  border: var(--surface-standard-border);
+  border-radius: var(--site-card-radius);
+  background: var(--surface-inset-background);
+  font-size: 1.4rem;
+  line-height: 1.4;
+  color: var(--colour-text-primary);
+  box-shadow: var(--shadow-surface);
+}
+
+.tool-widget-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tool-button {
+  border: var(--surface-standard-border);
+  padding: 14px 26px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: var(--shadow-surface);
+}
+
+.tool-button:hover {
+  transform: translateY(-1px);
+}
+
+.tool-button:active {
+  transform: translateY(0);
+}
+
+
+@container tool-play (max-width: 1040px) {
+  .tool-shell-main,
+      .tool-shell-sidebar {
+    width: 100%;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@container tool-play (max-width: 1040px) {
+  .tool-shell-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+@container tool-play (max-width: 700px) {
+  .tool-shell-sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@supports not (container-type: inline-size) {
+  @media (max-width: 1120px) {
+    .tool-shell-main,
+            .tool-shell-sidebar {
+      width: 100%;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-shell {
+    border-radius: var(--site-panel-radius);
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-shell-frame {
+    min-height: 0;
+    padding: 10px;
+    border-radius: var(--site-card-radius);
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-tagline {
+    font-size: 1.08rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-widget {
+    padding: 20px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-widget-result {
+    font-size: 1.15rem;
+    padding: 18px;
+  }
+}
+
+.privacy-page a:not(.privacy-button) {
+  color: var(--colour-text-primary);
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.privacy-page a:not(.privacy-button):hover {
+  color: var(--colour-text-primary);
+}
+
+
+.privacy-section {
+  scroll-margin-top: 90px;
+}
+
+.terms-page a:not(.terms-button) {
+  color: var(--colour-text-primary);
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.terms-page a:not(.terms-button):hover {
+  color: var(--colour-text-primary);
+}
+
+
+.terms-section {
+  scroll-margin-top: 90px;
+}
+
+.game-hero {
+  text-align: center;
+}
+
+.game-eyebrow {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.game-hero h1 {
+  line-height: 1.1;
+  text-align: center;
+}
+
+.game-tagline {
+  margin: 0 auto 16px;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  max-width: 900px;
+  text-align: center;
+}
+
+.game-intro {
+  margin: 0 auto;
+  max-width: 920px;
+  line-height: var(--line-height-body);
+  opacity: 0.9;
+  text-align: center;
+}
+
+.game-shell {
+  color: var(--colour-text-primary);
+  background: var(--surface-standard-background);
+  border: var(--surface-standard-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-surface);
+}
+
+.game-shell-main {
+  width: 100%;
+  min-width: 0;
+  justify-self: center;
+}
+
+.game-shell-frame {
+  color: var(--colour-text-primary);
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-standard-background);
+  border: var(--surface-standard-border);
+  border-radius: var(--site-panel-radius);
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.game-shell-sidebar {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-self: center;
+}
+
+@media (min-width: 901px) {
+  .game-shell-main {
+    max-width: min(100%, calc((100dvh - 180px) * 16 / 9));
+  }
+}
+
+.game-about-section {
+  width: 100%;
+  max-width: var(--width-wide);
+  margin: 0 auto 48px;
+}
+
+@container game-play (max-width: 1040px) {
+  .game-shell-main,
+      .game-shell-sidebar {
+    width: 100%;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@container game-play (max-width: 1040px) {
+  .game-shell-main {
+    max-width: min(960px, 100%);
+  }
+}
+
+@container game-play (max-width: 1040px) {
+  .game-shell-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+@container game-play (max-width: 700px) {
+  .game-shell-sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@supports not (container-type: inline-size) {
+  @media (max-width: 1120px) {
+    .game-shell-main,
+            .game-shell-sidebar {
+      width: 100%;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .game-shell {
+    border-radius: var(--site-panel-radius);
+  }
+}
+
+@media (max-width: 768px) {
+  .game-shell-frame {
+    padding: 8px;
+    border-radius: var(--site-card-radius);
+  }
+}
+
+@media (max-width: 768px) {
+  .game-tagline {
+    font-size: 1.08rem;
+  }
+}
+
+html, body, button, input, textarea, select,
+.story-category, .story-end-text, .story-intro {
+  font-family: var(--font-family-interface);
+}
+
+.story-content {
+  font-family: var(--font-family-reading);
+  font-optical-sizing: auto;
+}
+
+/* Shared shell controls reuse the existing theme control and focus tokens. */
+.site-header, .header-search-panel { background: var(--background-header); color: var(--colour-text-primary); }
+.site-header::before, .site-header::after { content: ""; position: absolute; bottom: 0; width: calc(50% - var(--size-centre-rule-gap) / 2); height: 1px; background: var(--colour-divider); }
+.site-header::before { left: 0; }
+.site-header::after { right: 0; }
+/* Search hides the compact wordmark; its divider must close at the same time. */
+.site-header:has(.header-brand[hidden])::before { width: 100%; z-index: 1; pointer-events: none; }
+.site-header:has(.header-brand[hidden])::after { display: none; }
+.header-body-fade { background: linear-gradient(to bottom, var(--background-page) 0, var(--background-page) var(--size-quill-overhang), transparent 100%); }
+.logo { display: flex; flex-direction: column; font-family: var(--font-family-brand); font-size: var(--size-wordmark); font-weight: 400; font-style: normal; line-height: 0.92; white-space: nowrap; text-decoration: none; color: var(--colour-wordmark); }
+.wordmark__from { display: block; width: 100%; font-size: 0.72em; line-height: 1; text-align: left; padding-left: 0.5em; }
+.wordmark__name { display: block; }
+.shell-control, .socials a { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 44px; padding: 0; border: 0; border-radius: 0.5rem; background: transparent; color: var(--colour-control-text); text-decoration: none; cursor: pointer; font-size: 1rem; transition: background var(--site-motion-normal), color var(--site-motion-normal); }
 .shell-control:hover, .socials a:hover, .site-search-suggestion:hover { background: var(--state-hover-background); color: var(--state-hover-colour); }
 .shell-control:active, .shell-control[aria-expanded="true"] { background: var(--state-current-background); color: var(--state-current-colour); }
 .theme-toggle__icon { width: 1.15rem; height: 1.15rem; }
