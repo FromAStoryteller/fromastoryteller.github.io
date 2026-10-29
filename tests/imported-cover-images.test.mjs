@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';import {importedCoverImages} from '../systems/content/imported-cover-images.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';import {importedCoverImages} from '../systems/community/public-story-catalog.mjs';
 test('reviewed imported-cover registry cannot drift from the immutable seed identity or repository bytes',()=>{
  const seed=JSON.parse(readFileSync(new URL('../supabase/seed-data/existing-editorial.json',import.meta.url)));
  for(const [id,entry]of Object.entries(importedCoverImages)){

@@ -1,6 +1,6 @@
 # Imported editorial cover delivery
 
-Original imported cover IDs are registered in `systems/content/imported-cover-images.mjs`.
+Original imported cover IDs are registered in `systems/community/public-story-catalog.mjs`.
 After a fresh public discovery response validates publication and author visibility,
 the card converter may select the registered repository image for that exact cover
 asset ID. This gives the static first paint and hydrated card the same versioned

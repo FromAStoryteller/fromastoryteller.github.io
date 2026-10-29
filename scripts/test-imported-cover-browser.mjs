@@ -25,7 +25,7 @@ return Response.json(result);}
 const browser=await chromium.launch();
 try{
  // Compare each public imported original against the checked-in source; no accounts or writes.
- const {importedCoverImages}=await import('../systems/content/imported-cover-images.mjs');
+ const {importedCoverImages}=await import('../systems/community/public-story-catalog.mjs');
  const proof=await browser.newPage();
  for(const [id,entry]of Object.entries(importedCoverImages)){
   const response=await fetch(origin+'/api/public/image?asset_id='+id+'&width=1600');

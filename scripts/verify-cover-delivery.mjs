@@ -1,5 +1,5 @@
 // Read-only exact-release and live homepage image verification.
-import fs from 'node:fs/promises';import assert from 'node:assert/strict';import {chromium} from 'playwright';import {importedCoverImages} from '../systems/content/imported-cover-images.mjs';
+import fs from 'node:fs/promises';import assert from 'node:assert/strict';import {chromium} from 'playwright';import {importedCoverImages} from '../systems/community/public-story-catalog.mjs';
 const origin='https://fromastoryteller.com',expected=JSON.parse(await fs.readFile('dist/content/asset-manifest.json','utf8'))['/systems/community/public-story-catalog.mjs'];
 let ready=false;for(let i=0;i<36;i++){try{const r=await fetch(origin+'/content/asset-manifest.json',{cache:'no-store'});if((await r.json())['/systems/community/public-story-catalog.mjs']===expected){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,10000));}assert.ok(ready,'expected public card release must be deployed');
 const browser=await chromium.launch();
