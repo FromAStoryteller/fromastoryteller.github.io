@@ -1,13 +1,16 @@
 name: Layout stability verification
 on:
   pull_request:
-    paths: [css/components.css, search/search.js, scripts/test-layout-stability-browser.mjs, .github/workflows/layout-stability.yml]
+    paths: [css/components.css, search/search.js, scripts/test-layout-stability-browser.mjs, scripts/verify-layout-stability.mjs, .github/workflows/layout-stability.yml]
+  push:
+    branches: [main]
+    paths: [css/components.css, search/search.js]
 permissions:
   contents: read
 jobs:
   stability:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,3 +22,10 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run build:cloudflare
       - run: node scripts/test-layout-stability-browser.mjs
+        if: github.event_name == 'pull_request'
+      - run: node scripts/verify-layout-stability.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: layout-stability-measurements
+          path: layout-audit.json
