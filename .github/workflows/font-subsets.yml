@@ -1,0 +1,22 @@
+name: Font subset verification
+on:
+  pull_request:
+    paths:
+      - assets/fonts/**
+      - css/foundations.css
+      - scripts/build-font-subsets.py
+      - scripts/font-subsets-requirements.txt
+      - scripts/test-font-delivery-browser.mjs
+      - .github/workflows/font-subsets.yml
+permissions:
+  contents: read
+jobs:
+  fonts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/font-subsets-requirements.txt
+      - run: python scripts/build-font-subsets.py --emit-blobs
