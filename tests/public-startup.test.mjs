@@ -12,7 +12,7 @@ test('public startup preloads static dependencies once and leaves dynamic/editor
  assert.equal(publicStartupMarkup('account/policy-history/frozen/index.html',html,{source,mapping,resolve}),html);
 });
 const startup=readFileSync(new URL('../systems/content/discovery-startup.js',import.meta.url),'utf8'),slot=Symbol.for('fas.public-discovery');
-function begin(path,fetcher){const events=new Map(),location={origin:'https://fromastoryteller.com',pathname:path.split('?')[0],href:'https://fromastoryteller.com'+path},sandbox={location,URL,URLSearchParams,Symbol,AbortController,AbortSignal,fetch:fetcher,addEventListener:(name,fn)=>events.set(name,fn)};new Script(startup).runInNewContext(sandbox);return {pending:sandbox[slot],hide:()=>events.get('pagehide')?.()};}
+function begin(path,fetcher){const events=new Map(),location={origin:'https://fromastoryteller.com',pathname:path.split('?')[0],href:'https://fromastoryteller.com'+path},sandbox={location,URL,URLSearchParams,Symbol,AbortController,AbortSignal,fetch:fetcher,addEventListener:(name,fn)=>events.set(name,fn)};sandbox.globalThis=sandbox;new Script(startup).runInNewContext(sandbox);return {pending:sandbox[slot],hide:()=>events.get('pagehide')?.()};}
 const page=()=>Response.json({items:[],featured:[],total:0,next_cursor:null});
 test('one anonymous startup request is consumed once, with fresh reads after consumption or restoration',async()=>{
  const previous=globalThis.fetch,calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,options});return page();};

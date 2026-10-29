@@ -1,0 +1,31 @@
+name: Public startup verification
+on:
+  pull_request:
+    paths: [systems/community/legacy-page.mjs, systems/content/public-query.mjs, systems/content/discovery-startup.js, scripts/public-startup-markup.mjs, scripts/version-public-assets.mjs, scripts/test-public-startup-browser.mjs, scripts/audit-public-startup.mjs, .github/workflows/public-startup.yml]
+  push:
+    branches: [main]
+    paths: [systems/community/legacy-page.mjs, systems/content/public-query.mjs, systems/content/discovery-startup.js, scripts/public-startup-markup.mjs, scripts/version-public-assets.mjs]
+permissions:
+  contents: read
+jobs:
+  startup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save playwright@1.58.0
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:cloudflare
+      - run: node scripts/test-public-startup-browser.mjs
+        if: github.event_name == 'pull_request'
+      - run: node scripts/audit-public-startup.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-startup-measurements
+          path: startup-audit.json
