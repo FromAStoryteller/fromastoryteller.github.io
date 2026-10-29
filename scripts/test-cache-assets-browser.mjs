@@ -29,6 +29,9 @@ try{for(const width of [390,1440]){
  assert.ok(await page.locator('#home-grid picture source[type="image/avif"]').count());
  await page.waitForFunction(()=>document.querySelector('#home-grid img')?.complete);
  assert.ok(await page.locator('#home-grid img').first().evaluate(img=>img.naturalWidth>0));
+ await page.evaluate(()=>document.fonts.ready);
+ assert.equal(await page.getByRole('link',{name:'Back to top',exact:true}).locator('svg[aria-hidden="true"]').count(),1);
+ assert.ok(!requests.some(u=>u.endsWith('/source-sans-3-variable.woff2')),'ASCII homepage shell must not download the full Unicode font for its footer arrow');
  assert.equal(await page.locator('.menu-toggle').isVisible(),true);await page.locator('.menu-toggle').click();await page.locator('.sidebar a[href="/stories/"]').click();await page.waitForFunction(()=>document.querySelector('.content-grid')?.getAttribute('aria-busy')==='false');
  await page.goto(origin+'/stories/tea-at-the-summit/');await page.locator('.story-page').waitFor();assert.ok((await page.locator('.story-page').textContent()).includes('Eleanor'));
  await page.goto(origin+'/account/sign-in/');await page.locator('input[type="email"]').waitFor();

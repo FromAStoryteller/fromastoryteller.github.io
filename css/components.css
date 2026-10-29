@@ -1579,6 +1579,7 @@ html, body, button, input, textarea, select,
 .site-footer { border-top: 1px solid var(--colour-divider); color: var(--colour-text-muted); font-size: 0.875rem; }
 .footer-brand { color: var(--colour-wordmark); text-decoration: none; font: 1.8rem var(--font-family-brand); }
 .footer-legal a { display: inline-flex; align-items: center; min-height: 44px; color: var(--colour-link); text-underline-offset: 0.2em; }
+.back-to-top-icon { flex: 0 0 auto; margin-inline-end: .25em; }
 .footer-legal a:hover { color: var(--colour-link-hover); }
 .footer-copyright { margin: 0; }
 
