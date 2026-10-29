@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 const root=process.cwd(),origin='https://fromastoryteller.com';
-const {publicContentResponse}=await import(path.join(root,'systems/content/public-cache-worker.mjs'));
-const {readingResponse}=await import(path.join(root,'cloudflare-worker.mjs'));
+const {publicContentResponse}=await import(pathToFileURL(path.join(root,'systems/content/public-cache-worker.mjs')).href);
+const {readingResponse}=await import(pathToFileURL(path.join(root,'cloudflare-worker.mjs')).href);
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2','.avif':'image/avif','.webp':'image/webp','.woff':'font/woff','.ttf':'font/ttf'};
 const env={ASSETS:{async fetch(request){let file=new URL(request.url).pathname;if(file==='/account/runtime-config.json')return Response.json({mode:'production',enabled:true,url:'https://vzdicnufhidelaoeqbza.supabase.co',key:'sb_publishable_fixture',signup:true,lifecycle:true,policyRelease:'fixture'});if(file.endsWith('/'))file+='index.html';try{return new Response(await fs.readFile(path.join(root,'dist',file)),{headers:{'Content-Type':types[path.extname(file)]??'application/octet-stream'}});}catch{return new Response('Not found',{status:404});}}}};
 const fetcher=async(url)=>{
