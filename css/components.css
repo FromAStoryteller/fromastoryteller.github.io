@@ -1644,7 +1644,7 @@ html, body, button, input, textarea, select,
 .viewer-action:disabled { opacity:.65; cursor:wait; }
 .viewer-action-status { flex-basis:100%; text-align:center; font-size:.85rem; line-height:1.5; }
 .viewer-action-status:empty { display:none; }
-.story-header:has(+ .viewer-content-actions) { margin-bottom:.35rem; }
+.story-header { margin-bottom:.35rem; }
 .story-header + .viewer-content-actions { width:min(100%,var(--width-story-hero)); justify-content:flex-end; margin-top:0; margin-bottom:1.25rem; }
 :is(.game-hero,.tool-hero,.video-hero) + .viewer-content-actions { justify-content:flex-end; max-width:var(--width-featured); margin-top:0; margin-bottom:1rem; }
 .story-footer .viewer-content-actions { margin:.5rem auto 1rem; }
@@ -1813,3 +1813,10 @@ html, body, button, input, textarea, select,
 /* Destructive secondary actions retain their distinct red treatment. */
 .account-secondary.account-danger { color:var(--colour-error-text); border-color:var(--colour-error-text); }
 .account-secondary.account-danger:hover:not(:disabled) { background:var(--colour-wine); color:var(--colour-parchment); border-color:var(--colour-wine); }
+
+/* Reserve the save/share row before the shell module mounts it. Removing the
+   placeholder and inserting the real row preserves the next section's position. */
+main :is(.story-header,.game-hero,.tool-hero,.video-hero):not(:has(+ .viewer-content-actions))::after {
+  content:""; display:block; height:2.75rem;
+}
+main .story-header:not(:has(+ .viewer-content-actions))::after { height:4rem; }
