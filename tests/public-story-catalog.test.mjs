@@ -31,3 +31,16 @@ test('paged discovery stops after each requested page and retries without losing
  const pager=createPublicStoryPager({origin:'https://fromastoryteller.com',loadConfig:async()=>({url:root,key:'public'}),fetcher:async()=>{calls++;if(calls===1)return Response.json({items:[row],next_cursor:{id,published_at:when}});if(fail){fail=false;return new Response(null,{status:503});}return Response.json({items:[{...row,id:other,slug:'another'}],next_cursor:null});}});
  assert.equal((await pager.next()).length,1);assert.equal(calls,1);assert.equal(pager.done,false);await assert.rejects(pager.next());assert.equal((await pager.next())[0].id,other);assert.equal(pager.done,true);assert.deepEqual(await pager.next(),[]);assert.equal(calls,3);
 });
+
+test('original imported covers reuse responsive repository images, while replacements retain live visibility checks',()=>{
+ const original='05cbe008-99d6-edd3-5357-1c8e0fb9e19d';
+ const item={...row,cover:{asset_id:original,alt:'Current alt text',width:1600,height:900}};
+ const card=publicStoryCard(item,base);
+ assert.equal(card.image.src,'/assets/images/covers/michaels-choice.jpg');
+ assert.equal(card.image.alt,'Current alt text');assert.match(createCardMarkup(card),/image\/avif/);
+ const changed=publicStoryCard({...item,cover:{...item.cover,asset_id:asset}},base);
+ assert.match(changed.image.src,/fas-story-image\?asset_id=/);
+ assert.equal(publicStoryCard({...item,status:'archived'},base),null);
+ assert.equal(publicStoryCard({...item,author:null},base),null);
+ assert.notEqual(publicStoryCard(item,'https://oqmmvjjycpyxvxipcyli.supabase.co/functions/v1/fas-story-image').image.src,card.image.src);
+});

@@ -2,6 +2,7 @@ name: Shared content layout browser checks
 on:
   pull_request:
     paths:
+      - systems/community/public-story-catalog.mjs
       - search/**
       - systems/search/**
       - systems/community/profile-directory.mjs
