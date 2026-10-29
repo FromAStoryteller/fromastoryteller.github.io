@@ -60,7 +60,7 @@ try{
    if(changed)assert.ok(current.includes('/api/public/image?'),'replacement cover must use live gateway');
    else{
     assert.ok(current.includes('michaels-choice.')&&current.endsWith('.avif'));
-    assert.equal(requests.filter(u=>u===current).length,1,'initial and hydrated featured cover share one image request');
+    assert.ok(requests.includes(current),'featured uses the same responsive original as static HTML');
     assert.ok(!requests.some(u=>u.includes('/api/public/image?')),'original cover needs no extra JPEG');
    }
    withdrawn=true;await page.reload();await page.locator('#home-grid[aria-busy="false"]').waitFor();

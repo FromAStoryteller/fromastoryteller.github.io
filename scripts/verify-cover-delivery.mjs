@@ -11,7 +11,7 @@ try{for(const width of [390,1440]){
  await page.waitForTimeout(600);
  const result=await page.locator('.content-featured-card img').first().evaluate(i=>({src:i.currentSrc,width:i.naturalWidth,resources:performance.getEntriesByType('resource').filter(r=>r.initiatorType==='img').map(r=>({url:r.name,bytes:r.transferSize,body:r.encodedBodySize}))}));
  const original=Object.entries(importedCoverImages).find(([,entry])=>result.src.includes(entry.src.split('/').at(-1).replace('.jpg','.')));
- if(original){assert.equal(requests.filter(u=>u===result.src).length,1,'featured cover downloaded once');assert.ok(!requests.some(u=>u.includes('/api/public/image?')&&u.includes(original[0])),'no second original-cover JPEG');}
+ if(original){assert.equal(result.resources.filter(r=>r.url===result.src&&r.bytes>0).length,1,'featured cover transfers once; later memory-cache reuse transfers zero bytes');assert.ok(!requests.some(u=>u.includes('/api/public/image?')&&u.includes(original[0])),'no second original-cover JPEG');}
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
  console.log('LIVE_COVER '+JSON.stringify({width,original:Boolean(original),...result}));
  await context.close();
