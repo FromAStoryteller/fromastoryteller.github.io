@@ -1,3 +1,4 @@
+import {importedCoverImages} from '../content/imported-cover-images.mjs';
 import {normalizeGameFeatures} from '../content/game-features.mjs';
 import {loadAccountAuthConfig} from '../../account/auth-settings.mjs';
 import {contentPath} from './content-address.mjs';
@@ -5,9 +6,10 @@ import {isPublicId,publicCoverUrl} from './profiles.mjs';
 export function publicStoryCard(row,imageBase){
  if(row?.status!=='published'||!isPublicId(row.id)||!isPublicId(row.author?.public_id)||!['story','blog','game','tool'].includes(row.content_type)||typeof row.title!=='string'||typeof row.summary!=='string'||!Number.isFinite(Date.parse(row.published_at)))return null;
  const url=contentPath(row);if(!url)return null;
- const image=publicCoverUrl(row.cover,imageBase)||(typeof row.preview_image==='string'&&row.preview_image.startsWith('/assets/')?row.preview_image:''),category=({story:'stories',blog:'blog',game:'games',tool:'tools'})[row.content_type],tags=Array.isArray(row.tags)?row.tags.filter(t=>typeof t==='string'):[];
+ const liveImage=publicCoverUrl(row.cover,imageBase),original=liveImage&&imageBase==='https://vzdicnufhidelaoeqbza.supabase.co/functions/v1/fas-story-image'?importedCoverImages[row.cover.asset_id]:null;
+ const image=original?.src||liveImage||(typeof row.preview_image==='string'&&row.preview_image.startsWith('/assets/')?row.preview_image:''),category=({story:'stories',blog:'blog',game:'games',tool:'tools'})[row.content_type],tags=Array.isArray(row.tags)?row.tags.filter(t=>typeof t==='string'):[];
  return {id:row.id,type:row.content_type,category,subtype:row.subtype||row.content_type,status:'published',draft:false,featured:false,pinned:false,title:row.title,shortTitle:row.title,description:row.summary,excerpt:row.summary,url,slug:row.slug,datePublished:row.published_at,dateModified:row.updated_at,author:row.author.public_id,authorDisplay:row.author.display_name,gameFeatures:row.content_type==='game'?normalizeGameFeatures(row.game_features):null,readingMinutes:Number(row.reading_minutes)||(['story','blog'].includes(row.content_type)?1:0),
- genres:Array.isArray(row.genres)?row.genres:[],image:{src:image,alt:row.cover?.alt||row.preview_alt||'',width:row.cover?.width||row.preview_width||1600,height:row.cover?.height||row.preview_height||900},card:{title:row.title,description:row.summary,image,imageAlt:row.cover?.alt||row.preview_alt||'',icon:row.content_type==='game'?'fa-solid fa-gamepad':row.content_type==='tool'?'fa-solid fa-feather-pointed':'fa-solid fa-book-open',tags},taxonomy:{genres:Array.isArray(row.genres)?row.genres:[]}};
+ genres:Array.isArray(row.genres)?row.genres:[],image:{src:image,alt:row.cover?.alt||row.preview_alt||'',width:original?1600:row.cover?.width||row.preview_width||1600,height:original?900:row.cover?.height||row.preview_height||900},card:{title:row.title,description:row.summary,image,imageAlt:row.cover?.alt||row.preview_alt||'',icon:row.content_type==='game'?'fa-solid fa-gamepad':row.content_type==='tool'?'fa-solid fa-feather-pointed':'fa-solid fa-book-open',tags},taxonomy:{genres:Array.isArray(row.genres)?row.genres:[]}};
 }
 export function createPublicStoryPager({origin=typeof location==='undefined'?null:location.origin,fetcher=fetch,loadConfig=loadAccountAuthConfig,initialPage}={}){
  if(!origin)return {done:true,next:async()=>[]};
