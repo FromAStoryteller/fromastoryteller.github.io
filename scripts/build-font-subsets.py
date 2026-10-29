@@ -6,6 +6,7 @@ Full fonts remain the fallback for every other supported character.
 import argparse
 import io
 import json
+import re
 from pathlib import Path
 from fontTools import subset
 from fontTools.ttLib import TTFont
@@ -28,6 +29,14 @@ FILES = [
 parser = argparse.ArgumentParser()
 parser.add_argument("--check", action="store_true")
 args = parser.parse_args()
+css = (ROOT / "css/foundations.css").read_text(encoding="utf8")
+faces = re.findall(r"@font-face\s*\{([^}]+)\}", css)
+def declared_ranges(filename):
+    face = next(f for f in faces if ('../assets/fonts/' + filename + '"') in f)
+    raw = re.search(r"unicode-range:\s*([^;]+)", face).group(1)
+    return [(int(a,16),int(z or a,16)) for a,z in
+            re.findall(r"U\+([0-9A-Fa-f]+)(?:-([0-9A-Fa-f]+))?", raw)]
+
 for name in FILES:
     original = ROOT / "assets/fonts" / (name + ".woff2")
     output = ROOT / "assets/fonts" / (name + ".latin.woff2")
@@ -43,6 +52,16 @@ for name in FILES:
     options.recommended_glyphs = True
     worker = subset.Subsetter(options=options)
     requested = set(range(0x80)) if name.startswith("montecarlo/") else COMMON
+    common_ranges = declared_ranges(name + ".latin.woff2")
+    full_ranges = declared_ranges(name + ".woff2")
+    cursor = 0
+    for first,last in sorted(common_ranges + full_ranges):
+        assert first == cursor, name + ": CSS ranges overlap or leave a gap"
+        cursor = last + 1
+    assert cursor == 0x110000, name + ": CSS fallback range is incomplete"
+    for code in source.getBestCmap():
+        in_common = any(first <= code <= last for first,last in common_ranges)
+        assert in_common == (code in requested), (name, code, "CSS/subset mismatch")
     worker.populate(unicodes=requested)
     worker.subset(font)
     font.flavor = "woff2"

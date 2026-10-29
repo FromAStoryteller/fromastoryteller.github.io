@@ -66,6 +66,7 @@ try {
       const probe=document.createElement('p');probe.style.fontFamily='"'+family+'"';probe.textContent=text;document.querySelector('main').append(probe);
       await document.fonts.load('400 24px "'+family+'"',text);
      }
+     await document.fonts.ready;
      return document.fonts.status;
     });
     assert.equal(fallback,'loaded');
