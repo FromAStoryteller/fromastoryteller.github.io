@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 const registry=JSON.parse(await readFile(new URL('../account/policy-versions.json',import.meta.url),'utf8'));
-const version='discovery-delivery-2026-10-29-v1';
+const version=registry.activePublishedVersion;
 const release=registry.versions[version];
 async function get(path){const response=await fetch('https://fromastoryteller.com'+path,{cache:'no-store',signal:AbortSignal.timeout(15000)});assert.equal(response.status,200,path);return response;}
 let last;
@@ -19,7 +19,7 @@ for(let attempt=0;attempt<30;attempt++){
   const browse=await(await get('/api/public/browse?limit=2')).json();
   assert.ok(Array.isArray(browse.items)&&browse.items.length<=2&&browse.items.length>0);
   assert.ok(Number.isInteger(browse.total)&&browse.total>=browse.items.length);
-  const searched=await(await get('/api/public/browse?q=Tea&limit=2')).json();
+  const searched=await(await get('/api/public/browse?q='+encodeURIComponent(String(browse.items[0].title).slice(0,64))+'&limit=2')).json();
   assert.ok(searched.items.length>0);
   const invalid=await fetch('https://fromastoryteller.com/api/public/browse?limit=999',{signal:AbortSignal.timeout(15000)});
   assert.equal(invalid.status,400);
