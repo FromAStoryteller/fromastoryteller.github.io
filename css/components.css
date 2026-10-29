@@ -133,7 +133,9 @@ a.image-overlay:focus-visible:where(:not([data-restored-focus])) { outline: 3px 
 .content-featured-action { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--colour-overlay-accent); font-size: var(--font-size-button); padding-inline-end: var(--size-touch-target-minimum); }
 .content-featured-action-label { inline-size: 2.5em; }
 .content-featured-action > i { inline-size: 1em; font-size: .75em; text-align: center; }
-.content-featured-controls { display: flex; align-items: center; justify-content: center; gap: var(--space-1); margin-top: var(--space-2); }
+.content-featured { padding-bottom: calc(var(--size-touch-target-minimum) + var(--space-2)); }
+.content-featured:empty { padding-bottom:0; }
+.content-featured-controls { position:absolute; inset-inline:0; bottom:0; display: flex; align-items: center; justify-content: center; gap: var(--space-1); margin-top: var(--space-2); }
 .content-featured-segments { display: flex; justify-content: center; min-width: 0; }
 .content-featured-arrow, .content-featured-segment, .content-featured-pause {
   display: inline-flex; justify-content: center; align-items: center;

@@ -3,6 +3,17 @@ import {newestPublished,contributorKey} from './featured-selection.mjs';
 
 const label=value=>String(value).replaceAll('-',' ').replace(/\b\w/g,c=>c.toUpperCase());
 const tags=item=>[...new Set([...(item.tags??[]),...(item.taxonomy?.tags??[]),...(item.card?.tags??[])])];
+export function discoveryPlaceholder(items,{category=''}={}){
+ const scope=items.filter(i=>!category||i.category===category),fields=[];
+ if(!category)fields.push('Content type');
+ if(scope.some(i=>i.subtype&&!['story','blog','game','tool','video','short-story'].includes(i.subtype)))fields.push(category==='tools'?'Tool type':category==='games'?'Game type':'Format');
+ if(scope.some(i=>storyGenres(i).length)||category==='stories')fields.push(category==='tools'?'Purpose':'Genre');
+ if(['stories','blog'].includes(category))fields.push('Reading length');
+ if(category==='games'&&scope.some(i=>i.gameFeatures))fields.push('Players','Progress');
+ if(['tools','videos','gallery','blog'].includes(category)&&scope.some(i=>tags(i).length))fields.push('Topic');
+ fields.push(category==='stories'?'Sort stories':'Sort content');
+ return '<form class="story-discovery" aria-label="Find content" aria-busy="true">'+fields.map(title=>'<label>'+title+'<select disabled aria-label="'+title+'"><option>Loading…</option></select></label>').join('')+'<button class="content-filter" type="button" disabled>Reset filters</button></form><p class="story-discovery-status" role="status">Loading published content.</p>';
+}
 export function discoverContent(items,state={},followed=new Set()) {
  const rows=newestPublished(items.filter(item=>(!state.category||item.category===state.category)&&(!state.subtype||item.subtype===state.subtype)&&(!state.genre||storyGenres(item).includes(state.genre))&&(!state.tag||tags(item).includes(state.tag))&&(!state.players||(state.players==='single'?item.gameFeatures?.multiplayer==='off':['casual','realtime'].includes(item.gameFeatures?.multiplayer)))&&(!state.saves||item.gameFeatures?.saves===true)&&(!state.length||(['stories','blog'].includes(item.category)&&((state.length==='quick'&&item.readingMinutes>0&&item.readingMinutes<5)||(state.length==='medium'&&item.readingMinutes>=5&&item.readingMinutes<=15)||(state.length==='long'&&item.readingMinutes>15))))));
  if(state.sort==='oldest')rows.reverse();
@@ -12,7 +23,7 @@ export function discoverContent(items,state={},followed=new Set()) {
  return followed.size?[...rows.filter(item=>followed.has(contributorKey(item))),...rows.filter(item=>!followed.has(contributorKey(item)))]:rows;
 }
 
-export function mountContentDiscovery(host,items,onChange,{category='',window:w=window,followed=new Set()}={}) {
+export function mountContentDiscovery(host,items,onChange,{category='',window:w=window,followed=new Set(),remote=false}={}) {
  const d=host.ownerDocument,params=new URL(w.location.href).searchParams,state=Object.fromEntries(['category','subtype','genre','tag','players','saves','length','sort'].map(k=>[k,params.get(k)??(k==='sort'?'newest':'')]));
  if(category)state.category=category;
  const form=d.createElement('form');form.className='story-discovery';form.setAttribute('aria-label','Find content');
@@ -46,10 +57,10 @@ export function mountContentDiscovery(host,items,onChange,{category='',window:w=
  }
  function update(save=true){
   if(save){const url=new URL(w.location.href);for(const [key,value]of Object.entries(state)){if(value&&!(key==='sort'&&value==='newest')&&!(key==='category'&&category))url.searchParams.set(key,value);else url.searchParams.delete(key);}w.history.replaceState(w.history.state,'',url);}
-  const rows=discoverContent(items,state,followed);status.textContent=`${rows.length} ${category==='stories'?(rows.length===1?'story':'stories'):(rows.length===1?'piece':'pieces')}${rows.length!==items.length?' of '+items.length:''}.`;
-  reset.disabled=!Object.entries(state).some(([key,value])=>key==='sort'?value&&value!=='newest':key==='category'&&category?false:Boolean(value));onChange(rows);
+  const rows=remote?[]:discoverContent(items,state,followed);if(!remote)status.textContent=`${rows.length} ${category==='stories'?(rows.length===1?'story':'stories'):(rows.length===1?'piece':'pieces')}${rows.length!==items.length?' of '+items.length:''}.`;
+  reset.disabled=!Object.entries(state).some(([key,value])=>key==='sort'?value&&value!=='newest':key==='category'&&category?false:Boolean(value));onChange(rows,{...state});
  }
  form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',e=>{const key=e.target.name;if(!controls[key])return;state[key]=e.target.value;if(key==='category'){for(const field of ['subtype','genre','tag','players','saves','length'])state[field]='';build();controls.category?.focus();}update();});
- const pop=()=>{const query=new URL(w.location.href).searchParams;for(const key of Object.keys(state))state[key]=query.get(key)??(key==='sort'?'newest':'');if(category)state.category=category;build();update(false);};w.addEventListener('popstate',pop);w.addEventListener('pagehide',()=>w.removeEventListener('popstate',pop),{once:true});
- build();update(false);return {setItems(next){items=next;build();update(false);},setFollowed(ids){if(ids.size===followed.size&&[...ids].every(id=>followed.has(id)))return;followed=ids;update(false);},dispose(){w.removeEventListener('popstate',pop);}};
+ const pop=()=>{const query=new URL(w.location.href).searchParams;for(const key of Object.keys(state))state[key]=query.get(key)??(key==='sort'?'newest':'');if(category)state.category=category;build();update(false);};w.addEventListener('popstate',pop);w.addEventListener('pagehide',event=>{if(!event.persisted)w.removeEventListener('popstate',pop);});
+ build();update(false);return {setItems(next){items=next;build();update(false);},setStatus(text){status.textContent=text;},setFollowed(ids){if(ids.size===followed.size&&[...ids].every(id=>followed.has(id)))return;followed=ids;update(false);},dispose(){w.removeEventListener('popstate',pop);}};
 }

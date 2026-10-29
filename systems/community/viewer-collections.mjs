@@ -4,6 +4,7 @@ import { publicCoverUrl } from './profiles.mjs';
 import { signInHref } from '../../account/return-path.mjs';
 import { watchViewerChanges, publishViewerChanges } from './viewer-sync.mjs';
 import { createBrowseHistory } from '../content/browse-state.mjs';
+import {onPageRestore} from '../core/page-restore.mjs';
 
 const searchable = value => String(value ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
 
@@ -23,7 +24,7 @@ async function mountViewerCollection(root, { connect = connectViewerAccount } = 
     const words = searchable(query).trim().split(/\s+/).filter(Boolean);
     return [...items.values()].filter(item => (type === 'all' || item.type === type) && words.every(word => searchable(item.title+' '+(item.summary ?? '')).includes(word)));
   };
-  w.addEventListener('pageshow', event => { if (event.persisted) w.location.reload(); });
+  onPageRestore(w,()=>mountViewerCollection(root,{connect}),{hide:root});
   const node = (tag, text) => { const n = d.createElement(tag); n.textContent = text; return n; };
   function fail(text, signIn = false) {
     notice?.remove();

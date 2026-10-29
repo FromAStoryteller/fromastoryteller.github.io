@@ -1,4 +1,6 @@
 import {connectViewerAccount} from './viewer-actions.mjs';
+import {onPageRestore} from '../core/page-restore.mjs';
+import {createBrowseHistory} from '../content/browse-state.mjs';
 import {createCardMarkup} from '../content/content-system.js';
 import {publicCoverUrl} from './profiles.mjs';
 import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
@@ -29,6 +31,7 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
  const d=root.ownerDocument,w=d.defaultView,node=(tag,text='')=>{const el=d.createElement(tag);el.textContent=text;return el;};
  const params=new URL(w.location.href).searchParams,view=params.get('view')==='completed'?'completed':'recent';
  let ended=false,account,stop,stopSync,loading=false,queued=false,mutating=false,revision=0,cursor=null,loaded=false,cache=new Map(),limit=48,settings;
+ const browsing=createBrowseHistory(()=>({pages:Math.ceil(limit/48)}),{window:w,document:d});limit=Math.max(1,Math.min(50,browsing.state?.pages??1))*48;
  const state={query:(params.get('q')??'').slice(0,160),type:params.get('type')??'',period:params.get('period')??''};
  function unavailable(text){root.replaceChildren(node('h1','Your history'),node('p',text));const a=node('a','Sign in');a.className='account-secondary';a.href=signInHref('/account/history/');root.append(a);}
  try{
@@ -112,9 +115,9 @@ export async function mountViewerHistory(root,{connect=connectViewerAccount}={})
   search.addEventListener('input',change);type.onchange=change;period.onchange=change;controls.onsubmit=e=>{e.preventDefault();change();};reset.onclick=()=>{search.value=type.value=period.value='';change();search.focus();};
   more.onclick=()=>{limit+=48;void load();};retry.onclick=()=>void load(true);
   const changed=()=>{revision++;void load(true);};w.addEventListener('fas-viewer-action-change',changed);stopSync=watchViewerChanges(changed,{window:w,document:d});
-  w.addEventListener('pagehide',()=>{ended=true;cache.clear();stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
-  w.addEventListener('pageshow',e=>{if(e.persisted)w.location.reload();});
-  await load();
+  w.addEventListener('pagehide',()=>{ended=true;cache.clear();browsing.dispose();stop?.();stopSync?.();w.removeEventListener('fas-viewer-action-change',changed);},{once:true});
+  onPageRestore(w,()=>mountViewerHistory(root,{connect}),{hide:root});
+  await load();browsing.restore();
  }catch{if(!ended)unavailable('Your account could not be checked. Please sign in again.');}
 }
 const root=typeof document!=='undefined'?document.querySelector('[data-viewer-history]'):null;if(root)void mountViewerHistory(root);

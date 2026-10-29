@@ -26,6 +26,7 @@ test('FAS migrations enforce SQL permissions, workflows and image approval', asy
     `);
     const migrations = new URL('../supabase/migrations/', import.meta.url);
     for (const file of readdirSync(migrations).filter(f => f.endsWith('.sql')).sort()) {
+      if(file.endsWith('_public_discovery_queries.sql'))continue; // Complete upgraded schema is tested separately.
       if (file.endsWith('_precomputed_cover_sizes.sql') || file.endsWith('_nested_creator_assets.sql') || file.endsWith('_high_resolution_cover_masters.sql') || file.endsWith('_public_content_cache_revision.sql') || file.endsWith('_viewer_recent_activity.sql') || file.endsWith('_viewer_activity_default_on.sql')) continue; // Full upgrade is exercised in studio-database.test.mjs.
       // Rehearse the original installed workflow here. The complete upgraded
       // Studio publication contract has its own database suite.

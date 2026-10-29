@@ -1,4 +1,5 @@
 import {watchViewerChanges,publishViewerChanges} from './viewer-sync.mjs';
+import {onPageRestore} from '../core/page-restore.mjs';
 import {recordRecentVisit} from './viewer-activity.mjs';
 import { loadLocalAuthClient } from "../../account/local-auth-client.mjs";
 import { restoreSession, restoredIdentity } from "../../account/session-controller.mjs";
@@ -230,7 +231,7 @@ function initViewerActions({ document: d = document, window: w = window, connect
   }
   const collectionRendered = () => { schedule(); queueMicrotask(() => void refresh()); };
   w.addEventListener('fas-viewer-collection-rendered',collectionRendered);
-  d.addEventListener("click", async (event) => {
+  const click = async (event) => {
     const b = event.target.closest("[data-viewer-action]");
     if (!b) return;
     const host = b.closest("[data-viewer-key]");
@@ -286,10 +287,10 @@ function initViewerActions({ document: d = document, window: w = window, connect
       for (const h of hosts) if (h.dataset.viewerKey === key) paint(h);
       if (refreshQueued && !pending.size) void refresh();
     }
-  });
-  w.addEventListener("pageshow", (event) => {
-    if (event.persisted) w.location.reload();
-  });
+  };
+  d.addEventListener('click',click);
+  const browse=/^\/(?:$|(?:stories|games|tools|blog|search)\/$|account\/(?:saved|favourites|history|following)\/$)/.test(w.location.pathname);
+  onPageRestore(w,()=>{if(browse)return initViewerActions({document:d,window:w,connect});w.location.reload();});
   const observer = new w.MutationObserver(schedule);
   observer.observe(d.body, { childList: true, subtree: true });
   scan();
@@ -308,6 +309,8 @@ function initViewerActions({ document: d = document, window: w = window, connect
     }
     states.clear();
     writes.clear();
+    d.removeEventListener('click',click);
+    if(browse){for(const host of hosts)host.remove();delete d.documentElement.dataset.viewerActionsMounted;}
   }, { once: true });
 }
 export {

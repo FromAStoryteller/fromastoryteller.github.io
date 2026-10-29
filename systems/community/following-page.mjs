@@ -1,4 +1,6 @@
 import {connectViewerAccount} from './viewer-actions.mjs';
+import {onPageRestore} from '../core/page-restore.mjs';
+import {createBrowseHistory} from '../content/browse-state.mjs';
 import {watchViewerChanges} from './viewer-sync.mjs';
 import {renderProfileCards} from './profile-directory.mjs';
 import {loadFollowedStorytellers} from './following-service.mjs';
@@ -12,6 +14,7 @@ export function followedWork(items,people){const ids=new Set(people.map(p=>p.pub
 export async function mountFollowingPage(root,{connect=connectViewerAccount,loadContent=getAllPublishedContent}={}){
  const d=root.ownerDocument,w=d.defaultView,node=(tag,text)=>{const n=d.createElement(tag);if(text)n.textContent=text;return n;};
  let account,ended=false,loading=false,queued=false,stop,stopSync,people=[],work=[],peopleLimit=24,workLimit=12;
+ const browsing=createBrowseHistory(()=>({pages:Math.max(peopleLimit/24,workLimit/12)}),{window:w,document:d});const pages=Math.max(1,Math.min(50,browsing.state?.pages??1));peopleLimit=24*pages;workLimit=12*pages;
  function fail(text,signIn=false){root.replaceChildren(node('h1','Following'),node('p',text));const a=node('a',signIn?'Sign in':'Reload following');a.className='account-secondary';a.href=signIn?signInHref('/account/following/'):'/account/following/';root.append(a);}
  try{account=await connect();if(!account){fail('Sign in to see the storytellers you follow.',true);return;}
   stop=account.subscribe(()=>{ended=true;people=[];work=[];stopSync?.();fail('Your account changed. Sign in again to view Following.',true);});
@@ -27,7 +30,7 @@ export async function mountFollowingPage(root,{connect=connectViewerAccount,load
    finally{loading=false;if(!ended){root.setAttribute('aria-busy','false');more.disabled=feedMore.disabled=false;if(queued){queued=false;void load();}}}
   }
   more.addEventListener('click',()=>{peopleLimit+=24;paint();});feedMore.addEventListener('click',()=>{workLimit+=12;paint();});retry.addEventListener('click',()=>void load());stopSync=watchViewerChanges(()=>void load(),{window:w,document:d});
-  w.addEventListener('pageshow',event=>{if(event.persisted)w.location.reload();});w.addEventListener('pagehide',()=>{ended=true;people=[];work=[];stop?.();stopSync?.();},{once:true});await load();
+  onPageRestore(w,()=>mountFollowingPage(root,{connect,loadContent}),{hide:root});w.addEventListener('pagehide',()=>{ended=true;people=[];work=[];browsing.dispose();stop?.();stopSync?.();},{once:true});await load();browsing.restore();
  }catch{if(!ended)fail('Following could not be loaded. Please reload and try again.');}
 }
 const root=typeof document!=='undefined'?document.querySelector('[data-following-root]'):null;if(root)void mountFollowingPage(root);

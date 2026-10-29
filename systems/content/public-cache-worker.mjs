@@ -1,4 +1,5 @@
 import {isProductionAuthConfig,PRODUCTION_ACCOUNT_ORIGIN,PRODUCTION_AUTH_URL} from '../../account/auth-settings.mjs';
+import {parseDiscoveryQuery} from './public-query-options.mjs';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const API='/api/public/';
 const noStore={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
@@ -15,6 +16,7 @@ export function publicCatalogRequest(url){
   return {image:true,id,width};
  }
  if(url.pathname===API+'discovery'&&!url.search)return {discovery:true};
+ if(url.pathname===API+'browse')return {rpc:'fas_query_public_content',args:{options:parseDiscoveryQuery(url.searchParams)}};
  if(url.pathname===API+'files'&&!url.search)return {rpc:'fas_public_file_catalog',args:{}};
  if(url.pathname!==API+'stories')throw Error('Unknown public endpoint');
  const keys=[...url.searchParams.keys()];
@@ -48,7 +50,7 @@ export async function publicContentResponse(request,env,render,{fetcher=fetch,ca
   const key=new Request(keyUrl,{method:'GET'});
   if(useCache){try{const hit=await cache.match(key);if(hit)return exposed(hit,'HIT',request.method==='HEAD');}catch{/* A cache outage still permits a fresh public read. */}}
   const anonymous=new Request(url,{method:'GET'});
-  const discovery=async()=>{const responses=await Promise.all([rpc('fas_public_file_catalog',{}),rpc('fas_public_story_catalog',{before_time:null,after_id:null})]);if(responses.some(r=>!r.ok))throw Error('Discovery unavailable');const [files,stories]=await Promise.all(responses.map(r=>r.json()));return Response.json({files,stories},{headers:noStore});};
+  const discovery=()=>rpc('fas_public_discovery',{});
   let response=catalog?.discovery?await discovery():catalog?.image?await fetcher(PRODUCTION_AUTH_URL+'/functions/v1/fas-story-image?asset_id='+catalog.id+'&width='+catalog.width,{method:'GET',credentials:'omit',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{'x-region':'ap-southeast-2'}}):catalog?await rpc(catalog.rpc,catalog.args):await render(anonymous,env,fetcher);
   if(catalog?.image){
    if(!response.ok)return new Response('Image unavailable.',{status:response.status===404?404:503,headers:noStore});

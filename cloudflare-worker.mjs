@@ -1,4 +1,4 @@
-// Generated account policy release: viewer-activity-default-2026-10-24-v1
+// Generated account policy release: discovery-delivery-2026-10-29-v1
 // Regenerated with site indexes so policy-only releases also refresh the hosting build.
 // Public JPEG delivery strips upstream gateway cookies before shared caching.
 import {publicContentResponse} from './systems/content/public-cache-worker.mjs';

@@ -1,4 +1,5 @@
 import {observeImages,whenVisible} from './deferred-media.mjs';
+import {remoteDiscovery,queryPublicContent} from './public-query.mjs';
 import {responsiveImage} from './responsive-image.mjs';
 import {createBrowseHistory} from './browse-state.mjs'
 import {relatedContent} from './related-content.mjs'
@@ -434,7 +435,7 @@ function initFeaturedRotator(selector, items, label = "Featured Content", interv
     schedule()
 }
 
-function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", variant = "standard") {
+function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", variant = "standard",{initialCount=24}={}) {
     const container = document.querySelector(selector)
     if (!container) return
 
@@ -450,11 +451,12 @@ function renderGrid(selector, items, emptyMessage = "Nothing to show yet.", vari
     const previous=new Map([...container.querySelectorAll(':scope > article')].map(node=>[node.querySelector('.content-grid-card-link')?.getAttribute('href'),node]));
     container._fasGridObserver?.disconnect();
     let shown=0;
-    const nodes=items.map(item=>{const markup=createCardMarkup(item,variant);let node=previous.get(item.url);if(!node||node._fasMarkup!==markup&&node.dataset.fasVersion!==cardVersion(item)){const template=document.createElement('template');template.innerHTML=markup.trim();node=template.content.firstElementChild;node._fasMarkup=markup;}return node;});
-    const retain=new Set(nodes.slice(0,24));for(const child of [...container.children])if(!retain.has(child))child.remove();
+    const nodes=new Map();
+    const nodeFor=index=>{if(nodes.has(index))return nodes.get(index);const item=items[index],markup=createCardMarkup(item,variant);let node=previous.get(item.url);if(!node||node._fasMarkup!==markup&&node.dataset.fasVersion!==cardVersion(item)){const template=document.createElement('template');template.innerHTML=markup.trim();node=template.content.firstElementChild;node._fasMarkup=markup;}nodes.set(index,node);return node;};
+    const batchSize=Math.max(24,initialCount);const retain=new Set(items.slice(0,batchSize).map((_,index)=>nodeFor(index)));for(const child of [...container.children])if(!retain.has(child))child.remove();
     // Batch DOM work; the accessible button also works without IntersectionObserver.
     const more=document.createElement('button');more.type='button';more.className='account-secondary content-grid-more';more.textContent='Show more';more.style.gridColumn='1 / -1';
-    const append=()=>{const end=Math.min(shown+24,nodes.length);for(;shown<end;shown++)container.append(nodes[shown]);more.remove();if(shown<nodes.length)container.append(more);observeImages(container);};
+    const append=()=>{const end=Math.min(shown+batchSize,items.length);for(;shown<end;shown++)container.append(nodeFor(shown));more.remove();if(shown<items.length)container.append(more);observeImages(container);};
     more.addEventListener('click',append);append();
 
 }
@@ -481,6 +483,7 @@ function renderFeaturedItem(selector, item, label = "Featured") {
 
 // ----- PAGE INIT HELPERS -----
 export async function initCategoryPage(config) {
+    if(remoteDiscovery())return (await import('./remote-discovery.mjs')).mountRemoteDiscovery(config,{renderGrid:(s,i,m,o)=>renderGrid(s,i,m,'standard',o),featured:initFeaturedRotator});
     const {
         category,
         featuredSelector,
@@ -522,6 +525,7 @@ export async function initCategoryPage(config) {
 }
 
 export async function initHomePage(config) {
+    if(remoteDiscovery())return (await import('./remote-discovery.mjs')).mountRemoteDiscovery(config,{renderGrid:(s,i,m,o)=>renderGrid(s,i,m,'standard',o),featured:initFeaturedRotator});
     const {
         featuredSelector,
         filtersSelector,
@@ -585,6 +589,7 @@ async function loadRelatedContentSection(config) {
     } = config
 
     try {
+        if(remoteDiscovery()){const page=await queryPublicContent({related:location.pathname.replace(/index\.html$/,''),limit});renderGrid(gridSelector,page.items,emptyMessage);return;}
         const loadedContent = await loadAllContent()
         const publishedContent = getPublishedContent(loadedContent)
         const current = publishedContent.find(item => item.id === currentContentId || item.slug === currentContentId) ?? config.currentContent
@@ -613,8 +618,8 @@ export function searchPublishedContent(items, query) {
     return searchContentItems(items, query)
 }
 
-export function renderContentGrid(selector, items, emptyMessage = "Nothing to show yet.") {
-    renderGrid(selector, items, emptyMessage)
+export function renderContentGrid(selector, items, emptyMessage = "Nothing to show yet.",options={}) {
+    renderGrid(selector, items, emptyMessage,'standard',options)
 }
 // Shared with the build script so static and interactive cards stay identical.
 export { normalizeContentMeta, sortContent, createCardMarkup, getFeaturedItem, getHomeFeaturedItems, createFeaturedPanelMarkup, initFeaturedRotator };

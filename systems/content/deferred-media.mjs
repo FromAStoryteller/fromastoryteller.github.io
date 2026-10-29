@@ -27,5 +27,5 @@ export function whenVisible(element,load){
  if(!element)return;
  const w=element.ownerDocument.defaultView;
  if(!w.IntersectionObserver)return load();
- return new Promise((resolve,reject)=>{const observer=new w.IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();Promise.resolve().then(load).then(resolve,reject);}},{rootMargin:'160px 0px'});observer.observe(element);w.addEventListener('pagehide',()=>{observer.disconnect();resolve();},{once:true});});
+ return new Promise((resolve,reject)=>{let started=false;const clean=()=>{observer.disconnect();w.removeEventListener('pagehide',leave);w.removeEventListener('pageshow',resume);};const observer=new w.IntersectionObserver(entries=>{if(!started&&entries.some(e=>e.isIntersecting)){started=true;clean();Promise.resolve().then(load).then(resolve,reject);}},{rootMargin:'160px 0px'});const leave=event=>{observer.disconnect();if(!event.persisted){clean();resolve();}};const resume=event=>{if(event.persisted&&!started)observer.observe(element);};observer.observe(element);w.addEventListener('pagehide',leave);w.addEventListener('pageshow',resume);});
 }

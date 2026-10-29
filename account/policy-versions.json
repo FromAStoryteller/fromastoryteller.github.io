@@ -1,6 +1,6 @@
 {
   "format": "fas-policy-history-v1",
-  "activePublishedVersion": "viewer-activity-default-2026-10-24-v1",
+  "activePublishedVersion": "discovery-delivery-2026-10-29-v1",
   "reviewVersion": "account-review-2026-10-15-v2",
   "operator": {
     "name": "From A Storyteller",
@@ -247,6 +247,27 @@
           "sha256": "9a1044a28cc3fbcf170e06054910276a168eaa4b1cb65b1417d93955e0590bb4"
         }
       }
+    },
+    "discovery-delivery-2026-10-29-v1": {
+      "status": "published",
+      "acknowledgementKind": "published_terms_agreement",
+      "preparedOn": "2026-10-29",
+      "previousVersion": "viewer-activity-default-2026-10-24-v1",
+      "change": "Server-side public-content search/filtering; short-lived public delivery caches and fresh account checks on restored browsing pages. No new visitor analytics.",
+      "publicationAuthorization": {
+        "approvedOn": "2026-10-29",
+        "scope": "User requested all remaining performance improvements and review/update of terms and related notices."
+      },
+      "documents": {
+        "terms": {
+          "path": "/account/policy-history/discovery-delivery-2026-10-29-v1/terms/index.html",
+          "sha256": "61d5d4241af8a23024572fb65b7b194fb5f09777c7f9d0e0e75645af62666dca"
+        },
+        "privacy": {
+          "path": "/account/policy-history/discovery-delivery-2026-10-29-v1/privacy/index.html",
+          "sha256": "9d99619ef6fc9ed0aedd28c9db55eef6489e836f9a41ef6c3b8c5961b77cf7b5"
+        }
+      }
     }
   },
   "hashFormat": "sha256-utf8-lf",
@@ -258,5 +279,6 @@
   "insightsUpdateVersion": "contributor-insights-2026-10-20-v1",
   "viewerUpdateVersion": "viewer-actions-2026-10-20-v1",
   "activityUpdateVersion": "viewer-activity-2026-10-24-v1",
-  "activityDefaultUpdateVersion": "viewer-activity-default-2026-10-24-v1"
+  "activityDefaultUpdateVersion": "viewer-activity-default-2026-10-24-v1",
+  "discoveryUpdateVersion": "discovery-delivery-2026-10-29-v1"
 }
