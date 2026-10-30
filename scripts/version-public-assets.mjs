@@ -1,3 +1,4 @@
+import {publicStartupMarkup} from './public-startup-markup.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -24,6 +25,7 @@ export function versionPublicAssets(output,files,workerSource=''){
   for(const file of groups[id]){hash.update(file+'\0');hash.update(source.get(file));for(const dep of dependencies.get(file))if(groupOf.get(dep)!==id)hash.update(dep+groupHash(groupOf.get(dep)));}
   const value=hash.digest('hex').slice(0,24);hashes.set(id,value);return value;
  }
+ const imports=new Map();
  const mapping=new Map(assets.map(file=>['/'+file,'/_assets/'+groupHash(groupOf.get(file))+'/'+file]));
  const rewrite=(file,value)=>value.replace(reference,url=>{const target=resolve(file,url);return target?mapping.get('/'+target):url;});
  for(const file of assets){
@@ -32,7 +34,7 @@ export function versionPublicAssets(output,files,workerSource=''){
   if(/\.(?:js|mjs|css)$/.test(file)&&!file.startsWith('assets/vendor/'))data=transformSync(data.toString(),{loader:file.endsWith('.css')?'css':'js',minifyWhitespace:true,minifySyntax:true,legalComments:'inline',target:'es2022'}).code;
   fs.writeFileSync(target,data);
  }
- for(const file of files.filter(file=>/\.(?:html|json)$/i.test(file)&&file!=='account/runtime-config.json'&&!file.startsWith('account/policy-history/'))){const target=path.join(output,file);fs.writeFileSync(target,rewrite(file,fs.readFileSync(target,'utf8')));}
+ for(const file of files.filter(file=>/\.(?:html|json)$/i.test(file)&&file!=='account/runtime-config.json'&&!file.startsWith('account/policy-history/'))){const target=path.join(output,file);const raw=fs.readFileSync(target,'utf8'),prepared=file.endsWith('.html')?publicStartupMarkup(file,raw,{resolve,source,mapping,imports}):raw;fs.writeFileSync(target,rewrite(file,prepared));}
  const releaseHash=createHash('sha256').update(workerSource);for(const file of [...files].sort()){releaseHash.update(file+'\0');releaseHash.update(fs.readFileSync(path.join(output,file)));}
  const release=releaseHash.digest('hex').slice(0,24);
  fs.mkdirSync(path.join(output,'content'),{recursive:true});

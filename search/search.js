@@ -159,11 +159,15 @@ function runSearch(query,searchProfiles=true) {
 
 async function initSearchPage() {
     try {
-        void loadSearchContent()
-
         const initialQuery = getQueryFromUrl()
         input.value = initialQuery
-        runSearch(initialQuery)
+        if (remoteDiscovery()) {
+            searchPeople(initialQuery)
+            void loadSearchContent()
+        } else {
+            void loadSearchContent()
+            runSearch(initialQuery)
+        }
         // Capture early departures; repeat restoration when both result sections settle.
         browsing.restore()
 
